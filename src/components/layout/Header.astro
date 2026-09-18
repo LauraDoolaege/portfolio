@@ -1,6 +1,8 @@
 ---
 // Site-wide header/navigation. Nav items per PROJECT_BRIEF.md Section 4
-// (LOCKED): Laura [Name] | Work | About | CV | Contact.
+// (LOCKED): Laura Doolaege | Work | About | CV | Contact. Display name
+// resolved from the brief's "Laura [Name]" placeholder — see CLAUDE.md
+// "Open decisions".
 //
 // Open decision this component had to fill in (see CLAUDE.md "Open
 // decisions" — not locked anywhere yet):
@@ -16,7 +18,7 @@ import Button from '../ui/Button.astro';
 <header class="site-header">
   <div class="site-header__inner">
     <a href={withBase('/')} class="site-header__name">
-      Laura <span class="site-header__name-placeholder">[Name]</span>
+      Laura Doolaege
     </a>
 
     <div class="site-header__right">
@@ -51,6 +53,8 @@ import Button from '../ui/Button.astro';
 <style>
   .site-header {
     padding-block: 2rem;
+    /* Closes the header off as its own structural block, so the gap before the hero reads as one deliberate space rather than two paddings stacking with no visual anchor between them. */
+    border-bottom: var(--border-hairline) solid var(--color-ink);
   }
 
   .site-header__inner {
@@ -83,10 +87,6 @@ import Button from '../ui/Button.astro';
   .site-header__name:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 4px;
-  }
-
-  .site-header__name-placeholder {
-    color: var(--color-text-secondary);
   }
 
   /* Groups the nav links and the CV button together on the right, with

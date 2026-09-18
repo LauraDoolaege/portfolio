@@ -2,10 +2,11 @@
 // Homepage hero (PROJECT_BRIEF.md Section 5 "Homepage — LOCKED", item 1).
 // Content is final per the brief (Section 6), not placeholder.
 //
-// The name uses the brief's locked "object replacing/interrupting a
-// letterform" device (Section 3 "Other locked tokens") — this is the
-// page's one sanctioned "surprise" (Section 3, principle 2), so nothing
-// else on this page should introduce another one.
+// The two-line name (diagonally offset, image placeholder behind it) is
+// the brief's locked "object replacing/interrupting a letterform" device
+// (Section 3 "Other locked tokens") — this is the page's one sanctioned
+// "surprise" (Section 3, principle 2), so nothing else on this page
+// should introduce another one.
 //
 // Open decisions this component had to fill in (not locked anywhere —
 // see CLAUDE.md "Open decisions"):
@@ -14,6 +15,9 @@
 //   token, since 96px literally overflows a phone viewport. Revisit
 //   once a real mobile type scale is locked.
 // - "Get to know me" target: linked to /about (no target was specified).
+// - Vertical rhythm below the name (role/intro/CTA/tags) uses a small
+//   local scale (1rem / 1.5rem / 2rem / 3rem) rather than one-off values,
+//   so the spacing reads as deliberate rather than picked by eye.
 import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
 import Tag from '../ui/Tag.astro';
@@ -21,16 +25,18 @@ import Tag from '../ui/Tag.astro';
 
 <section class="hero">
   <div class="hero__inner">
-    <h1 class="hero__name">
-      <span class="sr-only">Laura</span>
-      <span class="hero__name-visual" aria-hidden="true">
-        <span>LA</span>
-        <span class="hero__name-image">
-          <!-- TODO: replace with a real photo (see PROJECT_BRIEF.md Section 6 — no photography exists yet) -->
-        </span>
-        <span>RA</span>
+    <div class="hero__name-block">
+      <span class="hero__name-image">
+        <!-- TODO: replace with a real photo (see PROJECT_BRIEF.md Section 6 — no photography exists yet) -->
       </span>
-    </h1>
+      <h1 class="hero__name">
+        <span class="sr-only">Laura Doolaege</span>
+        <span class="hero__name-visual" aria-hidden="true">
+          <span class="hero__name-first">Laura</span>
+          <span class="hero__name-last">Doolaege</span>
+        </span>
+      </h1>
+    </div>
 
     <p class="hero__role">Experience designer to-be</p>
 
@@ -59,7 +65,7 @@ import Tag from '../ui/Tag.astro';
 
 <style>
   .hero {
-    padding-block: 2rem var(--space-section);
+    padding-block: 3rem var(--space-section);
   }
 
   .hero__inner {
@@ -68,33 +74,57 @@ import Tag from '../ui/Tag.astro';
     padding-inline: var(--space-outer);
   }
 
+  /* Shared font-size context: the image and both name lines size off
+     this, so the whole composition scales together as one fluid unit
+     instead of needing separate mobile-only overrides. */
+  .hero__name-block {
+    position: relative;
+    font-size: clamp(2.75rem, 6vw + 1.5rem, var(--text-h1));
+  }
+
   .hero__name {
     font-family: var(--font-display);
     font-weight: 700;
-    /* Fluid, see the open-decision note at the top of this file — 96px (--text-h1) is the desktop ceiling, scales down on narrow viewports instead of overflowing. */
-    font-size: clamp(2.75rem, 6vw + 1.5rem, var(--text-h1));
+    font-size: inherit;
     line-height: var(--text-h1-leading);
     text-transform: uppercase;
+    /* Tighter than body-scale tracking — extreme scale contrast and tight negative tracking are the "hard mechanical" macro-type move, applied here without going as extreme as a literal brutalist reference would (this is still an editorial brand). */
+    letter-spacing: -0.02em;
   }
 
   .hero__name-visual {
-    display: inline-flex;
-    align-items: center;
-    flex-wrap: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero__name-first {
+    font-size: 0.42em;
+  }
+
+  .hero__name-last {
+    font-size: 1em;
+    /* Explicit offsets, not align-self — a shrink-to-fit flex column is exactly as wide as its widest line, so align-self: flex-end has no room to actually shift anything. */
+    margin-top: 0.18em;
+    margin-left: 1em;
   }
 
   .hero__name-image {
-    width: 0.72em;
-    height: 0.72em;
-    margin-inline: 0.12em;
+    position: absolute;
+    top: 0.5em;
+    left: 0.1em;
+    width: 2.1em;
+    height: 1.05em;
     background: var(--color-bg-secondary);
     border: var(--border-hairline) solid var(--color-text-secondary);
     border-radius: var(--radius-image);
-    flex-shrink: 0;
+    z-index: 0;
   }
 
   .hero__role {
-    margin-top: 0.75em;
+    margin-top: 1rem;
     font-family: var(--font-body);
     font-weight: 500;
     font-size: 1.125rem;
@@ -119,7 +149,11 @@ import Tag from '../ui/Tag.astro';
   .hero__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 2.5rem;
+    gap: 1rem;
+    margin-top: 3rem;
   }
+
+  /* Everything below scales together via the shared em context on
+     .hero__name-block, so no separate mobile override is needed for
+     the name composition itself — verified at 1440px down to 320px. */
 </style>

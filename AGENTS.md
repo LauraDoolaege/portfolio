@@ -63,15 +63,23 @@ globally for users who request it; don't build animations that bypass this.
 **Borders/radii** — hairline (1px) rules only; sharp or subtly rounded
 image containers, not SaaS-style large border-radius cards.
 
-**Buttons (revised from the brief's original "solid ink pill")** — the
-brief's Section 3 originally locked "solid ink pill for primary actions."
-That's been superseded (`components/ui/Button.astro`): primary is now a
-bracket-tag mono label (`[ cv ]`), hairline-bordered, with a fill that
-sweeps in on hover/focus — matching the site's own `[ case study ]` /
-`[ scaffold ]` bracket-label device instead of a separate pill shape.
-Secondary (quiet underline text link) is unchanged. Treat this file's
-description as current; the brief's original pill wording is superseded
-the same way the palette's terracotta draft was.
+**Buttons (revised twice from the brief's original "solid ink pill")** —
+the brief's Section 3 originally locked "solid ink pill for primary
+actions." Current state (`components/ui/Button.astro`): primary is a
+hairline-bordered **ink/charcoal** box (not mauve, not a pill, no bracket
+glyphs), with a fill that sweeps in on hover/focus. It briefly went
+through a bracket-tag mono-label phase (`[ cv ]`) matching the site's
+`[ case study ]` device — that's gone too; the brackets now live on tags
+instead (see below), not buttons. Secondary (quiet underline text link)
+is unchanged. Treat this file's description as current, not the brief's
+original pill wording or CLAUDE.md's own earlier bracket-button
+description — both superseded, same as the palette's terracotta draft.
+
+**Tags** — plain bracketed mono text (`[ ux / experience design ]`), ink
+colored, **no background fill**. `accent-soft` is no longer used for tag
+backgrounds (an earlier version filled tags with it; that's been dropped
+in favor of a quieter, brackets-only treatment) — it's still available
+for other decorative fills per its locked usage note, just not this one.
 
 Full palette/type/spacing/grid values with exact numbers live in
 `src/styles/global.css` as CSS custom properties — treat that file as the
@@ -90,11 +98,16 @@ locked 96px), a fluid `clamp()` has been used as a documented stopgap
 (see the component's own header comment) — not a proposal for the real
 mobile type scale, which still needs to be decided as its own thing.
 
-Also unresolved: final display name/handle, Work/case-study/Contact page
-layouts (proposed only), content max-width (1320px is a working default,
-not locked), and the mauve accent's WCAG contrast ratio (not yet verified
-against either background token — verify before using it for body-sized
-text/links, not just decorative use).
+Also unresolved: Work/case-study/Contact page layouts (proposed only),
+content max-width (1320px is a working default, not locked), and the
+mauve accent's WCAG contrast ratio (not yet verified against either
+background token — verify before using it for body-sized text/links, not
+just decorative use).
+
+**Resolved:** final display name is **Laura Doolaege** (confirmed via a
+layout sketch that used the real surname, matching the account's own
+email domain) — the brief's "Laura [Name]" placeholder is superseded in
+the header wordmark and hero name.
 
 ## Component architecture
 
@@ -122,9 +135,9 @@ variants per section.
 ## Content
 
 Homepage and About copy in the brief is final, not placeholder. Project
-titles/images/descriptions, case-study copy, final Contact copy, and the
-real display name are all still missing — use clearly-labeled placeholders,
-not invented content, when a page needs them before they exist. Once real
+titles/images/descriptions, case-study copy, and final Contact copy are
+still missing — use clearly-labeled placeholders, not invented content,
+when a page needs them before they exist. Once real
 case studies are approved, they're a natural fit for an Astro content
 collection (one entry per project) rather than hardcoded pages — don't
 hardcode a growing list of near-identical case-study pages instead.

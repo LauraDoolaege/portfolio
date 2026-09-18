@@ -1,11 +1,9 @@
 ---
 // Button system (supersedes the original PROJECT_BRIEF.md Section 3 "solid
 // ink pill for primary actions" rule — see CLAUDE.md "Tech stack" for the
-// documented revision). Two roles, same as before:
-// - primary: the bracket-tag mono label (matching the site's existing
-//   "[ scaffold ]" / "[ case study ]" bracket-label device), with a fill
-//   that sweeps in on hover/focus. Used for the one or two real actions
-//   per page (CV download, hero CTA).
+// documented revision). Two roles:
+// - primary: hairline-bordered ink/charcoal box, fill sweeps in on
+//   hover/focus. No bracket glyphs — the box itself is the affordance.
 // - secondary: unchanged — a quiet underline text link.
 interface Props {
   href: string;
@@ -18,11 +16,6 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
 ---
 
 <a href={href} class:list={['btn', `btn--${variant}`, className]}>
-  {variant === 'primary' && (
-    <span class="btn__bracket" aria-hidden="true">
-      [
-    </span>
-  )}
   <span class="btn__label">
     <slot />
   </span>
@@ -49,18 +42,13 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
       />
     </svg>
   )}
-  {variant === 'primary' && (
-    <span class="btn__bracket" aria-hidden="true">
-      ]
-    </span>
-  )}
 </a>
 
 <style>
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.4em;
+    gap: 0.5em;
     font-weight: 500;
     transition: color var(--motion-duration) var(--motion-easing);
   }
@@ -70,7 +58,7 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
     outline-offset: 3px;
   }
 
-  /* Primary: bracket-tag mono label with a fill that sweeps in behind it. */
+  /* Primary: hairline ink box, fill sweeps in on hover. */
   .btn--primary {
     position: relative;
     z-index: 0;
@@ -79,10 +67,10 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
     font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
-    color: var(--color-accent);
-    border: var(--border-hairline) solid var(--color-accent);
+    color: var(--color-ink);
+    border: var(--border-hairline) solid var(--color-ink);
     border-radius: 0;
-    padding: 0.7em 0.9em;
+    padding: 0.75em 1.1em;
   }
 
   .btn--primary > * {
@@ -94,7 +82,7 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--color-accent);
+    background: var(--color-ink);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform var(--motion-duration-slow) var(--motion-easing);
@@ -108,6 +96,10 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
   .btn--primary:hover::before,
   .btn--primary:focus-visible::before {
     transform: scaleX(1);
+  }
+
+  .btn--primary:active {
+    transform: scale(0.98);
   }
 
   .btn__icon {

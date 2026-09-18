@@ -1,7 +1,7 @@
 ---
 // Locked type hierarchy (PROJECT_BRIEF.md Section 3): "Labels / tags:
-// Mono, 11-12px, uppercase, bracketed." Background uses accent-soft per
-// its locked usage note ("decorative fills, tag backgrounds").
+// Mono, 11-12px, uppercase, bracketed." Plain bracketed text, no fill —
+// the brackets alone carry the "tag" meaning.
 interface Props {
   class?: string;
 }
@@ -25,8 +25,5 @@ const { class: className } = Astro.props;
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
     color: var(--color-ink);
-    background: var(--color-accent-soft);
-    padding: 0.45em 0.7em;
-    border-radius: var(--radius-image);
   }
 </style>

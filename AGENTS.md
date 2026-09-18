@@ -134,10 +134,14 @@ hardcode a growing list of near-identical case-study pages instead.
   going through the build pipeline, so images get optimized automatically.
   `public/` is for files that must keep an exact path or bypass processing
   (favicon, robots.txt).
-- **Deployment**: GitHub Pages. `astro.config.mjs` has a `site`/`base` TODO
-  that depends on the open "repo type" decision (project repo vs.
-  `<username>.github.io`) — fix it once that's confirmed, or pages will
-  404 under a subpath.
+- **Deployment**: GitHub Pages, via `.github/workflows/deploy.yml` (builds
+  and deploys on every push to `main`). Repo is a project repo
+  (`github.com/LauraDoolaege/portfolio`), so `site`/`base` in
+  `astro.config.mjs` are set to `https://LauraDoolaege.github.io` /
+  `/portfolio`. Any internal link to a `public/` asset must go through
+  `import.meta.env.BASE_URL` (see `BaseLayout.astro`'s favicon link) or it
+  will 404 once deployed under the `/portfolio` subpath — this is easy to
+  forget locally since `base` only bites once you deploy.
 - **Linting/formatting**: ESLint (flat config, `typescript-eslint` +
   `eslint-plugin-astro`) and Prettier (`prettier-plugin-astro`). Run
   `npm run lint` / `npm run format` / `npm run check` (the last is Astro's

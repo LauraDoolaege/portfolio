@@ -50,8 +50,9 @@ src/
 | `npm run format`       | Format with Prettier                       |
 | `npm run format:check` | Check formatting without writing           |
 
-## Before deploying
+## Deployment
 
-`astro.config.mjs` has a `site`/`base` TODO that depends on whether this
-repo is a GitHub Pages project repo or a `<username>.github.io` repo — set
-it once that's decided (see `CLAUDE.md` "Open decisions").
+Deploys to GitHub Pages automatically on every push to `main` via
+`.github/workflows/deploy.yml`. One-time setup on GitHub: **Settings →
+Pages → Build and deployment → Source → GitHub Actions**. Site URL:
+https://LauraDoolaege.github.io/portfolio/

@@ -1,0 +1,51 @@
+---
+// Temporary scaffold-verification page — NOT the real homepage.
+// Replace once the homepage (PROJECT_BRIEF.md Section 5) is built.
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Laura — Portfolio (scaffold)">
+  <main class="scaffold-check">
+    <p class="label">[ scaffold ]</p>
+    <h1>Technical foundation is running.</h1>
+    <p class="body">Homepage content has not been built yet.</p>
+    <p class="editorial">
+      <em>Contemporary editorial design, with a tactile, human edge.</em>
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .scaffold-check {
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    padding: var(--space-outer);
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-accent);
+  }
+
+  h1 {
+    font-size: var(--text-h2);
+    line-height: var(--text-h2-leading);
+    text-transform: uppercase;
+    margin-block: 0.5em;
+  }
+
+  .body {
+    font-family: var(--font-body);
+    color: var(--color-text-secondary);
+  }
+
+  .editorial {
+    font-family: var(--font-editorial);
+    font-style: italic;
+    font-size: 1.5rem;
+    margin-top: 1.5em;
+  }
+</style>

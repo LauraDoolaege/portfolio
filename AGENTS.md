@@ -16,11 +16,12 @@ brutalist portfolio cliché, never full-bleed dark mode as a base theme.
 
 ## Current status
 
-Technical foundation only. **No pages have been designed or built yet** —
-homepage and About have locked content/structure in the brief, but no
-layout has been implemented; Work index, case study, and Contact layouts
-are still PROPOSED and unapproved. Don't build page content without
-checking the brief section for that page first.
+Header/nav and the homepage hero are built. The rest of the homepage
+(selected work, gallery, "currently working on", "how I think", contact
+CTA, footer), About, and every other page are **not built yet** — Work
+index, case study, and Contact layouts are still PROPOSED and unapproved.
+Don't build page content without checking the brief section for that page
+first.
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
@@ -62,6 +63,16 @@ globally for users who request it; don't build animations that bypass this.
 **Borders/radii** — hairline (1px) rules only; sharp or subtly rounded
 image containers, not SaaS-style large border-radius cards.
 
+**Buttons (revised from the brief's original "solid ink pill")** — the
+brief's Section 3 originally locked "solid ink pill for primary actions."
+That's been superseded (`components/ui/Button.astro`): primary is now a
+bracket-tag mono label (`[ cv ]`), hairline-bordered, with a fill that
+sweeps in on hover/focus — matching the site's own `[ case study ]` /
+`[ scaffold ]` bracket-label device instead of a separate pill shape.
+Secondary (quiet underline text link) is unchanged. Treat this file's
+description as current; the brief's original pill wording is superseded
+the same way the palette's terracotta draft was.
+
 Full palette/type/spacing/grid values with exact numbers live in
 `src/styles/global.css` as CSS custom properties — treat that file as the
 canonical, machine-readable copy of this section, and update both together
@@ -73,7 +84,11 @@ Breakpoints, mobile type scale, mobile spacing, mobile fallback for macro
 asymmetry, ticket-card mobile column count, touch fallback for hover-only
 motion, and mobile nav pattern are all **unresolved** in the brief (its
 Section 8). If a page-building task needs one of these, surface it rather
-than picking a number and moving on.
+than picking a number and moving on. Where a component genuinely can't
+ship without a value (e.g. the hero name would overflow mobile at the
+locked 96px), a fluid `clamp()` has been used as a documented stopgap
+(see the component's own header comment) — not a proposal for the real
+mobile type scale, which still needs to be decided as its own thing.
 
 Also unresolved: final display name/handle, Work/case-study/Contact page
 layouts (proposed only), content max-width (1320px is a working default,
@@ -92,12 +107,12 @@ text/links, not just decorative use).
 - `src/layouts/` — full HTML-document shells (`BaseLayout.astro`). Page
   content goes in `src/pages/`, not in a layout.
 
-**Do not create a component before a page actually needs it.** All three
-component folders are currently empty on purpose (see each folder's
-README.md) — the brief's "suggested component set" (Nav, Footer, Button,
-ProjectCard, SectionHeader, TagPill, CardTriptych, SpecRow/SpecTable,
-CaseStudyHeader, Marquee, ImageReveal) is a naming reference for when that
-component is actually built, not a checklist to scaffold in advance.
+**Do not create a component before a page actually needs it.** Built so
+far: `Header`, `Button`, `Tag`, `Hero` (see each folder's README.md for the
+current list) — the brief's "suggested component set" (Footer, ProjectCard,
+SectionHeader, CardTriptych, SpecRow/SpecTable, CaseStudyHeader, Marquee,
+ImageReveal) is a naming reference for when that component is actually
+needed, not a checklist to scaffold in advance.
 
 The one component-shaped rule worth remembering early: the ticket-card
 module is meant to be **one** component reused everywhere a project

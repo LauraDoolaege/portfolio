@@ -6,6 +6,11 @@ dist/
 # dependencies
 node_modules/
 
+# third-party design-reference skills fetched via the `skills` CLI —
+# external reference material for Claude, not project source
+.agents/
+skills-lock.json
+
 # logs
 npm-debug.log*
 yarn-debug.log*

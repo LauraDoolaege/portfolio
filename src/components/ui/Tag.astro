@@ -1,0 +1,32 @@
+---
+// Locked type hierarchy (PROJECT_BRIEF.md Section 3): "Labels / tags:
+// Mono, 11-12px, uppercase, bracketed." Background uses accent-soft per
+// its locked usage note ("decorative fills, tag backgrounds").
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<span class:list={['tag', className]}>
+  <span aria-hidden="true">[</span>
+  <slot />
+  <span aria-hidden="true">]</span>
+</span>
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-ink);
+    background: var(--color-accent-soft);
+    padding: 0.45em 0.7em;
+    border-radius: var(--radius-image);
+  }
+</style>

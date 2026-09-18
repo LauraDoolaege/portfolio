@@ -10,9 +10,59 @@ A personal portfolio for Laura (digital development & design student,
 specializing in UX/experience design), built to let recruiters quickly judge
 her process, taste, and credibility. Aesthetic: **contemporary editorial
 design with a tactile, human edge** — disciplined whitespace and oversized
-type, with exactly one deliberate "surprise" per composition. Never a cold
-SaaS dark-mode look, never a glossy stock-photo look, never generic beige
-brutalist portfolio cliché, never full-bleed dark mode as a base theme.
+type. Never a cold SaaS dark-mode look, never a glossy stock-photo look,
+never generic beige brutalist portfolio cliché, never full-bleed dark mode
+as a base theme. (The brief's original "exactly one surprise per
+composition" rule is superseded — see "Experimental design dials" below.)
+
+## Experimental design dials (OVERRIDE the brief — confirmed explicitly)
+
+The `design-taste-frontend` skill (`.agents/skills/design-taste-frontend/`)
+defines three tunable dials — `DESIGN_VARIANCE`, `MOTION_INTENSITY`,
+`VISUAL_DENSITY` — with a "Portfolio (Designer/studio)" baseline of
+**8 / 7 / 3**. This project runs:
+
+- **`DESIGN_VARIANCE: 9`** (up) — bolder, less predictable composition:
+  asymmetric structure, varied section rhythm, layouts that don't repeat
+  their neighbor, willing to break grid uniformity for effect.
+- **`MOTION_INTENSITY: 8`** (up) — once interaction work starts (GSAP is
+  the brief's named tool), reach for the fuller end of what's allowed:
+  noticeable entrance/scroll reveals, hover physics, more energy than a
+  minimal fade-in.
+- **`VISUAL_DENSITY: 2`** (down) — fewer elements per viewport, more
+  negative space than the baseline portfolio preset.
+
+**Explicitly confirmed: these dials override the brief's composition/motion
+rules where they conflict**, not just operate inside them. Concretely
+superseded:
+
+- Section 3 principle 2, "one surprise per composition" — no longer a hard
+  cap. `DESIGN_VARIANCE: 9` permits more than one bold move per page.
+- Section 3's macro-asymmetry limit ("asymmetry at macro level only...
+  content blocks stay orderly") — no longer a ceiling; more aggressive
+  grid-breaking is allowed.
+- Section 3's motion ceiling ("250-500ms," "a playful gust of wind, not a
+  tech demo," "no excessive parallax") — no longer a hard cap.
+  `MOTION_INTENSITY: 8` can reach toward the skill's fuller range
+  (longer/more elaborate sequences, more noticeable physics).
+
+**What the dials do NOT touch** — they govern composition/motion/density,
+not identity or accessibility, so these stay locked exactly as before
+unless a future message says otherwise:
+
+- Palette, type families, and imagery modes (Section 3's color/type/imagery
+  rules) — untouched.
+- `prefers-reduced-motion` — always respected regardless of
+  `MOTION_INTENSITY`. This is an accessibility floor, not a style
+  preference, so it's not part of what got overridden.
+- Semantic HTML, focus states, contrast — unaffected baseline quality.
+
+The skill's own stack defaults (React, Tailwind, Motion/Framer, GSAP,
+shadcn/ui) don't apply here — this project stays Astro + plain CSS +
+vanilla JS (see "Tech stack" below); only the dial _values_ and the
+design-engineering judgment behind them (anti-center-bias, layout
+diversification, anti-repetition rules, etc.) carry over, translated to
+our actual tools.
 
 ## Current status
 
@@ -162,6 +212,14 @@ hardcode a growing list of near-identical case-study pages instead.
   going through the build pipeline, so images get optimized automatically.
   `public/` is for files that must keep an exact path or bypass processing
   (favicon, robots.txt).
+- **Animation**: `gsap` is installed with a canonical entry point at
+  `src/utils/motion.ts` — it imports `gsap`, registers `ScrollTrigger`
+  once, and exports a `prefersReducedMotion()` guard. Nothing animates
+  yet (plumbing only, added ahead of need per explicit request); when
+  animation work starts, import `gsap`/`ScrollTrigger` from that file
+  rather than from the `gsap` package directly, and rather than
+  registering the plugin again in each component. Client-only — import
+  it from a component's `<script>` tag, not from Astro frontmatter.
 - **Deployment**: GitHub Pages, via `.github/workflows/deploy.yml` (builds
   and deploys on every push to `main`). Repo is a project repo
   (`github.com/LauraDoolaege/portfolio`), so `site`/`base` in

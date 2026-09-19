@@ -128,6 +128,21 @@ a {
   text-decoration: none;
 }
 
+/* Visually hidden but still available to assistive tech — for cases like
+   the hero name, where a decorative element visually stands in for part
+   of the text but the full word must still be announced. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Locked motion principle: subtle and functional only, never forced on users who opt out */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -152,8 +152,8 @@ Both avoid glossy/staged studio polish and full-bleed treatment; images are crop
 ## 4. INFORMATION ARCHITECTURE
 
 **Navigation (LOCKED)**
-`Laura [Name] | Work | About | CV | Contact`
-CV is a direct-download button (downloads a PDF), not a page. Full display name still needs to be confirmed/finalized (see Open Decisions).
+`Laura Doolaege | Work | About | CV | Contact`
+CV is a direct-download button (downloads a PDF), not a page. Full display name confirmed as "Laura Doolaege" during implementation (see Open Decisions Checklist).
 
 **Homepage structure (LOCKED, content from Website Structure document)**
 
@@ -282,7 +282,6 @@ Assumption behind this proposal: the existing "Enough about me..." block that al
 - Titles, images, and descriptions for all 6+ homepage/Work-index project cards.
 - Case-study copy (Context / Approach / Outcome content) for each individual project.
 - Contact page copy beyond the reused "Enough about me" block (if a form or additional content is wanted).
-- Final display name/handle for nav and footer (currently placeholder "Laura [Name]").
 
 **Placeholder requirements**
 
@@ -322,13 +321,13 @@ Everything locked in Section 3 is specified at desktop scale only. No mobile-sca
 - **Ticket-card grid collapse**: the 3-across project card rows (`[card][card][card]`) have no locked mobile column-count rule (1-column stack vs. 2-column).
 - **Hover-dependent motion has no touch fallback**: the locked motion system (accent-underline on hover, 1.02-1.04x image zoom on hover, metadata reveal on hover) assumes a cursor. Undecided whether touch devices get a tap-equivalent, always show that state, or drop it entirely.
 - **Vertical/rotated type**: "dropped on mobile" is stated in prose in the source material but not tied to a specific locked component, so it's unclear exactly which element(s) this applies to.
-- **Navigation mobile pattern**: the 5-item nav (`Laura [Name] | Work | About | CV | Contact`) has no locked mobile treatment (hamburger, condensed inline, or wrap).
+- **Navigation mobile pattern**: the 5-item nav (`Laura Doolaege | Work | About | CV | Contact`) has no locked mobile treatment (hamburger, condensed inline, or wrap) — implementation chose plain-text wrap, no hamburger (see CLAUDE.md).
 
 ---
 
 ## OPEN DECISIONS CHECKLIST
 
-- [ ] Confirm full display name/handle to use in nav, footer, and page titles (currently placeholder "Laura [Name]").
+- [x] Confirm full display name/handle to use in nav, footer, and page titles — resolved as **Laura Doolaege**.
 - [ ] Approve, modify, or reject the proposed Work / Project index layout (Section 5).
 - [ ] Approve, modify, or reject the proposed Individual case study layout (Section 5), including whether the Context/Approach/Outcome structure is right for UX case studies specifically.
 - [ ] Approve, modify, or reject the proposed Contact page layout (Section 5), including whether a contact form is wanted at all or email-only is correct.

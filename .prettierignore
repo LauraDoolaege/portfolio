@@ -2,3 +2,6 @@ dist/
 .astro/
 node_modules/
 package-lock.json
+
+# third-party skill content installed via `skills` CLI — not ours to reformat
+.agents/

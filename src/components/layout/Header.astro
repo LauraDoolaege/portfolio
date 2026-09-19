@@ -287,6 +287,11 @@ const navItems = [
      the note at the top of this file) — tablet and up keeps the plain
      inline nav. */
   @media (max-width: 767px) {
+    .site-header__inner {
+      /* Guarantees CV + the toggle stay on the name's row instead of wrapping underneath it — the base rule's flex-wrap: wrap exists for genuinely narrow content, but at phone widths the right-hand group should never drop to its own line. */
+      flex-wrap: nowrap;
+    }
+
     .site-header__toggle {
       display: block;
     }

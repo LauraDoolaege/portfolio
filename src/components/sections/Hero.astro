@@ -85,7 +85,9 @@ const letters = titleWord.split('');
     </div>
 
     <div class="hero__bottom">
-      <p class="hero__role">Experience designer to-be</p>
+      <p class="hero__role">
+        Experience designer <span class="hero__role-soft">to-be</span>
+      </p>
 
       <p class="hero__intro">
         I'm Laura, a digital development &amp; design student with a background in marketing
@@ -339,19 +341,36 @@ const letters = titleWord.split('');
     }
   }
 
+  /* Mobile redesign (taste-skill pass): the old layout put the meta cluster (year + tags) in flow above the image, which collided with "PORTFOLIO" rising up into it — the title's overlap has to land on the element directly before it, and that needs to be the image, not the tags. Fix is a real flex order, not a visual patch: image, then title overlapping it, then the (now-smaller) meta row underneath — "tags under the header image," per direct request, plus year moved down with them rather than left stranded on its own above. */
   @media (max-width: 639px) {
+    .hero__inner {
+      /* The 100dvh-filling space-between from the base rule is a desktop-only ask (the wireframe spec only calls out 100svh "on desktop") — at mobile it just stretched a short stack of content across the full viewport, leaving a dead gap before the bottom block. Flow naturally instead. */
+      justify-content: flex-start;
+    }
+
     .hero__visual {
-      display: block;
-      /* No fixed min-height here — .hero__visual's height comes from its in-flow content (meta + title) alone; the image is absolutely positioned and centers within whatever that ends up being, via inset: 0 + margin: auto below. */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero__image {
+      order: 1;
+      align-self: center;
+      width: 50%;
+    }
+
+    .hero__title {
+      order: 2;
     }
 
     .hero__meta {
-      position: relative;
-      z-index: 1;
+      order: 3;
+      align-self: stretch;
       flex-direction: row;
-      align-items: center;
+      align-items: baseline;
       justify-content: flex-start;
       gap: var(--space-24);
+      margin-top: var(--space-16);
     }
 
     .hero__year {
@@ -363,19 +382,15 @@ const letters = titleWord.split('');
       flex-direction: row;
       flex-wrap: wrap;
       align-items: flex-start;
+      /* Pushes the whole tag block to the row's right edge (matching the title's own right edge) while year stays left; justify-content then right-aligns the tags themselves once they wrap to a second line. */
+      justify-content: flex-end;
+      margin-left: auto;
+      gap: var(--space-8);
     }
 
-    /* Centered behind the word, roughly half the viewport width. inset + margin: auto, not top/left/transform: translate — the scroll parallax above animates this same element's `transform` via GSAP, which would silently overwrite a transform-based centering trick the instant the page scrolls. */
-    .hero__image {
-      position: absolute;
-      inset: 0;
-      margin: auto;
-      width: 50%;
-    }
-
-    .hero__title {
-      position: relative;
-      margin-top: var(--space-32);
+    /* Smaller, per direct request — a deliberate step below the locked 11-12px tag type-scale (PROJECT_BRIEF.md Section 3), mobile only. :global() because Tag.astro renders its own scoped element. */
+    .hero__tags :global(.tag) {
+      font-size: 10px;
     }
 
     .hero__bottom {
@@ -383,11 +398,21 @@ const letters = titleWord.split('');
       margin-top: var(--space-32);
     }
 
+    /* Forces "to-be" onto its own line (display: block after inline text breaks the line, same as the nav "/" separator elsewhere in this project) instead of letting it wrap mid-word wherever the viewport happens to cut it off, and de-emphasizes it slightly against "Experience designer." */
+    .hero__role-soft {
+      display: block;
+      margin-top: 0.15em;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
     .hero__intro {
       max-width: none;
     }
 
     :global(.hero__cta) {
+      /* Slightly smaller, per direct request. !important is required: Button.astro's own .btn--secondary rule sets font-size with higher specificity (a class plus Astro's scope-hash attribute selector) than a plain global class here beats without it, and relying on stylesheet injection order to win a specificity tie would be fragile. */
+      font-size: var(--text-label) !important;
       /* 44px+ touch target, per WCAG target-size guidance. */
       min-height: 44px;
       display: inline-flex;

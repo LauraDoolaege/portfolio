@@ -1,201 +1,357 @@
 ---
 // Homepage hero (PROJECT_BRIEF.md Section 5 "Homepage — LOCKED", item 1).
 // Content is final per the brief (Section 6): role line, intro, CTA, and
-// tags are unchanged. The name itself moved to Header.astro (small corner
-// mark) — this section now carries its own big graphic moment instead, a
-// "Portfolio" headline with a year mark and an oversized placeholder
-// interrupting it, rebuilt to match a layout sketch the file attached.
-// Same locked device as before (PROJECT_BRIEF.md Section 3 "object
-// replacing/interrupting a letterform"), just a different word.
+// tags are unchanged. Rebuilt to a precise 12-column grid spec (a target
+// wireframe the file attached), replacing the earlier freeform version.
 //
-// No hairline under Header any more (see Header.astro), and this section
-// is stretched to fill the remaining viewport height via the wrapper in
-// index.astro — together they read as one continuous opening screen
-// instead of two stacked blocks.
+// Grid: shares --intro-max-width / --intro-margin with Header.astro (see
+// global.css) so logo, nav/CV, the title, and the bottom block all sit on
+// the same margin lines — the earlier version's biggest complaint was
+// that these drifted out of alignment with each other.
 //
-// Layout is a 12-column grid (PROJECT_BRIEF.md Section 3's locked grid),
-// not one-off margins: the year sits in column 1, everything else starts
-// at column 2, and the CTA is deliberately placed in its own columns
-// further right than the paragraph above it — that offset is the
-// "creative button position," done as a grid placement rather than a
-// hand-picked margin. Sizes throughout are clamp()/fr-based, not fixed
-// px, so the whole composition scales without needing extra breakpoints
-// (it's only simplified to a single column below tablet width).
+// The visual anchor is now a portrait image slot (replacing the earlier
+// organic placeholder blob — a mistake in the sketch this rebuilt from,
+// per direct correction) with "PORTFOLIO" overlapping its lower third,
+// the same locked object-in-letterform device as before, just a
+// different placeholder shape. The word is sized with container query
+// units (cqw) rather than a hand-tuned clamp() curve, so it fills the
+// full grid width edge-to-edge without overflowing or wrapping at any
+// viewport width — a plain-clamp() fallback covers browsers without
+// container query support.
+//
+// Motion: this is the project's first real use of GSAP (previously
+// plumbing-only, see src/utils/motion.ts). Every animated property is
+// transform/opacity/clip-path only (GPU-only, no layout impact). All
+// initial "hidden" states are set imperatively via gsap.set() in the
+// script below, never in static CSS — so if JS fails to load, everything
+// still renders in its normal, final, fully visible position. See the
+// prefersReducedMotion() guard for the reduced-motion path.
 //
 // Open decisions this component had to fill in (not locked anywhere —
 // see CLAUDE.md "Open decisions"):
-// - Mobile type scale: fluid clamp() rather than a fixed desktop token,
-//   same reasoning as before this rebuild.
 // - "Get to know me" target: linked to /about (no target was specified).
+// - No real photo exists yet (PROJECT_BRIEF.md Section 6) — the image
+//   slot is a placeholder block with a TODO showing the exact swap-in
+//   markup once one exists.
 import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
 import Tag from '../ui/Tag.astro';
+
+const titleWord = 'Portfolio';
+const letters = titleWord.split('');
 ---
 
 <section class="hero">
   <div class="hero__inner">
-    <span class="hero__year">
-      <span>20</span>
-      <span>26</span>
-    </span>
+    <div class="hero__visual">
+      <div class="hero__meta">
+        <span class="hero__year" aria-label="2026">
+          <span aria-hidden="true">20</span>
+          <span aria-hidden="true">26</span>
+        </span>
 
-    <div class="hero__title-block">
-      <h1 class="hero__title">
-        <span class="sr-only">Laura Doolaege</span>
-        <span aria-hidden="true">Portfolio</span>
-      </h1>
-      <span class="hero__placeholder" aria-hidden="true">
-        <!-- TODO: replace with a real photo (see PROJECT_BRIEF.md Section 6 — no photography exists yet) -->
+        <ul class="hero__tags">
+          <li>
+            <Tag>UX / Experience Design</Tag>
+          </li>
+          <li>
+            <Tag>Digital Design</Tag>
+          </li>
+          <li>
+            <Tag>Motion Design</Tag>
+          </li>
+        </ul>
+      </div>
+
+      <span class="hero__image" aria-hidden="true">
+        <!--
+          TODO: swap for a real photo once one exists (PROJECT_BRIEF.md
+          Section 6 — no photography yet). Replace this span's content with:
+          <img src={yourImportedImage} alt="Laura Doolaege" class="hero__image-img" />
+          — .hero__image-img is already styled (width/height/object-fit)
+          and ready for it.
+        -->
       </span>
+
+      <h1 class="hero__title" aria-label={titleWord}>
+        <span class="hero__title-visual" aria-hidden="true">
+          {letters.map((letter) => (
+            <span class="hero__letter-mask">
+              <span class="hero__letter">{letter}</span>
+            </span>
+          ))}
+        </span>
+      </h1>
     </div>
 
-    <ul class="hero__tags">
-      <li>
-        <Tag>UX / Experience Design</Tag>
-      </li>
-      <li>
-        <Tag>Digital Design</Tag>
-      </li>
-      <li>
-        <Tag>Motion Design</Tag>
-      </li>
-    </ul>
+    <div class="hero__bottom">
+      <p class="hero__role">Experience designer to-be</p>
 
-    <p class="hero__role">Experience designer to-be</p>
+      <p class="hero__intro">
+        I'm Laura, a digital development &amp; design student with a background in marketing
+        communication, currently specialising in user experience design.
+      </p>
 
-    <p class="hero__intro">
-      I'm Laura, a digital development &amp; design student with a background in marketing
-      communication, currently specialising in user experience design.
-    </p>
+      <Button href={withBase('/about')} variant="secondary" icon="arrow" class="hero__cta">
+        Get to know me
+      </Button>
 
-    <Button href={withBase('/about')} variant="primary" icon="arrow" class="hero__cta">
-      Get to know me
-    </Button>
+      <span class="hero__scroll">(Scroll)</span>
+    </div>
   </div>
 </section>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  // Must match --motion-easing-editorial in global.css.
+  const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    const image = hero.querySelector<HTMLElement>('.hero__image');
+    const letters = hero.querySelectorAll<HTMLElement>('.hero__letter');
+    const meta = hero.querySelector<HTMLElement>('.hero__meta');
+    const bottom = hero.querySelector<HTMLElement>('.hero__bottom');
+
+    if (!prefersReducedMotion() && image && letters.length && meta && bottom) {
+      // Initial states live here, not in CSS — if this script never runs,
+      // the hero renders fully visible in its final layout, not stuck
+      // mid-animation.
+      gsap.set(image, { clipPath: 'inset(100% 0% 0% 0%)' });
+      gsap.set(letters, { yPercent: 100 });
+      gsap.set([meta, bottom], { autoAlpha: 0, y: 16 });
+
+      gsap
+        .timeline({ defaults: { ease: EASE } })
+        .to(image, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9 }, 0)
+        .to(letters, { yPercent: 0, duration: 0.6, stagger: 0.04 }, 0.2)
+        .to(meta, { autoAlpha: 1, y: 0, duration: 0.6 }, 0.4)
+        .to(bottom, { autoAlpha: 1, y: 0, duration: 0.6 }, 0.55);
+
+      // Gentle scroll parallax on the image, capped at +/-40px — no
+      // heavier mouse-follow effects.
+      gsap.fromTo(
+        image,
+        { y: -40 },
+        {
+          y: 40,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: hero,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          },
+        },
+      );
+
+      ScrollTrigger.refresh();
+    }
+  }
+</script>
 
 <style>
   .hero {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     flex: 1 1 auto;
-    padding-block: clamp(2rem, 5vw, 4rem);
   }
 
   .hero__inner {
     width: 100%;
-    max-width: var(--content-max-width);
+    max-width: var(--intro-max-width);
     margin-inline: auto;
-    padding-inline: var(--space-outer);
+    padding-inline: var(--intro-margin);
+    padding-block: var(--space-32);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1 1 auto;
+    gap: var(--space-32);
+  }
+
+  .hero__visual {
+    position: relative;
     display: grid;
-    grid-template-columns: auto repeat(11, 1fr);
-    column-gap: clamp(1rem, 2vw, 2rem);
-    row-gap: clamp(1rem, 3vw, 1.75rem);
-    align-items: start;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--intro-gutter);
+    row-gap: var(--space-16);
+  }
+
+  /* Right-aligned year + tags, sitting above the word beside the image. */
+  .hero__meta {
+    grid-column: 9 / 13;
+    grid-row: 1;
+    align-self: start;
+    justify-self: end;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-16);
+    text-align: right;
   }
 
   .hero__year {
-    grid-column: 1 / 2;
-    grid-row: 1;
     display: flex;
     flex-direction: column;
-    margin-top: 0.4em;
+    align-items: flex-end;
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
-    line-height: 1.4;
+    line-height: 1.3;
     color: var(--color-text-secondary);
   }
 
-  .hero__title-block {
-    grid-column: 2 / -1;
+  .hero__tags {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-8);
+  }
+
+  /* Image slot — replaces the earlier blob placeholder. Row 1 only; its own aspect-ratio (not a grid-row span) determines its height, so the title below can pull up into it by a font-size-relative amount instead of a row-sizing trick that turned out not to place things where it looked like it should. */
+  .hero__image {
+    grid-column: 5 / 9;
     grid-row: 1;
-    justify-self: start;
-    position: relative;
-    font-size: clamp(3.25rem, 8vw + 1rem, 8.5rem);
-  }
-
-  .hero__title {
-    position: relative;
-    z-index: 1;
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: inherit;
-    line-height: 0.92;
-    text-transform: uppercase;
-    letter-spacing: -0.03em;
-    white-space: nowrap;
-  }
-
-  /* The "bigger placeholder, slightly overlapping the text" device — sized
-     and positioned in the same em context as the title, so it scales and
-     stays put relative to the word at every viewport width. */
-  .hero__placeholder {
-    position: absolute;
-    z-index: 0;
-    top: -0.02em;
-    right: -0.3em;
-    width: 1.9em;
-    height: 1.15em;
+    align-self: start;
+    aspect-ratio: 5 / 7;
+    /* Caps how tall the image gets on short/laptop viewports so the hero actually fits 100dvh instead of pushing the bottom block below the fold — without this, a full 5:7 box at this column's width is taller than the viewport at common 900-ish px heights. Width stays grid-determined, so past this cap the box is wider than 5:7 rather than shrinking sideways too; an acceptable trade for a placeholder, worth revisiting once a real photo (with its own crop) is in. */
+    max-height: 36dvh;
+    overflow: hidden;
     background: var(--color-bg-secondary);
     border: var(--border-hairline) solid var(--color-text-secondary);
-    border-radius: 44% 56% 61% 39% / 55% 46% 54% 45%;
   }
 
-  .hero__tags {
-    grid-column: 2 / -1;
+  .hero__image :global(.hero__image-img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Full-width, edge-to-edge title. container-type turns on cqw sizing for .hero__title-visual below — the word's font-size tracks this element's own rendered width, not the viewport, so it fills the grid at any width from 320px to well past 2560px without a hand-tuned breakpoint ladder. The negative margin-top is in em (title's own font-size), not px or %, so the overlap into the image's lower third scales with the word instead of drifting at other viewports. */
+  .hero__title {
+    grid-column: 1 / -1;
     grid-row: 2;
+    container-type: inline-size;
+    /* Without this, the negative margin-top below collapses straight through the h1 (standard block margin-collapsing), leaving the h1 measuring 0 height and the word floating detached from the grid's own row-sizing. flow-root opts out of collapsing without clipping the intentional overflow into the row above. */
+    display: flow-root;
+    /* Deliberately no position/z-index here: either one establishes a new stacking context, which would isolate .hero__letter's mix-blend-mode from the image and page background behind it (it would only blend against other things inside .hero__title, which is nothing) — paint order alone (title comes after image in the markup) already puts it on top. */
+  }
+
+  .hero__title-visual {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    margin-top: -0.55em;
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 0.8;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    /* 27cqw is measured, not guessed: at a given font-size, "PORTFOLIO" in this display font/weight/tracking renders to ~3.71x that font-size in width, so 100 / 3.71 ~= 27 is the cqw value that makes the rendered word width match the container width (edge to edge). The clamp() bounds are a floor/ceiling safety net, not the fallback — that's @supports below. */
+    font-size: clamp(2.5rem, 27cqw, 26rem);
+  }
+
+  .hero__letter-mask {
+    overflow: hidden;
+  }
+
+  .hero__letter {
+    display: inline-block;
+    color: var(--color-bg-primary);
+    mix-blend-mode: difference;
+  }
+
+  /* Fallback for browsers without mix-blend-mode: plain ink text stays legible instead of rendering invisible cream-on-cream. */
+  @supports not (mix-blend-mode: difference) {
+    .hero__letter {
+      color: var(--color-ink);
+      mix-blend-mode: normal;
+    }
+  }
+
+  /* Fallback for browsers without container query units: a viewport-based clamp() curve, same floor/ceiling as the cqw version above. */
+  @supports not (container-type: inline-size) {
+    .hero__title-visual {
+      font-size: clamp(2.5rem, 11vw + 1rem, 26rem);
+    }
+  }
+
+  .hero__bottom {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--intro-gutter);
   }
 
   .hero__role {
-    grid-column: 2 / 8;
-    grid-row: 3;
+    grid-column: 1 / 6;
     font-family: var(--font-body);
     font-weight: 700;
-    font-size: 1.125rem;
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
     color: var(--color-ink);
   }
 
   .hero__intro {
-    grid-column: 2 / 8;
-    grid-row: 4;
-    max-width: 46ch;
+    grid-column: 1 / 6;
+    margin-top: var(--space-32);
+    max-width: 38ch;
     font-family: var(--font-body);
-    font-size: var(--text-body);
-    line-height: var(--text-body-leading);
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+    line-height: 1.5;
     color: var(--color-text-secondary);
   }
 
-  /* The "more creative button position": its own grid columns, offset
-     right of the text block above it rather than left-aligned under it.
-     :global() is required here — Button.astro renders its own <a>, which
-     carries Button's own Astro scope hash, not Hero's, so an unscoped
-     ".hero__cta" rule would silently never match it. */
+  /* :global() is required — Button.astro renders its own <a>, which carries Button's own Astro scope hash, not Hero's, so an unscoped ".hero__cta" rule would silently never match it. */
   :global(.hero__cta) {
-    grid-column: 7 / 11;
-    grid-row: 5;
-    margin-top: 0.5rem;
+    grid-column: 1 / 6;
+    margin-top: var(--space-48);
     justify-self: start;
   }
 
-  @media (max-width: 767px) {
-    .hero__inner {
-      grid-template-columns: 1fr;
+  .hero__scroll {
+    grid-column: 12 / 13;
+    align-self: end;
+    justify-self: end;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .hero__image {
+      grid-column: 4 / 9;
     }
 
-    .hero__year,
-    .hero__title-block,
-    .hero__tags,
+    .hero__meta {
+      grid-column: 9 / 13;
+    }
+
+    .hero__bottom {
+      grid-template-columns: repeat(7, 1fr);
+    }
+
     .hero__role,
     .hero__intro,
     :global(.hero__cta) {
-      grid-column: 1;
+      grid-column: 1 / 8;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .hero__visual {
+      display: block;
+      /* No fixed min-height here — .hero__visual's height comes from its in-flow content (meta + title) alone; the image is absolutely positioned and centers within whatever that ends up being, via inset: 0 + margin: auto below. */
+    }
+
+    .hero__meta {
+      position: relative;
+      z-index: 1;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: var(--space-24);
     }
 
     .hero__year {
@@ -203,15 +359,45 @@ import Tag from '../ui/Tag.astro';
       gap: 0.4em;
     }
 
-    :global(.hero__cta) {
-      justify-self: stretch;
-      margin-top: 1rem;
+    .hero__tags {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
     }
-  }
 
-  @media (max-width: 640px) {
-    .hero__inner {
-      padding-inline: 1.5rem;
+    /* Centered behind the word, roughly half the viewport width. inset + margin: auto, not top/left/transform: translate — the scroll parallax above animates this same element's `transform` via GSAP, which would silently overwrite a transform-based centering trick the instant the page scrolls. */
+    .hero__image {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 50%;
+    }
+
+    .hero__title {
+      position: relative;
+      margin-top: var(--space-32);
+    }
+
+    .hero__bottom {
+      display: block;
+      margin-top: var(--space-32);
+    }
+
+    .hero__intro {
+      max-width: none;
+    }
+
+    :global(.hero__cta) {
+      /* 44px+ touch target, per WCAG target-size guidance. */
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .hero__scroll {
+      display: block;
+      margin-top: var(--space-24);
+      text-align: right;
     }
   }
 </style>

@@ -97,28 +97,75 @@ Real project titles/images, the Gallery's images, and the exact
 — see each component's own header comment for what's a direct brief
 descriptor vs. an invented structural stand-in.
 
-**Header/Hero rebuild (superseding the two paragraphs above about the
-name):** the wordmark moved out of Hero's big type into a small corner
-mark in Header — Hero's oversized moment is now a "Portfolio" headline
-with a year mark and a bigger placeholder overlapping it, same locked
-object-in-letterform device, different word. Header's `border-bottom` and
-SectionMarker's `border-bottom` are both gone (explicit request — they
-read as overplayed). Header + Hero are wrapped in `.intro` in
-`index.astro` with `min-height: 100dvh` so they fill the opening screen
-together. Hero's CTA sits in its own grid columns (7/11) rather than
-under the paragraph — the "creative button position" — using the brief's
-locked 12-column grid rather than a hand-picked margin. Gallery is a
-horizontal scroll strip now, not the earlier asymmetric collage grid.
+**Header/Hero rebuild v1 (superseded by v2 below):** the wordmark moved
+out of Hero's big type into a small corner mark in Header — Hero's
+oversized moment became a "Portfolio" headline with a year mark and a
+placeholder overlapping it, same locked object-in-letterform device,
+different word. Header's `border-bottom` and SectionMarker's
+`border-bottom` were removed (explicit request — they read as
+overplayed). Header + Hero got wrapped in `.intro` in `index.astro` with
+`min-height: 100dvh` so they fill the opening screen together. Gallery
+became a horizontal scroll strip, not the earlier asymmetric collage
+grid — this part is unchanged by v2.
 
-**Bug found during this rebuild, worth knowing for any future `<Button>`
-usage:** passing `class="foo"` into `<Button>` and then writing `.foo {}`
-in the *parent's* `<style>` block silently does nothing — Astro scopes
-that rule to the parent's own `data-astro-cid`, but Button.astro's `<a>`
-carries Button's cid instead, so the selectors never match. Wrap the
-selector in `:global()` when styling a Button instance from outside
-(see Hero.astro's `.hero__cta` for the pattern) — plain `<div>`/`<span>`
-children don't need this, only classes landing on another component's
-own root element.
+**Header/Hero rebuild v2 (current):** rebuilt again to a precise 12-column
+grid spec matching a target wireframe, on top of v1's foundation. New
+shared tokens in `global.css`: `--intro-max-width` (1600px) /
+`--intro-margin` (`clamp(20px, 5vw, 72px)`) / `--intro-gutter`, used by
+_both_ Header and Hero so the logo, nav/CV, the hero title, and the hero
+bottom block all land on the same margin lines (verified pixel-exact via
+`getBoundingClientRect()`) — separate from the sitewide
+`--content-max-width`/`--space-outer` (1320px/100px) every section below
+the fold still uses. Also added a general-purpose 8px spacing scale
+(`--space-4` through `--space-128`).
+
+Hero.astro structure: a portrait image slot (`aspect-ratio: 5/7`,
+`max-height: 36dvh` so it doesn't push the page past one viewport)
+replaces the placeholder blob; "Portfolio" is sized with **cqw**
+(container query units, via `container-type: inline-size` on the `<h1>`)
+rather than a hand-tuned `clamp()`, measured so the rendered word width
+matches its container edge-to-edge at any viewport; year + tags form one
+right-aligned "meta" cluster above the image; role/intro/CTA sit
+left-aligned in a `.hero__bottom` grid, CTA now a plain secondary
+(text-link) button per the target wireframe, not the boxed primary style.
+Header's nav switched to the mono "Label" type style and gained a
+text-roll hover (two stacked label copies, CSS grid + transform, no JS).
+
+**This is the project's first real animation work** — `src/utils/motion.ts`
+was plumbing-only before this. Hero's script sets up a GSAP entrance
+timeline (image clip-path reveal, per-letter stagger rise, meta/bottom
+fade-up) plus a ±40px scroll-linked parallax on the image via
+ScrollTrigger, all gated behind `prefersReducedMotion()`. Button.astro
+gained a universal small icon-nudge-on-hover (`.btn:hover .btn__icon`).
+
+**Three real bugs found and fixed during this rebuild, worth knowing for
+future work in this file or nearby:**
+
+1. Passing `class="foo"` into `<Button>` and writing `.foo {}` in the
+   _parent's_ `<style>` block silently does nothing — Astro scopes that
+   rule to the parent's own `data-astro-cid`, but `Button.astro`'s `<a>`
+   carries Button's own cid instead, so the selector never matches. Wrap
+   it in `:global()` (see `.hero__cta` in Hero.astro). Plain
+   `<div>`/`<span>` children you author yourself don't need this — only
+   classes landing on another component's own root element do.
+2. `mix-blend-mode` only blends against content painted in the _same_
+   stacking context. `position: relative` + `z-index` on an ancestor of
+   a blended element creates a new stacking context and silently isolates
+   the blend from everything outside it (the image, the page background)
+   — it'll render as if blend-mode were `normal`. Paint order from plain
+   DOM order was already correct here; the z-index was never needed.
+3. A negative `margin-top` used to pull an element up into its previous
+   sibling only works if the parent doesn't margin-collapse with that
+   child — a plain block parent with one child _does_ collapse by
+   default, silently reporting 0 height. `display: flow-root` on the
+   parent fixes it without clipping the intentional overflow (unlike
+   `overflow: hidden`, which would also hide the overlap). Separately:
+   never combine CSS `transform` used for static positioning (e.g. a
+   centering `translate()`) with a GSAP tween that also animates
+   `transform` on the same element — the tween's inline style silently
+   replaces the CSS one the instant it runs. Use `inset: 0; margin: auto;`
+   for transform-free centering when an element also needs `transform`
+   for something else (see `.hero__image`'s mobile rule).
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

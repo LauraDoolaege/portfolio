@@ -1,9 +1,16 @@
 ---
 // Site-wide header/navigation. Nav items per PROJECT_BRIEF.md Section 4
 // (LOCKED): Laura Doolaege | Work | About | CV | Contact. The wordmark is
-// back, but small this time — a quiet corner mark rather than a masthead
-// statement, since the Hero now carries its own big headline moment (see
-// Hero.astro) and the two shouldn't compete for the same visual weight.
+// small — a quiet corner mark rather than a masthead statement, since the
+// Hero carries its own big headline moment (see Hero.astro).
+//
+// Header and Hero now share one alignment system: --intro-max-width /
+// --intro-margin (global.css), not the sitewide --content-max-width /
+// --space-outer used everywhere below the fold — logo, nav/CV, the
+// hero title, and the hero bottom block all sit on the same margin
+// lines. Nav labels use the mono "Label" style (Space Mono, 12px,
+// wide tracking) instead of the body-font style used elsewhere, per
+// explicit request.
 //
 // Open decisions this component had to fill in (see CLAUDE.md "Open
 // decisions" — not locked anywhere yet):
@@ -17,6 +24,12 @@
 //   so a hard rule between them would cut that in half.
 import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
+
+const navItems = [
+  { href: withBase('/work'), label: 'Work' },
+  { href: withBase('/about'), label: 'About' },
+  { href: withBase('/contact'), label: 'Contact' },
+];
 ---
 
 <header class="site-header">
@@ -28,21 +41,21 @@ import Button from '../ui/Button.astro';
     <div class="site-header__right">
       <nav aria-label="Primary" class="site-header__nav" id="primary-nav">
         <ul class="site-header__links">
-          <li>
-            <a href={withBase('/work')} class="site-header__link">
-              Work
-            </a>
-          </li>
-          <li>
-            <a href={withBase('/about')} class="site-header__link">
-              About
-            </a>
-          </li>
-          <li>
-            <a href={withBase('/contact')} class="site-header__link">
-              Contact
-            </a>
-          </li>
+          {navItems.map((item) => (
+            <li>
+              <a href={item.href} class="site-header__link">
+                {/* Text-roll hover: two stacked copies of the label in one
+                grid cell; hover/focus slides the visible one up and out,
+                the hidden duplicate up into view. */}
+                <span class="site-header__link-roll">
+                  <span class="site-header__link-roll-line">{item.label}</span>
+                  <span class="site-header__link-roll-line" aria-hidden="true">
+                    {item.label}
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
         </ul>
       </nav>
 
@@ -113,9 +126,9 @@ import Button from '../ui/Button.astro';
   }
 
   .site-header__inner {
-    max-width: var(--content-max-width);
+    max-width: var(--intro-max-width);
     margin-inline: auto;
-    padding-inline: var(--space-outer);
+    padding-inline: var(--intro-margin);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -172,31 +185,53 @@ import Button from '../ui/Button.astro';
     color: var(--color-text-secondary);
   }
 
-  /* Light and subtle, per explicit request: text-secondary rather than
-     full ink, weight stays at the brief's locked "Body Medium" nav spec
-     (PROJECT_BRIEF.md Section 3 type hierarchy) — only the color recedes. */
+  /* Mono "Label" style, per explicit request — matches tags/year/buttons
+     rather than the body-font nav style used before. Still light and
+     subtle (text-secondary, not full ink). */
   .site-header__link {
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: var(--text-nav);
+    /* inline-block, not block: the "/" separator before this in the DOM is a plain inline ::before on the <li> — a block-level link here would force it onto its own line above instead of sitting next to it. inline-block still lets .site-header__link-roll's inner display: grid work normally. */
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
     color: var(--color-text-secondary);
     padding-block: 0.2em;
-    border-bottom: var(--border-hairline) solid transparent;
-    transition:
-      color var(--motion-duration) var(--motion-easing),
-      border-color var(--motion-duration) var(--motion-easing);
+    transition: color var(--motion-duration) var(--motion-easing);
   }
 
-  .site-header__link:hover {
+  .site-header__link:hover,
+  .site-header__link:focus-visible {
     color: var(--color-accent);
-    border-bottom-color: var(--color-accent);
   }
 
   .site-header__link:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 4px;
+  }
+
+  .site-header__link-roll {
+    display: grid;
+    overflow: hidden;
+  }
+
+  .site-header__link-roll-line {
+    grid-area: 1 / 1;
+    transition: transform var(--motion-duration-slow) var(--motion-easing-editorial);
+  }
+
+  .site-header__link-roll-line:last-child {
+    transform: translateY(100%);
+  }
+
+  .site-header__link:hover .site-header__link-roll-line:first-child,
+  .site-header__link:focus-visible .site-header__link-roll-line:first-child {
+    transform: translateY(-100%);
+  }
+
+  .site-header__link:hover .site-header__link-roll-line:last-child,
+  .site-header__link:focus-visible .site-header__link-roll-line:last-child {
+    transform: translateY(0);
   }
 
   .site-header__toggle {
@@ -243,12 +278,6 @@ import Button from '../ui/Button.astro';
   .site-header__toggle:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 4px;
-  }
-
-  @media (max-width: 640px) {
-    .site-header__inner {
-      padding-inline: 1.5rem;
-    }
   }
 
   /* Below tablet (phone only): Work/About/Contact collapse into a

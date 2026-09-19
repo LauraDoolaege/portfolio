@@ -105,6 +105,15 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
   .btn__icon {
     width: 0.9em;
     height: 0.9em;
+    transition: transform var(--motion-duration) var(--motion-easing);
+  }
+
+  /* Small arrow/icon nudge on hover — applies to both variants, harmless
+     on the download glyph, and is what the Hero CTA's "arrow nudges 4px
+     on hover" spec actually wants. */
+  .btn:hover .btn__icon,
+  .btn:focus-visible .btn__icon {
+    transform: translateX(0.25em);
   }
 
   /* Secondary: quiet underline text link — unchanged. */

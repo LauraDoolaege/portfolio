@@ -11,6 +11,15 @@ node_modules/
 .agents/
 skills-lock.json
 
+# local agent-tool config/skill installs (Claude Code, Codex, GitHub agents)
+# — machine/tool setup, not project source
+.claude/
+.codex/
+.github/agents/
+.github/hooks/
+.github/skills/
+.impeccable/
+
 # logs
 npm-debug.log*
 yarn-debug.log*

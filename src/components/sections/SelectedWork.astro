@@ -1,0 +1,111 @@
+---
+// Homepage "Selected work" (PROJECT_BRIEF.md Section 4, item 2). Content is
+// final per the brief: two groups, three projects each — Design/individual
+// work, Experience design/group projects. Real project titles/images don't
+// exist yet (Section 6), so cards are numbered placeholders, not invented
+// project names.
+//
+// DESIGN_VARIANCE: 9 (see CLAUDE.md "Experimental design dials") — the two
+// groups deliberately don't share one grid: the Design row is even, the
+// Experience row staggers its middle card. That's this section's one
+// structural break from uniformity; the grid itself (auto-fit, not a fixed
+// column count) is the mobile-column-count answer to the open decision in
+// PROJECT_BRIEF.md Section 8, chosen so it doesn't need a guessed
+// breakpoint to look right at any width.
+import SectionMarker from '../ui/SectionMarker.astro';
+import ProjectCard from '../ui/ProjectCard.astro';
+
+const design = [
+  { number: '01', title: 'Project 01', roleTag: 'design' },
+  { number: '02', title: 'Project 02', roleTag: 'design' },
+  { number: '03', title: 'Project 03', roleTag: 'design' },
+];
+
+const experience = [
+  { number: '04', title: 'Project 04', roleTag: 'experience design' },
+  { number: '05', title: 'Project 05', roleTag: 'experience design' },
+  { number: '06', title: 'Project 06', roleTag: 'experience design' },
+];
+---
+
+<section class="selected-work" id="work">
+  <div class="selected-work__inner">
+    <SectionMarker index="02" label="Selected work" />
+
+    <p class="selected-work__intro">
+      A mix of solo design work and collaborative experience-design projects.
+    </p>
+
+    <div class="selected-work__group">
+      <h3 class="selected-work__group-label">Design — individual work</h3>
+      <ul class="selected-work__grid selected-work__grid--design">
+        {design.map((project) => (
+          <li>
+            <ProjectCard {...project} />
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="selected-work__group selected-work__group--experience">
+      <h3 class="selected-work__group-label">Experience design — group projects</h3>
+      <ul class="selected-work__grid selected-work__grid--experience">
+        {experience.map((project) => (
+          <li>
+            <ProjectCard {...project} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .selected-work {
+    padding-block: var(--space-section);
+  }
+
+  .selected-work__inner {
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    padding-inline: var(--space-outer);
+  }
+
+  .selected-work__intro {
+    max-width: 46ch;
+    font-family: var(--font-body);
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+  }
+
+  .selected-work__group {
+    margin-top: 4.5rem;
+  }
+
+  .selected-work__group-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-nav);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-ink);
+  }
+
+  .selected-work__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2.5rem;
+    margin-top: 2rem;
+  }
+
+  @media (min-width: 900px) {
+    .selected-work__grid--experience li:nth-child(2) {
+      margin-top: 3.5rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .selected-work__inner {
+      padding-inline: 1.5rem;
+    }
+  }
+</style>

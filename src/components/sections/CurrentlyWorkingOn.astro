@@ -1,0 +1,106 @@
+---
+// Homepage "Currently working on" (PROJECT_BRIEF.md Section 4, item 4) —
+// exactly 2 items per the brief: Blender/3D-header learning, and a
+// hedgehog-led decentering-human-design UX project. The brief only gives
+// short descriptors, not the Website Structure doc's exact sentences, so
+// the one-line descriptions below are a direct expansion of those
+// descriptors, not invented content — swap in the real copy if it differs.
+//
+// This section holds the page's one terracotta "wink" (PROJECT_BRIEF.md
+// Section 3 palette table, accent-signal — locked, NOT touched by the
+// design-variance override in CLAUDE.md): a single rotated asterisk after
+// the heading, the exact example the brief itself gives for this color.
+// It appears nowhere else on the homepage — don't add a second one.
+import SectionMarker from '../ui/SectionMarker.astro';
+
+const items = [
+  {
+    title: 'Blender',
+    description: 'Learning 3D — building a header piece.',
+  },
+  {
+    title: 'Decentering the human',
+    description: 'A hedgehog-led UX project on designing beyond human-centered defaults.',
+  },
+];
+---
+
+<section class="currently">
+  <div class="currently__inner">
+    <SectionMarker index="04" label="Currently working on">
+      <span class="currently__wink" aria-hidden="true" slot="suffix">
+        *
+      </span>
+    </SectionMarker>
+
+    <ul class="currently__list">
+      {items.map((item) => (
+        <li class="currently__item">
+          <span class="currently__tag" aria-hidden="true">
+            [ in progress ]
+          </span>
+          <h3 class="currently__title">{item.title}</h3>
+          <p class="currently__description">{item.description}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .currently {
+    padding-block: var(--space-section);
+  }
+
+  .currently__inner {
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    padding-inline: var(--space-outer);
+  }
+
+  .currently__wink {
+    display: inline-block;
+    color: var(--color-accent-signal);
+    transform: rotate(-8deg);
+  }
+
+  .currently__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 3rem;
+    margin-top: 2.5rem;
+  }
+
+  .currently__tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-ink);
+  }
+
+  .currently__title {
+    margin-top: 0.75rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  .currently__description {
+    margin-top: 0.6rem;
+    max-width: 38ch;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body-leading);
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    .currently__inner {
+      padding-inline: 1.5rem;
+    }
+  }
+</style>

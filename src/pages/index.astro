@@ -1,13 +1,39 @@
 ---
-// Homepage. Hero is built (PROJECT_BRIEF.md Section 5); everything below
-// it (selected work, gallery, "currently working on", "how I think",
-// contact CTA, footer) is not built yet.
+// Homepage. Section order and content per PROJECT_BRIEF.md Section 4
+// "Homepage structure (LOCKED)" / Section 5 "Homepage — LOCKED".
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
 import Hero from '../components/sections/Hero.astro';
+import SelectedWork from '../components/sections/SelectedWork.astro';
+import Gallery from '../components/sections/Gallery.astro';
+import CurrentlyWorkingOn from '../components/sections/CurrentlyWorkingOn.astro';
+import HowIThink from '../components/sections/HowIThink.astro';
+import ContactCTA from '../components/sections/ContactCTA.astro';
 ---
 
 <BaseLayout title="Laura Doolaege — Portfolio">
-  <Header />
-  <Hero />
+  <div class="intro">
+    <Header />
+    <Hero />
+  </div>
+  <SelectedWork />
+  <Gallery />
+  <CurrentlyWorkingOn />
+  <HowIThink />
+  <ContactCTA />
+  <Footer />
 </BaseLayout>
+
+<style>
+  /* Header + Hero fill the opening viewport as one screen, per explicit
+     request — dvh rather than vh so mobile browser chrome doesn't clip
+     it, min-height rather than height so content is never forced to
+     overflow/clip on a short viewport. Hero.astro's own `flex: 1` is what
+     lets it absorb the remaining space and center its content within it. */
+  .intro {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+</style>

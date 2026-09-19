@@ -1,0 +1,148 @@
+---
+// Site-wide footer. Locked as the default use of dark-field (CLAUDE.md
+// Design system, Section 3 palette table) — paired with the homepage's
+// ContactCTA immediately above it so the two form one continuous dark
+// closing zone rather than two separate dark sections.
+//
+// Email/LinkedIn are placeholders — no real contact details exist yet
+// (same open item as the CV button in Header.astro).
+import { withBase } from '../../utils/url';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__row">
+      <a href={withBase('/')} class="site-footer__name">
+        Laura Doolaege
+      </a>
+
+      <nav aria-label="Footer" class="site-footer__nav">
+        <ul class="site-footer__links">
+          <li>
+            <a href={withBase('/work')}>Work</a>
+          </li>
+          <li>
+            <a href={withBase('/about')}>About</a>
+          </li>
+          <li>
+            <a href={withBase('/contact')}>Contact</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="site-footer__row site-footer__row--contact">
+      <!-- TODO: replace with a real email once supplied -->
+      <a href="mailto:hello@example.com" class="site-footer__email">
+        hello@example.com
+      </a>
+      <!-- TODO: replace with the real LinkedIn URL once supplied -->
+      <a href="#" class="site-footer__social">
+        LinkedIn
+      </a>
+    </div>
+
+    <div class="site-footer__row site-footer__row--meta">
+      <p class="site-footer__credit">© {year} Laura Doolaege</p>
+      <a href="#top" class="site-footer__top">
+        Back to top
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--color-dark-field);
+    color: var(--color-bg-primary);
+    border-top: var(--border-hairline) solid var(--color-text-secondary);
+  }
+
+  .site-footer__inner {
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    padding: 3rem var(--space-outer);
+  }
+
+  .site-footer__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .site-footer__name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  .site-footer__links {
+    display: flex;
+    gap: 1.5rem;
+    font-family: var(--font-body);
+    font-size: var(--text-nav);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .site-footer__links a:hover {
+    color: var(--color-accent);
+  }
+
+  .site-footer__row--contact {
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: var(--border-hairline) solid var(--color-text-secondary);
+  }
+
+  .site-footer__email {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3vw + 1rem, 2.5rem);
+    text-transform: lowercase;
+  }
+
+  .site-footer__email:hover {
+    color: var(--color-accent);
+  }
+
+  .site-footer__social {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .site-footer__social:hover {
+    color: var(--color-accent);
+  }
+
+  .site-footer__row--meta {
+    margin-top: 2.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  .site-footer__top:hover {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 640px) {
+    .site-footer__inner {
+      padding-inline: 1.5rem;
+    }
+
+    .site-footer__row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

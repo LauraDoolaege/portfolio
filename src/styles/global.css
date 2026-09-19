@@ -61,6 +61,33 @@
   --motion-duration: 300ms;
   --motion-duration-slow: 450ms;
   --motion-easing: ease-out;
+  /* MOTION_INTENSITY: 8 override (see AGENTS.md "Experimental design
+     dials") — a dedicated easing/duration pair for the hero's own intro
+     sequence, reaching past the 250-500ms ceiling the brief otherwise
+     locks. Not used by anything under the dials' baseline range. */
+  --motion-easing-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Strict 8px spacing scale — general-purpose, additive to the section
+     rhythm tokens above (--space-outer/--space-section), not a
+     replacement for them. Introduced for the hero rebuild; safe for any
+     future component that wants fixed steps instead of a one-off value. */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-96: 96px;
+  --space-128: 128px;
+
+  /* "Intro" layout tokens — the wider, fluid-margin grid used only by the
+     full-viewport opening screen (Header + Hero). Deliberately separate
+     from --content-max-width/--space-outer (1320px/100px), which stay
+     the locked sitewide grid for every section below the fold. */
+  --intro-max-width: 1600px;
+  --intro-margin: clamp(20px, 5vw, 72px);
+  --intro-gutter: var(--space-24);
 }
 
 /* Minimal modern reset */

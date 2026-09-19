@@ -1,19 +1,35 @@
 ---
 // Site-wide header/navigation. Nav items per PROJECT_BRIEF.md Section 4
-// (LOCKED): Laura Doolaege | Work | About | CV | Contact. Display name
-// resolved from the brief's "Laura [Name]" placeholder — see CLAUDE.md
-// "Open decisions".
+// (LOCKED): Laura Doolaege | Work | About | CV | Contact. The wordmark is
+// small — a quiet corner mark rather than a masthead statement, since the
+// Hero carries its own big headline moment (see Hero.astro).
+//
+// Header and Hero now share one alignment system: --intro-max-width /
+// --intro-margin (global.css), not the sitewide --content-max-width /
+// --space-outer used everywhere below the fold — logo, nav/CV, the
+// hero title, and the hero bottom block all sit on the same margin
+// lines. Nav labels use the mono "Label" style (Space Mono, 12px,
+// wide tracking) instead of the body-font style used elsewhere, per
+// explicit request.
 //
 // Open decisions this component had to fill in (see CLAUDE.md "Open
 // decisions" — not locked anywhere yet):
-// - Mobile nav pattern: hamburger + overlay panel for tablet and down
-//   (≤1024px, this component's own choice of "tablet" boundary — not a
-//   locked breakpoint). Above that, the nav stays inline text. The CV
-//   button stays visible at every width — only Work/About/Contact
-//   collapse into the panel.
+// - Mobile nav pattern: regular inline text nav from tablet (768px) up.
+//   Below that, a hamburger + overlay panel — phone-only. The CV button
+//   stays visible at every width — only Work/About/Contact collapse into
+//   the panel.
 // - Sticky vs. static: static (scrolls with the page).
+// - No border under the header, per explicit request — the header and
+//   Hero now read as one continuous opening screen (see index.astro),
+//   so a hard rule between them would cut that in half.
 import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
+
+const navItems = [
+  { href: withBase('/work'), label: 'Work' },
+  { href: withBase('/about'), label: 'About' },
+  { href: withBase('/contact'), label: 'Contact' },
+];
 ---
 
 <header class="site-header">
@@ -25,21 +41,21 @@ import Button from '../ui/Button.astro';
     <div class="site-header__right">
       <nav aria-label="Primary" class="site-header__nav" id="primary-nav">
         <ul class="site-header__links">
-          <li>
-            <a href={withBase('/work')} class="site-header__link">
-              Work
-            </a>
-          </li>
-          <li>
-            <a href={withBase('/about')} class="site-header__link">
-              About
-            </a>
-          </li>
-          <li>
-            <a href={withBase('/contact')} class="site-header__link">
-              Contact
-            </a>
-          </li>
+          {navItems.map((item) => (
+            <li>
+              <a href={item.href} class="site-header__link">
+                {/* Text-roll hover: two stacked copies of the label in one
+                grid cell; hover/focus slides the visible one up and out,
+                the hidden duplicate up into view. */}
+                <span class="site-header__link-roll">
+                  <span class="site-header__link-roll-line">{item.label}</span>
+                  <span class="site-header__link-roll-line" aria-hidden="true">
+                    {item.label}
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
         </ul>
       </nav>
 
@@ -96,8 +112,8 @@ import Button from '../ui/Button.astro';
       }
     });
 
-    const desktopQuery = window.matchMedia('(min-width: 1025px)');
-    desktopQuery.addEventListener('change', (event) => {
+    const tabletUpQuery = window.matchMedia('(min-width: 768px)');
+    tabletUpQuery.addEventListener('change', (event) => {
       if (event.matches) closeMenu();
     });
   }
@@ -106,15 +122,13 @@ import Button from '../ui/Button.astro';
 <style>
   .site-header {
     position: relative;
-    padding-block: 2rem;
-    /* Closes the header off as its own structural block, so the gap before the hero reads as one deliberate space rather than two paddings stacking with no visual anchor between them. */
-    border-bottom: var(--border-hairline) solid var(--color-ink);
+    padding-block: clamp(1.5rem, 1.5vw + 1rem, 2.25rem);
   }
 
   .site-header__inner {
-    max-width: var(--content-max-width);
+    max-width: var(--intro-max-width);
     margin-inline: auto;
-    padding-inline: var(--space-outer);
+    padding-inline: var(--intro-margin);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -123,10 +137,11 @@ import Button from '../ui/Button.astro';
     column-gap: 2rem;
   }
 
+  /* Small corner mark, not a masthead — see the file header comment. */
   .site-header__name {
     font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.55rem;
+    font-weight: 700;
+    font-size: clamp(0.95rem, 0.3vw + 0.85rem, 1.1rem);
     letter-spacing: -0.01em;
     text-transform: uppercase;
     color: var(--color-ink);
@@ -143,11 +158,10 @@ import Button from '../ui/Button.astro';
     outline-offset: 4px;
   }
 
-  /* Groups the nav links and the CV button together on the right, with
-     the CV button as the distinct, rightmost element — a CTA set apart
-     from plain navigation, not just another item in its rhythm. Below
-     the tablet breakpoint the toggle becomes the actual rightmost item
-     instead (see media query). */
+  /* Groups the nav links and the CV button together, CV last so it stays
+     the far-right, distinct CTA — not just another item in the nav's own
+     rhythm. Below tablet width the toggle becomes the actual rightmost
+     item instead (see media query). */
   .site-header__right {
     display: flex;
     flex-wrap: wrap;
@@ -171,28 +185,53 @@ import Button from '../ui/Button.astro';
     color: var(--color-text-secondary);
   }
 
+  /* Mono "Label" style, per explicit request — matches tags/year/buttons
+     rather than the body-font nav style used before. Still light and
+     subtle (text-secondary, not full ink). */
   .site-header__link {
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: var(--text-nav);
+    /* inline-block, not block: the "/" separator before this in the DOM is a plain inline ::before on the <li> — a block-level link here would force it onto its own line above instead of sitting next to it. inline-block still lets .site-header__link-roll's inner display: grid work normally. */
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
-    color: var(--color-ink);
+    color: var(--color-text-secondary);
     padding-block: 0.2em;
-    border-bottom: var(--border-hairline) solid transparent;
-    transition:
-      color var(--motion-duration) var(--motion-easing),
-      border-color var(--motion-duration) var(--motion-easing);
+    transition: color var(--motion-duration) var(--motion-easing);
   }
 
-  .site-header__link:hover {
+  .site-header__link:hover,
+  .site-header__link:focus-visible {
     color: var(--color-accent);
-    border-bottom-color: var(--color-accent);
   }
 
   .site-header__link:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 4px;
+  }
+
+  .site-header__link-roll {
+    display: grid;
+    overflow: hidden;
+  }
+
+  .site-header__link-roll-line {
+    grid-area: 1 / 1;
+    transition: transform var(--motion-duration-slow) var(--motion-easing-editorial);
+  }
+
+  .site-header__link-roll-line:last-child {
+    transform: translateY(100%);
+  }
+
+  .site-header__link:hover .site-header__link-roll-line:first-child,
+  .site-header__link:focus-visible .site-header__link-roll-line:first-child {
+    transform: translateY(-100%);
+  }
+
+  .site-header__link:hover .site-header__link-roll-line:last-child,
+  .site-header__link:focus-visible .site-header__link-roll-line:last-child {
+    transform: translateY(0);
   }
 
   .site-header__toggle {
@@ -241,18 +280,18 @@ import Button from '../ui/Button.astro';
     outline-offset: 4px;
   }
 
-  @media (max-width: 640px) {
+  /* Below tablet (phone only): Work/About/Contact collapse into a
+     hamburger panel. CV stays visible outside it — an always-reachable
+     primary action, not buried behind a menu tap. 768px is the standard
+     tablet-starts boundary, not a value locked anywhere in the brief (see
+     the note at the top of this file) — tablet and up keeps the plain
+     inline nav. */
+  @media (max-width: 767px) {
     .site-header__inner {
-      padding-inline: 1.5rem;
+      /* Guarantees CV + the toggle stay on the name's row instead of wrapping underneath it — the base rule's flex-wrap: wrap exists for genuinely narrow content, but at phone widths the right-hand group should never drop to its own line. */
+      flex-wrap: nowrap;
     }
-  }
 
-  /* Tablet and down: Work/About/Contact collapse into a hamburger panel.
-     CV stays visible outside it — an always-reachable primary action,
-     not buried behind a menu tap. "Tablet" here means ≤1024px, this
-     component's own choice, not a locked breakpoint (see the note at
-     the top of this file). */
-  @media (max-width: 1024px) {
     .site-header__toggle {
       display: block;
     }

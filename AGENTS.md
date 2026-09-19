@@ -66,12 +66,59 @@ our actual tools.
 
 ## Current status
 
-Header/nav and the homepage hero are built. The rest of the homepage
-(selected work, gallery, "currently working on", "how I think", contact
-CTA, footer), About, and every other page are **not built yet** — Work
-index, case study, and Contact layouts are still PROPOSED and unapproved.
-Don't build page content without checking the brief section for that page
-first.
+The full homepage is built: Header/nav, Hero, SelectedWork, Gallery,
+CurrentlyWorkingOn, HowIThink, ContactCTA, and Footer. About and every
+other page are **not built yet** — Work index, case study, and Contact
+layouts are still PROPOSED and unapproved. Don't build page content
+without checking the brief section for that page first.
+
+Two new reusable `ui/` primitives came out of the homepage build:
+`ProjectCard.astro` (the brief's "ticket-card" module — image, number,
+title, role tag, year, reused for all 6 Selected Work cards and meant for
+the Work index later) and `SectionMarker.astro` (the "( 02 ) Selected
+work" numbered running-head repeated at the top of each section below the
+hero, echoing the numbered Context/Approach/Outcome pattern already
+proposed for case studies in PROJECT_BRIEF.md Section 5).
+
+The homepage's one locked terracotta "wink" (Section 3 palette table —
+NOT touched by the design-variance override above) is the rotated
+asterisk after "Currently working on" — the brief's own named example for
+this color. Don't add a second terracotta moment anywhere else on the
+homepage.
+
+ContactCTA and Footer are both `dark-field`, deliberately paired as one
+continuous dark closing zone (Section 3 permits "footer / at most one CTA
+band"). Because `dark-field` is so close in value to `ink`, ContactCTA
+uses a local dark-context copy of the button style rather than reusing
+`Button.astro` directly, which hardcodes ink/porcelain colors.
+
+Real project titles/images, the Gallery's images, and the exact
+"Currently working on" / "How I think" intro copy are still placeholders
+— see each component's own header comment for what's a direct brief
+descriptor vs. an invented structural stand-in.
+
+**Header/Hero rebuild (superseding the two paragraphs above about the
+name):** the wordmark moved out of Hero's big type into a small corner
+mark in Header — Hero's oversized moment is now a "Portfolio" headline
+with a year mark and a bigger placeholder overlapping it, same locked
+object-in-letterform device, different word. Header's `border-bottom` and
+SectionMarker's `border-bottom` are both gone (explicit request — they
+read as overplayed). Header + Hero are wrapped in `.intro` in
+`index.astro` with `min-height: 100dvh` so they fill the opening screen
+together. Hero's CTA sits in its own grid columns (7/11) rather than
+under the paragraph — the "creative button position" — using the brief's
+locked 12-column grid rather than a hand-picked margin. Gallery is a
+horizontal scroll strip now, not the earlier asymmetric collage grid.
+
+**Bug found during this rebuild, worth knowing for any future `<Button>`
+usage:** passing `class="foo"` into `<Button>` and then writing `.foo {}`
+in the *parent's* `<style>` block silently does nothing — Astro scopes
+that rule to the parent's own `data-astro-cid`, but Button.astro's `<a>`
+carries Button's cid instead, so the selectors never match. Wrap the
+selector in `:global()` when styling a Button instance from outside
+(see Hero.astro's `.hero__cta` for the pattern) — plain `<div>`/`<span>`
+children don't need this, only classes landing on another component's
+own root element.
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

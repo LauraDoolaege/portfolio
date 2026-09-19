@@ -5,3 +5,11 @@ package-lock.json
 
 # third-party skill content installed via `skills` CLI — not ours to reformat
 .agents/
+
+# local agent-tool config/skill installs — not ours to reformat
+.claude/
+.codex/
+.github/agents/
+.github/hooks/
+.github/skills/
+.impeccable/

@@ -1,0 +1,53 @@
+---
+// Recurring "plate number" running-head, echoing the numbered section
+// pattern already used in PROJECT_BRIEF.md's proposed case-study layout
+// (01 CONTEXT / 02 APPROACH / 03 SYSTEM). Sits at the top of each homepage
+// section below the hero as a quiet, book-like index — content is generic
+// (index + label props), so it belongs in ui/, not sections/.
+//
+// The optional "suffix" slot renders inline right after the label, for the
+// rare section that needs a trailing mark next to its own heading (e.g.
+// CurrentlyWorkingOn's terracotta wink asterisk) instead of a separate
+// absolutely-positioned element guessing at the label's flow position.
+interface Props {
+  index: string;
+  label: string;
+}
+
+const { index, label } = Astro.props;
+---
+
+<div class="section-marker">
+  <span class="section-marker__index" aria-hidden="true">
+    ( {index} )
+  </span>
+  <h2 class="section-marker__label">
+    {label}
+    <slot name="suffix" />
+  </h2>
+</div>
+
+<style>
+  .section-marker {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-marker__index {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  .section-marker__label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+</style>

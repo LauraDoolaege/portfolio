@@ -1,17 +1,20 @@
 ---
 // Site-wide header/navigation. Nav items per PROJECT_BRIEF.md Section 4
-// (LOCKED): Laura Doolaege | Work | About | CV | Contact. Display name
-// resolved from the brief's "Laura [Name]" placeholder — see CLAUDE.md
-// "Open decisions".
+// (LOCKED): Laura Doolaege | Work | About | CV | Contact. The wordmark is
+// back, but small this time — a quiet corner mark rather than a masthead
+// statement, since the Hero now carries its own big headline moment (see
+// Hero.astro) and the two shouldn't compete for the same visual weight.
 //
 // Open decisions this component had to fill in (see CLAUDE.md "Open
 // decisions" — not locked anywhere yet):
-// - Mobile nav pattern: hamburger + overlay panel for tablet and down
-//   (≤1024px, this component's own choice of "tablet" boundary — not a
-//   locked breakpoint). Above that, the nav stays inline text. The CV
-//   button stays visible at every width — only Work/About/Contact
-//   collapse into the panel.
+// - Mobile nav pattern: regular inline text nav from tablet (768px) up.
+//   Below that, a hamburger + overlay panel — phone-only. The CV button
+//   stays visible at every width — only Work/About/Contact collapse into
+//   the panel.
 // - Sticky vs. static: static (scrolls with the page).
+// - No border under the header, per explicit request — the header and
+//   Hero now read as one continuous opening screen (see index.astro),
+//   so a hard rule between them would cut that in half.
 import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
 ---
@@ -96,8 +99,8 @@ import Button from '../ui/Button.astro';
       }
     });
 
-    const desktopQuery = window.matchMedia('(min-width: 1025px)');
-    desktopQuery.addEventListener('change', (event) => {
+    const tabletUpQuery = window.matchMedia('(min-width: 768px)');
+    tabletUpQuery.addEventListener('change', (event) => {
       if (event.matches) closeMenu();
     });
   }
@@ -106,9 +109,7 @@ import Button from '../ui/Button.astro';
 <style>
   .site-header {
     position: relative;
-    padding-block: 2rem;
-    /* Closes the header off as its own structural block, so the gap before the hero reads as one deliberate space rather than two paddings stacking with no visual anchor between them. */
-    border-bottom: var(--border-hairline) solid var(--color-ink);
+    padding-block: clamp(1.5rem, 1.5vw + 1rem, 2.25rem);
   }
 
   .site-header__inner {
@@ -123,10 +124,11 @@ import Button from '../ui/Button.astro';
     column-gap: 2rem;
   }
 
+  /* Small corner mark, not a masthead — see the file header comment. */
   .site-header__name {
     font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.55rem;
+    font-weight: 700;
+    font-size: clamp(0.95rem, 0.3vw + 0.85rem, 1.1rem);
     letter-spacing: -0.01em;
     text-transform: uppercase;
     color: var(--color-ink);
@@ -143,11 +145,10 @@ import Button from '../ui/Button.astro';
     outline-offset: 4px;
   }
 
-  /* Groups the nav links and the CV button together on the right, with
-     the CV button as the distinct, rightmost element — a CTA set apart
-     from plain navigation, not just another item in its rhythm. Below
-     the tablet breakpoint the toggle becomes the actual rightmost item
-     instead (see media query). */
+  /* Groups the nav links and the CV button together, CV last so it stays
+     the far-right, distinct CTA — not just another item in the nav's own
+     rhythm. Below tablet width the toggle becomes the actual rightmost
+     item instead (see media query). */
   .site-header__right {
     display: flex;
     flex-wrap: wrap;
@@ -171,13 +172,16 @@ import Button from '../ui/Button.astro';
     color: var(--color-text-secondary);
   }
 
+  /* Light and subtle, per explicit request: text-secondary rather than
+     full ink, weight stays at the brief's locked "Body Medium" nav spec
+     (PROJECT_BRIEF.md Section 3 type hierarchy) — only the color recedes. */
   .site-header__link {
     font-family: var(--font-body);
     font-weight: 500;
     font-size: var(--text-nav);
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
-    color: var(--color-ink);
+    color: var(--color-text-secondary);
     padding-block: 0.2em;
     border-bottom: var(--border-hairline) solid transparent;
     transition:
@@ -247,12 +251,13 @@ import Button from '../ui/Button.astro';
     }
   }
 
-  /* Tablet and down: Work/About/Contact collapse into a hamburger panel.
-     CV stays visible outside it — an always-reachable primary action,
-     not buried behind a menu tap. "Tablet" here means ≤1024px, this
-     component's own choice, not a locked breakpoint (see the note at
-     the top of this file). */
-  @media (max-width: 1024px) {
+  /* Below tablet (phone only): Work/About/Contact collapse into a
+     hamburger panel. CV stays visible outside it — an always-reachable
+     primary action, not buried behind a menu tap. 768px is the standard
+     tablet-starts boundary, not a value locked anywhere in the brief (see
+     the note at the top of this file) — tablet and up keeps the plain
+     inline nav. */
+  @media (max-width: 767px) {
     .site-header__toggle {
       display: block;
     }

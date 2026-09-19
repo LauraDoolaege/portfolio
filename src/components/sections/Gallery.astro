@@ -1,0 +1,89 @@
+---
+// Homepage "Gallery of older works / process screenshots" (PROJECT_BRIEF.md
+// Section 4, item 3). No real images exist yet (Section 6) — flat gray
+// placeholders, a couple tagged "[ process ]" to signal the documentary
+// imagery mode (Section 3) without inventing specific content.
+//
+// Horizontal scroll strip, not a collage grid (reverted per explicit
+// request — the earlier loose asymmetric grid read as "weird," not
+// intentional). Tile width is a clamp(), not a fixed px value, so the
+// strip resizes fluidly instead of needing its own breakpoints.
+import SectionMarker from '../ui/SectionMarker.astro';
+
+const tiles = [{ caption: 'process' }, {}, { caption: 'process' }, {}, {}, {}, {}];
+---
+
+<section class="gallery">
+  <div class="gallery__inner">
+    <SectionMarker index="03" label="Gallery" />
+
+    <ul class="gallery__strip">
+      {tiles.map((tile) => (
+        <li class="gallery__tile">
+          <span class="gallery__placeholder">
+            {tile.caption && <span class="gallery__caption">[ {tile.caption} ]</span>}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .gallery {
+    padding-block: var(--space-section);
+    background: var(--color-bg-secondary);
+  }
+
+  .gallery__inner {
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    padding-inline: var(--space-outer);
+  }
+
+  .gallery__strip {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--space-outer);
+    scrollbar-width: thin;
+    padding-bottom: 0.75rem;
+  }
+
+  .gallery__tile {
+    flex: 0 0 clamp(15rem, 24vw, 22rem);
+    aspect-ratio: 4 / 3;
+    scroll-snap-align: start;
+  }
+
+  .gallery__placeholder {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    height: 100%;
+    background: var(--color-bg-primary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    border-radius: var(--radius-image);
+    padding: 0.75rem;
+  }
+
+  .gallery__caption {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    .gallery__inner {
+      padding-inline: 1.5rem;
+    }
+
+    .gallery__strip {
+      scroll-padding-inline: 1.5rem;
+    }
+  }
+</style>

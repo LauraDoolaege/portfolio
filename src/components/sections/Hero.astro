@@ -1,23 +1,32 @@
 ---
 // Homepage hero (PROJECT_BRIEF.md Section 5 "Homepage — LOCKED", item 1).
-// Content is final per the brief (Section 6), not placeholder.
+// Content is final per the brief (Section 6): role line, intro, CTA, and
+// tags are unchanged. The name itself moved to Header.astro (small corner
+// mark) — this section now carries its own big graphic moment instead, a
+// "Portfolio" headline with a year mark and an oversized placeholder
+// interrupting it, rebuilt to match a layout sketch the file attached.
+// Same locked device as before (PROJECT_BRIEF.md Section 3 "object
+// replacing/interrupting a letterform"), just a different word.
 //
-// The two-line name (diagonally offset, image placeholder behind it) is
-// the brief's locked "object replacing/interrupting a letterform" device
-// (Section 3 "Other locked tokens") — this is the page's one sanctioned
-// "surprise" (Section 3, principle 2), so nothing else on this page
-// should introduce another one.
+// No hairline under Header any more (see Header.astro), and this section
+// is stretched to fill the remaining viewport height via the wrapper in
+// index.astro — together they read as one continuous opening screen
+// instead of two stacked blocks.
+//
+// Layout is a 12-column grid (PROJECT_BRIEF.md Section 3's locked grid),
+// not one-off margins: the year sits in column 1, everything else starts
+// at column 2, and the CTA is deliberately placed in its own columns
+// further right than the paragraph above it — that offset is the
+// "creative button position," done as a grid placement rather than a
+// hand-picked margin. Sizes throughout are clamp()/fr-based, not fixed
+// px, so the whole composition scales without needing extra breakpoints
+// (it's only simplified to a single column below tablet width).
 //
 // Open decisions this component had to fill in (not locked anywhere —
 // see CLAUDE.md "Open decisions"):
-// - Mobile type scale: the brief leaves this undefined (Section 8). The
-//   hero name uses a fluid clamp() rather than the fixed 96px desktop
-//   token, since 96px literally overflows a phone viewport. Revisit
-//   once a real mobile type scale is locked.
+// - Mobile type scale: fluid clamp() rather than a fixed desktop token,
+//   same reasoning as before this rebuild.
 // - "Get to know me" target: linked to /about (no target was specified).
-// - Vertical rhythm below the name (role/intro/CTA/tags) uses a small
-//   local scale (1rem / 1.5rem / 2rem / 3rem) rather than one-off values,
-//   so the spacing reads as deliberate rather than picked by eye.
 import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
 import Tag from '../ui/Tag.astro';
@@ -25,29 +34,20 @@ import Tag from '../ui/Tag.astro';
 
 <section class="hero">
   <div class="hero__inner">
-    <div class="hero__name-block">
-      <span class="hero__name-image">
+    <span class="hero__year">
+      <span>20</span>
+      <span>26</span>
+    </span>
+
+    <div class="hero__title-block">
+      <h1 class="hero__title">
+        <span class="sr-only">Laura Doolaege</span>
+        <span aria-hidden="true">Portfolio</span>
+      </h1>
+      <span class="hero__placeholder" aria-hidden="true">
         <!-- TODO: replace with a real photo (see PROJECT_BRIEF.md Section 6 — no photography exists yet) -->
       </span>
-      <h1 class="hero__name">
-        <span class="sr-only">Laura Doolaege</span>
-        <span class="hero__name-visual" aria-hidden="true">
-          <span class="hero__name-first">Laura</span>
-          <span class="hero__name-last">Doolaege</span>
-        </span>
-      </h1>
     </div>
-
-    <p class="hero__role">Experience designer to-be</p>
-
-    <p class="hero__intro">
-      I'm Laura, a digital development &amp; design student with a background in marketing
-      communication, currently specialising in user experience design.
-    </p>
-
-    <Button href={withBase('/about')} variant="primary" icon="arrow" class="hero__cta">
-      Get to know me
-    </Button>
 
     <ul class="hero__tags">
       <li>
@@ -60,73 +60,102 @@ import Tag from '../ui/Tag.astro';
         <Tag>Motion Design</Tag>
       </li>
     </ul>
+
+    <p class="hero__role">Experience designer to-be</p>
+
+    <p class="hero__intro">
+      I'm Laura, a digital development &amp; design student with a background in marketing
+      communication, currently specialising in user experience design.
+    </p>
+
+    <Button href={withBase('/about')} variant="primary" icon="arrow" class="hero__cta">
+      Get to know me
+    </Button>
   </div>
 </section>
 
 <style>
   .hero {
-    padding-block: 3rem var(--space-section);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1 1 auto;
+    padding-block: clamp(2rem, 5vw, 4rem);
   }
 
   .hero__inner {
+    width: 100%;
     max-width: var(--content-max-width);
     margin-inline: auto;
     padding-inline: var(--space-outer);
+    display: grid;
+    grid-template-columns: auto repeat(11, 1fr);
+    column-gap: clamp(1rem, 2vw, 2rem);
+    row-gap: clamp(1rem, 3vw, 1.75rem);
+    align-items: start;
   }
 
-  /* Shared font-size context: the image and both name lines size off
-     this, so the whole composition scales together as one fluid unit
-     instead of needing separate mobile-only overrides. */
-  .hero__name-block {
-    position: relative;
-    font-size: clamp(2.75rem, 6vw + 1.5rem, var(--text-h1));
-  }
-
-  .hero__name {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: inherit;
-    line-height: var(--text-h1-leading);
-    text-transform: uppercase;
-    /* Tighter than body-scale tracking — extreme scale contrast and tight negative tracking are the "hard mechanical" macro-type move, applied here without going as extreme as a literal brutalist reference would (this is still an editorial brand). */
-    letter-spacing: -0.02em;
-  }
-
-  .hero__name-visual {
+  .hero__year {
+    grid-column: 1 / 2;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    margin-top: 0.4em;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    line-height: 1.4;
+    color: var(--color-text-secondary);
+  }
+
+  .hero__title-block {
+    grid-column: 2 / -1;
+    grid-row: 1;
+    justify-self: start;
+    position: relative;
+    font-size: clamp(3.25rem, 8vw + 1rem, 8.5rem);
+  }
+
+  .hero__title {
     position: relative;
     z-index: 1;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: inherit;
+    line-height: 0.92;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
   }
 
-  .hero__name-first {
-    font-size: 0.42em;
-  }
-
-  .hero__name-last {
-    font-size: 1em;
-    /* Explicit offsets, not align-self — a shrink-to-fit flex column is exactly as wide as its widest line, so align-self: flex-end has no room to actually shift anything. */
-    margin-top: 0.18em;
-    margin-left: 1em;
-  }
-
-  .hero__name-image {
+  /* The "bigger placeholder, slightly overlapping the text" device — sized
+     and positioned in the same em context as the title, so it scales and
+     stays put relative to the word at every viewport width. */
+  .hero__placeholder {
     position: absolute;
-    top: 0.5em;
-    left: 0.1em;
-    width: 2.1em;
-    height: 1.05em;
+    z-index: 0;
+    top: -0.02em;
+    right: -0.3em;
+    width: 1.9em;
+    height: 1.15em;
     background: var(--color-bg-secondary);
     border: var(--border-hairline) solid var(--color-text-secondary);
-    border-radius: var(--radius-image);
-    z-index: 0;
+    border-radius: 44% 56% 61% 39% / 55% 46% 54% 45%;
+  }
+
+  .hero__tags {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
   .hero__role {
-    margin-top: 1rem;
+    grid-column: 2 / 8;
+    grid-row: 3;
     font-family: var(--font-body);
-    font-weight: 500;
+    font-weight: 700;
     font-size: 1.125rem;
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
@@ -134,7 +163,8 @@ import Tag from '../ui/Tag.astro';
   }
 
   .hero__intro {
-    margin-top: 1.5rem;
+    grid-column: 2 / 8;
+    grid-row: 4;
     max-width: 46ch;
     font-family: var(--font-body);
     font-size: var(--text-body);
@@ -142,18 +172,46 @@ import Tag from '../ui/Tag.astro';
     color: var(--color-text-secondary);
   }
 
-  .hero__cta {
-    margin-top: 2rem;
+  /* The "more creative button position": its own grid columns, offset
+     right of the text block above it rather than left-aligned under it.
+     :global() is required here — Button.astro renders its own <a>, which
+     carries Button's own Astro scope hash, not Hero's, so an unscoped
+     ".hero__cta" rule would silently never match it. */
+  :global(.hero__cta) {
+    grid-column: 7 / 11;
+    grid-row: 5;
+    margin-top: 0.5rem;
+    justify-self: start;
   }
 
-  .hero__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 3rem;
+  @media (max-width: 767px) {
+    .hero__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .hero__year,
+    .hero__title-block,
+    .hero__tags,
+    .hero__role,
+    .hero__intro,
+    :global(.hero__cta) {
+      grid-column: 1;
+    }
+
+    .hero__year {
+      flex-direction: row;
+      gap: 0.4em;
+    }
+
+    :global(.hero__cta) {
+      justify-self: stretch;
+      margin-top: 1rem;
+    }
   }
 
-  /* Everything below scales together via the shared em context on
-     .hero__name-block, so no separate mobile override is needed for
-     the name composition itself — verified at 1440px down to 320px. */
+  @media (max-width: 640px) {
+    .hero__inner {
+      padding-inline: 1.5rem;
+    }
+  }
 </style>

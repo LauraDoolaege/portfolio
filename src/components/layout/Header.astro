@@ -30,6 +30,11 @@ const navItems = [
   { href: withBase('/about'), label: 'About' },
   { href: withBase('/contact'), label: 'Contact' },
 ];
+
+// trailingSlash: 'never' (astro.config.mjs) means Astro.url.pathname never
+// carries one either, so this can compare directly against `withBase()`
+// output without normalizing either side.
+const currentPath = Astro.url.pathname;
 ---
 
 <header class="site-header">
@@ -43,7 +48,11 @@ const navItems = [
         <ul class="site-header__links">
           {navItems.map((item) => (
             <li>
-              <a href={item.href} class="site-header__link">
+              <a
+                href={item.href}
+                class="site-header__link"
+                aria-current={item.href === currentPath ? 'page' : undefined}
+              >
                 {/* Text-roll hover: two stacked copies of the label in one
                 grid cell; hover/focus slides the visible one up and out,
                 the hidden duplicate up into view. */}
@@ -79,6 +88,8 @@ const navItems = [
 </header>
 
 <script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
   const header = document.querySelector('.site-header');
   const toggle = header?.querySelector('.site-header__toggle');
   const nav = header?.querySelector('.site-header__nav');
@@ -117,11 +128,52 @@ const navItems = [
       if (event.matches) closeMenu();
     });
   }
+
+  // Text-roll hover, GSAP-driven instead of a CSS transition — the two
+  // lines ease independently (the outgoing one a touch quicker than the
+  // incoming one settles in) rather than mirroring each other in
+  // lockstep, which is what made the CSS version feel like a mechanical
+  // swap rather than a roll. The hidden starting position is set here via
+  // gsap.set(), not in static CSS: GSAP writes the shorthand `transform`
+  // property directly, and a stylesheet rule also setting `transform` on
+  // the same element silently loses that tug-of-war the first time GSAP
+  // tries to animate away from it — the tween runs but never visibly
+  // moves anything. Same reasoning as Hero's entrance animation.
+  const reduceMotion = prefersReducedMotion();
+  const rollDuration = reduceMotion ? 0 : 0.5;
+
+  document.querySelectorAll<HTMLAnchorElement>('.site-header__link').forEach((link) => {
+    const [outgoing, incoming] = link.querySelectorAll<HTMLElement>('.site-header__link-roll-line');
+    if (!outgoing || !incoming) return;
+
+    gsap.set(incoming, { yPercent: 100 });
+
+    const enter = () => {
+      gsap.to(outgoing, { yPercent: -100, duration: rollDuration, ease: 'power3.inOut' });
+      gsap.to(incoming, {
+        yPercent: 0,
+        duration: rollDuration,
+        ease: 'power3.inOut',
+        delay: reduceMotion ? 0 : 0.04,
+      });
+    };
+    const leave = () => {
+      gsap.to(outgoing, { yPercent: 0, duration: rollDuration, ease: 'power3.inOut' });
+      gsap.to(incoming, { yPercent: 100, duration: rollDuration, ease: 'power3.inOut' });
+    };
+
+    link.addEventListener('mouseenter', enter);
+    link.addEventListener('mouseleave', leave);
+    link.addEventListener('focus', enter);
+    link.addEventListener('blur', leave);
+  });
 </script>
 
 <style>
   .site-header {
     position: relative;
+    /* Without an explicit z-index, this only wins paint order against Hero's plain static content by luck: Hero's scroll parallax writes an inline `transform` to .hero__image, and any element with a transform establishes its own stacking context, which then outranks position:relative/absolute siblings that never got a real z-index — regardless of DOM order. That silently put .hero__image on top of the open mobile nav panel, right over the Work/About/Contact links. A real z-index here makes the header (and its nav overlay) win against anything Hero does, GSAP or not. */
+    z-index: 10;
     padding-block: clamp(1.5rem, 1.5vw + 1rem, 2.25rem);
   }
 
@@ -210,6 +262,14 @@ const navItems = [
     outline-offset: 4px;
   }
 
+  /* Current page: full ink instead of text-secondary, no separate icon or
+     underline needed — the same weight step already used everywhere else
+     to mean "the primary, not the supporting, thing". Hover still wins
+     over it, same as any other state. */
+  .site-header__link[aria-current='page'] {
+    color: var(--color-ink);
+  }
+
   .site-header__link-roll {
     display: grid;
     overflow: hidden;
@@ -217,22 +277,13 @@ const navItems = [
 
   .site-header__link-roll-line {
     grid-area: 1 / 1;
-    transition: transform var(--motion-duration-slow) var(--motion-easing-editorial);
   }
 
-  .site-header__link-roll-line:last-child {
-    transform: translateY(100%);
-  }
-
-  .site-header__link:hover .site-header__link-roll-line:first-child,
-  .site-header__link:focus-visible .site-header__link-roll-line:first-child {
-    transform: translateY(-100%);
-  }
-
-  .site-header__link:hover .site-header__link-roll-line:last-child,
-  .site-header__link:focus-visible .site-header__link-roll-line:last-child {
-    transform: translateY(0);
-  }
+  /* No static transform here on purpose — see the script's gsap.set()
+     comment above. If this script never runs, both lines render stacked
+     in the same cell (duplicate text, since the second one is
+     aria-hidden and only meant to be visible while rolled into view) —
+     an acceptable fallback for a decorative hover effect. */
 
   .site-header__toggle {
     display: none;

@@ -44,6 +44,31 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
   )}
 </a>
 
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  // GSAP-driven icon nudge, not a CSS transition — a quick spring-out on
+  // the way in and a plain ease back on the way out reads as a tactile
+  // nudge rather than the icon just sliding a fixed distance at a fixed
+  // rate. Queried once for every .btn on the page (this script runs once
+  // per page load regardless of how many Button instances are rendered).
+  const reduceMotion = prefersReducedMotion();
+  const duration = reduceMotion ? 0 : 0.5;
+
+  document.querySelectorAll<HTMLElement>('.btn').forEach((btn) => {
+    const icon = btn.querySelector<HTMLElement>('.btn__icon');
+    if (!icon) return;
+
+    const nudgeIn = () => gsap.to(icon, { x: '0.25em', duration, ease: 'back.out(2)' });
+    const nudgeOut = () => gsap.to(icon, { x: 0, duration, ease: 'power3.out' });
+
+    btn.addEventListener('mouseenter', nudgeIn);
+    btn.addEventListener('mouseleave', nudgeOut);
+    btn.addEventListener('focus', nudgeIn);
+    btn.addEventListener('blur', nudgeOut);
+  });
+</script>
+
 <style>
   .btn {
     display: inline-flex;
@@ -102,18 +127,11 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
     transform: scale(0.98);
   }
 
+  /* No transition here — the nudge on hover/focus is GSAP-driven (see
+     the script above), not a CSS transition. */
   .btn__icon {
     width: 0.9em;
     height: 0.9em;
-    transition: transform var(--motion-duration) var(--motion-easing);
-  }
-
-  /* Small arrow/icon nudge on hover — applies to both variants, harmless
-     on the download glyph, and is what the Hero CTA's "arrow nudges 4px
-     on hover" spec actually wants. */
-  .btn:hover .btn__icon,
-  .btn:focus-visible .btn__icon {
-    transform: translateX(0.25em);
   }
 
   /* Secondary: quiet underline text link — unchanged. */

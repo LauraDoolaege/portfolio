@@ -1,0 +1,82 @@
+---
+// About page "How I work" (PROJECT_BRIEF.md Section 4/5, item 3): the
+// analog-first process description. Copy is final, supplied directly by
+// the user, kept verbatim except one em dash rewritten as a colon (see
+// AboutStory's frontmatter comment - same reason).
+//
+// Deliberately the one quiet section on this page - no scroll reveal, no
+// grid break beyond the shared plate-boundary rule below. AboutIntro,
+// AboutStory, and AboutDrives each already carry their own moment (a
+// load-in, a pull-quote emphasis, a settling card scatter); repeating a
+// reveal here too would be the banned "same entrance on every section"
+// pattern, and a page needs a still beat between its louder ones as much
+// as it needs the loud ones themselves.
+import SectionMarker from '../ui/SectionMarker.astro';
+---
+
+<section class="about-process">
+  <div class="about-process__inner">
+    <SectionMarker index="03" label="How I work" />
+
+    <div class="about-process__column">
+      <p class="about-process__lead">I like starting analog.</p>
+
+      <p>
+        Paper, whiteboards, sticky notes, messy diagrams: anything that lets ideas move faster than
+        my concern for how they look.
+      </p>
+
+      <p>
+        I especially enjoy collaborative ideation: getting different perspectives in the room,
+        throwing ideas around, combining them and challenging each other's assumptions.
+      </p>
+
+      <p>Once the messy thinking starts to make sense, I move into digital tools and prototypes.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-process {
+    padding-block: var(--space-section);
+    /* Plate boundary - see AboutStory's matching rule for why. */
+    border-top: var(--border-hairline) solid var(--color-text-secondary);
+  }
+
+  .about-process__inner {
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    padding-inline: var(--space-outer);
+  }
+
+  .about-process__column {
+    max-width: 65ch;
+    margin-left: 8.3333%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body-leading);
+    color: var(--color-ink);
+  }
+
+  .about-process__lead {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 1.5vw + 1.25rem, 2.25rem);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--color-ink);
+  }
+
+  @media (max-width: 639px) {
+    .about-process__inner {
+      padding-inline: 1.5rem;
+    }
+
+    .about-process__column {
+      margin-left: 0;
+    }
+  }
+</style>

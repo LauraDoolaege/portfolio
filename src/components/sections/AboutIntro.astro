@@ -1,0 +1,217 @@
+---
+// About page opening (PROJECT_BRIEF.md Section 4/5 "About page structure -
+// LOCKED", item 1: "Intro restating specialization and current focus, CV
+// download"). Copy is final, supplied directly by the user.
+//
+// This page's one oversized type anchor (Section 3 principle 1: "let one
+// oversized type statement anchor every page") is the "About" headline -
+// a plain solid-ink word, deliberately NOT reusing Hero's edge-to-edge cqw
+// sizing or its object-in-letterform/mix-blend-mode device. That device is
+// scoped to the homepage hero as a signature move; repeating it here would
+// dilute it into a template trick instead of a one-time moment.
+//
+// The footnote card is this page's one terracotta "wink" (Section 3
+// palette table - locked per-composition, not per-site: the homepage
+// already spent its own wink on the "Currently working on" asterisk, but
+// this is a different composition and gets its own). It reuses the user's
+// own aside almost verbatim - a small rotated note sitting beside the
+// intro paragraph, styled like something actually pinned there.
+//
+// Brutalist-structure pass (explicit request, About-only scope - see
+// AGENTS.md "About page" section): the "( 01 )" plate mark, sharp card
+// corners, and harder headline reveal below are this page's own addition,
+// borrowing the industrial-brutalist skill's grid discipline and type
+// contrast without touching the locked palette/type families or any
+// shared component - nothing here changes what Header, Footer, or the
+// homepage look like.
+import { withBase } from '../../utils/url';
+import Button from '../ui/Button.astro';
+
+// TODO: replace href="#" with the real CV PDF path once supplied
+// (PROJECT_BRIEF.md Section 6), same placeholder pattern as Header's CV button.
+const cvHref = '#';
+---
+
+<section class="about-intro">
+  <div class="about-intro__inner">
+    <span class="about-intro__plate" aria-hidden="true">
+      ( 01 )
+    </span>
+
+    <h1 class="about-intro__headline">About</h1>
+
+    <div class="about-intro__row">
+      <p class="about-intro__text">
+        I'm Laura, a digital development &amp; design student with a background in marketing
+        communication. I'm currently specialising in UX and experience design, while continuing to
+        explore web and motion design.
+      </p>
+
+      <aside class="about-intro__footnote">
+        <span class="about-intro__footnote-mark" aria-hidden="true">
+          *
+        </span>
+        You knew that already by now. Let me use this opportunity to tell you a little more about
+        me.
+      </aside>
+    </div>
+
+    <Button href={withBase(cvHref)} variant="primary" icon="download" class="about-intro__cta">
+      Download CV
+    </Button>
+  </div>
+</section>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const section = document.querySelector('.about-intro');
+  if (section && !prefersReducedMotion()) {
+    const plate = section.querySelector<HTMLElement>('.about-intro__plate');
+    const headline = section.querySelector<HTMLElement>('.about-intro__headline');
+    const rest = section.querySelectorAll<HTMLElement>('.about-intro__row, .about-intro__cta');
+
+    if (plate && headline && rest.length) {
+      // A hard clip-path wipe instead of a soft fade/rise - reads like the
+      // word being printed by a scanning bar rather than drifting in, which
+      // fits this page's more structural, mechanical-precision character
+      // better than a translateY fade would. Hero's own per-letter entrance
+      // stays a separate, homepage-only recipe (see the file header comment).
+      gsap.set(plate, { autoAlpha: 0 });
+      gsap.set(headline, { clipPath: 'inset(0 100% 0 0)' });
+      gsap.set(rest, { autoAlpha: 0, y: 12 });
+
+      gsap
+        .timeline()
+        .to(plate, { autoAlpha: 1, duration: 0.3, ease: 'none' })
+        .to(headline, { clipPath: 'inset(0 0% 0 0)', duration: 0.8, ease: 'power4.out' }, 0.1)
+        .to(rest, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.08 }, 0.55);
+    }
+  }
+</script>
+
+<style>
+  .about-intro {
+    padding-top: var(--space-64);
+    padding-bottom: var(--space-section);
+  }
+
+  .about-intro__inner {
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    padding-inline: var(--space-outer);
+  }
+
+  /* This page's plate mark, matching SectionMarker's mono/hairline-box
+     language (see AboutStory's global override) but authored locally -
+     Intro doesn't use SectionMarker itself (it isn't a labeled section,
+     it's the page opener, same as Hero on the homepage), so this keeps
+     the numbering system honest without forcing an index+label pair onto
+     something that isn't one. */
+  .about-intro__plate {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border: var(--border-hairline) solid var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-ink);
+  }
+
+  .about-intro__headline {
+    margin-top: var(--space-16);
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.035em;
+    line-height: 0.88;
+    font-size: clamp(3.5rem, 7vw + 2rem, 9rem);
+    color: var(--color-ink);
+  }
+
+  .about-intro__row {
+    margin-top: var(--space-48);
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--space-24);
+    align-items: start;
+  }
+
+  .about-intro__text {
+    grid-column: 1 / 8;
+    max-width: 65ch;
+    font-family: var(--font-body);
+    font-size: clamp(1.0625rem, 0.3vw + 1rem, 1.25rem);
+    line-height: var(--text-body-leading);
+    color: var(--color-ink);
+  }
+
+  /* The page's one terracotta wink - a small pinned note, not a banner.
+     Kept off the grid's straight edges on purpose (a slight rotation, an
+     asymmetric self-position) so it reads as placed by hand rather than
+     laid out. Sharp corners (no radius token) rather than the sitewide
+     hairline-rounded default - reads more like a cut paper scrap than a
+     soft printed card, which suits "pinned by hand" better. */
+  .about-intro__footnote {
+    grid-column: 9 / 13;
+    align-self: start;
+    justify-self: end;
+    max-width: 26ch;
+    padding: var(--space-16);
+    background: var(--color-bg-primary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    box-shadow: 0 8px 20px -12px rgb(23 21 15 / 0.28);
+    transform: rotate(-3.5deg);
+    font-family: var(--font-body);
+    font-size: var(--text-caption);
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  .about-intro__footnote-mark {
+    display: inline-block;
+    margin-right: 0.3em;
+    font-family: var(--font-display);
+    font-style: normal;
+    font-size: 1.25rem;
+    line-height: 0.6;
+    vertical-align: -0.1em;
+    color: var(--color-accent-signal);
+  }
+
+  :global(.about-intro__cta) {
+    margin-top: var(--space-48);
+  }
+
+  @media (max-width: 1023px) {
+    .about-intro__text {
+      grid-column: 1 / 13;
+    }
+
+    .about-intro__footnote {
+      grid-column: 1 / 13;
+      justify-self: start;
+      margin-top: var(--space-24);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .about-intro__inner {
+      padding-inline: 1.5rem;
+    }
+
+    .about-intro__headline {
+      font-size: clamp(3rem, 18vw, 5rem);
+    }
+
+    .about-intro__row {
+      margin-top: var(--space-32);
+    }
+
+    .about-intro__footnote {
+      max-width: none;
+      transform: rotate(-2deg);
+    }
+  }
+</style>

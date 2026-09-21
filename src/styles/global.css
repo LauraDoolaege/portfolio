@@ -23,6 +23,15 @@
   --color-accent-signal: #a65139; /* Terracotta — one "wink" per composition, never a general accent */
   --color-dark-field: #1c1b16; /* Footer / one controlled CTA band only, not a dark mode */
 
+  /* text-secondary and accent are both tuned against the light backgrounds
+     (porcelain/chalk) — against dark-field they drop to 3.03:1 / 3.49:1,
+     under the 4.5:1 body-text minimum. These are dark-field-only tints of
+     the same two colors (secondary tinted toward porcelain/the dark-field
+     foreground, accent tinted the same way to keep its hue recognizable),
+     not new accents — use only where text/links sit on dark-field. */
+  --color-text-secondary-on-dark: #8f8a80; /* ~5.0:1 on dark-field */
+  --color-accent-on-dark: #a2838a; /* ~5.0:1 on dark-field */
+
   /* Type families */
   --font-display: 'Barlow Condensed', sans-serif;
   --font-editorial: 'Instrument Serif', serif; /* italic only, once per page max */
@@ -61,11 +70,6 @@
   --motion-duration: 300ms;
   --motion-duration-slow: 450ms;
   --motion-easing: ease-out;
-  /* MOTION_INTENSITY: 8 override (see AGENTS.md "Experimental design
-     dials") — a dedicated easing/duration pair for the hero's own intro
-     sequence, reaching past the 250-500ms ceiling the brief otherwise
-     locks. Not used by anything under the dials' baseline range. */
-  --motion-easing-editorial: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Strict 8px spacing scale — general-purpose, additive to the section
      rhythm tokens above (--space-outer/--space-section), not a

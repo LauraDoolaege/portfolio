@@ -92,7 +92,8 @@ const year = new Date().getFullYear();
   }
 
   .site-footer__links a:hover {
-    color: var(--color-accent);
+    /* var(--color-accent) drops to 3.49:1 on dark-field — the on-dark tint keeps the same hue at a legible weight here (see global.css). */
+    color: var(--color-accent-on-dark);
   }
 
   .site-footer__row--contact {
@@ -109,7 +110,7 @@ const year = new Date().getFullYear();
   }
 
   .site-footer__email:hover {
-    color: var(--color-accent);
+    color: var(--color-accent-on-dark);
   }
 
   .site-footer__social {
@@ -120,7 +121,7 @@ const year = new Date().getFullYear();
   }
 
   .site-footer__social:hover {
-    color: var(--color-accent);
+    color: var(--color-accent-on-dark);
   }
 
   .site-footer__row--meta {
@@ -128,11 +129,12 @@ const year = new Date().getFullYear();
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
+    /* var(--color-text-secondary) is 3.03:1 on dark-field, under the 4.5:1 minimum for 12px text — the on-dark tint (global.css) fixes it. */
+    color: var(--color-text-secondary-on-dark);
   }
 
   .site-footer__top:hover {
-    color: var(--color-accent);
+    color: var(--color-accent-on-dark);
   }
 
   @media (max-width: 640px) {

@@ -1,0 +1,27 @@
+---
+// About page. Section order and content per PROJECT_BRIEF.md Section 4/5
+// "About page structure (LOCKED)": intro + CV, "How I got here" + pull-quote,
+// "How I work", "What drives me", reused Contact CTA, reused Footer.
+// Direction contract: .impeccable/surfaces/src-pages-about-astro.md.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import AboutIntro from '../components/sections/AboutIntro.astro';
+import AboutStory from '../components/sections/AboutStory.astro';
+import AboutProcess from '../components/sections/AboutProcess.astro';
+import AboutDrives from '../components/sections/AboutDrives.astro';
+import ContactCTA from '../components/sections/ContactCTA.astro';
+---
+
+<BaseLayout
+  title="About | Laura Doolaege"
+  description="Digital development & design student specialising in UX and experience design: how she got here, how she works, and what drives her."
+>
+  <Header />
+  <AboutIntro />
+  <AboutStory />
+  <AboutProcess />
+  <AboutDrives />
+  <ContactCTA />
+  <Footer />
+</BaseLayout>

@@ -66,11 +66,12 @@ our actual tools.
 
 ## Current status
 
-The full homepage is built: Header/nav, Hero, SelectedWork, Gallery,
-CurrentlyWorkingOn, HowIThink, ContactCTA, and Footer. About and every
-other page are **not built yet** — Work index, case study, and Contact
-layouts are still PROPOSED and unapproved. Don't build page content
-without checking the brief section for that page first.
+The full homepage and the full About page are built: Header/nav, Hero,
+SelectedWork, Gallery, CurrentlyWorkingOn, HowIThink, ContactCTA, Footer,
+and (About) AboutIntro, AboutStory, AboutProcess, AboutDrives. Every other
+page is **not built yet** — Work index, case study, and Contact layouts
+are still PROPOSED and unapproved. Don't build page content without
+checking the brief section for that page first.
 
 Two new reusable `ui/` primitives came out of the homepage build:
 `ProjectCard.astro` (the brief's "ticket-card" module — image, number,
@@ -96,6 +97,113 @@ Real project titles/images, the Gallery's images, and the exact
 "Currently working on" / "How I think" intro copy are still placeholders
 — see each component's own header comment for what's a direct brief
 descriptor vs. an invented structural stand-in.
+
+**About page (built):** content and section order are locked
+(PROJECT_BRIEF.md Section 4/5 — intro+CV, "How I got here"+pull-quote,
+"How I work", "What drives me", reused ContactCTA, reused Footer); all
+copy was supplied directly by the user and kept close to verbatim. Layout
+composition was resolved as an implementation decision inside the locked
+system (see `.impeccable/surfaces/src-pages-about-astro.md` for the
+recorded direction), the same freedom already used for every homepage
+section — not a new identity exercise.
+
+This page's own oversized type anchor is a plain "About" headline —
+deliberately NOT Hero's edge-to-edge cqw sizing or its object-in-
+letterform/mix-blend-mode device, which stays a homepage-only signature
+move. Its one terracotta wink (locked per-composition, not per-site — see
+CLAUDE.md "Design system") is a small rotated footnote card next to the
+intro, built from the user's own aside almost verbatim. Its one
+Instrument Serif moment is the "How I got here" pull-quote, which also
+carries the page's one macro grid-break (wider than the body column, the
+classic "the quote breaks the column" editorial move). "What drives me"
+is the page's tactile centerpiece, per direct request ("have fun with it,
+make it tactile"): four short statements as small rotated note cards on a
+chalk field, echoing "paper, sticky notes, messy diagrams" from "How I
+work" one section above — DESIGN_VARIANCE: 9 grid-breaking earned by the
+content itself, not decoration.
+
+Motion is deliberately varied across the page's four sections rather than
+one reveal copy-pasted four times: AboutIntro gets a single restrained
+load-in fade/rise; AboutStory's pull-quote gets its own scroll-triggered
+emphasis reveal (rise + slight scale); AboutDrives' cards get a
+rotational settle (start flatter and lower, ease into their resting
+tilt); AboutProcess is deliberately left still — a page needs a quiet
+beat between its louder ones as much as it needs the loud ones. A new
+`.site-header__link[aria-current="page"]` style (compares `Astro.url.pathname`
+against each nav item, `trailingSlash: 'never'` means no normalization is
+needed) shows which page you're on in the site nav — added because it
+directly serves "clear and easy to navigate," not a pre-planned feature.
+
+**One more bug found and fixed, same family as the others:** GSAP's
+`rotate` tween property doesn't animate the standalone CSS `rotate`
+property — it still consolidates into the `transform` shorthand (and
+explicitly zeroes the standalone `rotate` out), even though the tween
+config used the property name `rotate`. A breakpoint override written
+against the standalone `rotate` property (meant to flatten AboutDrives'
+cards on mobile) was therefore silently inert once the entrance animation
+ran — confirmed via `getComputedStyle().transform`/`.rotate` on the live
+page, not assumed. Fixed by removing the override rather than chasing the
+right property: the rotated look reads fine at any width, so the
+"simpler" fix was to stop trying to override it, not to fight GSAP for
+control of a property it doesn't actually write to.
+
+**About page brutalist-structure pass:** explicit follow-up request ("use
+your brutalist design skill and taste skill... make it more modern") after
+the first build read as too safe. Read `.agents/skills/industrial-
+brutalist-ui/SKILL.md` and `.agents/skills/design-taste-frontend/SKILL.md`
+directly (neither is registered as an invokable skill in this harness —
+their guidance is applied by hand, same as the taste-frontend dials
+already were). The brutalist skill's literal palette (hazard red or CRT
+black, zero radius, ASCII framing) directly conflicts with this project's
+own locked "never generic beige brutalist portfolio cliché" rule, so
+before touching anything this was surfaced to the user with three concrete
+scope options; they picked **structure only, About page only** — borrow
+brutalist grid discipline and type contrast, keep the locked palette/type
+families, touch only About's 4 section files. Nothing sitewide (Header,
+Footer, SectionMarker.astro, global.css) changed.
+
+What actually changed, all within that scope:
+
+- A repeated hairline `border-top` on AboutStory/AboutProcess/AboutDrives
+  turns section padding into a visible "plate boundary" — a dossier-page
+  break instead of implicit whitespace. AboutIntro skips it (Header's edge
+  already reads as the page top).
+- SectionMarker's plain index text gets a hairline box, and AboutIntro
+  gets its own matching "( 01 )" plate mark (authored locally — Intro
+  isn't a labeled section, so it doesn't use SectionMarker itself). The
+  box style is declared once, in AboutStory, via `:global(.section-marker__index)`
+  — Astro only ships a component's CSS to pages that import it, so this
+  reaches every SectionMarker instance on the About page without touching
+  the shared component file or leaking to the homepage bundle.
+- Sharp (zero-radius) corners on the footnote card and the "What drives
+  me" cards, replacing the sitewide `--radius-image` token locally —
+  reads more like cut paper than a soft printed card, which fits "pinned/
+  placed by hand" better, and borrows the brutalist skill's "reject
+  border-radius" discipline without touching the token itself.
+- "What drives me" cards gained a corner-plate number (01-04), reusing
+  ProjectCard's own already-locked corner-number device rather than
+  inventing a new one — declared as a block line above the text, not an
+  absolutely-positioned corner mark like ProjectCard's, since these cards
+  are pure text and an absolute mark risked colliding with a longer item's
+  first line.
+- The "How I got here" pull-quote's thin mauve `border-left` became a
+  real 3px ink rule (a separate element, not `border-left` — GSAP needs a
+  node it can scale independently) that draws down before the text
+  settles in, instead of a plain fade. Ink, not accent: a thicker
+  structural mark reads as a blueprint annotation rather than the colored-
+  border-as-decoration pattern craft-floor already refuses.
+- AboutIntro's headline reveal changed from a soft fade/rise to a hard
+  `clip-path` wipe (reads like the word being printed by a scanning bar),
+  and AboutDrives' card settle got a tighter overshoot and shorter
+  duration (a firm stamp rather than a bouncy toss) — both read as more
+  mechanical-precision, which suits the page's more structural character
+  better than the previous softer entrances.
+- Fixed four em dashes in About's visible copy (two in AboutStory, one
+  each in AboutIntro and AboutProcess) that CLAUDE.md's own quality
+  guardrails already ban but the first build had missed — rewritten as
+  separate sentences or a colon, not cut. The site's other pre-existing
+  em dashes (two in SelectedWork's group labels) were left alone; that's
+  outside this pass's About-only scope, not an oversight.
 
 **Header/Hero rebuild v1 (superseded by v2 below):** the wordmark moved
 out of Hero's big type into a small corner mark in Header — Hero's
@@ -135,8 +243,16 @@ text-roll hover (two stacked label copies, CSS grid + transform, no JS).
 was plumbing-only before this. Hero's script sets up a GSAP entrance
 timeline (image clip-path reveal, per-letter stagger rise, meta/bottom
 fade-up) plus a ±40px scroll-linked parallax on the image via
-ScrollTrigger, all gated behind `prefersReducedMotion()`. Button.astro
-gained a universal small icon-nudge-on-hover (`.btn:hover .btn__icon`).
+ScrollTrigger, all gated behind `prefersReducedMotion()`. The entrance
+timeline gives each element its own ease and lets groups overlap instead
+of running strictly one-after-another (per-element `power3.out` /
+`back.out(1.5)` / `sine.inOut` stagger / `power2.out`, not one uniform
+curve) — a follow-up pass after the first version read as mechanical.
+Header's nav text-roll hover and Button's icon-nudge-on-hover both moved
+from plain CSS transitions to GSAP for the same reason (independent
+easing per element instead of a lockstep mirror swap); their hidden/rest
+states are set via `gsap.set()` at script-init, not static CSS — see bug
+4 below for why.
 
 **Three real bugs found and fixed during this rebuild, worth knowing for
 future work in this file or nearby:**
@@ -165,7 +281,36 @@ future work in this file or nearby:**
    `transform` on the same element — the tween's inline style silently
    replaces the CSS one the instant it runs. Use `inset: 0; margin: auto;`
    for transform-free centering when an element also needs `transform`
-   for something else (see `.hero__image`'s mobile rule).
+   for something else (see `.hero__image`'s mobile rule). The same clash
+   also breaks a _static CSS rule_ that sets `transform` on an element
+   GSAP later animates (not just static-positioning trick) — see bug 4.
+4. Any element with an active `transform` (even `position: static`)
+   establishes its own stacking context, as if it had
+   `position: relative; z-index: 0`. Hero's scroll parallax writes an
+   inline `transform` to `.hero__image` on load (immediate-render, not
+   just once scrolled into range), which silently promoted it above
+   Header's mobile nav overlay (`position: absolute`, `z-index: auto`) —
+   the open Work/About/Contact panel rendered, but the image sat on top
+   of it and ate every tap. Fix: give `.site-header` an explicit
+   `z-index` (`10`) so the header/nav always wins regardless of what
+   transform-bearing content Hero animates. Any future GSAP work that
+   transforms Hero (or other in-flow) content should assume it can jump
+   ahead of unrelated positioned siblings unless they have a real
+   z-index — `position: relative` alone isn't enough.
+
+**Homepage polish pass:** a systematic desktop/tablet/mobile sweep (contrast
+math + `getBoundingClientRect()`/hit-testing, not just eyeballing
+screenshots) turned up three more issues beyond bug 4 above, all fixed:
+`--color-text-secondary` and `--color-accent` are tuned for the light
+backgrounds and drop to 3.03:1 / 3.49:1 on `dark-field` — under the 4.5:1
+minimum for the footer's 12px meta row and its hover states. Added
+`--color-text-secondary-on-dark` / `--color-accent-on-dark` (global.css) —
+tints of the same two colors, not new accents — for that one context.
+Separately, the tablet range (640-1023px) never got the "space-between is
+a desktop-only ask" fix that mobile already had (see `.hero__inner`), so
+a portrait tablet viewport (820×1100 measured) showed a ~265px dead gap
+between the hero's visual block and its role/intro/CTA block; extended
+the same `flex-start` override to that range.
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

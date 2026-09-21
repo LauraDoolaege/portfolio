@@ -1,38 +1,367 @@
 ---
 // Homepage "Gallery of older works / process screenshots" (PROJECT_BRIEF.md
-// Section 4, item 3). No real images exist yet (Section 6) — flat gray
-// placeholders, a couple tagged "[ process ]" to signal the documentary
-// imagery mode (Section 3) without inventing specific content.
+// Section 4, item 3). No real images exist yet (Section 6) - flat gray
+// placeholders, a sparse few tagged "[ process ]" to signal the
+// documentary imagery mode (Section 3) without inventing specific content.
 //
-// Horizontal scroll strip, not a collage grid (reverted per explicit
-// request — the earlier loose asymmetric grid read as "weird," not
-// intentional). Tile width is a clamp(), not a fixed px value, so the
-// strip resizes fluidly instead of needing its own breakpoints.
+// Interaction model (explicit, detailed request - this is the third pass
+// on this section, and each one replaced the previous mechanism rather
+// than layering on top of it):
+//
+// The section pins in the viewport while the page scrolls through it: at
+// rest, the big "Gallery" watermark fills roughly half the width on the
+// left with just the first couple of tiles overlapping its tail end;
+// scrolling down feeds that scroll input into a GSAP ScrollTrigger scrub
+// instead of moving the page, sliding the tile track across (revealing
+// the rest of the images) while the watermark slides out of the way to
+// the left in the same motion; scrolling back up reverses it exactly
+// (scrub ties the animation directly to scroll position, so "restore on
+// scroll-back" is what scrub already does, not something built
+// separately). Once the track finishes travelling, the pin releases and
+// the page continues normally into "Currently working on."
+//
+// This replaced the previous build's independent auto-scrolling/
+// draggable marquee (see AGENTS.md for that pass's own history) - once
+// page scroll itself drives the horizontal motion, a separate auto-drift
+// or drag-to-scroll gesture on the strip would fight the same input, so
+// that whole mechanism (the infinite 3x-duplicated loop, scrollLeft
+// accumulator, pointer-drag handlers) is gone, not layered under this.
+// The hover-only bob survives from that pass unchanged (see below) -
+// it's an orthogonal, tactile detail, not part of the scroll mechanism.
+//
+// Reduced motion: no pin, no scrub, no scroll-hijack of any kind - the
+// track instead becomes a plain native-scrollable strip
+// (overflow-x: auto), so every tile stays reachable without any
+// scroll-driven motion. That's a functional equivalent with the motion
+// removed, the same principle applied everywhere else in this project.
 import SectionMarker from '../ui/SectionMarker.astro';
 
-const tiles = [{ caption: 'process' }, {}, { caption: 'process' }, {}, {}, {}, {}];
+const TOTAL = 15;
+const ASPECTS = ['wide', 'tall', 'square'] as const;
+const FLOATS = ['up', 'flat', 'down'] as const;
+
+const tiles = Array.from({ length: TOTAL }, (_, i) => ({
+  number: String(i + 1).padStart(2, '0'),
+  caption: i % 4 === 0 ? 'process' : undefined,
+  aspectClass: ASPECTS[i % ASPECTS.length],
+  // Offset by 1 from the aspect cycle so the two patterns don't lock
+  // step and repeat identically every 3 tiles.
+  floatClass: FLOATS[(i + 1) % FLOATS.length],
+}));
 ---
 
 <section class="gallery">
   <div class="gallery__inner">
     <SectionMarker index="03" label="Gallery" />
+  </div>
 
-    <ul class="gallery__strip">
-      {tiles.map((tile) => (
-        <li class="gallery__tile">
-          <span class="gallery__placeholder">
-            {tile.caption && <span class="gallery__caption">[ {tile.caption} ]</span>}
-          </span>
-        </li>
-      ))}
-    </ul>
+  <div class="gallery__stage">
+    <p class="gallery__bg-title" aria-hidden="true">
+      Gallery
+    </p>
+
+    <div class="gallery__viewport" data-total={TOTAL}>
+      <ul class="gallery__track">
+        {tiles.map((tile, i) => (
+          <li
+            class={`gallery__tile gallery__tile--${tile.aspectClass} gallery__tile--${tile.floatClass}`}
+          >
+            <button
+              type="button"
+              class="gallery__trigger"
+              data-index={i}
+              aria-label={`View image ${tile.number} of ${TOTAL} larger`}
+            >
+              <span class="gallery__placeholder">
+                {tile.caption && <span class="gallery__caption">[ {tile.caption} ]</span>}
+                <span class="gallery__expand" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10"
+                      stroke="currentColor"
+                      stroke-width="1.3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   </div>
 </section>
+
+<div
+  class="lightbox"
+  id="gallery-lightbox"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Image viewer"
+  hidden
+>
+  <button type="button" class="lightbox__backdrop" aria-label="Close image viewer"></button>
+
+  <!--
+    Close/prev/next are pinned to the lightbox's own (viewport) edges, not
+    laid out as flex-siblings of the image: a flex row of [prev, image,
+    next] adds each control's width on top of the image's own width, which
+    stopped fitting in a phone-width viewport (the next button measured
+    outside the 390px viewport entirely - a real bug, caught via
+    getBoundingClientRect, not visual guesswork). Pinning to the edges
+    means the controls' position never depends on the image's size.
+  -->
+  <button type="button" class="lightbox__close" aria-label="Close">
+    <svg viewBox="0 0 16 16" fill="none">
+      <path
+        d="M4 4L12 12M12 4L4 12"
+        stroke="currentColor"
+        stroke-width="1.3"
+        stroke-linecap="round"
+      />
+    </svg>
+  </button>
+
+  <button type="button" class="lightbox__nav lightbox__nav--prev" aria-label="Previous image">
+    <svg viewBox="0 0 16 16" fill="none">
+      <path
+        d="M13 8H3M3 8L6.75 4.25M3 8L6.75 11.75"
+        stroke="currentColor"
+        stroke-width="1.3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+
+  <button type="button" class="lightbox__nav lightbox__nav--next" aria-label="Next image">
+    <svg viewBox="0 0 16 16" fill="none">
+      <path
+        d="M3 8H13M13 8L9.25 4.25M13 8L9.25 11.75"
+        stroke="currentColor"
+        stroke-width="1.3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+
+  <div class="lightbox__stage">
+    <span class="lightbox__placeholder">
+      <span class="lightbox__number" aria-hidden="true"></span>
+    </span>
+    <p class="lightbox__counter">
+      <span class="lightbox__current">1</span> / <span>{TOTAL}</span>
+    </p>
+  </div>
+</div>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const stage = document.querySelector<HTMLElement>('.gallery__stage');
+  const bgTitle = document.querySelector<HTMLElement>('.gallery__bg-title');
+  const viewport = document.querySelector<HTMLElement>('.gallery__viewport');
+  const track = document.querySelector<HTMLElement>('.gallery__track');
+  const lightbox = document.getElementById('gallery-lightbox');
+  const lightboxStage = lightbox?.querySelector<HTMLElement>('.lightbox__stage');
+  const numberEl = lightbox?.querySelector<HTMLElement>('.lightbox__number');
+  const currentEl = lightbox?.querySelector<HTMLElement>('.lightbox__current');
+  const closeBtn = lightbox?.querySelector<HTMLButtonElement>('.lightbox__close');
+  const prevBtn = lightbox?.querySelector<HTMLButtonElement>('.lightbox__nav--prev');
+  const nextBtn = lightbox?.querySelector<HTMLButtonElement>('.lightbox__nav--next');
+  const backdrop = lightbox?.querySelector<HTMLButtonElement>('.lightbox__backdrop');
+
+  if (
+    stage &&
+    bgTitle &&
+    viewport &&
+    track &&
+    lightbox &&
+    lightboxStage &&
+    numberEl &&
+    currentEl &&
+    closeBtn &&
+    prevBtn &&
+    nextBtn &&
+    backdrop
+  ) {
+    const reduceMotion = prefersReducedMotion();
+    const total = Number(viewport.dataset.total || '0');
+
+    if (reduceMotion) {
+      // No pin, no scrub, no scroll-hijack - a plain native horizontal
+      // strip instead, so every tile stays reachable with zero
+      // scroll-driven motion (see the file header comment).
+      viewport.classList.add('gallery__viewport--static');
+    } else {
+      // --- Scroll-linked pin: track and watermark both driven by one
+      // shared scrub timeline (see the file header comment for the why).
+      // Measured fresh each time (not cached once) so resize invalidation
+      // recomputes correct start/end values instead of stale ones.
+      const OVERLAP = 64; // px the first tile creeps into the watermark's tail
+      const PUSH_ASIDE = 0.7; // fraction of its own width the watermark slides left
+
+      const measure = () => {
+        const startX = bgTitle.getBoundingClientRect().width - OVERLAP;
+        const endX = -(track.scrollWidth - viewport.clientWidth);
+        return { startX, endX, travel: startX - endX };
+      };
+
+      gsap.set(track, { x: measure().startX });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: stage,
+          start: 'top top',
+          end: () => `+=${measure().travel}`,
+          pin: true,
+          scrub: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+      tl.to(track, { x: () => measure().endX, ease: 'none' }, 0);
+      tl.to(
+        bgTitle,
+        { x: () => -bgTitle.getBoundingClientRect().width * PUSH_ASIDE, ease: 'none' },
+        0,
+      );
+    }
+
+    // Subtle bob, hover-only: each tile's trigger (not the tile itself -
+    // see the file header comment on why) drifts a few px up and down in
+    // a slow, soft loop, but only while the pointer is over the section.
+    // A per-tile duration offset keeps them from bobbing in perfect
+    // unison, which would read as one mechanical pulse instead of
+    // something organic. Independent of the scroll-pin above - both can
+    // run at once without conflict (different elements, different GSAP
+    // properties).
+    if (!reduceMotion) {
+      const triggers = Array.from(viewport.querySelectorAll<HTMLElement>('.gallery__trigger'));
+      let bobTweens: gsap.core.Tween[] = [];
+
+      const startBob = () => {
+        if (bobTweens.length) return;
+        bobTweens = triggers.map((el, i) =>
+          gsap.to(el, {
+            y: 7,
+            duration: 2.4 + (i % 5) * 0.2,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+          }),
+        );
+      };
+
+      const stopBob = () => {
+        bobTweens.forEach((tween) => tween.kill());
+        bobTweens = [];
+        gsap.to(triggers, { y: 0, duration: 0.6, ease: 'sine.out' });
+      };
+
+      viewport.addEventListener('pointerenter', startBob);
+      viewport.addEventListener('pointerleave', stopBob);
+    }
+
+    // --- Lightbox ---
+    let currentIndex = 0;
+    let lastFocused: HTMLElement | null = null;
+
+    const label = (i: number) => String(i + 1).padStart(2, '0');
+
+    const render = () => {
+      numberEl.textContent = `[ ${label(currentIndex)} ]`;
+      currentEl.textContent = String(currentIndex + 1);
+    };
+
+    const step = (delta: number) => {
+      currentIndex = (currentIndex + delta + total) % total;
+      render();
+    };
+
+    const onKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeLightbox();
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        step(1);
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        step(-1);
+      } else if (event.key === 'Tab') {
+        const focusable = [closeBtn, prevBtn, nextBtn];
+        const activeIndex = focusable.indexOf(document.activeElement as HTMLButtonElement);
+        event.preventDefault();
+        const dir = event.shiftKey ? -1 : 1;
+        const nextFocus = focusable[(activeIndex + dir + focusable.length) % focusable.length];
+        nextFocus?.focus();
+      }
+    };
+
+    function closeLightbox() {
+      const finish = () => {
+        lightbox!.hidden = true;
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', onKeydown);
+        lastFocused?.focus();
+      };
+      if (!reduceMotion) {
+        // Plain fade, no scale - "click an image, it should fade in and
+        // out," per direct request.
+        gsap.to(lightboxStage!, { opacity: 0, duration: 0.35, ease: 'sine.inOut' });
+        gsap.to(lightbox, { opacity: 0, duration: 0.35, ease: 'sine.inOut', onComplete: finish });
+      } else {
+        finish();
+      }
+    }
+
+    const openLightbox = (index: number, trigger: HTMLElement) => {
+      currentIndex = index;
+      lastFocused = trigger;
+      render();
+      lightbox.hidden = false;
+      document.body.style.overflow = 'hidden';
+
+      if (!reduceMotion) {
+        // Plain opacity, not autoAlpha: autoAlpha also toggles `visibility`,
+        // and that flips to `visible` only when the tween actually starts
+        // ticking (next frame), not synchronously here - so the
+        // closeBtn.focus() call right below would silently fail to move
+        // focus while visibility was still `hidden` from gsap.set(). The
+        // native `hidden` attribute above already handles show/hide (and
+        // removes this from the tab order/a11y tree while closed), so
+        // opacity alone is enough for the fade without that side effect.
+        gsap.set(lightbox, { opacity: 0 });
+        gsap.set(lightboxStage, { opacity: 0 });
+        gsap.to(lightbox, { opacity: 1, duration: 0.4, ease: 'sine.inOut' });
+        gsap.to(lightboxStage, { opacity: 1, duration: 0.45, ease: 'sine.inOut' });
+      }
+      closeBtn.focus();
+      document.addEventListener('keydown', onKeydown);
+    };
+
+    viewport.querySelectorAll<HTMLButtonElement>('.gallery__trigger').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        openLightbox(Number(trigger.dataset.index), trigger);
+      });
+    });
+
+    closeBtn.addEventListener('click', closeLightbox);
+    backdrop.addEventListener('click', closeLightbox);
+    prevBtn.addEventListener('click', () => step(-1));
+    nextBtn.addEventListener('click', () => step(1));
+  }
+</script>
 
 <style>
   .gallery {
     padding-block: var(--space-section);
     background: var(--color-bg-secondary);
+    /* The stage below breaks out to 100vw; on a page with a vertical scrollbar, 100vw can be a hair wider than the visible viewport in some browsers, which would otherwise show as a slim horizontal scrollbar. This contains that sub-pixel case without affecting anything else on the page (only this section's own box). */
+    overflow-x: hidden;
   }
 
   .gallery__inner {
@@ -41,21 +370,92 @@ const tiles = [{ caption: 'process' }, {}, { caption: 'process' }, {}, {}, {}, {
     padding-inline: var(--space-outer);
   }
 
-  .gallery__strip {
-    display: flex;
-    gap: 1.25rem;
+  /* Full-bleed breakout, per direct request ("I dont like that there is a cutoff in the side, it can overflow"): standard 100vw + negative-margin technique, independent of .gallery__inner's own max-width above it. Also hosts the background title - overflow: hidden here only clips the title where it bleeds past the section, never the viewport itself, whose own content determines this element's auto height. */
+  .gallery__stage {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    overflow: hidden;
+  }
+
+  /* Sits behind the strip (z-index below .gallery__viewport), sized to fill roughly half the viewport width at rest, per direct request ("gallery... filling around half the horizontal width of the screen"). text-secondary at low opacity (a token, not a new hardcoded color) reads as a soft watermark rather than legible content - aria-hidden because of that: SectionMarker's own "Gallery" h2 above already is the accessible heading. */
+  .gallery__bg-title {
+    position: absolute;
+    top: 50%;
+    left: clamp(1rem, 4vw, var(--space-outer));
+    transform: translateY(-50%);
+    z-index: 0;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    font-size: clamp(6rem, 17vw, 17rem);
+    color: var(--color-text-secondary);
+    opacity: 0.4;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .gallery__viewport {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    /* Vertical room for the float offset and hover bob below so nothing clips: the pinned scroll animation only ever moves the track horizontally, but this still needs enough height that floated/bobbing tiles never touch this box's own top/bottom edge. Negative margin cancels the padding's footprint on .gallery__stage's own auto height, so this trick doesn't add visible extra whitespace around the section. */
+    padding-block: 4rem;
+    margin-block: -4rem;
+  }
+
+  /* Reduced-motion fallback: a plain native-scrollable strip, no pin, no
+     scrub, no transform-driven track - see the script's own comment for
+     why this is the right equivalent rather than a degraded one. */
+  .gallery__viewport--static {
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    scroll-snap-type: x proximity;
-    scroll-padding-inline: var(--space-outer);
     scrollbar-width: thin;
-    padding-bottom: 0.75rem;
+  }
+
+  .gallery__track {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    width: max-content;
   }
 
   .gallery__tile {
-    flex: 0 0 clamp(15rem, 24vw, 22rem);
+    flex: 0 0 clamp(12rem, 19vw, 18rem);
+  }
+
+  .gallery__tile--wide {
     aspect-ratio: 4 / 3;
-    scroll-snap-align: start;
+  }
+
+  .gallery__tile--tall {
+    aspect-ratio: 3 / 4;
+  }
+
+  .gallery__tile--square {
+    aspect-ratio: 1 / 1;
+  }
+
+  .gallery__tile--up {
+    transform: translateY(-28px);
+  }
+
+  .gallery__tile--down {
+    transform: translateY(28px);
+  }
+
+  .gallery__trigger {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
   }
 
   .gallery__placeholder {
@@ -68,13 +468,52 @@ const tiles = [{ caption: 'process' }, {}, { caption: 'process' }, {}, {}, {}, {
     border: var(--border-hairline) solid var(--color-text-secondary);
     border-radius: var(--radius-image);
     padding: 0.75rem;
+    overflow: hidden;
+    transition: transform var(--motion-duration) var(--motion-easing);
+  }
+
+  .gallery__trigger:hover .gallery__placeholder,
+  .gallery__trigger:focus-visible .gallery__placeholder {
+    transform: scale(1.03);
+  }
+
+  .gallery__trigger:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
   }
 
   .gallery__caption {
+    position: relative;
+    z-index: 1;
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
     color: var(--color-text-secondary);
+  }
+
+  .gallery__expand {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(23 21 15 / 0);
+    opacity: 0;
+    transition:
+      opacity var(--motion-duration) var(--motion-easing),
+      background-color var(--motion-duration) var(--motion-easing);
+  }
+
+  .gallery__trigger:hover .gallery__expand,
+  .gallery__trigger:focus-visible .gallery__expand {
+    opacity: 1;
+    background: rgb(23 21 15 / 0.1);
+  }
+
+  .gallery__expand svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-ink);
   }
 
   @media (max-width: 640px) {
@@ -82,8 +521,161 @@ const tiles = [{ caption: 'process' }, {}, { caption: 'process' }, {}, {}, {}, {
       padding-inline: 1.5rem;
     }
 
-    .gallery__strip {
-      scroll-padding-inline: 1.5rem;
+    .gallery__tile--up {
+      transform: translateY(-14px);
+    }
+
+    .gallery__tile--down {
+      transform: translateY(14px);
+    }
+  }
+
+  /* --- Lightbox --- */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox[hidden] {
+    display: none;
+  }
+
+  .lightbox__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: rgb(23 21 15 / 0.88);
+    cursor: pointer;
+  }
+
+  /* Close/prev/next are pinned to the lightbox's own edges (the fixed, full-viewport element), never laid out beside the image itself - see the markup comment for the bug this replaced: a flex row of [prev, image, next] added each control's width on top of the image's, which stopped fitting a phone viewport entirely (next measured outside the 390px viewport). Fixed insets mean their position never depends on the image's size at any breakpoint. */
+  .lightbox__close {
+    position: absolute;
+    top: var(--space-24);
+    right: var(--space-24);
+    z-index: 2;
+    padding: 0.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--color-bg-primary);
+    transition: color var(--motion-duration) var(--motion-easing);
+  }
+
+  .lightbox__close:hover,
+  .lightbox__close:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .lightbox__close svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .lightbox__nav {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    transform: translateY(-50%);
+    padding: 0.75rem;
+    border: var(--border-hairline) solid rgb(248 246 241 / 0.3);
+    border-radius: 999px;
+    background: none;
+    cursor: pointer;
+    color: var(--color-bg-primary);
+    transition:
+      color var(--motion-duration) var(--motion-easing),
+      border-color var(--motion-duration) var(--motion-easing);
+  }
+
+  .lightbox__nav--prev {
+    left: var(--space-24);
+  }
+
+  .lightbox__nav--next {
+    right: var(--space-24);
+  }
+
+  .lightbox__nav:hover,
+  .lightbox__nav:focus-visible {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .lightbox__nav svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: block;
+  }
+
+  .lightbox__stage {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-16);
+    /* Room for the pinned nav buttons on both sides (space-24 inset + button width) so the image never sits underneath them. */
+    max-width: calc(100vw - 9rem);
+  }
+
+  .lightbox__placeholder {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    width: min(64vw, 780px);
+    aspect-ratio: 4 / 3;
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    padding: var(--space-16);
+  }
+
+  .lightbox__number {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  .lightbox__counter {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-bg-primary);
+  }
+
+  @media (max-width: 640px) {
+    .lightbox__close {
+      top: var(--space-16);
+      right: var(--space-16);
+    }
+
+    .lightbox__nav {
+      padding: 0.5rem;
+    }
+
+    .lightbox__nav--prev {
+      left: var(--space-16);
+    }
+
+    .lightbox__nav--next {
+      right: var(--space-16);
+    }
+
+    .lightbox__stage {
+      max-width: calc(100vw - 6.5rem);
+    }
+
+    .lightbox__placeholder {
+      width: min(58vw, 780px);
     }
   }
 </style>

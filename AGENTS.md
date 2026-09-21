@@ -312,6 +312,149 @@ a portrait tablet viewport (820×1100 measured) showed a ~265px dead gap
 between the hero's visual block and its role/intro/CTA block; extended
 the same `flex-start` override to that range.
 
+**Gallery rebuild (floating, auto-scrolling, draggable, with a lightbox):**
+explicit request, replacing the earlier plain horizontal-scroll strip.
+Tiles now sit at alternating heights and aspect ratios (wide/tall/square,
+up/flat/down, two independent cycles offset by one so they don't lock
+step) and drift continuously; the strip is grab-to-drag (mouse/pen; touch
+keeps native momentum scrolling) and opens into a full-viewport lightbox
+with prev/next, a counter, and an exit control, all keyboard-accessible.
+
+The continuous auto-drift is a deliberate, informed exception to Section
+3's locked "no constant/looping animation" line — that phrase specifically
+wasn't among the three quoted as superseded by the `DESIGN_VARIANCE`
+override ("250-500ms," "playful gust of wind, not a tech demo," "no
+excessive parallax"), so this was surfaced rather than silently assumed
+covered. It fully stands down under `prefers-reduced-motion` (no slower
+fallback, no motion at all) and pauses on hover/focus/drag/touch/wheel/tab
+-hidden, resuming only after ~1.8s idle.
+
+Technical approach: position (`scrollLeft`), not a CSS `transform`, drives
+both the auto-scroll and the drag — this sidesteps the whole GSAP-vs-
+static-transform conflict class of bug documented elsewhere in this file
+(bug 4 above), since nothing here ever writes `transform` on the
+scrolling track. The tile list renders three times (prev/current/next
+set); the viewport starts scrolled into the middle set, and `scrollLeft`
+silently jumps back a full set-width whenever it crosses into a
+neighboring set, in either direction — verified seamless by sampling
+which tile sits at each of 5 fixed x-positions immediately before and
+after a scroll-triggered wrap and confirming identical content, not just
+eyeballed. Only the middle (real) set of triggers is keyboard/screen-
+reader reachable; the other two are `aria-hidden` + untabbable, present
+purely for the loop illusion.
+
+**Three real bugs found and fixed while testing this, all confirmed via
+`getBoundingClientRect()`/computed styles rather than assumed from the
+code reading right:**
+
+1. A stale `pointerup` resume-timer could re-enable `autoScrollActive`
+   mid-drag on a quick drag-release-drag-release sequence, since `pause()`
+   only flipped the flag and never cancelled a pending `resumeSoon()`
+   timeout from the previous interaction. Harmless in practice (the tick
+   loop also gates on `!isPointerDown`, so nothing visibly broke), but
+   fixed by cancelling the pending timer inside `pause()` too, so the
+   intended ~1.8s cooldown is accurate after rapid successive drags.
+2. `closeBtn.focus()` was silently failing on lightbox open — focus
+   landed on `<body>` instead. Cause: `gsap.set(lightbox, { autoAlpha: 0 })`
+   sets `visibility: hidden` synchronously, and `autoAlpha` only flips it
+   back to visible when the following `.to()` tween actually starts
+   ticking (next animation frame), not synchronously — so the
+   `.focus()` call, running in the same synchronous block, targeted an
+   element that was still `visibility: hidden` and therefore unfocusable.
+   Fixed by animating plain `opacity` instead of `autoAlpha` for the
+   lightbox and its stage: the native `hidden` attribute (already toggled
+   before the animation starts) already handles show/hide and removes it
+   from the tab order/a11y tree while closed, so `autoAlpha`'s extra
+   `visibility` toggle was never actually needed.
+3. On a 390px viewport, the lightbox's next button measured **outside the
+   viewport entirely** (`right: 482.8px` against `innerWidth: 390`) —
+   found via `getBoundingClientRect()`, not visible in a screenshot at a
+   glance. Cause: prev/next/close were flex-siblings of the image in one
+   row (`[prev, image, next]`), so their widths added on top of the
+   image's own width; at narrow viewports the row's total content
+   exceeded the panel's `max-width`, and flex children overflow a
+   too-small container by default rather than shrinking below their
+   content size. Fixed by pinning close/prev/next to the lightbox's own
+   (viewport) edges with `position: absolute` instead of laying them out
+   beside the image — their position now never depends on the image's
+   size at any breakpoint.
+
+Also worth knowing: a `position: fixed`, full-viewport lightbox is
+genuinely hard to verify by screenshot in this environment — captures
+consistently showed the dark backdrop clipped to roughly the first third
+of the viewport height even though `getBoundingClientRect()` confirmed it
+spans the true full 100vh and `elementFromPoint()` at the bottom of the
+viewport still resolved to the backdrop. Treated as a capture-tool
+limitation (reproduced identically in a brand-new tab), not a product
+bug — verified via hit-testing instead, same approach already established
+in this file for the mobile-nav z-index bug above. The same screenshot
+tool turned out to also crop very wide (1440px) emulated viewports in
+this environment specifically — a 1024px viewport captured reliably, a
+1440px one didn't, both confirmed against identical DOM measurements —
+worth remembering before trusting a screenshot's negative result on a
+wide layout.
+
+**Gallery refinement pass (explicit follow-up request):** slower
+auto-scroll, a subtle continuous bob per tile while the section is
+hovered (killed back to rest on pointerleave), full-bleed edges (broke
+`.gallery__viewport` out of the sitewide `--content-max-width` via a new
+`.gallery__stage` wrapper and the standard `100vw` / negative-margin
+technique — `.gallery__inner` now holds only SectionMarker, so its own
+inset margins stay untouched), a large "Gallery" wordmark sitting behind
+the strip as a low-contrast textural watermark (`aria-hidden`, since
+SectionMarker's own h2 is still the accessible heading), and the lightbox
+open/close is a plain opacity fade now with no scale.
+
+**One more real bug, the most interesting of this pass:** dropping the
+auto-scroll speed constant from `0.4` to `0.15` silently stopped the
+strip from moving at all. Cause: the browser rounds/snaps `scrollLeft` on
+every write, and a sub-pixel delta below whatever that rounding threshold
+is never survives a single write — confirmed directly, not assumed, by
+running `scrollLeft += 0.15` twenty times in a row from the console and
+finding zero net change (`0.4` happened to clear the threshold every
+time, `0.15` never did). Fixed by moving the true scroll position into a
+plain JS number (`scrollPos`, full float precision, immune to whatever
+the DOM does to `scrollLeft`) that drives both the auto-scroll tick and
+the drag handler; `scrollLeft` is only ever written from it, never read
+back as the source of truth for the next frame. Any lesson here
+generalizes: a slow/subtle animation driven by repeatedly reading back
+and incrementing a DOM property that the browser is free to round
+(`scrollLeft`, and worth remembering for similar properties elsewhere)
+needs its true state kept in a plain variable instead, not trusted to
+survive the round-trip through the DOM.
+
+**Gallery, third pass — the interaction model changed, not just tuned:**
+explicit, detailed follow-up request replaced the independent auto-
+scrolling/draggable marquee from the previous two passes with a
+scroll-linked pinned reveal (GSAP's canonical "horizontal-pan" pattern):
+at rest, the "Gallery" watermark fills roughly half the viewport width
+with the first tile overlapping its tail end; scrolling the page pins
+the section and feeds that scroll input into a `ScrollTrigger` scrub
+instead of moving the page, sliding the track across while the watermark
+slides out of the way; scrolling back up reverses it exactly, because
+that reversibility is what `scrub` already does, not something built
+separately (verified directly: scrolled forward 300px, back 300px,
+`track`'s and the title's computed `transform` matched the pre-scroll
+values to the pixel once the `scrub: 1` smoothing settled). Once the
+track finishes travelling the pin releases and the page continues
+normally.
+
+Since page scroll itself now drives the horizontal motion, the previous
+pass's whole mechanism for that — the infinite 3×-duplicated tile loop,
+the `scrollPos` accumulator, the pointer-drag handlers, the
+hover/touch/wheel pause-and-resume listeners — no longer had a job and
+was removed rather than kept alongside the new one (two systems fighting
+over the same scroll input would have been the outcome otherwise). Tiles
+render once now, not three times, which also simplified the lightbox
+wiring (no more duplicate-set `aria-hidden`/`tabindex="-1"` handling —
+every trigger is real). The hover-only hop bob survived unchanged from
+the previous pass; it targets a different element and a different GSAP
+property than the scroll-pin, so the two run independently without
+conflict. `prefers-reduced-motion` skips the pin/scrub entirely (not a
+slower version of it) and falls back to a plain native
+`overflow-x: auto` strip, same "functional equivalent, motion removed"
+principle used everywhere else in this project.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

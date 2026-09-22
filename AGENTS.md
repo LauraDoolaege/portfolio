@@ -1171,6 +1171,69 @@ below it, and a real hover on a card shows the lift, the border going to
 ink, the arrow badge filling solid, and the title switching to accent -
 not just assumed from the CSS reading right.
 
+**A real bug in the Hero status tag, caught on certain screen widths
+only:** direct report that "the belgium and available" line sometimes
+sat next to the CTA button instead of above it. Cause: `display:
+inline-flex` on `.hero__status` (needed for the icon+text row inside it)
+is an inline-level *outer* display, not a block one - inside
+`.hero__bottom`'s mobile `display: block` layout, an inline-level
+element doesn't get its own line, it just joins the inline flow beside
+the next inline-level sibling, which here was `.hero__cta` (itself
+`display: inline-flex` via `Button.astro`'s `.btn`). At any width wide
+enough for both to fit side by side, that's exactly what rendered - the
+tag and the button on one line. Below that width they still wrapped
+separately (two inline boxes that don't both fit share a line box but
+break across it like text would), which is why the bug only showed up
+"on certain screen sizes" rather than always. Fixed the same way
+`.hero__role-soft` one rule up already solves an identical problem:
+`display: flex` (block-level outside, flex inside) instead of
+`inline-flex` - the icon/text row layout is unaffected, only the outer
+box type changes, plus `width: fit-content` so it doesn't stretch to the
+full row now that it's block-level.
+
+Also on the same block: `.selected-work__group-label` ("Design:
+individual work" / "Experience design: group projects") now matches the
+Belgium tag's own fine-print weight - `--text-label` (12px) and
+`--color-text-secondary` instead of `--text-nav` (14px) and full ink -
+per direct request to put it "in the same fine font as the belgium tag."
+
+**Gallery: the card-deck stacking is gone, restoring the plain
+scroll-linked reveal; the progress line grows from the left again and
+gained flanking tile-count labels** - two direct follow-ups. On
+stacking: the `else if (isPhone) {...} else {...}` split that used to
+separate "plain strip" (phone) from "card-deck convergence" (desktop/
+tablet) collapsed back into one branch, since removing the stacking
+meant both were already the same code - tile 0 no longer needs to
+cancel the track's own motion to stay pinned, nothing needs a computed
+`arrival` progress, and nothing shrinks/tilts as a neighbor arrives. The
+per-tile server-side `z-index` (in the markup) and the negative
+`margin-left` overlap (`.gallery__tile + .gallery__tile`, both the
+desktop value and the phone-only reset back to 0) are gone too - with
+tiles no longer overlapping, there's nothing left for either to do. The
+hover block that used to lift a covered tile's z-index above its
+neighbors on `pointerenter` and restore it on `pointerleave` lost that
+half as well; it still tracks `hoveredTrigger` (needed so the pin's own
+`onUpdate` can dispatch a synthetic `pointerleave` when scroll moves a
+tile out from under a stationary cursor - unrelated to stacking, so this
+part stayed).
+
+On the progress line: it went back to `transform-origin: left` (a
+previous pass had changed this to `center`, growing the bar outward both
+ways - per direct request, reverted). Separately, per a reference image
+showing a timeline with year labels flanking a line and a bolder
+highlighted sub-segment, the progress line gained the same structure:
+`1` and `{TOTAL}` (Astro's own `TOTAL` constant, not hardcoded, so it
+stays correct if the tile count ever changes) now flank a new faint
+full-width `.gallery__progress-track`, with the existing
+`.gallery__progress-bar` drawn over it as the solid segment tracking
+actual scroll progress - same `--color-text-secondary` this already
+used, per direct request to keep it "still black like it is now" rather
+than adopting the reference image's gold. Verified in the browser, not
+just from the CSS: at 1400px the tiles render with even, non-overlapping
+gaps (no stacking), and the progress bar's computed `transform` mid-scroll
+showed a partial `scaleX` with `transform-origin: 0px` (left), not
+center.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

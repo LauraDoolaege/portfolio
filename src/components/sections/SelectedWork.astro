@@ -95,12 +95,16 @@ const experience = [
     margin-top: 4.5rem;
   }
 
+  /* Same fine-print weight as the header/hero location tag
+     (.site-header__status / .hero__status) - text-label (12px) and
+     text-secondary, not text-nav (14px) and full ink - per direct
+     request to match "the same fine font as the belgium tag". */
   .selected-work__group-label {
     font-family: var(--font-mono);
-    font-size: var(--text-nav);
+    font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
-    color: var(--color-ink);
+    color: var(--color-text-secondary);
   }
 
   /* Mobile/tablet default: a plain equal-width stack, first item first -

@@ -64,7 +64,6 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
         {tiles.map((tile, i) => (
           <li
             class={`gallery__tile gallery__tile--${tile.aspectClass} gallery__tile--${tile.floatClass}`}
-            style={`z-index: ${i + 1}`}
           >
             <button
               type="button"
@@ -92,8 +91,21 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       </ul>
     </div>
 
+    <!--
+      Numbers flanking a line, a bold segment tracking scroll progress
+      between them - per direct request for "a similar structure to the
+      example" (a reference timeline image: two labels, a hairline
+      between them, a bolder highlighted sub-segment), swapping the
+      example's year range for the tile count (1-{TOTAL}) and keeping
+      the same ink/text-secondary color this already used, not the
+      example's gold.
+    -->
     <div class="gallery__progress" aria-hidden="true">
-      <span class="gallery__progress-bar"></span>
+      <span class="gallery__progress-label">1</span>
+      <span class="gallery__progress-track">
+        <span class="gallery__progress-bar"></span>
+      </span>
+      <span class="gallery__progress-label">{TOTAL}</span>
     </div>
   </div>
 </section>
@@ -204,7 +216,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 </div>
 
 <script>
-  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
 
   const section = document.querySelector<HTMLElement>('.gallery');
   const inner = document.querySelector<HTMLElement>('.gallery__inner');
@@ -243,16 +255,6 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     backdrop
   ) {
     const reduceMotion = prefersReducedMotion();
-    // Phone still gets the scroll-linked pin - page scroll driving the
-    // strip is exactly what was wanted kept, per direct follow-up ("i
-    // still meant that on phone it scrolls on scroll") - just not the
-    // card-deck stacking on top of it. A first attempt folded phone
-    // width into `reduceMotion` itself, which went too far and dropped
-    // the pin/scrub entirely in favor of a plain native swipe-strip; this
-    // is a separate flag instead, checked once at script-init like
-    // `reduceMotion` itself, matched at 639px (the same phone/tablet
-    // split the rest of this file already uses).
-    const isPhone = window.matchMedia('(max-width: 639px)').matches;
     const total = Number(viewport.dataset.total || '0');
 
     // Whichever trigger currently has the pointer inside it, per the
@@ -281,15 +283,16 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
         viewport.addEventListener('scroll', syncProgress, { passive: true });
         syncProgress();
       }
-    } else if (isPhone) {
-      // --- Scroll-linked strip, no stacking: the same pin+scrub every
-      // width used to get (page scroll drives the track sliding left,
-      // see this section's earlier passes), without the card-deck
-      // convergence the desktop/tablet branch below adds on top. Direct
-      // follow-up after phone was first switched to the plain native
-      // swipe-strip fallback: "i still meant that on phone it scrolls on
-      // scroll" - the page-scroll-driven reveal was the part worth
-      // keeping, only the stacking wasn't wanted here.
+    } else {
+      // --- Plain scroll-linked reveal, no stacking: this section's
+      // original mechanism (see the file header comment), restored -
+      // the card-deck convergence a later pass added here (each tile
+      // locking onto tile 0's spot, shrinking/tilting the one behind it)
+      // is gone per direct request ("I want to remove the stacking").
+      // The track just slides the whole way across at a constant rate,
+      // one continuous tween tied to scroll progress; no per-tile
+      // position math, no z-index shuffling needed to keep a covered
+      // tile reachable, because nothing covers anything anymore.
       const startInset = parseFloat(getComputedStyle(inner).paddingLeft) || 0;
 
       const measure = () => {
@@ -309,6 +312,16 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
           invalidateOnRefresh: true,
           onUpdate: (self) => {
             if (progressBar) progressBar.style.transform = `scaleX(${self.progress})`;
+            // Scrolling moves tiles under the cursor without ever firing
+            // a pointer event (the mouse itself hasn't moved), so
+            // nothing would otherwise tell a hovered tile's bob-pause,
+            // mouse-shift, cursor, or spotlight that it's no longer
+            // actually under the pointer. Dispatching a real
+            // pointerleave here reuses each effect's own existing
+            // cleanup below rather than duplicating it - every scroll
+            // tick is treated as an implicit "stopped hovering," and
+            // nothing re-engages until an actual pointermove says
+            // otherwise.
             if (hoveredTrigger) {
               hoveredTrigger.dispatchEvent(new PointerEvent('pointerleave'));
               hoveredTrigger = null;
@@ -317,171 +330,23 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
         },
       });
       tl.to(track, { x: () => measure().endX, ease: 'none' }, 0);
-    } else {
-      // --- Scroll-linked stack, v2: the track still slides the whole
-      // way across, exactly like the original strip did (see this
-      // section's earlier passes) - the difference is that once a
-      // tile's own natural, track-adjusted position reaches the first
-      // tile's spot, it locks there instead of continuing to slide off
-      // to the left with everything else, so it visibly piles on top of
-      // the first tile rather than sliding past it.
-      //
-      // The first version of this pass (tiles individually tweened onto
-      // a *fixed* target with the track itself frozen) broke down past
-      // ~5 tiles: with the track no longer moving, every tile beyond
-      // whichever ones fit in the original viewport-width strip started
-      // out far off past the right edge - each one's own entrance still
-      // played correctly once its turn came, but getting there took a
-      // long stretch of scroll with nothing visibly happening, since
-      // nothing was bringing the next tile within reach ahead of time.
-      // Per direct follow-up ("the scroll should still move to the
-      // left, as should the deck of images... so there are no huge
-      // gaps") - this version keeps the track's own continuous motion,
-      // which is what actually keeps the queue arriving at a steady
-      // pace, and layers the "lock onto the first tile" behavior on
-      // top of it instead of replacing it.
-      //
-      // The math: tile 0's own local x is set every tick to exactly
-      // cancel however far the track has moved (`startInset - trackX`),
-      // which is what makes it - and only it - stay visually fixed at
-      // its starting screen position for the entire scroll, the one
-      // anchor everything else piles onto. Every other tile rides along
-      // with the track uncorrected (localX: 0) until the scroll
-      // progress reaches its own `arrival` value - the exact progress
-      // at which its natural (track-adjusted) position first coincides
-      // with tile 0's fixed spot, solved once from the tiles' own
-      // static layout positions - at which point it switches to the
-      // same kind of compensation tile 0 uses, anchoring it at that
-      // same fixed spot for the rest of the scroll. Continuous by
-      // construction (both branches agree at progress === arrival), so
-      // there's no jump the moment a tile locks in.
-      const startInset = parseFloat(getComputedStyle(inner).paddingLeft) || 0;
-      const triggers = Array.from(viewport.querySelectorAll<HTMLElement>('.gallery__trigger'));
-      const tiles = triggers.map((trigger) => trigger.closest<HTMLElement>('.gallery__tile'));
-
-      const measure = () => {
-        const trackEndX = -(track.scrollWidth - viewport.clientWidth);
-        return { trackStartX: startInset, trackEndX, travel: startInset - trackEndX };
-      };
-
-      // Progress (0..1) at which each tile's natural position reaches
-      // tile 0's fixed spot. Recomputed on every ScrollTrigger refresh
-      // (resize), same as `measure()` - these depend on the tiles' own
-      // offsetLeft, which the responsive tile width can change.
-      const computeArrivals = () => {
-        const { trackStartX, trackEndX } = measure();
-        const denom = trackEndX - trackStartX;
-        const tile0Left = tiles[0]?.offsetLeft ?? 0;
-        return tiles.map((tile) => {
-          if (!tile || denom === 0) return 0;
-          return (tile0Left - tile.offsetLeft) / denom;
-        });
-      };
-
-      let arrivals = computeArrivals();
-      const SETTLE = 0.02; // fraction of total scroll the shrink/tilt eases over, right as the next tile locks in
-
-      gsap.set(track, { x: measure().trackStartX });
-
-      ScrollTrigger.create({
-        // The whole section (title included), not just the stage, is
-        // both the trigger and the pin target - per direct feedback
-        // that the title was scrolling away from the gallery while
-        // only the tile strip stayed pinned. Pinning the section keeps
-        // the title and the strip locked together for the whole scrub,
-        // exactly like the trigger's own top-level Astro markup groups
-        // them. "top top" - the pin engages once the section's own top
-        // reaches the top of the viewport - reads as "once the section
-        // is into full view" for this section's height, and pinning
-        // the section (which starts higher up the page than the stage
-        // alone did) reaches that point with less scrolling than
-        // before, without needing a separate earlier-start hack.
-        trigger: section,
-        start: 'top top',
-        end: () => `+=${measure().travel}`,
-        pin: true,
-        scrub: 1,
-        invalidateOnRefresh: true,
-        onRefresh: () => {
-          arrivals = computeArrivals();
-        },
-        onUpdate: (self) => {
-          const { trackStartX, trackEndX } = measure();
-          const trackX = trackStartX + self.progress * (trackEndX - trackStartX);
-          gsap.set(track, { x: trackX });
-
-          if (progressBar) progressBar.style.transform = `scaleX(${self.progress})`;
-          // Scrolling moves tiles under the cursor without ever firing a
-          // pointer event (the mouse itself hasn't moved), so nothing
-          // would otherwise tell a hovered tile's bob-pause, mouse-shift,
-          // cursor, or spotlight that it's no longer actually under the
-          // pointer - they'd stay frozen mid-tween, pointed at stale
-          // geometry, or (for the spotlight) visibly drift away still
-          // glued to a tile that moved somewhere else. Dispatching a
-          // real pointerleave here reuses each effect's own existing
-          // cleanup below rather than duplicating it - every scroll tick
-          // is treated as an implicit "stopped hovering," and nothing
-          // re-engages until an actual pointermove says otherwise.
-          if (hoveredTrigger) {
-            hoveredTrigger.dispatchEvent(new PointerEvent('pointerleave'));
-            hoveredTrigger = null;
-          }
-
-          triggers.forEach((trigger, i) => {
-            const arrival = arrivals[i];
-            const x =
-              self.progress >= arrival ? -(self.progress - arrival) * (trackEndX - trackStartX) : 0;
-
-            // The tile being covered shrinks and tilts rather than just
-            // sitting still underneath, easing in right as the next one
-            // locks into place - the last tile has no successor, so it
-            // never gets covered and stays full-size. Alternating the
-            // rotation direction per index keeps the growing pile from
-            // all leaning the same way, which read as mechanical rather
-            // than like a loosely stacked deck.
-            const nextArrival = arrivals[i + 1];
-            let scale = 1;
-            let rotation = 0;
-            if (nextArrival !== undefined) {
-              const t = Math.min(1, Math.max(0, (self.progress - (nextArrival - SETTLE)) / SETTLE));
-              scale = 1 - t * 0.1;
-              rotation = t * (i % 2 === 0 ? -4 : 4);
-            }
-
-            gsap.set(trigger, { x, scale, rotation });
-          });
-        },
-      });
     }
 
     // Tracks which trigger the pointer is actually inside, purely so the
     // pin's onUpdate above has something to dispatch a synthetic
     // pointerleave at when the track scrolls out from under a stationary
     // cursor - not an effect of its own, just bookkeeping the hover
-    // effects below don't otherwise need each other to know about.
-    //
-    // Also lifts the hovered tile's z-index above the whole stack while
-    // it's active, so hovering a partially-covered tile brings it fully
-    // into view instead of leaving it stuck under its neighbor - the
-    // deck-of-cards overlap (see .gallery__tile's own CSS comment) means
-    // most tiles start out partly hidden, so this is what makes each one
-    // actually reachable to look at, not just a decorative stacking
-    // effect. Each tile's own resting z-index (set server-side, per
-    // index) is read once up front and restored on pointerleave, rather
-    // than cleared outright - clearing it would leave the tile with no
-    // z-index at all instead of putting it back in its place in the deck.
+    // effects below don't otherwise need each other to know about. (This
+    // used to also lift the hovered tile's z-index above the rest of the
+    // deck - that half is gone along with the stacking itself, since
+    // tiles no longer overlap and have nothing to be lifted above.)
     if (!reduceMotion) {
       viewport.querySelectorAll<HTMLElement>('.gallery__trigger').forEach((trigger) => {
-        const tile = trigger.closest<HTMLElement>('.gallery__tile');
-        const restingZIndex = tile?.style.zIndex ?? '';
-
         trigger.addEventListener('pointerenter', () => {
           hoveredTrigger = trigger;
-          if (tile) tile.style.zIndex = '100';
         });
         trigger.addEventListener('pointerleave', () => {
           if (hoveredTrigger === trigger) hoveredTrigger = null;
-          if (tile) tile.style.zIndex = restingZIndex;
         });
       });
     }
@@ -854,15 +719,8 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     width: max-content;
   }
 
-  /* position: relative so the inline z-index (per-tile, set in the markup) actually takes effect - z-index is inert on a static-positioned element. Each tile after the first pulls left into its neighbor via negative margin (see the sibling-combinator rule below) rather than the plain gap they used to have, so consecutive tiles genuinely overlap - the increasing z-index means each one is "dealt" on top of the one before it, card-deck style, as the strip scrolls past. */
   .gallery__tile {
-    position: relative;
     flex: 0 0 clamp(12rem, 19vw, 18rem);
-  }
-
-  /* Only tile-to-tile (not the "Scroll" hint before the first tile, which should stay cleanly spaced at .gallery__track's own 1.5rem gap) - the sibling combinator naturally excludes it. -3rem on top of that 1.5rem gap nets out to a 24px overlap between consecutive tiles. */
-  .gallery__tile + .gallery__tile {
-    margin-left: -3rem;
   }
 
   .gallery__tile--wide {
@@ -1021,26 +879,61 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     }
   }
 
-  /* Tracks how far through the horizontal reveal the track has scrubbed - no static backing line anymore, just this bar growing from nothing as you scroll and stopping at the same full inset width once the gallery ends, per direct request ("appears and grows... stopping growth at the size it is now"). Sits within the same inset as .gallery__inner so it lines up with the section marker above rather than running the full breakout width. A bigger top margin than a plain hairline gap needs - per direct feedback the line was sitting too close to the tiles above it (the floated/bobbing ones dip into the same vertical room .gallery__viewport already reserves for them), so this clears that zone with room to spare rather than trimming the reserved room itself, which would clip the bob. */
+  /* Numbers flanking a line, per direct request for "a similar structure
+     to the [reference] example" - a faint full-width track between the
+     two tile-count labels, with a solid segment growing across it to
+     mark how far through the horizontal reveal the track has scrubbed.
+     Sits within the same inset as .gallery__inner so it lines up with
+     the section marker above rather than running the full breakout
+     width. A bigger top margin than a plain hairline gap needs - per
+     earlier direct feedback the line was sitting too close to the tiles
+     above it (the floated/bobbing ones dip into the same vertical room
+     .gallery__viewport already reserves for them), so this clears that
+     zone with room to spare rather than trimming the reserved room
+     itself, which would clip the bob. */
   .gallery__progress {
     position: relative;
     z-index: 1;
-    height: 1px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
     max-width: var(--content-max-width);
     margin-inline: auto;
     margin-top: 3.5rem;
     padding-inline: var(--space-outer);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
   }
 
+  .gallery__progress-label {
+    flex: 0 0 auto;
+  }
+
+  /* The faint full-length line between the two labels - the reference
+     example's own thin base line, at rest the whole way from 1 to
+     {TOTAL}. */
+  .gallery__progress-track {
+    position: relative;
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--color-text-secondary);
+    opacity: 0.25;
+  }
+
+  /* The solid segment tracking actual scroll progress, drawn over the
+     faint track above. transform-origin: left (back to growing
+     left-to-right like a conventional loading bar, per direct request -
+     a previous pass had this growing outward from the center instead). */
   .gallery__progress-bar {
-    /* top: 0, left/right: 0 - absolute offsets are measured from the containing block's own padding edge, so this fills .gallery__progress's full height/inset without repeating its padding-inline value. transform-origin: center (not left) so the bar grows outward from the middle as you scroll, per direct request, instead of filling left-to-right like a conventional loading bar. */
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 1px;
     background: var(--color-text-secondary);
-    transform-origin: center;
+    transform-origin: left;
     transform: scaleX(0);
   }
 
@@ -1061,11 +954,6 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 
     .gallery__tile--down {
       transform: translateY(14px);
-    }
-
-    /* No overlap at all on phone, per direct request ("I don't want the cards to stack there, just a regular scrollable gallery like before") - resets the desktop/tablet rule's negative margin back to 0, so tiles fall back to .gallery__track's own plain 1.5rem gap instead. The animated pin-driven stack above is already off at this width (folded into the shared `reduceMotion` flag in the script); this is the CSS-only visual overlap that's independent of that and needed its own reset. */
-    .gallery__tile + .gallery__tile {
-      margin-left: 0;
     }
   }
 

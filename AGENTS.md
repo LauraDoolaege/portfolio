@@ -860,6 +860,95 @@ without needing to know anything about how the placeholder got there -
 verified by comparing both rects directly after moving the pointer to
 different corners of a tile, matching to well under a pixel each time.
 
+**Scrolling while hovering a tile was "very buggy," per direct report -
+root cause and the fix, discussed with the user before implementing.**
+Every hover-driven effect (bob-pause, the mouse-shift, the custom
+cursor, the spotlight) is wired only to `pointerenter`/`pointermove`/
+`pointerleave`. Gallery's horizontal motion isn't driven by the mouse
+though - it's driven by page scroll, via the pin+scrub - so scrolling
+while the cursor sits still moves a tile out from under it without firing
+any pointer event at all (the mouse itself never moved). Every hover
+effect then stays frozen on stale geometry, and the spotlight in
+particular visibly drifted away still glued to a tile that had scrolled
+somewhere else.
+
+Two fixes were on the table: (A) treat any scroll as an implicit
+"stopped hovering" - clear whatever's active the instant scrolling
+starts, nothing re-engages until a real pointermove says otherwise; or
+(B) make hover fully scroll-aware - continuously re-derive what's
+actually under the last-known cursor position during scroll and
+synthesize proper enter/leave transitions as the answer changes. (B) is
+the more "physically correct" version but meaningfully more code and
+more edge cases (throttling, avoiding the cursor/spotlight's own
+overlay elements, flicker on fast scrubs) for a benefit that mostly only
+shows up if you're scrolling and hover-exploring at the literal same
+instant. Went with (A) first, per direct instruction, with (B) left as
+the fallback if (A) doesn't feel sufficient.
+
+Implementation: a single `hoveredTrigger` reference, updated by one
+small tracker block (separate from the four effects themselves, which
+don't need to know about each other or about this). The pin's own
+`onUpdate` - already firing every scroll tick for the progress bar -
+dispatches a real `pointerleave` at whatever `hoveredTrigger` currently
+points at. That reuses each effect's own existing cleanup logic instead
+of duplicating four separate reset paths in one place - a synthetic
+event dispatched via `element.dispatchEvent()` fires attached listeners
+identically to a trusted one, so bob resume, the shift snapping back to
+neutral, the cursor deactivating, and the spotlight's ticker stopping
+all happen from that one dispatch. Verified directly: hovered a tile
+(confirmed cursor + spotlight both active), scrolled without touching
+the mouse, confirmed both deactivated and the tile's shift eased back
+toward identity - not just assumed from the code reading right.
+
+**One more small stacking bug, caught from a screenshot:** the custom
+"View" cursor (`z-index: 5`) sat below the spotlight (`z-index: 50`), so
+whenever the cursor circle overhung past a tile's edge - which is exactly
+where it tends to sit, since it follows the pointer and the pointer is
+often near an edge - the spotlight's box-shadow darkened that sliver of
+the circle, reading as the cursor getting "cut off." Bumped the cursor to
+`z-index: 55`, still under the lightbox's `100`.
+
+**Gallery tiles overlap into a card-deck stack now**, per direct request
+("make the images stack on top of each other while scrolling") - scoped
+via three clarifying questions asked before touching anything: Gallery
+only (not Selected Work too), a card-deck peel look (not a full-overlap
+pile or a fanned cascade), and keeping the existing pin+scrub strip
+rather than replacing its mechanism - the overlap happens tile-to-tile
+within the strip, not as a separate scroll-position-driven "pile up at
+the viewport edge" system (which would have been the more literal, but
+much more complex and jank-prone, reading of "at the edges").
+
+Each tile gets an increasing `z-index` (set server-side, per index, in
+the markup - CSS alone can't generate an incrementing integer per item)
+so later tiles are "dealt" on top of earlier ones, combined with a
+negative `margin-left` on `.gallery__tile + .gallery__tile` (the sibling
+combinator naturally excludes the "Scroll" hint before the first real
+tile, which keeps its normal spacing) pulling each tile 24px into its
+neighbor. `position: relative` on `.gallery__tile` is required for that
+inline z-index to do anything at all - it's inert on a
+statically-positioned element. A leftward `box-shadow` on
+`.gallery__placeholder` originally sold the "resting on top of" read
+here, but was dropped again on direct follow-up ("I don't like the
+shadows") - the overlap and z-index ordering carry the stacking read on
+their own without it.
+
+Hovering a tile lifts its z-index to the top of the whole stack (folded
+into the existing pointer-tracking block rather than a fifth separate
+trigger loop), so a mostly-covered tile becomes fully visible and
+clickable on hover instead of staying stuck under its neighbor - this
+pairs naturally with the spotlight from an earlier pass (dims everything
+else while one tile is "in focus"), reinforcing the same idea from two
+angles at once. Restores each tile's own resting z-index on
+`pointerleave` (captured once per tile up front) rather than clearing it
+outright, which would leave the tile with no z-index instead of putting
+it back in its place in the deck - and since the scroll-driven implicit
+"unhover" from the previous pass already dispatches a real `pointerleave`
+on whatever's hovered, this restoration falls out of that same mechanism
+for free, verified directly (hovered a tile mid-deck, confirmed z-index
+jumped to 100, scrolled without touching the mouse, confirmed it settled
+back to its original index-based value rather than getting stuck at 100
+or dropping to nothing).
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

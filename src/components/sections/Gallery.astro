@@ -64,6 +64,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
         {tiles.map((tile, i) => (
           <li
             class={`gallery__tile gallery__tile--${tile.aspectClass} gallery__tile--${tile.floatClass}`}
+            style={`z-index: ${i + 1}`}
           >
             <button
               type="button"
@@ -244,6 +245,13 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     const reduceMotion = prefersReducedMotion();
     const total = Number(viewport.dataset.total || '0');
 
+    // Whichever trigger currently has the pointer inside it, per the
+    // shared tracker set up below (alongside the hover-driven effects
+    // further down) - read from the pin's own onUpdate to cut hover
+    // state short the instant scrolling moves the track. See that
+    // tracker's own comment for why this needs to exist at all.
+    let hoveredTrigger: HTMLElement | null = null;
+
     if (reduceMotion) {
       // No pin, no scrub, no scroll-hijack - a plain native horizontal
       // strip instead, so every tile stays reachable with zero
@@ -308,10 +316,58 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
           invalidateOnRefresh: true,
           onUpdate: (self) => {
             if (progressBar) progressBar.style.transform = `scaleX(${self.progress})`;
+            // Scrolling moves the track under the cursor without ever
+            // firing a pointer event (the mouse itself hasn't moved), so
+            // nothing would otherwise tell a hovered tile's bob-pause,
+            // mouse-shift, cursor, or spotlight that it's no longer
+            // actually under the pointer - they'd stay frozen mid-tween,
+            // pointed at stale geometry, or (for the spotlight) visibly
+            // drift away still glued to a tile that scrolled out from
+            // under you. Dispatching a real pointerleave here reuses
+            // each effect's own existing cleanup below rather than
+            // duplicating it - every scroll tick is treated as an
+            // implicit "stopped hovering," and nothing re-engages until
+            // an actual pointermove says otherwise.
+            if (hoveredTrigger) {
+              hoveredTrigger.dispatchEvent(new PointerEvent('pointerleave'));
+              hoveredTrigger = null;
+            }
           },
         },
       });
       tl.to(track, { x: () => measure().endX, ease: 'none' }, 0);
+    }
+
+    // Tracks which trigger the pointer is actually inside, purely so the
+    // pin's onUpdate above has something to dispatch a synthetic
+    // pointerleave at when the track scrolls out from under a stationary
+    // cursor - not an effect of its own, just bookkeeping the hover
+    // effects below don't otherwise need each other to know about.
+    //
+    // Also lifts the hovered tile's z-index above the whole stack while
+    // it's active, so hovering a partially-covered tile brings it fully
+    // into view instead of leaving it stuck under its neighbor - the
+    // deck-of-cards overlap (see .gallery__tile's own CSS comment) means
+    // most tiles start out partly hidden, so this is what makes each one
+    // actually reachable to look at, not just a decorative stacking
+    // effect. Each tile's own resting z-index (set server-side, per
+    // index) is read once up front and restored on pointerleave, rather
+    // than cleared outright - clearing it would leave the tile with no
+    // z-index at all instead of putting it back in its place in the deck.
+    if (!reduceMotion) {
+      viewport.querySelectorAll<HTMLElement>('.gallery__trigger').forEach((trigger) => {
+        const tile = trigger.closest<HTMLElement>('.gallery__tile');
+        const restingZIndex = tile?.style.zIndex ?? '';
+
+        trigger.addEventListener('pointerenter', () => {
+          hoveredTrigger = trigger;
+          if (tile) tile.style.zIndex = '100';
+        });
+        trigger.addEventListener('pointerleave', () => {
+          if (hoveredTrigger === trigger) hoveredTrigger = null;
+          if (tile) tile.style.zIndex = restingZIndex;
+        });
+      });
     }
 
     // Continuous "breathing" bob: every tile's trigger (not the tile
@@ -682,8 +738,15 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     width: max-content;
   }
 
+  /* position: relative so the inline z-index (per-tile, set in the markup) actually takes effect - z-index is inert on a static-positioned element. Each tile after the first pulls left into its neighbor via negative margin (see the sibling-combinator rule below) rather than the plain gap they used to have, so consecutive tiles genuinely overlap - the increasing z-index means each one is "dealt" on top of the one before it, card-deck style, as the strip scrolls past. */
   .gallery__tile {
+    position: relative;
     flex: 0 0 clamp(12rem, 19vw, 18rem);
+  }
+
+  /* Only tile-to-tile (not the "Scroll" hint before the first tile, which should stay cleanly spaced at .gallery__track's own 1.5rem gap) - the sibling combinator naturally excludes it. -3rem on top of that 1.5rem gap nets out to a 24px overlap between consecutive tiles. */
+  .gallery__tile + .gallery__tile {
+    margin-left: -3rem;
   }
 
   .gallery__tile--wide {
@@ -775,12 +838,12 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     color: var(--color-ink);
   }
 
-  /* Follows the pointer via GSAP quickTo (see the script) - x/y only, no CSS transform of its own, so GSAP's inline transform never has to fight a class-toggled one (see the markup comment for the bug this avoids). Purely a positioning wrapper; the circle itself is .gallery__cursor-inner below. */
+  /* Follows the pointer via GSAP quickTo (see the script) - x/y only, no CSS transform of its own, so GSAP's inline transform never has to fight a class-toggled one (see the markup comment for the bug this avoids). Purely a positioning wrapper; the circle itself is .gallery__cursor-inner below. z-index: 55 - above the spotlight (50), which otherwise darkened whatever part of the circle fell outside the tile's own hole (the cursor sits at the pointer, near a tile's edge that's exactly where it tends to spill past it). Still below the lightbox (100). */
   .gallery__cursor {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 5;
+    z-index: 55;
     width: 4.25rem;
     height: 4.25rem;
     margin: -2.125rem;
@@ -882,6 +945,11 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 
     .gallery__tile--down {
       transform: translateY(14px);
+    }
+
+    /* Smaller overlap for smaller tiles at this width - the same -3rem the desktop rule uses would cover a disproportionate share of a mobile tile's own width. */
+    .gallery__tile + .gallery__tile {
+      margin-left: -1.5rem;
     }
   }
 

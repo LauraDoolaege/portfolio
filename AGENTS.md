@@ -762,6 +762,47 @@ instances already have, so About's index marks no longer diverge from
 that shared default. See AboutStory.astro and AboutIntro.astro's own
 comments for exactly which rule was removed.
 
+**Lightbox open/close became a FLIP transition, not a plain fade** - per
+direct request ("make it look like the card moves, grows from its hover
+state to the detail view... feel tactile and effortless"). FLIP
+(First/Last/Invert/Play): read the clicked tile's own current box
+("first"), diff it against the lightbox image's natural, already-laid-
+out box ("last"), then play that diff as a single transform tween. The
+browser never renders an intermediate layout state, only a GPU
+transform, which is what makes this read as one continuous physical
+motion - "the card becomes the detail view" - rather than two competing
+effects (a fade layered under an unrelated move), which is what the
+previous version's separate opacity tween on the whole lightbox
+container would have produced if scale were simply added on top of it.
+The image itself (`.lightbox__placeholder`) never fades - it's fully
+visible the instant the tile is clicked, it just grows into position/
+size - while the backdrop and chrome (close/nav/counter) still fade in
+as before, on a short delay so they settle in just after the image
+arrives rather than fighting for attention at the same time. `.lightbox__
+placeholder` also picked up the same `border-radius: var(--radius-image)`
+`.gallery__placeholder` already uses, so the shape reads as continuous
+through the whole grow, not a rounded tile snapping to a square panel
+partway through.
+
+Closing reverses the same diff, but against whichever tile is _currently_
+being viewed, not the one originally clicked - looked up fresh by
+`data-index` (`currentTrigger()`) rather than trusting the `lastFocused`
+reference the open handler captured, since that would otherwise point at
+the wrong tile after navigating with prev/next while the lightbox was
+open (verified directly: opened tile 3, stepped to tile 4, closed -
+confirmed via `getBoundingClientRect()` that the placeholder shrank
+toward tile 4's box, not tile 3's, at every sampled point mid-tween, not
+just at the end). If the current tile somehow isn't in the DOM, closing
+falls back to a plain fade instead of leaving the placeholder stuck
+mid-transform with nothing to diff against.
+
+Also clears any lingering `.is-active` state on the custom cursor and
+the hover spotlight when a tile is clicked - both would otherwise stay
+"active" (just invisible, hidden behind the now-opaque lightbox) since
+opening the lightbox doesn't itself fire a `pointerleave` on the trigger.
+Harmless as a rendering matter, but cleaning it up avoids leaving stale
+state around for its own sake.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

@@ -215,6 +215,8 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   const spotlight = document.querySelector<HTMLElement>('.gallery__spotlight');
   const lightbox = document.getElementById('gallery-lightbox');
   const lightboxStage = lightbox?.querySelector<HTMLElement>('.lightbox__stage');
+  const lightboxPlaceholder = lightbox?.querySelector<HTMLElement>('.lightbox__placeholder');
+  const lightboxCounter = lightbox?.querySelector<HTMLElement>('.lightbox__counter');
   const numberEl = lightbox?.querySelector<HTMLElement>('.lightbox__number');
   const currentEl = lightbox?.querySelector<HTMLElement>('.lightbox__current');
   const closeBtn = lightbox?.querySelector<HTMLButtonElement>('.lightbox__close');
@@ -230,6 +232,8 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     track &&
     lightbox &&
     lightboxStage &&
+    lightboxPlaceholder &&
+    lightboxCounter &&
     numberEl &&
     currentEl &&
     closeBtn &&
@@ -436,18 +440,61 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       }
     };
 
+    // FLIP (First/Last/Invert/Play): reads the origin tile's current box
+    // ("first"), diffs it against the lightbox image's own natural,
+    // already-laid-out box ("last"), and plays that difference as a
+    // transform. The browser never actually renders an intermediate
+    // layout state - only a GPU transform tween - which is what makes a
+    // FLIP read as one continuous, physical motion ("the card becomes the
+    // detail view") instead of two separate effects (a fade plus an
+    // unrelated move) layered on top of each other. Center-to-center deltas
+    // rather than edge deltas, since the placeholder's own transform-origin
+    // is centered - matching origins on both sides of the diff is what
+    // keeps the math correct.
+    const flipDelta = (fromEl: HTMLElement, toEl: HTMLElement) => {
+      const from = fromEl.getBoundingClientRect();
+      const to = toEl.getBoundingClientRect();
+      return {
+        x: from.left + from.width / 2 - (to.left + to.width / 2),
+        y: from.top + from.height / 2 - (to.top + to.height / 2),
+        scaleX: from.width / to.width,
+        scaleY: from.height / to.height,
+      };
+    };
+
+    // The tile currently associated with whichever image is on screen -
+    // looked up fresh by data-index rather than trusting the trigger the
+    // lightbox was originally opened from, so closing after stepping to a
+    // different image (prev/next) flies back into the right tile, not
+    // wherever the very first click happened to land.
+    const currentTrigger = () =>
+      viewport.querySelector<HTMLElement>(`.gallery__trigger[data-index="${currentIndex}"]`);
+
     function closeLightbox() {
       const finish = () => {
         lightbox!.hidden = true;
         document.body.style.overflow = '';
         document.removeEventListener('keydown', onKeydown);
+        gsap.set(lightboxPlaceholder!, { clearProps: 'transform' });
         lastFocused?.focus();
       };
       if (!reduceMotion) {
-        // Plain fade, no scale - "click an image, it should fade in and
-        // out," per direct request.
-        gsap.to(lightboxStage!, { opacity: 0, duration: 0.35, ease: 'sine.inOut' });
-        gsap.to(lightbox, { opacity: 0, duration: 0.35, ease: 'sine.inOut', onComplete: finish });
+        const origin = currentTrigger()?.querySelector<HTMLElement>('.gallery__placeholder');
+        const chrome = [closeBtn, prevBtn, nextBtn, lightboxCounter];
+        gsap.to(backdrop!, { opacity: 0, duration: 0.35, ease: 'sine.inOut' });
+        gsap.to(chrome, { opacity: 0, duration: 0.25, ease: 'sine.inOut' });
+        if (origin) {
+          gsap.to(lightboxPlaceholder!, {
+            ...flipDelta(origin, lightboxPlaceholder!),
+            duration: 0.5,
+            ease: 'power3.inOut',
+            onComplete: finish,
+          });
+        } else {
+          // Origin tile isn't in the DOM for some reason - fall back to a
+          // plain fade rather than leaving the placeholder stuck mid-animation.
+          gsap.to(lightboxPlaceholder!, { opacity: 0, duration: 0.35, onComplete: finish });
+        }
       } else {
         finish();
       }
@@ -461,18 +508,36 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       document.body.style.overflow = 'hidden';
 
       if (!reduceMotion) {
-        // Plain opacity, not autoAlpha: autoAlpha also toggles `visibility`,
-        // and that flips to `visible` only when the tween actually starts
-        // ticking (next frame), not synchronously here - so the
-        // closeBtn.focus() call right below would silently fail to move
-        // focus while visibility was still `hidden` from gsap.set(). The
-        // native `hidden` attribute above already handles show/hide (and
-        // removes this from the tab order/a11y tree while closed), so
-        // opacity alone is enough for the fade without that side effect.
-        gsap.set(lightbox, { opacity: 0 });
-        gsap.set(lightboxStage, { opacity: 0 });
-        gsap.to(lightbox, { opacity: 1, duration: 0.4, ease: 'sine.inOut' });
-        gsap.to(lightboxStage, { opacity: 1, duration: 0.45, ease: 'sine.inOut' });
+        // Already-hovered state shouldn't linger, visually hidden but
+        // still "active," underneath the now-opaque lightbox.
+        cursor?.classList.remove('is-active');
+        spotlight?.classList.remove('is-active');
+
+        // Backdrop + chrome fade in as before; the image itself never
+        // fades (stays at opacity: 1 throughout) - it's already fully
+        // visible the instant the tile was clicked, it just grows into
+        // its final position/size, so fading it too would read as two
+        // competing motions instead of one.
+        gsap.set(backdrop, { opacity: 0 });
+        gsap.set([closeBtn, prevBtn, nextBtn, lightboxCounter], { opacity: 0 });
+        gsap.to(backdrop, { opacity: 1, duration: 0.4, ease: 'sine.inOut' });
+        gsap.to([closeBtn, prevBtn, nextBtn, lightboxCounter], {
+          opacity: 1,
+          duration: 0.4,
+          ease: 'sine.inOut',
+          delay: 0.15,
+        });
+
+        const origin = trigger.querySelector<HTMLElement>('.gallery__placeholder') ?? trigger;
+        gsap.set(lightboxPlaceholder, flipDelta(origin, lightboxPlaceholder!));
+        gsap.to(lightboxPlaceholder, {
+          x: 0,
+          y: 0,
+          scaleX: 1,
+          scaleY: 1,
+          duration: 0.65,
+          ease: 'power3.out',
+        });
       }
       closeBtn.focus();
       document.addEventListener('keydown', onKeydown);
@@ -852,6 +917,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     max-width: calc(100vw - 9rem);
   }
 
+  /* Same radius token as .gallery__placeholder (var(--radius-image)) - the FLIP-in from a tile (see the script) reads as one continuous shape growing into place rather than a rounded card snapping to a square one partway through. */
   .lightbox__placeholder {
     display: flex;
     align-items: flex-end;
@@ -860,7 +926,9 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     aspect-ratio: 4 / 3;
     background: var(--color-bg-secondary);
     border: var(--border-hairline) solid var(--color-text-secondary);
+    border-radius: var(--radius-image);
     padding: var(--space-16);
+    overflow: hidden;
   }
 
   .lightbox__number {

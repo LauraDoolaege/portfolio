@@ -120,7 +120,7 @@ const letters = titleWord.split('');
         Belgium <span aria-hidden="true">|</span> Available Feb 2027
       </p>
 
-      <Button href={withBase('/about')} variant="secondary" icon="arrow" class="hero__cta">
+      <Button href={withBase('/about')} variant="primary" icon="arrow" class="hero__cta">
         Get to know me
       </Button>
 
@@ -464,13 +464,13 @@ const letters = titleWord.split('');
       max-width: none;
     }
 
-    /* Turned on only here - see the base rule's comment above. Same visual language as Header's version (hairline rule, mono, text-secondary) so it reads as the same fact stated twice in two contexts, not a new device. */
+    /* Turned on only here - see the base rule's comment above. Same visual language as Header's version (hairline rule, mono, text-secondary) so it reads as the same fact stated twice in two contexts, not a new device. Sits between the intro paragraph and the CTA button - margin-top here and the CTA's own margin-top override just below are both var(--space-24), so the tag gets equal breathing room above (from the paragraph) and below (to the button) rather than the mismatched space-16/space-48 gap this had before. */
     .hero__status {
       position: relative;
       display: inline-flex;
       align-items: center;
       gap: 0.4em;
-      margin-top: var(--space-16);
+      margin-top: var(--space-24);
       padding-left: 0.85rem;
       font-family: var(--font-mono);
       font-size: var(--text-label);
@@ -500,12 +500,10 @@ const letters = titleWord.split('');
     }
 
     :global(.hero__cta) {
-      /* Slightly smaller, per direct request. !important is required: Button.astro's own .btn--secondary rule sets font-size with higher specificity (a class plus Astro's scope-hash attribute selector) than a plain global class here beats without it, and relying on stylesheet injection order to win a specificity tie would be fragile. */
-      font-size: var(--text-label) !important;
+      /* Overrides the base rule's space-48 so the gap down to the status tag above matches that tag's own space-24 margin-top exactly - see .hero__status's comment. No !important needed: same selector, later in the cascade, no specificity fight with Button.astro's own rules (margin isn't something that component sets). */
+      margin-top: var(--space-24);
       /* 44px+ touch target, per WCAG target-size guidance. */
       min-height: 44px;
-      display: inline-flex;
-      align-items: center;
     }
 
     .hero__scroll {

@@ -12,6 +12,23 @@
 // href defaults to "#" — case-study pages are PROPOSED, not built yet
 // (PROJECT_BRIEF.md Section 5), same placeholder-link pattern already used
 // by the header CV button until a real destination exists.
+//
+// Card-hierarchy pass (explicit request, "make them feel more like
+// cards"): the image/stub/info used to sit loose in the anchor with no
+// unifying edge, reading as three stacked parts rather than one object.
+// A real card shell now wraps all three — hairline border, background,
+// one shared radius, overflow: hidden so the image's top corners inherit
+// it for free instead of needing their own. The old fade-in text link
+// ("[ view project -> ]") is gone: the new arrow badge (below) is the
+// card's one "go" affordance now, so keeping both would have meant two
+// competing calls to action doing the same job.
+//
+// `featured`: SelectedWork's new asymmetric bento layout needs one card
+// per row of three to read as the lead item, not just a bigger box - this
+// prop bumps the title size at every width, and on top of that (see the
+// component's own min-width: 900px rule) lets the card's frame stretch to
+// fill the bento cell's full height instead of holding a fixed
+// aspect-ratio, once the grid actually has a cell tall enough to fill.
 import Tag from './Tag.astro';
 
 interface Props {
@@ -20,13 +37,26 @@ interface Props {
   roleTag: string;
   year?: string;
   href?: string;
+  featured?: boolean;
   class?: string;
 }
 
-const { number, title, roleTag, year = 'TBD', href = '#', class: className } = Astro.props;
+const {
+  number,
+  title,
+  roleTag,
+  year = 'TBD',
+  href = '#',
+  featured = false,
+  class: className,
+} = Astro.props;
 ---
 
-<a href={href} class:list={['project-card', className]} aria-label={`${title} — ${roleTag}`}>
+<a
+  href={href}
+  class:list={['project-card', { 'project-card--featured': featured }, className]}
+  aria-label={`${title} — ${roleTag}`}
+>
   <span class="project-card__frame">
     <span class="project-card__image">
       <!-- TODO: replace with a real project image once photography exists (PROJECT_BRIEF.md Section 6) -->
@@ -34,20 +64,30 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     <span class="project-card__number" aria-hidden="true">
       {number}
     </span>
+    <span class="project-card__arrow" aria-hidden="true">
+      <svg viewBox="0 0 16 16" fill="none">
+        <path
+          d="M4.5 11.5L11.5 4.5M11.5 4.5H5.5M11.5 4.5V10.5"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </span>
   </span>
 
-  <span class="project-card__stub" aria-hidden="true"></span>
+  <span class="project-card__body">
+    <span class="project-card__stub" aria-hidden="true"></span>
 
-  <span class="project-card__info">
-    <span class="project-card__meta">
-      <Tag>{roleTag}</Tag>
-      <span class="project-card__year" aria-hidden="true">
-        {year}
+    <span class="project-card__info">
+      <span class="project-card__meta">
+        <Tag>{roleTag}</Tag>
+        <span class="project-card__year" aria-hidden="true">
+          {year}
+        </span>
       </span>
-    </span>
-    <span class="project-card__title">{title}</span>
-    <span class="project-card__link" aria-hidden="true">
-      [ view project → ]
+      <span class="project-card__title">{title}</span>
     </span>
   </span>
 </a>
@@ -64,7 +104,11 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
   // no-JS fallback: GSAP's inline `transform` always wins over it once
   // this script runs, but when it doesn't (reduced motion, or JS never
   // loads), the plain CSS hover state still gives a functional response,
-  // just without the mouse-follow.
+  // just without the mouse-follow. The card's own lift/shadow/border/
+  // arrow-fill/title-color hover states are plain CSS on `.project-card`
+  // itself, untouched by this script - it only ever writes to the image
+  // layer, so there's no risk of the two systems fighting over the same
+  // property.
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
   if (!prefersReducedMotion() && window.matchMedia('(pointer: fine)').matches) {
@@ -105,20 +149,45 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
 <style>
   .project-card {
     display: block;
+    background: var(--color-bg-primary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    border-radius: var(--radius-image);
+    overflow: hidden;
+    transition:
+      transform var(--motion-duration-slow) var(--motion-easing),
+      box-shadow var(--motion-duration-slow) var(--motion-easing),
+      border-color var(--motion-duration) var(--motion-easing);
+  }
+
+  /* The lift + soft shadow read as the card physically rising off the
+     page - a bigger, slower move than the image's own scale/shift, so
+     the two don't compete for attention. Kept as a plain CSS transition
+     (not GSAP) since it's a simple two-state toggle on the card itself,
+     an element the mouse-shift script above never touches. */
+  .project-card:hover,
+  .project-card:focus-visible {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px -24px rgb(23 21 15 / 0.38);
+    border-color: var(--color-ink);
+  }
+
+  .project-card:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
   }
 
   .project-card__frame {
     display: block;
     position: relative;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
   }
 
   .project-card__image {
     display: block;
-    aspect-ratio: 4 / 3;
+    width: 100%;
+    height: 100%;
     background: var(--color-bg-secondary);
-    border: var(--border-hairline) solid var(--color-text-secondary);
-    border-radius: var(--radius-image);
     transition: transform var(--motion-duration-slow) var(--motion-easing);
   }
 
@@ -140,9 +209,51 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     color: var(--color-text-secondary);
   }
 
+  /* The card's one "go" affordance, replacing the old fade-in text link -
+     a circular badge in the Awwwards-card mold, hairline at rest so it
+     doesn't compete with the number chip, filling solid ink (with the
+     arrow flipping to the porcelain background color via currentColor)
+     on hover/focus - same fill-sweep language Button.astro's primary
+     variant already uses elsewhere on this page, just circular instead
+     of a box. */
+  .project-card__arrow {
+    position: absolute;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--color-bg-primary);
+    border: var(--border-hairline) solid var(--color-ink);
+    border-radius: var(--radius-pill);
+    color: var(--color-ink);
+    transition:
+      background var(--motion-duration) var(--motion-easing),
+      color var(--motion-duration) var(--motion-easing),
+      transform var(--motion-duration) var(--motion-easing);
+  }
+
+  .project-card__arrow svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .project-card:hover .project-card__arrow,
+  .project-card:focus-visible .project-card__arrow {
+    background: var(--color-ink);
+    color: var(--color-bg-primary);
+    transform: scale(1.08);
+  }
+
+  .project-card__body {
+    padding: var(--space-24);
+  }
+
   .project-card__stub {
     display: block;
-    margin-top: 0.9rem;
+    margin-bottom: var(--space-16);
     border-top: var(--border-hairline) dashed var(--color-text-secondary);
   }
 
@@ -151,7 +262,6 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     flex-direction: column;
     align-items: flex-start;
     gap: 0.6rem;
-    padding-top: 0.9rem;
   }
 
   .project-card__meta {
@@ -178,17 +288,11 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     transition: color var(--motion-duration) var(--motion-easing);
   }
 
-  .project-card__link {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-accent);
-    opacity: 0;
-    transform: translateX(-0.4em);
-    transition:
-      opacity var(--motion-duration) var(--motion-easing),
-      transform var(--motion-duration) var(--motion-easing);
+  /* Reads as the lead item of its row at every width, not just on the
+     desktop bento layout below - a bigger title is a cheap, always-on
+     signal that degrades gracefully instead of disappearing on mobile. */
+  .project-card--featured .project-card__title {
+    font-size: 1.85rem;
   }
 
   .project-card:hover .project-card__title,
@@ -196,14 +300,26 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     color: var(--color-accent);
   }
 
-  .project-card:hover .project-card__link,
-  .project-card:focus-visible .project-card__link {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  /* Past this width the featured card's frame stops holding its own
+     aspect-ratio and stretches instead - see SelectedWork.astro's own
+     bento grid rule for why this width was chosen (same breakpoint the
+     grid itself switches on). Below it, .project-card--featured is a
+     plain stacked card like its siblings, just with the bigger title
+     above. */
+  @media (min-width: 900px) {
+    .project-card--featured {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
 
-  .project-card:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 4px;
+    .project-card--featured .project-card__frame {
+      flex: 1 1 auto;
+      aspect-ratio: auto;
+    }
+
+    .project-card--featured .project-card__body {
+      flex-shrink: 0;
+    }
   }
 </style>

@@ -1076,6 +1076,101 @@ assumed from the media queries: at 375px only the Hero copy is visible
 at a real desktop width (1400px) only the header copy is visible (Hero's
 reports `display: none`) - no width shows both or neither.
 
+**Two direct follow-ups on the Hero bottom block: equal spacing around
+the status tag, and the CTA button switched from a text link to a box.**
+The status tag's margin-top (space-16, echoing the paragraph above) and
+the CTA's own margin-top (space-48, unrelated to the tag) didn't match,
+so the tag read as sitting closer to the paragraph than to the button
+below it. Both are now `var(--space-24)`, verified via
+`getComputedStyle` rather than eyeballing the rect (the raw
+`getBoundingClientRect()` gap differs by a few px either side of 24,
+which is just line-height/box differences between a `<p>` and a button,
+not a real margin mismatch). Separately, "Get to know me" changed from
+`variant="secondary"` (a quiet underline text link) to
+`variant="primary"` (the hairline-box, fill-sweeps-in-on-hover style) -
+per direct request that it match "the other buttons on the page," i.e.
+the header's CV button and ContactCTA's own local copy of the same
+style, both boxes. The mobile-only `!important` font-size override this
+used to need (Button.astro's `.btn--secondary` rule outranked a plain
+global class without it) is gone - `.btn--primary` already renders at
+`--text-label` by default, so there's no specificity fight left to work
+around; what's left of that override is just the margin-top equalization
+above and the existing 44px touch-target min-height.
+
+**Selected Work rebuilt around an asymmetric bento grid with real hover
+micro-interactions, replacing the equal-width three-card rows** - per
+direct, detailed request ("the selected work section needs work...
+change the layout to something like [an Awwwards-style featured-card
+bento]"). Both groups (Design and Experience) now use the same 7fr/5fr
+device: the first project in each group's array is `featured` (a new
+`ProjectCard` prop), spanning both rows of the wide column, with the
+other two stacked in the narrow column - previously only the Experience
+row broke from uniformity (a single nth-child stagger), so this is both
+a bolder move and a more consistent one, applied identically to both
+groups rather than singling one out. The old `--design`/`--experience`
+grid modifier classes and the stagger hack are gone, replaced by three
+plain `:nth-child` position rules shared by both grids.
+
+Getting the featured card to actually fill the bento cell's height (not
+just its own aspect-ratio) needed `grid-auto-rows: auto` on the grid
+(not an explicit `1fr 1fr`, which needs a definite container height to
+mean anything) plus a `min-width: 900px` rule in `ProjectCard.astro`
+itself: past that width, `.project-card--featured` becomes a flex column
+with `height: 100%` and its frame set to `flex: 1 1 auto; aspect-ratio:
+auto` instead of holding a fixed ratio - so it stretches to match
+whatever height the two stacked cards on its own row happen to produce,
+rather than dictating a height of its own that they'd then have to
+match. Below that width (mobile/tablet portrait), the grid itself falls
+back to a plain single-column stack (`grid-template-columns: 1fr`) and
+the featured card is just a normal stacked card with a bigger title -
+flagging this rather than silently deciding it, per PROJECT_BRIEF.md
+Section 8's "mobile fallback for macro asymmetry" being an explicitly
+open decision: this reuses the same "asymmetry drops to an equal stack
+below a width threshold" pattern already established for AboutDrives'
+scattered cards and Hero's own grid, not a new one invented for this
+component.
+
+`ProjectCard.astro` itself picked up a real card shell it didn't have
+before, per direct feedback that the section needed better hierarchy
+("make them feel more like cards"): previously the image, dashed stub,
+and info block sat loose in the anchor with no unifying edge, reading as
+three stacked parts. Now the whole card is one bordered, backgrounded,
+radius'd box (`overflow: hidden`, so the image's top corners inherit the
+card's own radius for free instead of needing one of their own), with
+the stub/tag/title padded into a `.project-card__body` instead of
+floating directly in the anchor. The old fade-in text link ("[ view
+project -> ]") is gone, replaced by a circular arrow badge pinned to the
+image's bottom-right corner - hairline outline at rest, filling solid
+ink (the arrow flips to the porcelain background color via `currentColor`)
+on hover/focus, the same fill-sweep visual language `Button.astro`'s
+primary variant already uses elsewhere on this page, just circular. That
+badge is the card's one "go" affordance now; keeping the old text link
+alongside it would have meant two competing CTAs doing the same job.
+
+The other three requested micro-interactions layer on top without
+touching how the mouse-magnetic image shift already works (unchanged
+from an earlier pass, still gated on `prefers-reduced-motion` +
+`pointer: fine`, still only ever writing to `.project-card__image`'s own
+transform): the whole card lifts (`translateY(-6px)`) with a soft
+`box-shadow` and its border darkens to ink on `:hover`/`:focus-visible`,
+plain CSS transitions on `.project-card` itself, an element the
+mouse-shift script never touches, so there's no risk of the two systems
+fighting over the same property (the same reasoning already documented
+elsewhere in this file for why GSAP and static CSS can't both own one
+element's `transform`). The title-to-accent-color hover was already
+implemented from an earlier pass and needed no change. On touch,
+everything gated on `pointer: fine` simply doesn't run - no separate
+opt-out was needed, since that gate already existed - and the CSS
+`:hover`/`:focus-visible` rules still give a plain functional response
+via tap-and-hold, same "reduced-motion/no-JS fallback stays useful"
+principle used throughout this file. Verified in the browser at both a
+1400px and a 375px viewport: the bento grid and the flex-stretch
+featured card render correctly above 900px, the plain single-column
+fallback (with the featured card's title still visibly larger) renders
+below it, and a real hover on a card shows the lift, the border going to
+ink, the arrow badge filling solid, and the title switching to accent -
+not just assumed from the CSS reading right.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

@@ -5,13 +5,26 @@
 // exist yet (Section 6), so cards are numbered placeholders, not invented
 // project names.
 //
-// DESIGN_VARIANCE: 9 (see CLAUDE.md "Experimental design dials") — the two
-// groups deliberately don't share one grid: the Design row is even, the
-// Experience row staggers its middle card. That's this section's one
-// structural break from uniformity; the grid itself (auto-fit, not a fixed
-// column count) is the mobile-column-count answer to the open decision in
-// PROJECT_BRIEF.md Section 8, chosen so it doesn't need a guessed
-// breakpoint to look right at any width.
+// DESIGN_VARIANCE: 9 (see CLAUDE.md "Experimental design dials") — cards
+// no longer sit in three identical boxes per row (an equal-width triplet
+// reads as a template, per direct feedback that this section "needs
+// work"/more hierarchy). Each group is now a 7fr/5fr bento: one featured
+// card carries the row, the other two stack beside it. Both groups use
+// the same device now (design row and experience row alike) rather than
+// only one of the two breaking from uniformity, as the previous version
+// did — a bolder, more consistent move, and it also retires the old
+// `--design`/`--experience` grid modifiers and the experience-only
+// nth-child stagger hack that used to be this section's one asymmetric
+// beat.
+//
+// Mobile fallback (PROJECT_BRIEF.md Section 8 lists this as an open
+// decision — flagging, not silently resolving): below the bento's own
+// min-width: 900px switch, both groups collapse to a single equal-width
+// column, same "macro asymmetry drops to a plain stack" pattern already
+// used for AboutDrives' scattered cards and Hero's own grid. The featured
+// card stays visually distinct even there via ProjectCard's own
+// `featured` prop (a bigger title, at every width) rather than
+// disappearing entirely into the stack.
 import SectionMarker from '../ui/SectionMarker.astro';
 import ProjectCard from '../ui/ProjectCard.astro';
 
@@ -38,21 +51,21 @@ const experience = [
 
     <div class="selected-work__group">
       <h3 class="selected-work__group-label">Design: individual work</h3>
-      <ul class="selected-work__grid selected-work__grid--design">
-        {design.map((project) => (
+      <ul class="selected-work__grid">
+        {design.map((project, index) => (
           <li>
-            <ProjectCard {...project} />
+            <ProjectCard {...project} featured={index === 0} />
           </li>
         ))}
       </ul>
     </div>
 
-    <div class="selected-work__group selected-work__group--experience">
+    <div class="selected-work__group">
       <h3 class="selected-work__group-label">Experience design: group projects</h3>
-      <ul class="selected-work__grid selected-work__grid--experience">
-        {experience.map((project) => (
+      <ul class="selected-work__grid">
+        {experience.map((project, index) => (
           <li>
-            <ProjectCard {...project} />
+            <ProjectCard {...project} featured={index === 0} />
           </li>
         ))}
       </ul>
@@ -90,16 +103,43 @@ const experience = [
     color: var(--color-ink);
   }
 
+  /* Mobile/tablet default: a plain equal-width stack, first item first -
+     see the file header comment on why this is the deliberate fallback
+     rather than trying to preserve the bento shape at a width that can't
+     fit a 7fr/5fr split comfortably. */
   .selected-work__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: 1fr;
+    gap: var(--space-32);
     margin-top: 2rem;
   }
 
+  /* Bento: one featured card (spans both rows in the wide column) beside
+     two stacked ones. `grid-auto-rows` (not an explicit `1fr 1fr`, which
+     needs a definite container height to mean anything) lets the two
+     stacked cards size the rows from their own content, and the featured
+     card's own min-width: 900px rule (ProjectCard.astro) stretches to
+     match whatever height that produces, instead of imposing a height of
+     its own that the stacked column would then have to match. */
   @media (min-width: 900px) {
-    .selected-work__grid--experience li:nth-child(2) {
-      margin-top: 3.5rem;
+    .selected-work__grid {
+      grid-template-columns: 7fr 5fr;
+      grid-auto-rows: auto;
+    }
+
+    .selected-work__grid li:first-child {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+
+    .selected-work__grid li:nth-child(2) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .selected-work__grid li:nth-child(3) {
+      grid-column: 2;
+      grid-row: 2;
     }
   }
 

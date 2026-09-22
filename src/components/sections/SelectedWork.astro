@@ -51,7 +51,7 @@ const experience = [
 
 <section class="selected-work" id="work">
   <div class="selected-work__inner">
-    <SectionMarker index="02" label="Selected work" />
+    <SectionMarker index="01" label="Selected work" />
 
     <p class="selected-work__intro">
       A mix of solo design work and collaborative experience-design projects.
@@ -127,16 +127,20 @@ const experience = [
 
   @media (min-width: 900px) {
     /* A fixed-height row is what makes an accordion read as one object
-           instead of three cards of changing aspect-ratio - the height stays
-           constant, only each panel's share of the width changes. flex-grow
-           (not width or flex-basis) is what's animated: every panel starts
-           equal (grow: 1) and the hovered/focused one steps up to grow: 6,
-           so it takes roughly 6/8 of the row while its two siblings compress
-           to about 1/8 each, without any JS or per-panel width math. */
+             instead of three cards of changing aspect-ratio - the height stays
+             constant, only each panel's share of the width changes. 18rem, not
+             the 30rem this first shipped with - per direct feedback the panels
+             read as "quite tall" at that height, more like portrait cards than
+             the short, horizontal, rectangular strip that's actually wanted.
+             flex-grow (not width or flex-basis) is what's animated: every
+             panel starts equal (grow: 1) and the hovered/focused one steps up
+             to grow: 6, so it takes roughly 6/8 of the row while its two
+             siblings compress to about 1/8 each, without any JS or per-panel
+             width math. */
     .selected-work__accordion {
       display: flex;
       align-items: stretch;
-      height: 30rem;
+      height: 18rem;
       gap: var(--space-16);
     }
 
@@ -144,7 +148,10 @@ const experience = [
       flex: 1 1 0%;
       min-width: 0;
       overflow: hidden;
-      transition: flex-grow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      /* --motion-easing-soft, not a hand-typed cubic-bezier literal - see
+                     that token's own comment (global.css) for why this exact curve
+                     is now shared across several places instead of copy-pasted. */
+      transition: flex-grow 0.6s var(--motion-easing-soft);
     }
 
     .selected-work__accordion > li:hover,
@@ -153,8 +160,8 @@ const experience = [
     }
 
     /* The card fills its panel's full box instead of holding its own
-           aspect-ratio - same "stretch to fill a flex/grid cell" technique
-           the bento's featured card used before this replaced it. */
+                 aspect-ratio - same "stretch to fill a flex/grid cell" technique
+                 the bento's featured card used before this replaced it. */
     .selected-work__accordion :global(.project-card) {
       display: flex;
       flex-direction: column;
@@ -167,12 +174,12 @@ const experience = [
     }
 
     /* Collapsed (rest) state: a panel this narrow has no room for a
-           horizontal title/tag/year row, so the title runs vertically along
-           the panel instead (the classic accordion-gallery "spine label"),
-           and the tag/year/dashed-stub - which would just wrap illegibly at
-           this width - are hidden rather than shrunk into something
-           unreadable. The number badge and arrow badge stay put; both are
-           already small, self-contained, and legible at any panel width. */
+                 horizontal title/tag/year row, so the title runs vertically along
+                 the panel instead (the classic accordion-gallery "spine label"),
+                 and the tag/year/dashed-stub - which would just wrap illegibly at
+                 this width - are hidden rather than shrunk into something
+                 unreadable. The number badge and arrow badge stay put; both are
+                 already small, self-contained, and legible at any panel width. */
     .selected-work__accordion :global(.project-card__body) {
       flex: 0 0 auto;
       display: flex;
@@ -193,9 +200,9 @@ const experience = [
     }
 
     /* Expanded state: the panel is wide enough again for the card's
-           normal upright reading layout, so everything reverts - the title
-           un-rotates, the tag/year/stub reappear, the body padding grows
-           back to the card's usual space-24 inset. */
+                 normal upright reading layout, so everything reverts - the title
+                 un-rotates, the tag/year/stub reappear, the body padding grows
+                 back to the card's usual space-24 inset. */
     .selected-work__accordion > li:hover :global(.project-card__body),
     .selected-work__accordion > li:focus-within :global(.project-card__body) {
       align-items: flex-start;

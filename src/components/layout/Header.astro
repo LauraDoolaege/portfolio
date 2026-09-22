@@ -465,8 +465,8 @@ const currentPath = Astro.url.pathname;
       opacity: 0;
       transform: scale(0.98);
       transition:
-        opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.6s var(--motion-easing-soft),
+        transform 0.6s var(--motion-easing-soft),
         visibility 0.6s;
     }
 

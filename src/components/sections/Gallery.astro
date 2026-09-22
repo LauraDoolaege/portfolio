@@ -99,11 +99,20 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       example's year range for the tile count (1-{TOTAL}) and keeping
       the same ink/text-secondary color this already used, not the
       example's gold.
+
+      .gallery__progress-thumb is a second, later addition - a thicker
+      mark riding on top of the thin fill bar, sized to roughly how much
+      of the collection the viewport currently shows and positioned to
+      roughly where that window sits within the full 1-{TOTAL} range, so
+      it reads as "you are here" rather than just "this much has been
+      scrolled." Both bar and thumb share the same progress/width math in
+      the script below, just rendered differently.
     -->
     <div class="gallery__progress" aria-hidden="true">
       <span class="gallery__progress-label">1</span>
       <span class="gallery__progress-track">
         <span class="gallery__progress-bar"></span>
+        <span class="gallery__progress-thumb"></span>
       </span>
       <span class="gallery__progress-label">{TOTAL}</span>
     </div>
@@ -224,6 +233,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   const viewport = document.querySelector<HTMLElement>('.gallery__viewport');
   const track = document.querySelector<HTMLElement>('.gallery__track');
   const progressBar = document.querySelector<HTMLElement>('.gallery__progress-bar');
+  const progressThumb = document.querySelector<HTMLElement>('.gallery__progress-thumb');
   const cursor = document.querySelector<HTMLElement>('.gallery__cursor');
   const spotlight = document.querySelector<HTMLElement>('.gallery__spotlight');
   const lightbox = document.getElementById('gallery-lightbox');
@@ -257,6 +267,23 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     const reduceMotion = prefersReducedMotion();
     const total = Number(viewport.dataset.total || '0');
 
+    // Drives both the thin fill bar (overall scroll progress, unchanged)
+    // and the new thumb riding on top of it - a thicker mark sized to
+    // roughly how much of the collection the viewport currently shows
+    // (viewport width / the track's full scrollable width) and moved to
+    // roughly where that window currently sits within the 0-1 progress
+    // range, so it reads as "you are here" rather than just "this much
+    // has been scrolled." Clamped so it never collapses to an invisible
+    // sliver or balloons to the full track width at either extreme.
+    const setProgress = (progress: number) => {
+      if (progressBar) progressBar.style.transform = `scaleX(${progress})`;
+      if (progressThumb) {
+        const ratio = Math.min(0.9, Math.max(0.08, viewport.clientWidth / track.scrollWidth));
+        progressThumb.style.width = `${ratio * 100}%`;
+        progressThumb.style.left = `${progress * (1 - ratio) * 100}%`;
+      }
+    };
+
     // Whichever trigger currently has the pointer inside it, per the
     // shared tracker set up below (alongside the hover-driven effects
     // further down) - read from the pin's own onUpdate to cut hover
@@ -274,15 +301,13 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       // scroll position instead of a ScrollTrigger - same "functional
       // equivalent, motion removed" idea: the line itself doesn't move
       // under motion, it just reflects a value.
-      if (progressBar) {
-        const syncProgress = () => {
-          const max = viewport.scrollWidth - viewport.clientWidth;
-          const progress = max > 0 ? viewport.scrollLeft / max : 0;
-          progressBar.style.transform = `scaleX(${progress})`;
-        };
-        viewport.addEventListener('scroll', syncProgress, { passive: true });
-        syncProgress();
-      }
+      const syncProgress = () => {
+        const max = viewport.scrollWidth - viewport.clientWidth;
+        const progress = max > 0 ? viewport.scrollLeft / max : 0;
+        setProgress(progress);
+      };
+      viewport.addEventListener('scroll', syncProgress, { passive: true });
+      syncProgress();
     } else {
       // --- Plain scroll-linked reveal, no stacking: this section's
       // original mechanism (see the file header comment), restored -
@@ -311,7 +336,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
           scrub: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
-            if (progressBar) progressBar.style.transform = `scaleX(${self.progress})`;
+            setProgress(self.progress);
             // Scrolling moves tiles under the cursor without ever firing
             // a pointer event (the mouse itself hasn't moved), so
             // nothing would otherwise tell a hovered tile's bob-pause,
@@ -935,6 +960,22 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     background: var(--color-text-secondary);
     transform-origin: left;
     transform: scaleX(0);
+  }
+
+  /* The "you are here" mark, per direct request for "a subtle thicker
+     line on top of the gallery progress bar, to show more or less where
+     in the collection you are" - width and left are both plain
+     percentages set from the script (setProgress()), not a transform, so
+     the two can vary independently (the fill bar only ever needs a
+     single scaleX; this needs a width *and* a position). Solid ink,
+     thicker than the 1px bar/track underneath it but still a hairline
+     multiple, not a heavy bar of its own - "subtle," per the request. */
+  .gallery__progress-thumb {
+    position: absolute;
+    top: 0;
+    height: 3px;
+    transform: translateY(-1px);
+    background: var(--color-ink);
   }
 
   @media (max-width: 640px) {

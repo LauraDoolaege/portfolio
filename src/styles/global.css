@@ -70,6 +70,15 @@
   --motion-duration: 300ms;
   --motion-duration-slow: 450ms;
   --motion-easing: ease-out;
+  /* A softer alternative to --motion-easing, for hover/press transitions
+     that should read as a tactile glide rather than a mechanical
+     ease-out - plain ease-out decelerates evenly the whole way, which is
+     what read as "harsh" on ProjectCard's hover lift, per direct
+     feedback. This is the same curve already used for the mobile nav
+     panel's entrance (Header.astro) and the Selected Work accordion's
+     flex-grow transition - promoted to a real token now that a third
+     place wants it, rather than a third hand-typed cubic-bezier literal. */
+  --motion-easing-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Strict 8px spacing scale — general-purpose, additive to the section
      rhythm tokens above (--space-outer/--space-section), not a

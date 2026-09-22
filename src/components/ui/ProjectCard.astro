@@ -30,6 +30,15 @@
 // section's own class, not by teaching this component about every
 // section that might reuse it. Keeps this file focused on the one card
 // shape the brief actually specifies.
+//
+// Hover motion softened, drop shadow removed - per direct feedback that
+// the hover lift read as "very harsh." The lift/border-color/arrow/title
+// transitions now use the new `--motion-easing-soft` token (global.css)
+// instead of the plain ease-out `--motion-easing` - a gradual glide
+// instead of an even mechanical deceleration - and the box-shadow that
+// used to accompany the lift is gone outright, per the same feedback;
+// the lift and the border darkening to ink already carry the "this one's
+// active" read without it.
 import Tag from './Tag.astro';
 
 interface Props {
@@ -141,21 +150,28 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     border: var(--border-hairline) solid var(--color-text-secondary);
     border-radius: var(--radius-image);
     overflow: hidden;
+    /* --motion-easing-soft (not the plain --motion-easing/ease-out this
+             used before), and a touch longer than --motion-duration-slow - per
+             direct feedback that the card's hover movement read as "very
+             harsh." Plain ease-out decelerates evenly the whole way, which
+             reads mechanical on a 6px lift; the soft cubic-bezier eases in
+             more gradually, closer to a physical glide. */
     transition:
-      transform var(--motion-duration-slow) var(--motion-easing),
-      box-shadow var(--motion-duration-slow) var(--motion-easing),
-      border-color var(--motion-duration) var(--motion-easing);
+      transform 0.55s var(--motion-easing-soft),
+      border-color var(--motion-duration) var(--motion-easing-soft);
   }
 
-  /* The lift + soft shadow read as the card physically rising off the
-     page - a bigger, slower move than the image's own scale/shift, so
-     the two don't compete for attention. Kept as a plain CSS transition
-     (not GSAP) since it's a simple two-state toggle on the card itself,
-     an element the mouse-shift script above never touches. */
+  /* The lift reads as the card physically rising off the page - a
+     bigger, slower move than the image's own scale/shift, so the two
+     don't compete for attention. Kept as a plain CSS transition (not
+     GSAP) since it's a simple two-state toggle on the card itself, an
+     element the mouse-shift script above never touches. The drop shadow
+     this used to gain on hover is gone per direct request - the lift and
+     the border darkening to ink already carry the "this one's active"
+     read on their own. */
   .project-card:hover,
   .project-card:focus-visible {
     transform: translateY(-6px);
-    box-shadow: 0 24px 48px -24px rgb(23 21 15 / 0.38);
     border-color: var(--color-ink);
   }
 
@@ -176,7 +192,7 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     width: 100%;
     height: 100%;
     background: var(--color-bg-secondary);
-    transition: transform var(--motion-duration-slow) var(--motion-easing);
+    transition: transform var(--motion-duration-slow) var(--motion-easing-soft);
   }
 
   /* Reduced-motion/no-JS fallback only - the script above takes over transform entirely (scale + mouse-follow shift) once it runs, and GSAP's inline transform always wins over this rule regardless of source order, so there's no double-scaling risk between the two. */
@@ -218,9 +234,9 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     border-radius: var(--radius-pill);
     color: var(--color-ink);
     transition:
-      background var(--motion-duration) var(--motion-easing),
-      color var(--motion-duration) var(--motion-easing),
-      transform var(--motion-duration) var(--motion-easing);
+      background var(--motion-duration) var(--motion-easing-soft),
+      color var(--motion-duration) var(--motion-easing-soft),
+      transform var(--motion-duration) var(--motion-easing-soft);
   }
 
   .project-card__arrow svg {
@@ -273,7 +289,7 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     letter-spacing: -0.01em;
     line-height: 1.1;
     color: var(--color-ink);
-    transition: color var(--motion-duration) var(--motion-easing);
+    transition: color var(--motion-duration) var(--motion-easing-soft);
   }
 
   .project-card:hover .project-card__title,

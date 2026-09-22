@@ -11,6 +11,14 @@
 // design-variance override in CLAUDE.md): a single rotated asterisk after
 // the heading, the exact example the brief itself gives for this color.
 // It appears nowhere else on the homepage — don't add a second one.
+//
+// Moved to sit directly below Selected Work, per direct request - and
+// dropped its own SectionMarker number in the move (index="04" ->
+// omitted) so the page's numbered sections still read as a clean
+// ascending sequence (01 Selected Work, 02 Principles, 03 Gallery) with
+// this one sitting quietly in between rather than interrupting it with
+// an out-of-order "04". SectionMarker's `index` prop is optional for
+// exactly this case (see that file).
 import SectionMarker from '../ui/SectionMarker.astro';
 
 const items = [
@@ -27,7 +35,7 @@ const items = [
 
 <section class="currently">
   <div class="currently__inner">
-    <SectionMarker index="04" label="Currently working on">
+    <SectionMarker label="Currently working on">
       <span class="currently__wink" aria-hidden="true" slot="suffix">
         *
       </span>

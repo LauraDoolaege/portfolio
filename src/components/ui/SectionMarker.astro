@@ -9,8 +9,15 @@
 // rare section that needs a trailing mark next to its own heading (e.g.
 // CurrentlyWorkingOn's terracotta wink asterisk) instead of a separate
 // absolutely-positioned element guessing at the label's flow position.
+//
+// `index` is optional - CurrentlyWorkingOn dropped its own number when it
+// moved to sit directly below Selected Work (per direct request), so the
+// page's numbered running-head sequence (01 Selected Work, 02 Principles,
+// 03 Gallery) stays a clean ascending read without a section physically
+// sitting out of order in it. Omitting `index` just skips the "( NN )"
+// span entirely rather than rendering an empty pair of parens.
 interface Props {
-  index: string;
+  index?: string;
   label: string;
 }
 
@@ -18,9 +25,11 @@ const { index, label } = Astro.props;
 ---
 
 <div class="section-marker">
-  <span class="section-marker__index" aria-hidden="true">
-    ( {index} )
-  </span>
+  {index && (
+    <span class="section-marker__index" aria-hidden="true">
+      ( {index} )
+    </span>
+  )}
   <h2 class="section-marker__label">
     {label}
     <slot name="suffix" />

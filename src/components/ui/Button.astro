@@ -5,6 +5,13 @@
 // - primary: hairline-bordered ink/charcoal box, fill sweeps in on
 //   hover/focus. No bracket glyphs — the box itself is the affordance.
 // - secondary: unchanged — a quiet underline text link.
+//
+// Hover/press transitions use `--motion-easing-soft` (global.css), not
+// the plain ease-out `--motion-easing` this used before - per direct
+// feedback that ProjectCard's own hover motion read as "very harsh,"
+// with the same fix asked for on "the buttons on the page" too. Applies
+// to both variants (the base `.btn` rule owns the color transition both
+// share) plus the primary fill-sweep and its new press transform.
 interface Props {
   href: string;
   variant?: 'primary' | 'secondary';
@@ -75,7 +82,11 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
     align-items: center;
     gap: 0.5em;
     font-weight: 500;
-    transition: color var(--motion-duration) var(--motion-easing);
+    /* --motion-easing-soft, not the plain ease-out --motion-easing -
+             same "tactile glide, not a mechanical ease-out" fix applied to
+             ProjectCard's hover motion, per direct feedback to bring it to
+             the buttons too. */
+    transition: color var(--motion-duration) var(--motion-easing-soft);
   }
 
   .btn:focus-visible {
@@ -96,6 +107,7 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
     border: var(--border-hairline) solid var(--color-ink);
     border-radius: 0;
     padding: 0.75em 1.1em;
+    transition: transform var(--motion-duration) var(--motion-easing-soft);
   }
 
   .btn--primary > * {
@@ -110,7 +122,7 @@ const { href, variant = 'primary', icon, class: className } = Astro.props;
     background: var(--color-ink);
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform var(--motion-duration-slow) var(--motion-easing);
+    transition: transform var(--motion-duration-slow) var(--motion-easing-soft);
   }
 
   .btn--primary:hover,

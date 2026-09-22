@@ -1,30 +1,44 @@
 ---
-// Homepage "3 design principles," sitting between Hero and Selected Work
-// - per direct request, in "a really subtle fashion." Copy is the same
+// Homepage "3 design principles," between Selected Work and Gallery - per
+// direct request, in "a really subtle fashion." Body copy is the same
 // three sentences as About's own "How I work" section (AboutProcess.astro)
 // - reused verbatim rather than rewritten, per this project's own "no
-// fabricated copy" rule - only the title changes (this isn't "How I work"
-// twice on the site, it's the same process described once each on two
-// pages) and the layout/position are new.
+// fabricated copy" rule. Each item's short title is reused too, from the
+// homepage's former "How I think" section (HowIThink.astro, now removed
+// per direct request - "add the titles from the last section... to the 3
+// design principles" then "remove the how I think section... i do not
+// need it anymore") - "Understand before designing" / "Creative, but
+// defendable" / "Make it make sense", paired in order with the three
+// process sentences rather than re-authored.
 //
-// Deliberately outside the numbered SectionMarker rhythm (Selected Work
-// is "02," Gallery "03," and so on) rather than becoming a new "02" that
-// bumps every section after it - it's a quiet aside before the numbered
-// sections start, not a peer to them. For the same "subtle" reason, it
-// skips the display-font headline entirely: Barlow Condensed is this
-// page's one-headline-anchor type (PROJECT_BRIEF.md Section 3), already
-// spent on Hero's "PORTFOLIO," and giving this section its own big
-// headline would split that attention rather than stay quiet. The kicker
-// and the three lines are both mono/body type only, sized and colored to
-// read as fine print, not a second section title.
+// Now carries a real numbered kicker ("( 02 ) My design principles",
+// exact text per direct request) instead of the plain unnumbered
+// "Approach" label the first version used - the section is a peer to the
+// other numbered sections now, not deliberately outside that rhythm.
+// Still kept in the small mono kicker style rather than promoted to a
+// full SectionMarker h2, though: Barlow Condensed is this page's
+// one-headline-anchor type (PROJECT_BRIEF.md Section 3), already spent
+// on Hero's "PORTFOLIO", and a second big display headline here would
+// compete with it rather than stay the quiet aside this was asked to be.
+//
+// Numbering: Selected Work is "01" and this is "02" per the exact text
+// requested, with Gallery unchanged at "03" - a clean ascending read.
+// Currently Working On sits physically between Selected Work and this
+// section on the page ("directly below the selected works", a separate
+// direct request), but dropped its own number in the move rather than
+// claiming "02" itself and pushing this one to "03" - see that file's
+// own comment and SectionMarker.astro's now-optional `index` prop.
 const principles = [
   {
+    title: 'Understand before designing',
     text: 'Paper, whiteboards, sticky notes, messy diagrams: anything that lets ideas move faster than my concern for how they look.',
   },
   {
+    title: 'Creative, but defendable',
     text: "I especially enjoy collaborative ideation: getting different perspectives in the room, throwing ideas around, combining them and challenging each other's assumptions.",
   },
   {
+    title: 'Make it make sense',
     text: 'Once the messy thinking starts to make sense, I move into digital tools and prototypes.',
   },
 ];
@@ -32,14 +46,15 @@ const principles = [
 
 <section class="principles">
   <div class="principles__inner">
-    <p class="principles__kicker">Approach</p>
+    <p class="principles__kicker">
+      <span aria-hidden="true">( 02 )</span>
+      My design principles
+    </p>
 
     <ul class="principles__list">
-      {principles.map((item, index) => (
+      {principles.map((item) => (
         <li class="principles__item">
-          <span class="principles__number" aria-hidden="true">
-            {String(index + 1).padStart(2, '0')}
-          </span>
+          <h3 class="principles__title">{item.title}</h3>
           <p class="principles__text">{item.text}</p>
         </li>
       ))}
@@ -82,6 +97,9 @@ const principles = [
   }
 
   .principles__kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
     font-family: var(--font-mono);
     font-size: var(--text-label);
     text-transform: uppercase;
@@ -110,16 +128,16 @@ const principles = [
     border-left: none;
   }
 
-  .principles__number {
-    display: block;
-    margin-bottom: var(--space-8);
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
+  .principles__title {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: var(--text-nav);
+    letter-spacing: -0.005em;
+    color: var(--color-ink);
   }
 
   .principles__text {
+    margin-top: var(--space-8);
     font-family: var(--font-body);
     font-size: var(--text-caption);
     line-height: 1.5;

@@ -67,9 +67,11 @@ our actual tools.
 ## Current status
 
 The full homepage and the full About page are built: Header/nav, Hero,
-Principles, SelectedWork, Gallery, CurrentlyWorkingOn, HowIThink,
-ContactCTA, Footer, and (About) AboutIntro, AboutStory, AboutProcess,
-AboutDrives. Every other
+SelectedWork, CurrentlyWorkingOn, Principles, Gallery, ContactCTA,
+Footer (in that page order), and (About) AboutIntro, AboutStory,
+AboutProcess, AboutDrives. `HowIThink.astro` was built and later
+removed outright per direct request — see this file's own history below
+for why. Every other
 page is **not built yet** — Work index, case study, and Contact layouts
 are still PROPOSED and unapproved. Don't build page content without
 checking the brief section for that page first.
@@ -1324,6 +1326,110 @@ pointer hover (not a synthetic dispatch, which doesn't trigger CSS
 and its title horizontal while its siblings stayed narrow with vertical
 titles; and at 375px the accordion drops to `display: grid;
 grid-template-columns: 1fr` (no flex row, no hover mechanism at all).
+
+**A large, multi-part follow-up pass** - one message, several distinct
+direct requests, covering Hero, Selected Work, a new page reorder,
+Principles, Gallery, and a new shared motion token.
+
+Hero lost its third tag ("Motion Design" - two tags now, "UX /
+Experience Design" and "Digital Design"). Nothing else in the file
+assumed a specific tag count, so this needed no other changes.
+
+**Homepage reordered and "How I think" removed outright**, both per
+direct request: Selected Work now leads (numbered "01," was "02"),
+Currently Working On moved to sit directly below it, then Principles,
+then Gallery, into ContactCTA/Footer - see `index.astro`'s own comment.
+"How I think" (`HowIThink.astro`) is deleted, not just unrouted - "i do
+not need it anymore" - but its three short principle titles
+("Understand before designing" / "Creative, but defendable" / "Make it
+make sense") were folded into Principles.astro first, per the same
+message ("add the titles from the last section... to the 3 design
+principles"), paired in order with Principles' existing three process
+sentences rather than re-authored.
+
+Principles itself changed from a deliberately unnumbered "Approach"
+aside (see its own earlier entry in this file) to a real numbered
+kicker, "( 02 ) My design principles" - exact text per direct request -
+still in the small mono kicker style rather than promoted to a full
+`SectionMarker` h2 (Barlow Condensed stays Hero's one-headline-anchor
+type). This created a numbering puzzle: Selected Work is "01," this is
+"02," but Currently Working On now sits physically between them
+("directly below the selected works," a separate direct request). Rather
+than let the page's numbered sections read out of order (01, 04-or-
+whatever, 02, 03), `SectionMarker.astro`'s `index` prop became optional -
+CurrentlyWorkingOn dropped its own number in the move instead of forcing
+it into the sequence, so the numbered running-head (01 Selected Work, 02
+Principles, 03 Gallery, unchanged) still reads as a clean ascending
+sequence with Currently Working On as a quiet, unnumbered aside in
+between - the same role Principles itself used to play before this pass.
+
+**A shared "smooth transition" seam, Gallery/Principles (porcelain) into
+ContactCTA (dark-field)** - per direct request ("make a smooth
+transition in the page between the design principles, gallery and
+contact me/footer"). Principles and Gallery already share the plain
+porcelain page background, so the one real color seam left is Gallery
+into ContactCTA's dark-field. Fixed with a porcelain-to-transparent
+`::before` gradient painted over ContactCTA's own top ~8rem - a
+positioned pseudo-element paints after its parent's own solid
+background-color (CSS painting order), so the gradient sits visibly on
+top of the dark-field without a second wrapper element. Only the two
+already-locked tokens (bg-primary, dark-field) are used, no new hue.
+`.contact-cta__inner` picked up an explicit `position: relative; z-index:
+1` so its text/button paint above the gradient rather than being caught
+in the same "positioned descendants" paint step as the pseudo-element.
+
+**Selected Work's accordion got shorter and the harsh-hover fix that
+started here spread sitewide.** Per direct feedback ("now they are quite
+tall on desktop... make cards more rectangular, horizontal, shorter"),
+the accordion's fixed row height dropped from 30rem to 18rem - same
+flex-grow mechanism, just a shorter, more landscape-proportioned strip.
+Separately, per "the movement in the work cards is very harsh, make it a
+soft, tactile glide, and add that improvement to the buttons on the page
+as well," a new `--motion-easing-soft` token
+(`cubic-bezier(0.22, 1, 0.36, 1)`, global.css) replaced the plain
+ease-out `--motion-easing` on every hover/press transition this pass
+touched: `ProjectCard.astro`'s card lift/border-color/arrow/title,
+`Button.astro`'s color/fill-sweep/new press transform (both variants,
+via the shared base `.btn` rule), `ContactCTA.astro`'s own local copy of
+that button style, the Selected Work accordion's own flex-grow
+transition (already using this exact curve as a hand-typed literal - now
+references the token instead), and Header's mobile nav panel entrance
+(same reasoning - promoted the curve to a real token now that a fourth
+place wants the identical value, rather than a fourth copy-pasted
+cubic-bezier literal). `ProjectCard.astro`'s hover box-shadow is gone
+outright too, per the same feedback ("remove the drop shadow") - the
+lift and the border darkening to ink already carry the "this one's
+active" read without it.
+
+**Gallery's progress line gained a second, thicker mark riding on top of
+the existing fill bar** - per direct request for "a subtle thicker line
+on top of the gallery progress bar, to show more or less where in the
+collection you are." A new `.gallery__progress-thumb`, sized to roughly
+`viewport.clientWidth / track.scrollWidth` (how much of the collection
+is visible at once, clamped to [8%, 90%] so it never collapses to
+nothing or balloons to the full track) and positioned at
+`progress * (1 - ratio)` along the track - a classic scrollbar-thumb
+calculation, computed fresh on every tick alongside the existing fill
+bar rather than once, since the ratio can shift on resize. Both the fill
+bar and the new thumb are now driven by one shared `setProgress()`
+helper (previously the fill bar's `scaleX` was set inline at each of the
+two call sites - the reduced-motion static-scroll listener and the
+pin's own `onUpdate`) so the two mechanisms can't drift out of sync with
+each other.
+
+Verified in the browser (a fresh tab, after finding the original one was
+serving a stale cached script from before a mid-session server restart -
+not a real bug, just a caching artifact of restarting the dev server
+under an open tab): the reordered sections measure in the requested
+order via `getBoundingClientRect()`; Selected Work reads "( 01 )";
+Currently Working On has no index span at all; Principles reads "( 02 )
+My design principles" with all three reused titles present; the
+accordion still expands correctly at its new 18rem height with no
+box-shadow; the progress bar and thumb both update in tandem during a
+real scroll (`scaleX` and `left`/`width` moving together, not just
+assumed from the code); and the ContactCTA gradient is visible as a
+soft lightening at the very top of the dark section rather than a hard
+cut from Gallery's porcelain.
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

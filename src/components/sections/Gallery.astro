@@ -243,6 +243,16 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     backdrop
   ) {
     const reduceMotion = prefersReducedMotion();
+    // Phone still gets the scroll-linked pin - page scroll driving the
+    // strip is exactly what was wanted kept, per direct follow-up ("i
+    // still meant that on phone it scrolls on scroll") - just not the
+    // card-deck stacking on top of it. A first attempt folded phone
+    // width into `reduceMotion` itself, which went too far and dropped
+    // the pin/scrub entirely in favor of a plain native swipe-strip; this
+    // is a separate flag instead, checked once at script-init like
+    // `reduceMotion` itself, matched at 639px (the same phone/tablet
+    // split the rest of this file already uses).
+    const isPhone = window.matchMedia('(max-width: 639px)').matches;
     const total = Number(viewport.dataset.total || '0');
 
     // Whichever trigger currently has the pointer inside it, per the
@@ -271,6 +281,42 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
         viewport.addEventListener('scroll', syncProgress, { passive: true });
         syncProgress();
       }
+    } else if (isPhone) {
+      // --- Scroll-linked strip, no stacking: the same pin+scrub every
+      // width used to get (page scroll drives the track sliding left,
+      // see this section's earlier passes), without the card-deck
+      // convergence the desktop/tablet branch below adds on top. Direct
+      // follow-up after phone was first switched to the plain native
+      // swipe-strip fallback: "i still meant that on phone it scrolls on
+      // scroll" - the page-scroll-driven reveal was the part worth
+      // keeping, only the stacking wasn't wanted here.
+      const startInset = parseFloat(getComputedStyle(inner).paddingLeft) || 0;
+
+      const measure = () => {
+        const endX = -(track.scrollWidth - viewport.clientWidth);
+        return { startX: startInset, endX, travel: startInset - endX };
+      };
+
+      gsap.set(track, { x: measure().startX });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${measure().travel}`,
+          pin: true,
+          scrub: 1,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            if (progressBar) progressBar.style.transform = `scaleX(${self.progress})`;
+            if (hoveredTrigger) {
+              hoveredTrigger.dispatchEvent(new PointerEvent('pointerleave'));
+              hoveredTrigger = null;
+            }
+          },
+        },
+      });
+      tl.to(track, { x: () => measure().endX, ease: 'none' }, 0);
     } else {
       // --- Scroll-linked stack, v2: the track still slides the whole
       // way across, exactly like the original strip did (see this
@@ -1017,9 +1063,9 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       transform: translateY(14px);
     }
 
-    /* Smaller overlap for smaller tiles at this width - the same -3rem the desktop rule uses would cover a disproportionate share of a mobile tile's own width. */
+    /* No overlap at all on phone, per direct request ("I don't want the cards to stack there, just a regular scrollable gallery like before") - resets the desktop/tablet rule's negative margin back to 0, so tiles fall back to .gallery__track's own plain 1.5rem gap instead. The animated pin-driven stack above is already off at this width (folded into the shared `reduceMotion` flag in the script); this is the CSS-only visual overlap that's independent of that and needed its own reset. */
     .gallery__tile + .gallery__tile {
-      margin-left: -1.5rem;
+      margin-left: 0;
     }
   }
 

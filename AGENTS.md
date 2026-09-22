@@ -989,6 +989,78 @@ window (2% of total progress) right before the next tile's `arrival`,
 so it still eases in smoothly rather than snapping the instant a
 threshold is crossed, just computed inline instead of via a timeline.
 
+**Header gained a location/availability line** - per direct request, "a
+classy and creative way to incorporate my location (belgium) and
+'seeking internship february 2027'." Landed as a small mono line next to
+the wordmark: `Laura Doolaege │ Belgium / Available Feb 2027`, separated
+by a hairline rule rather than a status dot - CLAUDE.md's own quality
+guardrails name "decorative status dots" specifically as something to
+avoid, which rules out the single most common way sites signal "open to
+work." The "/" is the header's own existing separator glyph (already
+used between Work/About/Contact), reused here rather than reaching for
+an em dash the same guardrails ban in copy. `.site-header__status` hides
+below 640px (a `display: none`, not a truncation) - the mobile row is
+already tight with the name, CV, and toggle sharing one line, and a quiet
+secondary detail is what should give way first when space runs out, not
+the primary nav or wordmark.
+
+**Three direct follow-ups, same session: phone gets a plain gallery
+again, the mobile menu centers, and the header status line's separator
+changed.**
+
+Phone specifically now gets the exact same static, native-scrollable
+Gallery strip `prefers-reduced-motion` already used - not a smaller
+version of the card-deck stack, "a regular scrollable gallery like
+before." Two independent things needed fixing, because the stacking
+pass added two independent mechanisms: the JS pin/scrub (now off on
+phone via the shared `reduceMotion` flag, which folds in
+`window.matchMedia('(max-width: 639px)')` alongside the OS-level
+preference - every branch in the script already treats that flag as
+"use the simple path," so this was a one-line change) and the CSS-only
+visual overlap from the earlier card-deck pass (`.gallery__tile +
+.gallery__tile`'s negative margin, which applies regardless of the JS
+flag and needed its own reset - the existing mobile breakpoint's
+`-1.5rem` value went back to `0`, falling back to the track's own plain
+gap). Missing either half would have left phone either still pinning
+and scroll-jacking, or visually overlapped without the JS mechanism to
+justify it.
+
+The full-screen mobile/tablet menu's Work/About/Contact links are now
+centered (`align-items: center` on the column, `text-align: center` on
+each link) instead of left-aligned within the centered panel - per
+direct request.
+
+The header status line's "/" is gone again - a direct follow-up that it
+read as a navigation element, since "/" is already this same header's
+own separator between Work/About/Contact, and reusing it for an
+unrelated purpose a few pixels away created exactly the confusion that
+risks. Replaced with a plain "|" (matching the wordmark/status divider
+already used one hairline rule to the left) and a small location-pin
+icon in front of "Belgium" (16x16, `stroke-width: 1.3`-adjacent weight
+matching the site's other inline icons) - `Laura Doolaege │ [pin]
+Belgium | Available Feb 2027`.
+
+**Immediate correction to the phone-gallery fix above: "no stacking on
+phone" didn't mean "no scroll-linked pin on phone" either** - direct
+follow-up, "i still meant that on phone it scrolls on scroll." The first
+attempt folded phone width into the same `reduceMotion` flag the OS-level
+preference uses, which dropped the pin/scrub entirely in favor of the
+plain native swipe-the-strip fallback - too much at once. Split into two
+independent flags instead: `reduceMotion` (OS preference only, unchanged
+meaning) and a separate `isPhone` (still `max-width: 639px`). The
+`if (reduceMotion) {...} else if (isPhone) {...} else {...}` three-way
+branch now gives phone its own middle path - the same page-scroll-driven
+pin+scrub every other width gets (literally the pre-stacking-pass
+mechanism, restored verbatim: `gsap.set(track, {x: startX})` then a
+single `tl.to(track, {x: endX})` scrubbed across the pin), just without
+the card-deck convergence logic the desktop/tablet branch layers on top.
+Verified directly: at phone width, `.gallery__viewport--static` is no
+longer added, the track's own computed `transform` changes as the page
+scrolls (confirmed before/after a scroll), and consecutive tiles sit a
+plain 24px apart with no overlap - the strip reveals by scrolling, same
+as before any of the stacking passes, without literally reverting to a
+swipe-only strip.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

@@ -48,9 +48,39 @@ const currentPath = Astro.url.pathname;
 
 <header class="site-header">
   <div class="site-header__inner">
-    <a href={withBase('/')} class="site-header__name">
-      Laura Doolaege
-    </a>
+    <div class="site-header__identity">
+      <a href={withBase('/')} class="site-header__name">
+        Laura Doolaege
+      </a>
+
+      <!--
+        Location + availability, per direct request ("a classy and
+        creative way to incorporate my location and 'seeking internship
+        February 2027'"). A hairline rule separates it from the wordmark
+        instead of a status dot - CLAUDE.md's own quality guardrails name
+        "decorative status dots" specifically as something to avoid,
+        which rules out the single most common way sites signal "open to
+        work." The "/" this first used between Belgium and the
+        availability line is gone again (direct follow-up: it read as a
+        nav element, since "/" is already this header's own separator
+        between Work/About/Contact) - a plain "|" instead, which doesn't
+        carry that meaning anywhere else here. Mono/text-secondary, same
+        weight as the nav - a quiet business-card detail next to the
+        wordmark, not a second competing headline.
+      -->
+      <p class="site-header__status">
+        <svg class="site-header__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M8 14.2C8 14.2 12.5 9.8 12.5 6.3C12.5 3.8 10.5 1.8 8 1.8C5.5 1.8 3.5 3.8 3.5 6.3C3.5 9.8 8 14.2 8 14.2Z"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linejoin="round"
+          />
+          <circle cx="8" cy="6.3" r="1.6" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+        Belgium <span aria-hidden="true">|</span> Available Feb 2027
+      </p>
+    </div>
 
     <div class="site-header__right">
       <nav aria-label="Primary" class="site-header__nav" id="primary-nav">
@@ -228,6 +258,55 @@ const currentPath = Astro.url.pathname;
     outline-offset: 4px;
   }
 
+  .site-header__identity {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+  }
+
+  /* A hairline rule (not a status dot - see the markup comment) separates it from the wordmark, echoing the sitewide hairline-border language instead of inventing a new divider glyph. */
+  .site-header__status {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding-left: 0.85rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .site-header__status::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.2em;
+    bottom: 0.2em;
+    width: var(--border-hairline);
+    background: var(--color-text-secondary);
+  }
+
+  .site-header__status-icon {
+    width: 0.9em;
+    height: 0.9em;
+    flex-shrink: 0;
+  }
+
+  /* The "|" between Belgium and the availability line - not this header's own "/" nav-separator glyph, per direct request that it not read as a navigation element. Extra inline margin so it doesn't crowd either word despite the tight letter-spacing everything else here uses. */
+  .site-header__status span {
+    margin-inline: 0.15em;
+  }
+
+  /* Hidden below phone width, same reasoning as the mobile CV/toggle row needing every inch it can get - a quiet secondary detail is the right thing to drop first when space is tight, not the primary nav/name. */
+  @media (max-width: 639px) {
+    .site-header__status {
+      display: none;
+    }
+  }
+
   /* Groups the nav links and the CV button together, CV last so it stays
      the far-right, distinct CTA — not just another item in the nav's own
      rhythm. Below tablet width the toggle becomes the actual rightmost
@@ -399,7 +478,7 @@ const currentPath = Astro.url.pathname;
 
     .site-header__links {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       gap: 0;
     }
 
@@ -409,6 +488,7 @@ const currentPath = Astro.url.pathname;
 
     .site-header__link {
       display: block;
+      text-align: center;
       padding-block: 0.7em;
       font-size: clamp(1.75rem, 5vw, 2.5rem);
     }

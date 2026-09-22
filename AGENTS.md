@@ -67,8 +67,9 @@ our actual tools.
 ## Current status
 
 The full homepage and the full About page are built: Header/nav, Hero,
-SelectedWork, Gallery, CurrentlyWorkingOn, HowIThink, ContactCTA, Footer,
-and (About) AboutIntro, AboutStory, AboutProcess, AboutDrives. Every other
+Principles, SelectedWork, Gallery, CurrentlyWorkingOn, HowIThink,
+ContactCTA, Footer, and (About) AboutIntro, AboutStory, AboutProcess,
+AboutDrives. Every other
 page is **not built yet** — Work index, case study, and Contact layouts
 are still PROPOSED and unapproved. Don't build page content without
 checking the brief section for that page first.
@@ -1175,7 +1176,7 @@ not just assumed from the CSS reading right.
 only:** direct report that "the belgium and available" line sometimes
 sat next to the CTA button instead of above it. Cause: `display:
 inline-flex` on `.hero__status` (needed for the icon+text row inside it)
-is an inline-level *outer* display, not a block one - inside
+is an inline-level _outer_ display, not a block one - inside
 `.hero__bottom`'s mobile `display: block` layout, an inline-level
 element doesn't get its own line, it just joins the inline flow beside
 the next inline-level sibling, which here was `.hero__cta` (itself
@@ -1233,6 +1234,96 @@ just from the CSS: at 1400px the tiles render with even, non-overlapping
 gaps (no stacking), and the progress bar's computed `transform` mid-scroll
 showed a partial `scaleX` with `transform-origin: 0px` (left), not
 center.
+
+**New homepage section, `Principles.astro` - "3 design principles" sitting
+between Hero and Selected Work, "in a really subtle fashion,"** per direct
+request. The content is deliberately not new copy: it's the same three
+sentences as About's own "How I work" section (`AboutProcess.astro`),
+reused verbatim rather than rewritten or summarized, per this project's
+"no fabricated copy" rule - the user's own framing was "the 3 principles
+are the content from 'How I work' - the title just needs to change as
+well as the layout and position." So the title changed (a small "Approach"
+mono kicker, not "How I work" a second time - see below for why it's not
+even a real headline), and the layout/position are new (a quiet
+three-column strip before Selected Work, not About's larger prose block).
+
+Two structural decisions kept this genuinely subtle rather than "a
+smaller version of a normal section": it sits entirely outside the
+numbered `SectionMarker` rhythm (Selected Work is "02," Gallery "03," and
+so on) rather than claiming "02" and bumping every numbered section after
+it by one - renumbering the whole site wasn't asked for, and a numbered
+running-head would also make it read as a peer to the sections it's
+meant to quietly precede. And it skips the display-font headline
+entirely: Barlow Condensed is the homepage's one-headline-anchor type
+(PROJECT_BRIEF.md Section 3, "never split attention between two competing
+headlines"), already spent on Hero's "PORTFOLIO" - giving this section
+its own big headline would compete with that rather than stay quiet. Both
+the kicker and the three lines are mono/body type only, sized and colored
+to read as fine print (`--text-label`/`--text-caption`, both
+`--color-text-secondary`), the same register the header/hero status tag
+already established elsewhere on this page.
+
+Layout: three columns with hairline dividers between them (`border-left`,
+skipped on the first item so the row doesn't open with a stray rule),
+collapsing to a single stacked column with horizontal dividers - same
+device, rotated 90 degrees - below 900px. Entrance motion is a single
+plain fade/rise on the whole block, no stagger or per-element
+choreography, since drawing attention to itself would defeat the point;
+every other homepage section with motion gets its own distinct reveal; a
+uniform "smaller version of AboutDrives' card settle" or similar would
+also have been the wrong instinct here. Verified in the browser at both
+1400px (three columns, vertical dividers) and 375px (stacked, horizontal
+dividers, still legible at the small caption size).
+
+**Selected Work rebuilt a second time in the same session - the bento
+from the earlier pass is gone, replaced by an expanding accordion strip.**
+Direct follow-up feedback: "Im not fond of the current layout for the my
+works section. I would like something that expands," and when asked to
+choose between a few concrete readings of "expands," picked the
+Awwwards-style version - a row of narrow panels, one growing to take most
+of the row on hover/focus while its siblings compress. Both groups
+(Design, Experience) use the same device, continuing the pattern the
+bento itself established (one asymmetric device shared by both groups,
+not one singled out).
+
+Mechanism: a fixed-height flex row (`height: 30rem`, so the row reads as
+one steady object while only each panel's width share changes) where
+every `<li>` starts at `flex-grow: 1` and steps up to `flex-grow: 6` on
+`:hover`/`:focus-within`, transitioning `flex-grow` itself rather than
+`width` - no JS, no per-panel measurement needed for the expand/contract
+motion itself. `ProjectCard.astro`'s own now-unused `featured` prop (and
+its CSS) was removed rather than left dead - an accordion has no "lead
+item" concept, every panel is equal until hovered, so there was nothing
+left for it to do. The collapsed/expanded look is applied entirely from
+`SelectedWork.astro`'s own stylesheet via `:global()` overrides scoped
+under `.selected-work__accordion`, not by adding accordion-awareness to
+`ProjectCard.astro` itself - that component stays the plain, generic
+ticket-card module the brief specifies, unaware that this one section
+reshapes it. This is a deliberate, repeatable pattern now (the bento did
+the same thing with its own `:global()` overrides before this replaced
+it): section-specific layout presentation lives in the section, the
+reusable card component itself never grows section-specific modes.
+
+Collapsed panels have no room for the card's normal horizontal title/tag/
+year row, so `.project-card__title` rotates to `writing-mode: vertical-rl`
+(a spine label running the height of the panel) and `.project-card__stub`/
+`.project-card__meta` (the dashed rule, tag, year) are hidden outright
+rather than shrunk into something illegible - the number and arrow badges
+stay, since both are already small and legible at any width. Hovering
+reverts all of it: title back to horizontal, stub/tag/year back, body
+padding back to the card's usual `--space-24` inset. Below 900px (no
+touch equivalent for hover-driven expansion, same reasoning already used
+for the bento and for AboutDrives/Hero's own asymmetry before it) this
+drops to the plain equal-width stack of upright cards that's been the
+mobile fallback in this section since the bento pass - unchanged.
+
+Verified in the browser: at rest all panels in a row measure equal
+widths (~363px each in a 1120px-wide, three-panel row); a genuine
+pointer hover (not a synthetic dispatch, which doesn't trigger CSS
+`:hover`) showed one panel expanded with its arrow badge filled solid
+and its title horizontal while its siblings stayed narrow with vertical
+titles; and at 375px the accordion drops to `display: grid;
+grid-template-columns: 1fr` (no flex row, no hover mechanism at all).
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

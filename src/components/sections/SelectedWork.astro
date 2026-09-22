@@ -5,26 +5,34 @@
 // exist yet (Section 6), so cards are numbered placeholders, not invented
 // project names.
 //
-// DESIGN_VARIANCE: 9 (see CLAUDE.md "Experimental design dials") — cards
-// no longer sit in three identical boxes per row (an equal-width triplet
-// reads as a template, per direct feedback that this section "needs
-// work"/more hierarchy). Each group is now a 7fr/5fr bento: one featured
-// card carries the row, the other two stack beside it. Both groups use
-// the same device now (design row and experience row alike) rather than
-// only one of the two breaking from uniformity, as the previous version
-// did — a bolder, more consistent move, and it also retires the old
-// `--design`/`--experience` grid modifiers and the experience-only
-// nth-child stagger hack that used to be this section's one asymmetric
-// beat.
+// DESIGN_VARIANCE: 9 (see CLAUDE.md "Experimental design dials") — this is
+// the section's second rebuild in one session. The first (an asymmetric
+// 7fr/5fr bento, one featured card per group) was a direct improvement on
+// the original equal-width triplet, but per direct follow-up feedback the
+// user wasn't fond of it and asked for "something that expands" instead -
+// an Awwwards-style expanding accordion strip: narrow panels at rest,
+// one panel growing to take most of the row on hover/focus while its
+// siblings compress. Both groups (Design, Experience) use the same
+// accordion device now, same as the bento before it used one asymmetric
+// device for both rather than singling one group out.
 //
-// Mobile fallback (PROJECT_BRIEF.md Section 8 lists this as an open
-// decision — flagging, not silently resolving): below the bento's own
-// min-width: 900px switch, both groups collapse to a single equal-width
-// column, same "macro asymmetry drops to a plain stack" pattern already
-// used for AboutDrives' scattered cards and Hero's own grid. The featured
-// card stays visually distinct even there via ProjectCard's own
-// `featured` prop (a bigger title, at every width) rather than
-// disappearing entirely into the stack.
+// This replaces the bento entirely rather than layering on top of it -
+// `ProjectCard.astro`'s own `featured` prop (which only existed to size
+// one card per bento row) is gone; every card in an accordion row is
+// visually equal until hovered, so there's no "lead item" concept left to
+// carry. The accordion's collapsed/expanded look is applied here, from
+// outside ProjectCard, via `:global()` overrides scoped under
+// `.selected-work__accordion` - ProjectCard itself stays exactly the
+// generic ticket-card module the brief specifies (image, number, tag,
+// year, title, arrow), unaware that this one section reshapes it.
+//
+// Mobile/tablet fallback (PROJECT_BRIEF.md Section 8 lists this as an open
+// decision — flagging, not silently resolving): hover-driven expansion has
+// no touch equivalent, so below min-width: 900px this drops to a plain
+// equal-width stack of full, upright cards - the same "macro asymmetry
+// drops to a plain stack below a width threshold" pattern already used
+// for AboutDrives' scattered cards, Hero's own grid, and the bento this
+// replaced.
 import SectionMarker from '../ui/SectionMarker.astro';
 import ProjectCard from '../ui/ProjectCard.astro';
 
@@ -51,10 +59,10 @@ const experience = [
 
     <div class="selected-work__group">
       <h3 class="selected-work__group-label">Design: individual work</h3>
-      <ul class="selected-work__grid">
-        {design.map((project, index) => (
+      <ul class="selected-work__accordion">
+        {design.map((project) => (
           <li>
-            <ProjectCard {...project} featured={index === 0} />
+            <ProjectCard {...project} />
           </li>
         ))}
       </ul>
@@ -62,10 +70,10 @@ const experience = [
 
     <div class="selected-work__group">
       <h3 class="selected-work__group-label">Experience design: group projects</h3>
-      <ul class="selected-work__grid">
-        {experience.map((project, index) => (
+      <ul class="selected-work__accordion">
+        {experience.map((project) => (
           <li>
-            <ProjectCard {...project} featured={index === 0} />
+            <ProjectCard {...project} />
           </li>
         ))}
       </ul>
@@ -107,43 +115,109 @@ const experience = [
     color: var(--color-text-secondary);
   }
 
-  /* Mobile/tablet default: a plain equal-width stack, first item first -
-     see the file header comment on why this is the deliberate fallback
-     rather than trying to preserve the bento shape at a width that can't
-     fit a 7fr/5fr split comfortably. */
-  .selected-work__grid {
+  /* Mobile/tablet default: a plain equal-width stack of upright cards -
+     see the file header comment on why hover-driven expansion doesn't
+     get a touch fallback of its own. */
+  .selected-work__accordion {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--space-32);
     margin-top: 2rem;
   }
 
-  /* Bento: one featured card (spans both rows in the wide column) beside
-     two stacked ones. `grid-auto-rows` (not an explicit `1fr 1fr`, which
-     needs a definite container height to mean anything) lets the two
-     stacked cards size the rows from their own content, and the featured
-     card's own min-width: 900px rule (ProjectCard.astro) stretches to
-     match whatever height that produces, instead of imposing a height of
-     its own that the stacked column would then have to match. */
   @media (min-width: 900px) {
-    .selected-work__grid {
-      grid-template-columns: 7fr 5fr;
-      grid-auto-rows: auto;
+    /* A fixed-height row is what makes an accordion read as one object
+           instead of three cards of changing aspect-ratio - the height stays
+           constant, only each panel's share of the width changes. flex-grow
+           (not width or flex-basis) is what's animated: every panel starts
+           equal (grow: 1) and the hovered/focused one steps up to grow: 6,
+           so it takes roughly 6/8 of the row while its two siblings compress
+           to about 1/8 each, without any JS or per-panel width math. */
+    .selected-work__accordion {
+      display: flex;
+      align-items: stretch;
+      height: 30rem;
+      gap: var(--space-16);
     }
 
-    .selected-work__grid li:first-child {
-      grid-column: 1;
-      grid-row: 1 / span 2;
+    .selected-work__accordion > li {
+      flex: 1 1 0%;
+      min-width: 0;
+      overflow: hidden;
+      transition: flex-grow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .selected-work__grid li:nth-child(2) {
-      grid-column: 2;
-      grid-row: 1;
+    .selected-work__accordion > li:hover,
+    .selected-work__accordion > li:focus-within {
+      flex-grow: 6;
     }
 
-    .selected-work__grid li:nth-child(3) {
-      grid-column: 2;
-      grid-row: 2;
+    /* The card fills its panel's full box instead of holding its own
+           aspect-ratio - same "stretch to fill a flex/grid cell" technique
+           the bento's featured card used before this replaced it. */
+    .selected-work__accordion :global(.project-card) {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .selected-work__accordion :global(.project-card__frame) {
+      flex: 1 1 auto;
+      aspect-ratio: auto;
+    }
+
+    /* Collapsed (rest) state: a panel this narrow has no room for a
+           horizontal title/tag/year row, so the title runs vertically along
+           the panel instead (the classic accordion-gallery "spine label"),
+           and the tag/year/dashed-stub - which would just wrap illegibly at
+           this width - are hidden rather than shrunk into something
+           unreadable. The number badge and arrow badge stay put; both are
+           already small, self-contained, and legible at any panel width. */
+    .selected-work__accordion :global(.project-card__body) {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      padding: var(--space-16);
+    }
+
+    .selected-work__accordion :global(.project-card__stub),
+    .selected-work__accordion :global(.project-card__meta) {
+      display: none;
+    }
+
+    .selected-work__accordion :global(.project-card__title) {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      white-space: nowrap;
+      font-size: 1.15rem;
+    }
+
+    /* Expanded state: the panel is wide enough again for the card's
+           normal upright reading layout, so everything reverts - the title
+           un-rotates, the tag/year/stub reappear, the body padding grows
+           back to the card's usual space-24 inset. */
+    .selected-work__accordion > li:hover :global(.project-card__body),
+    .selected-work__accordion > li:focus-within :global(.project-card__body) {
+      align-items: flex-start;
+      padding: var(--space-24);
+    }
+
+    .selected-work__accordion > li:hover :global(.project-card__stub),
+    .selected-work__accordion > li:focus-within :global(.project-card__stub) {
+      display: block;
+    }
+
+    .selected-work__accordion > li:hover :global(.project-card__meta),
+    .selected-work__accordion > li:focus-within :global(.project-card__meta) {
+      display: flex;
+    }
+
+    .selected-work__accordion > li:hover :global(.project-card__title),
+    .selected-work__accordion > li:focus-within :global(.project-card__title) {
+      writing-mode: horizontal-tb;
+      transform: none;
+      white-space: normal;
+      font-size: 1.5rem;
     }
   }
 

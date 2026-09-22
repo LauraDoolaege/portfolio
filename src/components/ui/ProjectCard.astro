@@ -23,12 +23,13 @@
 // card's one "go" affordance now, so keeping both would have meant two
 // competing calls to action doing the same job.
 //
-// `featured`: SelectedWork's new asymmetric bento layout needs one card
-// per row of three to read as the lead item, not just a bigger box - this
-// prop bumps the title size at every width, and on top of that (see the
-// component's own min-width: 900px rule) lets the card's frame stretch to
-// fill the bento cell's full height instead of holding a fixed
-// aspect-ratio, once the grid actually has a cell tall enough to fill.
+// Deliberately no layout-mode props (an earlier `featured` prop, for a
+// now-abandoned bento layout, was removed rather than left unused) - any
+// layout-specific presentation (SelectedWork's accordion strip included)
+// is applied from outside via `:global()` overrides scoped to that
+// section's own class, not by teaching this component about every
+// section that might reuse it. Keeps this file focused on the one card
+// shape the brief actually specifies.
 import Tag from './Tag.astro';
 
 interface Props {
@@ -37,26 +38,13 @@ interface Props {
   roleTag: string;
   year?: string;
   href?: string;
-  featured?: boolean;
   class?: string;
 }
 
-const {
-  number,
-  title,
-  roleTag,
-  year = 'TBD',
-  href = '#',
-  featured = false,
-  class: className,
-} = Astro.props;
+const { number, title, roleTag, year = 'TBD', href = '#', class: className } = Astro.props;
 ---
 
-<a
-  href={href}
-  class:list={['project-card', { 'project-card--featured': featured }, className]}
-  aria-label={`${title} — ${roleTag}`}
->
+<a href={href} class:list={['project-card', className]} aria-label={`${title} — ${roleTag}`}>
   <span class="project-card__frame">
     <span class="project-card__image">
       <!-- TODO: replace with a real project image once photography exists (PROJECT_BRIEF.md Section 6) -->
@@ -288,38 +276,8 @@ const {
     transition: color var(--motion-duration) var(--motion-easing);
   }
 
-  /* Reads as the lead item of its row at every width, not just on the
-     desktop bento layout below - a bigger title is a cheap, always-on
-     signal that degrades gracefully instead of disappearing on mobile. */
-  .project-card--featured .project-card__title {
-    font-size: 1.85rem;
-  }
-
   .project-card:hover .project-card__title,
   .project-card:focus-visible .project-card__title {
     color: var(--color-accent);
-  }
-
-  /* Past this width the featured card's frame stops holding its own
-     aspect-ratio and stretches instead - see SelectedWork.astro's own
-     bento grid rule for why this width was chosen (same breakpoint the
-     grid itself switches on). Below it, .project-card--featured is a
-     plain stacked card like its siblings, just with the bigger title
-     above. */
-  @media (min-width: 900px) {
-    .project-card--featured {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .project-card--featured .project-card__frame {
-      flex: 1 1 auto;
-      aspect-ratio: auto;
-    }
-
-    .project-card--featured .project-card__body {
-      flex-shrink: 0;
-    }
   }
 </style>

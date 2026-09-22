@@ -204,7 +204,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 </div>
 
 <script>
-  import { gsap, prefersReducedMotion } from '../../utils/motion';
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
 
   const section = document.querySelector<HTMLElement>('.gallery');
   const inner = document.querySelector<HTMLElement>('.gallery__inner');
@@ -272,70 +272,140 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
         syncProgress();
       }
     } else {
-      // --- Scroll-linked pin: the track slides across while pinned (see
-      // the file header comment for the why). Measured fresh each time
-      // (not cached once) so resize invalidation recomputes correct
-      // start/end values instead of stale ones.
+      // --- Scroll-linked stack, v2: the track still slides the whole
+      // way across, exactly like the original strip did (see this
+      // section's earlier passes) - the difference is that once a
+      // tile's own natural, track-adjusted position reaches the first
+      // tile's spot, it locks there instead of continuing to slide off
+      // to the left with everything else, so it visibly piles on top of
+      // the first tile rather than sliding past it.
       //
-      // The "Scroll" hint is a real flex item at the head of the track
-      // now (see the markup), not a separately positioned/animated
-      // watermark - it sits directly next to the first image and simply
-      // scrolls away with everything else once the track starts moving,
-      // instead of needing its own tween to drift or fade it out of the
-      // way. startX is just the same left inset .gallery__inner uses
-      // above it, so the strip's resting position lines up with the
-      // title's own left margin rather than an arbitrary reveal fraction.
+      // The first version of this pass (tiles individually tweened onto
+      // a *fixed* target with the track itself frozen) broke down past
+      // ~5 tiles: with the track no longer moving, every tile beyond
+      // whichever ones fit in the original viewport-width strip started
+      // out far off past the right edge - each one's own entrance still
+      // played correctly once its turn came, but getting there took a
+      // long stretch of scroll with nothing visibly happening, since
+      // nothing was bringing the next tile within reach ahead of time.
+      // Per direct follow-up ("the scroll should still move to the
+      // left, as should the deck of images... so there are no huge
+      // gaps") - this version keeps the track's own continuous motion,
+      // which is what actually keeps the queue arriving at a steady
+      // pace, and layers the "lock onto the first tile" behavior on
+      // top of it instead of replacing it.
+      //
+      // The math: tile 0's own local x is set every tick to exactly
+      // cancel however far the track has moved (`startInset - trackX`),
+      // which is what makes it - and only it - stay visually fixed at
+      // its starting screen position for the entire scroll, the one
+      // anchor everything else piles onto. Every other tile rides along
+      // with the track uncorrected (localX: 0) until the scroll
+      // progress reaches its own `arrival` value - the exact progress
+      // at which its natural (track-adjusted) position first coincides
+      // with tile 0's fixed spot, solved once from the tiles' own
+      // static layout positions - at which point it switches to the
+      // same kind of compensation tile 0 uses, anchoring it at that
+      // same fixed spot for the rest of the scroll. Continuous by
+      // construction (both branches agree at progress === arrival), so
+      // there's no jump the moment a tile locks in.
       const startInset = parseFloat(getComputedStyle(inner).paddingLeft) || 0;
+      const triggers = Array.from(viewport.querySelectorAll<HTMLElement>('.gallery__trigger'));
+      const tiles = triggers.map((trigger) => trigger.closest<HTMLElement>('.gallery__tile'));
 
       const measure = () => {
-        const endX = -(track.scrollWidth - viewport.clientWidth);
-        return { startX: startInset, endX, travel: startInset - endX };
+        const trackEndX = -(track.scrollWidth - viewport.clientWidth);
+        return { trackStartX: startInset, trackEndX, travel: startInset - trackEndX };
       };
 
-      gsap.set(track, { x: measure().startX });
+      // Progress (0..1) at which each tile's natural position reaches
+      // tile 0's fixed spot. Recomputed on every ScrollTrigger refresh
+      // (resize), same as `measure()` - these depend on the tiles' own
+      // offsetLeft, which the responsive tile width can change.
+      const computeArrivals = () => {
+        const { trackStartX, trackEndX } = measure();
+        const denom = trackEndX - trackStartX;
+        const tile0Left = tiles[0]?.offsetLeft ?? 0;
+        return tiles.map((tile) => {
+          if (!tile || denom === 0) return 0;
+          return (tile0Left - tile.offsetLeft) / denom;
+        });
+      };
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          // The whole section (title included), not just the stage, is
-          // both the trigger and the pin target - per direct feedback
-          // that the title was scrolling away from the gallery while
-          // only the tile strip stayed pinned. Pinning the section keeps
-          // the title and the strip locked together for the whole
-          // scrub, exactly like the trigger's own top-level Astro markup
-          // groups them. "top top" - the pin engages once the section's
-          // own top reaches the top of the viewport - reads as "once the
-          // section is into full view" for this section's height, and
-          // pinning the section (which starts higher up the page than
-          // the stage alone did) reaches that point with less scrolling
-          // than before, without needing a separate earlier-start hack.
-          trigger: section,
-          start: 'top top',
-          end: () => `+=${measure().travel}`,
-          pin: true,
-          scrub: 1,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            if (progressBar) progressBar.style.transform = `scaleX(${self.progress})`;
-            // Scrolling moves the track under the cursor without ever
-            // firing a pointer event (the mouse itself hasn't moved), so
-            // nothing would otherwise tell a hovered tile's bob-pause,
-            // mouse-shift, cursor, or spotlight that it's no longer
-            // actually under the pointer - they'd stay frozen mid-tween,
-            // pointed at stale geometry, or (for the spotlight) visibly
-            // drift away still glued to a tile that scrolled out from
-            // under you. Dispatching a real pointerleave here reuses
-            // each effect's own existing cleanup below rather than
-            // duplicating it - every scroll tick is treated as an
-            // implicit "stopped hovering," and nothing re-engages until
-            // an actual pointermove says otherwise.
-            if (hoveredTrigger) {
-              hoveredTrigger.dispatchEvent(new PointerEvent('pointerleave'));
-              hoveredTrigger = null;
+      let arrivals = computeArrivals();
+      const SETTLE = 0.02; // fraction of total scroll the shrink/tilt eases over, right as the next tile locks in
+
+      gsap.set(track, { x: measure().trackStartX });
+
+      ScrollTrigger.create({
+        // The whole section (title included), not just the stage, is
+        // both the trigger and the pin target - per direct feedback
+        // that the title was scrolling away from the gallery while
+        // only the tile strip stayed pinned. Pinning the section keeps
+        // the title and the strip locked together for the whole scrub,
+        // exactly like the trigger's own top-level Astro markup groups
+        // them. "top top" - the pin engages once the section's own top
+        // reaches the top of the viewport - reads as "once the section
+        // is into full view" for this section's height, and pinning
+        // the section (which starts higher up the page than the stage
+        // alone did) reaches that point with less scrolling than
+        // before, without needing a separate earlier-start hack.
+        trigger: section,
+        start: 'top top',
+        end: () => `+=${measure().travel}`,
+        pin: true,
+        scrub: 1,
+        invalidateOnRefresh: true,
+        onRefresh: () => {
+          arrivals = computeArrivals();
+        },
+        onUpdate: (self) => {
+          const { trackStartX, trackEndX } = measure();
+          const trackX = trackStartX + self.progress * (trackEndX - trackStartX);
+          gsap.set(track, { x: trackX });
+
+          if (progressBar) progressBar.style.transform = `scaleX(${self.progress})`;
+          // Scrolling moves tiles under the cursor without ever firing a
+          // pointer event (the mouse itself hasn't moved), so nothing
+          // would otherwise tell a hovered tile's bob-pause, mouse-shift,
+          // cursor, or spotlight that it's no longer actually under the
+          // pointer - they'd stay frozen mid-tween, pointed at stale
+          // geometry, or (for the spotlight) visibly drift away still
+          // glued to a tile that moved somewhere else. Dispatching a
+          // real pointerleave here reuses each effect's own existing
+          // cleanup below rather than duplicating it - every scroll tick
+          // is treated as an implicit "stopped hovering," and nothing
+          // re-engages until an actual pointermove says otherwise.
+          if (hoveredTrigger) {
+            hoveredTrigger.dispatchEvent(new PointerEvent('pointerleave'));
+            hoveredTrigger = null;
+          }
+
+          triggers.forEach((trigger, i) => {
+            const arrival = arrivals[i];
+            const x =
+              self.progress >= arrival ? -(self.progress - arrival) * (trackEndX - trackStartX) : 0;
+
+            // The tile being covered shrinks and tilts rather than just
+            // sitting still underneath, easing in right as the next one
+            // locks into place - the last tile has no successor, so it
+            // never gets covered and stays full-size. Alternating the
+            // rotation direction per index keeps the growing pile from
+            // all leaning the same way, which read as mechanical rather
+            // than like a loosely stacked deck.
+            const nextArrival = arrivals[i + 1];
+            let scale = 1;
+            let rotation = 0;
+            if (nextArrival !== undefined) {
+              const t = Math.min(1, Math.max(0, (self.progress - (nextArrival - SETTLE)) / SETTLE));
+              scale = 1 - t * 0.1;
+              rotation = t * (i % 2 === 0 ? -4 : 4);
             }
-          },
+
+            gsap.set(trigger, { x, scale, rotation });
+          });
         },
       });
-      tl.to(track, { x: () => measure().endX, ease: 'none' }, 0);
     }
 
     // Tracks which trigger the pointer is actually inside, purely so the

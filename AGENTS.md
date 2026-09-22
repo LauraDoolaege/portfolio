@@ -949,6 +949,46 @@ jumped to 100, scrolled without touching the mouse, confirmed it settled
 back to its original index-based value rather than getting stuck at 100
 or dropping to nothing).
 
+**Gallery, card-deck stack v2 — the first version broke down past ~5
+tiles, per direct report ("a huge distance once we reach over 5 ish
+cards").** The first version froze the track entirely and gave each
+tile its own fixed-endpoint tween onto tile 0's spot - which meant every
+tile beyond whatever fit in one viewport-width's worth of the original
+strip started out sitting far past the right edge, with nothing bringing
+it closer until its own turn arrived, so getting there took a long
+stretch of scroll with nothing visibly happening.
+
+Fixed by bringing back the track's own continuous scroll-driven motion
+(same as the section's very first pin/scrub pass, before any stacking
+existed) and layering the "lock onto tile 0" behavior on top of it,
+rather than replacing it. The whole thing runs off one continuous
+per-tile formula evaluated in `onUpdate` (no more `tl.to()` calls with
+fixed start/end values, which can't express "stay pinned regardless of
+where the continuously-moving track currently is" - confirmed by
+checking the GSAP docs' own behavior for function-based tween values:
+they're only re-evaluated on `ScrollTrigger.refresh()`, not every scrub
+tick, so they can't reference the track's live position either): tile 0
+gets a local `x` that exactly cancels the track's own motion every tick
+(`trackStartX - trackX`), which is what keeps it - and only it - visually
+fixed at its starting screen position for the whole scroll, the one
+anchor everything else piles onto. Every other tile rides along with the
+track uncorrected until scroll progress reaches its own `arrival` value -
+solved once, from the tiles' own static `offsetLeft` positions, as the
+exact progress at which its natural track-adjusted position first
+coincides with tile 0's fixed spot - at which point it switches to the
+same compensation tile 0 uses, locking it at that same spot for the rest
+of the scroll. Both branches agree exactly at `progress === arrival`, so
+there's no jump the instant a tile locks in. Verified by sampling how
+many tiles are on screen at 250px scroll intervals across the whole pin
+range and confirming the count climbs steadily (6 → 7 → 8 → ... → 15,
+one earlier check) rather than jumping or stalling anywhere.
+
+The shrink/tilt on the tile being covered moved from a `tl.to()` slot to
+the same per-tick model - interpolated linearly over a small `SETTLE`
+window (2% of total progress) right before the next tile's `arrival`,
+so it still eases in smoothly rather than snapping the instant a
+threshold is crossed, just computed inline instead of via a timeline.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

@@ -803,6 +803,63 @@ opening the lightbox doesn't itself fire a `pointerleave` on the trigger.
 Harmless as a rendering matter, but cleaning it up avoids leaving stale
 state around for its own sake.
 
+**Mouse-magnetic image shift, on Selected Work's ProjectCard and Gallery
+tiles both** - per direct request ("a lot of Awwwards type websites, the
+images kind of shift to the mouse position"). Same technique in both
+places: on `pointermove`, the cursor's position within the card/tile is
+normalized to roughly [-0.5, 0.5] on each axis, multiplied by a small px
+range, and applied as `x`/`y` via `gsap.quickTo` for a smooth trailing
+follow, alongside a modest scale-up on `pointerenter`. Gated on
+`prefers-reduced-motion` and `pointer: fine`, same reasoning as the
+Gallery cursor/spotlight - this is a continuous mouse-follow effect with
+no touch equivalent.
+
+The two components don't share a markup shape, so the implementation
+isn't identical: ProjectCard already had a `.project-card__frame` (clips,
+stays put) wrapping a separate `.project-card__image` (scales), so the
+shift landed on the image layer specifically, same split as before.
+Gallery's `.gallery__placeholder` has always done both jobs at once (its
+own border/radius/overflow: hidden, and the thing that scaled on hover) -
+no separate frame to add without restructuring markup for an effect this
+size, so the shift and scale both land on the placeholder directly; the
+tile's border moving a few px with the mouse reads the same as the
+ProjectCard version in practice, just without an inner layer isolating
+it.
+
+Both components' existing CSS `:hover { transform: scale(1.03) }` rules
+stay in their stylesheets as the reduced-motion/no-JS fallback rather
+than being deleted - GSAP's inline `transform` always wins over a
+stylesheet rule once the script runs (regardless of source order), so
+there's no double-scaling risk, and when the script doesn't run at all
+(reduced motion, JS disabled), the plain CSS hover state still gives a
+functional response, just without the mouse-follow.
+
+Gallery's `openLightbox` also resets every tile's shift/scale to neutral
+before it measures the clicked tile's box for the FLIP transition above -
+clicking a tile happens while it's mid-hover-shift, and without this the
+FLIP's "first" rect would capture that in-flight offset instead of the
+tile's true resting position. The reset is a synchronous `gsap.set` (no
+easing) read back immediately by `getBoundingClientRect()` in the same
+tick, so the correction itself is invisible - no intermediate frame
+renders between the snap and the measurement.
+
+**A real bug the mouse-shift pass above introduced, caught from a
+screenshot showing the gap directly:** the spotlight's hole stayed put
+while the tile shifted out from under it, since it was positioned once
+from the trigger's own (unmoving) rect on `pointerenter` and never
+updated again - the mouse-magnetic shift didn't exist yet when the
+spotlight was first built, so nothing had a reason to keep them in sync
+before this. Fixed by decoupling the two entirely: instead of the
+spotlight computing a position itself, it now just mirrors whatever
+`.gallery__placeholder`'s own `getBoundingClientRect()` reports, every
+frame, via a `gsap.ticker.add()` loop started on `pointerenter` and
+removed on `pointerleave`. Since `getBoundingClientRect()` reflects
+whatever transform is currently applied regardless of which script
+applied it, the spotlight now tracks the shift and its scale correctly
+without needing to know anything about how the placeholder got there -
+verified by comparing both rects directly after moving the pointer to
+different corners of a tile, matching to well under a pixel each time.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

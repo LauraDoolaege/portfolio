@@ -346,6 +346,43 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       });
     }
 
+    // Mouse-magnetic tile shift, per direct request ("like a lot of
+    // Awwwards type websites, the images kind of shift to the mouse
+    // position") - the placeholder drifts a few px toward wherever the
+    // cursor sits within the tile, on top of its existing hover scale.
+    // Same technique and gating as ProjectCard.astro's version (see that
+    // file's own comment); gallery tiles don't have ProjectCard's
+    // separate frame/image split, so the shift and scale both land on
+    // .gallery__placeholder directly - it already owns overflow: hidden
+    // and the border/radius, and moving the whole thing a few px is the
+    // same "the card leans toward you" read the Awwwards reference has,
+    // just without an inner image layer to isolate it to yet.
+    if (!reduceMotion && window.matchMedia('(pointer: fine)').matches) {
+      const SHIFT_RANGE = 16;
+
+      viewport.querySelectorAll<HTMLElement>('.gallery__trigger').forEach((trigger) => {
+        const placeholder = trigger.querySelector<HTMLElement>('.gallery__placeholder');
+        if (!placeholder) return;
+
+        const moveX = gsap.quickTo(placeholder, 'x', { duration: 0.5, ease: 'power3.out' });
+        const moveY = gsap.quickTo(placeholder, 'y', { duration: 0.5, ease: 'power3.out' });
+
+        trigger.addEventListener('pointerenter', () => {
+          gsap.to(placeholder, { scale: 1.05, duration: 0.5, ease: 'power2.out' });
+        });
+        trigger.addEventListener('pointermove', (event) => {
+          const rect = trigger.getBoundingClientRect();
+          const relX = (event.clientX - rect.left) / rect.width - 0.5;
+          const relY = (event.clientY - rect.top) / rect.height - 0.5;
+          moveX(relX * SHIFT_RANGE);
+          moveY(relY * SHIFT_RANGE);
+        });
+        trigger.addEventListener('pointerleave', () => {
+          gsap.to(placeholder, { x: 0, y: 0, scale: 1, duration: 0.6, ease: 'power3.out' });
+        });
+      });
+    }
+
     // Custom "View" cursor: a small circle that follows the pointer and
     // only appears over a tile, replacing the system cursor there. Gated
     // on a fine pointer (mouse/trackpad) as well as reduced motion - on
@@ -383,24 +420,45 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     // Spotlight: dims the rest of the page while a tile is hovered, so
     // that one tile reads as clearly in focus - per direct request,
     // echoing the lightbox's own full-viewport backdrop as a hover cue
-    // rather than inventing a separate visual language for it. Sized and
-    // positioned from the hovered trigger's own rect on pointerenter (the
-    // hover-bob above already freezes that specific tile in place for the
-    // duration of the hover, so its position doesn't drift out from under
-    // the hole while it's open). Gated the same way as the custom cursor -
-    // reduced motion and touch both skip it, since it's a decorative focus
-    // cue, not something the gallery depends on to stay usable.
+    // rather than inventing a separate visual language for it. Gated the
+    // same way as the custom cursor - reduced motion and touch both skip
+    // it, since it's a decorative focus cue, not something the gallery
+    // depends on to stay usable.
+    //
+    // Tracked on a gsap.ticker loop rather than positioned once on
+    // pointerenter: the mouse-magnetic shift above moves and scales the
+    // placeholder continuously while it's hovered, and a one-time
+    // snapshot of the trigger's own (unmoving) rect drifted out of sync
+    // with it almost immediately - confirmed visually, the hole sat still
+    // while the tile shifted out from under it. Reading the placeholder's
+    // own getBoundingClientRect() every frame instead means the hole
+    // always matches whatever's actually on screen, including that
+    // shift and its scale, without the spotlight needing to know
+    // anything about how the placeholder got there.
     if (!reduceMotion && spotlight && window.matchMedia('(pointer: fine)').matches) {
+      let activePlaceholder: HTMLElement | null = null;
+
+      const syncSpotlight = () => {
+        if (!activePlaceholder) return;
+        const rect = activePlaceholder.getBoundingClientRect();
+        spotlight.style.left = `${rect.left}px`;
+        spotlight.style.top = `${rect.top}px`;
+        spotlight.style.width = `${rect.width}px`;
+        spotlight.style.height = `${rect.height}px`;
+      };
+
       viewport.querySelectorAll<HTMLElement>('.gallery__trigger').forEach((trigger) => {
         trigger.addEventListener('pointerenter', () => {
-          const rect = trigger.getBoundingClientRect();
-          spotlight.style.left = `${rect.left}px`;
-          spotlight.style.top = `${rect.top}px`;
-          spotlight.style.width = `${rect.width}px`;
-          spotlight.style.height = `${rect.height}px`;
+          activePlaceholder = trigger.querySelector<HTMLElement>('.gallery__placeholder');
+          syncSpotlight();
+          gsap.ticker.add(syncSpotlight);
           spotlight.classList.add('is-active');
         });
-        trigger.addEventListener('pointerleave', () => spotlight.classList.remove('is-active'));
+        trigger.addEventListener('pointerleave', () => {
+          gsap.ticker.remove(syncSpotlight);
+          activePlaceholder = null;
+          spotlight.classList.remove('is-active');
+        });
       });
     }
 
@@ -509,9 +567,14 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 
       if (!reduceMotion) {
         // Already-hovered state shouldn't linger, visually hidden but
-        // still "active," underneath the now-opaque lightbox.
+        // still "active," underneath the now-opaque lightbox - including
+        // the clicked tile's own mouse-shift, which otherwise has no
+        // event to reset it from (opening the lightbox doesn't itself
+        // move the pointer, so the tile it's covering never gets a
+        // pointerleave to snap back to neutral on its own).
         cursor?.classList.remove('is-active');
         spotlight?.classList.remove('is-active');
+        gsap.set(viewport.querySelectorAll('.gallery__placeholder'), { x: 0, y: 0, scale: 1 });
 
         // Backdrop + chrome fade in as before; the image itself never
         // fades (stays at opacity: 1 throughout) - it's already fully
@@ -667,6 +730,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     transition: transform var(--motion-duration) var(--motion-easing);
   }
 
+  /* Reduced-motion/no-JS fallback only - the script's mouse-shift block takes over transform entirely (scale + mouse-follow) once it runs, and GSAP's inline transform always wins over this rule regardless of source order. */
   .gallery__trigger:hover .gallery__placeholder,
   .gallery__trigger:focus-visible .gallery__placeholder {
     transform: scale(1.03);

@@ -52,6 +52,56 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
   </span>
 </a>
 
+<script>
+  // Mouse-magnetic image shift, per direct request ("like a lot of
+  // Awwwards type websites, the images kind of shift to the mouse
+  // position") - the image drifts a few px toward wherever the cursor
+  // sits within the frame, on top of the existing scale-up. Gated on
+  // `pointer: fine` as well as reduced motion, same as the Gallery
+  // cursor/spotlight - this is a continuous mouse-follow effect, not
+  // something touch has an equivalent of. The CSS `:hover { transform:
+  // scale(1.03) }` rule stays in the stylesheet as the reduced-motion/
+  // no-JS fallback: GSAP's inline `transform` always wins over it once
+  // this script runs, but when it doesn't (reduced motion, or JS never
+  // loads), the plain CSS hover state still gives a functional response,
+  // just without the mouse-follow.
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  if (!prefersReducedMotion() && window.matchMedia('(pointer: fine)').matches) {
+    // Total px range the image can travel corner-to-corner within the
+    // frame - modest on purpose (the frame clips via overflow: hidden,
+    // and the hover scale-up is what gives the image the few px of
+    // buffer to shift within without revealing the frame's own
+    // background at an edge).
+    const SHIFT_RANGE = 20;
+
+    document.querySelectorAll<HTMLAnchorElement>('.project-card').forEach((card) => {
+      const frame = card.querySelector<HTMLElement>('.project-card__frame');
+      const image = card.querySelector<HTMLElement>('.project-card__image');
+      if (!frame || !image) return;
+
+      const moveX = gsap.quickTo(image, 'x', { duration: 0.5, ease: 'power3.out' });
+      const moveY = gsap.quickTo(image, 'y', { duration: 0.5, ease: 'power3.out' });
+
+      card.addEventListener('pointerenter', () => {
+        gsap.to(image, { scale: 1.06, duration: 0.5, ease: 'power2.out' });
+      });
+
+      card.addEventListener('pointermove', (event) => {
+        const rect = frame.getBoundingClientRect();
+        const relX = (event.clientX - rect.left) / rect.width - 0.5;
+        const relY = (event.clientY - rect.top) / rect.height - 0.5;
+        moveX(relX * SHIFT_RANGE);
+        moveY(relY * SHIFT_RANGE);
+      });
+
+      card.addEventListener('pointerleave', () => {
+        gsap.to(image, { x: 0, y: 0, scale: 1, duration: 0.6, ease: 'power3.out' });
+      });
+    });
+  }
+</script>
+
 <style>
   .project-card {
     display: block;
@@ -72,6 +122,7 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     transition: transform var(--motion-duration-slow) var(--motion-easing);
   }
 
+  /* Reduced-motion/no-JS fallback only - the script above takes over transform entirely (scale + mouse-follow shift) once it runs, and GSAP's inline transform always wins over this rule regardless of source order, so there's no double-scaling risk between the two. */
   .project-card:hover .project-card__image,
   .project-card:focus-visible .project-card__image {
     transform: scale(1.03);

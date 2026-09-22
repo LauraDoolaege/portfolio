@@ -94,6 +94,32 @@ const letters = titleWord.split('');
         communication, currently specialising in user experience design.
       </p>
 
+      <!--
+        Mobile-only echo of Header's own location/availability line
+        (Header.astro's .site-header__status) - per direct request. That
+        line hides below 640px because the header row is already tight
+        with the name/CV/toggle sharing one line, so on phone it has
+        nowhere left to live up there; here, under the intro paragraph,
+        there's room, and it reads naturally as one more line of
+        "about me" rather than a header detail. Same icon/copy/markup
+        shape as the header version, kept as a separate element (not a
+        shared component) since it only exists at this one breakpoint in
+        this one place - hidden by default, shown only in the mobile
+        media query below.
+      -->
+      <p class="hero__status">
+        <svg class="hero__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M8 14.2C8 14.2 12.5 9.8 12.5 6.3C12.5 3.8 10.5 1.8 8 1.8C5.5 1.8 3.5 3.8 3.5 6.3C3.5 9.8 8 14.2 8 14.2Z"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linejoin="round"
+          />
+          <circle cx="8" cy="6.3" r="1.6" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+        Belgium <span aria-hidden="true">|</span> Available Feb 2027
+      </p>
+
       <Button href={withBase('/about')} variant="secondary" icon="arrow" class="hero__cta">
         Get to know me
       </Button>
@@ -322,6 +348,11 @@ const letters = titleWord.split('');
     color: var(--color-text-secondary);
   }
 
+  /* Desktop/tablet: Header's own .site-header__status already carries this, so this echo stays hidden until the mobile query below turns it on. */
+  .hero__status {
+    display: none;
+  }
+
   /* :global() is required — Button.astro renders its own <a>, which carries Button's own Astro scope hash, not Hero's, so an unscoped ".hero__cta" rule would silently never match it. */
   :global(.hero__cta) {
     grid-column: 1 / 6;
@@ -431,6 +462,41 @@ const letters = titleWord.split('');
 
     .hero__intro {
       max-width: none;
+    }
+
+    /* Turned on only here - see the base rule's comment above. Same visual language as Header's version (hairline rule, mono, text-secondary) so it reads as the same fact stated twice in two contexts, not a new device. */
+    .hero__status {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      margin-top: var(--space-16);
+      padding-left: 0.85rem;
+      font-family: var(--font-mono);
+      font-size: var(--text-label);
+      letter-spacing: var(--tracking-wide);
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+    }
+
+    .hero__status::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.2em;
+      bottom: 0.2em;
+      width: var(--border-hairline);
+      background: var(--color-text-secondary);
+    }
+
+    .hero__status-icon {
+      width: 0.9em;
+      height: 0.9em;
+      flex-shrink: 0;
+    }
+
+    .hero__status span {
+      margin-inline: 0.15em;
     }
 
     :global(.hero__cta) {

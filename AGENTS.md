@@ -1061,6 +1061,21 @@ plain 24px apart with no overlap - the strip reveals by scrolling, same
 as before any of the stacking passes, without literally reverting to a
 swipe-only strip.
 
+**Hero gained a mobile-only echo of the header's location/availability
+line** - per direct request ("on mobile formats, add the location and
+available under the paragraph" naming the "I'm Laura..." intro copy).
+Header's own `.site-header__status` already hides below 640px because
+that row is already tight with the name/CV/toggle sharing one line - this
+adds the same fact (icon, "Belgium | Available Feb 2027", same markup
+shape) as a new `.hero__status` line directly under `.hero__intro` in
+Hero.astro, shown only inside that same `max-width: 639px` breakpoint (a
+plain `display: none` outside it, same "give way first" pattern already
+used for the header version at that width). Verified directly, not just
+assumed from the media queries: at 375px only the Hero copy is visible
+(`getComputedStyle` on the header version reports `display: none`), and
+at a real desktop width (1400px) only the header copy is visible (Hero's
+reports `display: none`) - no width shows both or neither.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

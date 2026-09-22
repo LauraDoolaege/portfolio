@@ -14,10 +14,12 @@
 //
 // Open decisions this component had to fill in (see CLAUDE.md "Open
 // decisions" — not locked anywhere yet):
-// - Mobile nav pattern: regular inline text nav from tablet (768px) up.
-//   Below that, a hamburger + overlay panel — phone-only. The CV button
-//   stays visible at every width — only Work/About/Contact collapse into
-//   the panel.
+// - Mobile nav pattern: plain inline text nav from desktop (1024px) up.
+//   Below that — tablet and phone both — a hamburger opens a full-screen
+//   panel (per direct request: "the menu on tablet and mobile screens
+//   should fill the entire screen"), not a small dropdown. The CV button
+//   stays visible at every width, painted above the panel via z-index —
+//   only Work/About/Contact collapse into it.
 // - Sticky vs. static: static (scrolls with the page).
 // - No border under the header, per explicit request — the header and
 //   Hero now read as one continuous opening screen (see index.astro),
@@ -26,9 +28,16 @@ import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
 
 const navItems = [
-  { href: withBase('/work'), label: 'Work' },
+  // Work and Contact aren't their own pages yet (see CLAUDE.md "Current
+  // status" — Work index/Contact layouts are still proposed, unbuilt), so
+  // these point at same-page anchors instead of 404ing: Work always jumps
+  // to the homepage's own #work section (SelectedWork.astro), Contact to
+  // #contact in the footer, which every page shares (Footer.astro) — a
+  // bare hash works from any page since the id it targets is already on
+  // that page's own footer.
+  { href: `${withBase('/')}#work`, label: 'Work' },
   { href: withBase('/about'), label: 'About' },
-  { href: withBase('/contact'), label: 'Contact' },
+  { href: '#contact', label: 'Contact' },
 ];
 
 // trailingSlash: 'never' (astro.config.mjs) means Astro.url.pathname never
@@ -95,16 +104,22 @@ const currentPath = Astro.url.pathname;
   const nav = header?.querySelector('.site-header__nav');
 
   if (header && toggle && nav) {
+    // The panel now fills the viewport (see the styles below), so it needs
+    // the same background-scroll lock the lightbox already uses elsewhere
+    // in this project — otherwise the page behind it keeps scrolling under
+    // a full-screen overlay, which reads as broken.
     const closeMenu = () => {
       nav.classList.remove('is-open');
       toggle.classList.remove('is-open');
       toggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
     };
 
     toggle.addEventListener('click', () => {
       const isOpen = nav.classList.toggle('is-open');
       toggle.classList.toggle('is-open', isOpen);
       toggle.setAttribute('aria-expanded', String(isOpen));
+      document.body.style.overflow = isOpen ? 'hidden' : '';
     });
 
     nav.addEventListener('click', (event) => {
@@ -123,8 +138,11 @@ const currentPath = Astro.url.pathname;
       }
     });
 
-    const tabletUpQuery = window.matchMedia('(min-width: 768px)');
-    tabletUpQuery.addEventListener('change', (event) => {
+    // 1024px, not 768px — the panel now covers tablet widths too (see the
+    // styles below), so it should only auto-close once the layout actually
+    // switches back to the plain inline nav.
+    const desktopUpQuery = window.matchMedia('(min-width: 1024px)');
+    desktopUpQuery.addEventListener('change', (event) => {
       if (event.matches) closeMenu();
     });
   }
@@ -331,52 +349,58 @@ const currentPath = Astro.url.pathname;
     outline-offset: 4px;
   }
 
-  /* Below tablet (phone only): Work/About/Contact collapse into a
-     hamburger panel. CV stays visible outside it — an always-reachable
-     primary action, not buried behind a menu tap. 768px is the standard
-     tablet-starts boundary, not a value locked anywhere in the brief (see
-     the note at the top of this file) — tablet and up keeps the plain
-     inline nav. */
-  @media (max-width: 767px) {
+  /* Below desktop (tablet and phone both): Work/About/Contact collapse into a full-screen panel, not a small dropdown — per direct request ("the menu on tablet and mobile screens should fill the entire screen"). CV stays visible outside it, painted above the panel via z-index — an always-reachable primary action, not buried behind a menu tap. 1024px matches this project's own established tablet/desktop split (see Hero's tablet range, AboutIntro/AboutStory's breakpoints) rather than the narrower 768px this used before, when tablet still got the plain inline nav. */
+  @media (max-width: 1023px) {
     .site-header__inner {
-      /* Guarantees CV + the toggle stay on the name's row instead of wrapping underneath it — the base rule's flex-wrap: wrap exists for genuinely narrow content, but at phone widths the right-hand group should never drop to its own line. */
+      /* Guarantees CV + the toggle stay on the name's row instead of wrapping underneath it — the base rule's flex-wrap: wrap exists for genuinely narrow content, but here the right-hand group should never drop to its own line. */
       flex-wrap: nowrap;
     }
 
+    /* .site-header__nav below gets z-index: 1 to cover the viewport as a full-screen panel — a z-index with an integer value is what actually creates a stacking context (position alone, or position + z-index: auto, doesn't), so without a matching elevation here the name/CV/toggle would paint in the plain unstacked layer underneath it, becoming invisible and unclickable the moment the panel opens, even though DOM order would otherwise suggest they render on top. z-index: 2 beats the nav's 1 regardless of nesting depth, since neither .site-header__inner nor .site-header__right introduces a stacking context of its own in between. */
+    .site-header__name {
+      position: relative;
+      z-index: 2;
+    }
+
+    :global(.site-header__cv) {
+      /* !important is required: Button.astro's own .btn--primary rule already sets position: relative; z-index: 0, and its selector (a class plus Astro's scope-hash attribute) has higher specificity than a plain global class here beats without it — same fragile-tie problem Hero.astro's mobile CTA override already ran into (see that file's own comment), not something safe to leave to stylesheet injection order. */
+      z-index: 2 !important;
+    }
+
     .site-header__toggle {
+      position: relative;
+      z-index: 2;
       display: block;
     }
 
+    /* Fills the viewport rather than dropping down as a small panel under the header — inset: 0, not top: 100%. A soft fade + gentle scale (not the old translateY snap) reads as the calmer entrance asked for, eased with a custom "soft-out" curve instead of the sitewide --motion-easing (a plain ease-out, which accelerates hard out of the gate) — this one settles in gradually on both ends instead. */
     .site-header__nav {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: var(--color-bg-secondary);
       visibility: hidden;
       opacity: 0;
-      transform: translateY(-8px);
+      transform: scale(0.98);
       transition:
-        opacity var(--motion-duration-slow) var(--motion-easing),
-        transform var(--motion-duration-slow) var(--motion-easing),
-        visibility var(--motion-duration-slow);
+        opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.6s;
     }
 
     .site-header__nav.is-open {
       visibility: visible;
       opacity: 1;
-      transform: translateY(0);
+      transform: scale(1);
     }
 
     .site-header__links {
       flex-direction: column;
       align-items: flex-start;
       gap: 0;
-      padding: 1.5rem;
-    }
-
-    .site-header__links li {
-      width: 100%;
     }
 
     .site-header__links li:not(:first-child)::before {
@@ -385,8 +409,8 @@ const currentPath = Astro.url.pathname;
 
     .site-header__link {
       display: block;
-      padding-block: 0.85em;
-      font-size: 1rem;
+      padding-block: 0.7em;
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
     }
   }
 </style>

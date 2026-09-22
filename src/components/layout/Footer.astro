@@ -6,6 +6,11 @@
 //
 // Email/LinkedIn are placeholders — no real contact details exist yet
 // (same open item as the CV button in Header.astro).
+//
+// id="contact" on the row below is what Header.astro's "Contact" nav item
+// points at (a bare `#contact`, not a full path) — since this component
+// renders on every page, that one id works the same way regardless of
+// which page you click it from.
 import { withBase } from '../../utils/url';
 
 const year = new Date().getFullYear();
@@ -33,7 +38,7 @@ const year = new Date().getFullYear();
       </nav>
     </div>
 
-    <div class="site-footer__row site-footer__row--contact">
+    <div id="contact" class="site-footer__row site-footer__row--contact">
       <!-- TODO: replace with a real email once supplied -->
       <a href="mailto:hello@example.com" class="site-footer__email">
         hello@example.com

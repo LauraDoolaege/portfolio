@@ -455,6 +455,313 @@ slower version of it) and falls back to a plain native
 `overflow-x: auto` strip, same "functional equivalent, motion removed"
 principle used everywhere else in this project.
 
+**Gallery, fourth pass — refinement, not a mechanism change:** four
+explicit follow-up requests, all additive on top of the third pass's
+pin/scrub: (1) the giant "Gallery" watermark became a small "(scroll)"
+cta, styled with the site's mono/bracket-adjacent label device (see
+Tag.astro) instead of the display-headline treatment — since the at-rest
+reveal amount was previously derived from that watermark's own rendered
+width, it's now a fixed `REVEAL_FRACTION` of the stage's width set
+directly in the script, so a much smaller label doesn't collapse the
+layout it used to size. (2) A custom circular "View" cursor replaces the
+system pointer over a tile - GSAP `quickTo` on `x`/`y` for the follow-lag,
+gated on both `prefers-reduced-motion` and `(pointer: fine)` since it's
+meaningless on touch. (3) The pin's `ScrollTrigger` start moved from
+`top top` to `top 65%`, plus trimmed block padding on `.gallery` and
+`.gallery__viewport` - per direct feedback that desktop needed "too far"
+a scroll before the pinned reveal engaged; `top top` only pins once the
+stage's top edge reaches the very top of the viewport, so the section
+could already be substantially visible without anything happening yet.
+(4) A subtle 1px progress line sits under the strip, its bar scaled via
+the same `ScrollTrigger`'s `onUpdate` (`self.progress`) while pinned, and
+via a plain `scrollLeft`-driven listener in the reduced-motion static
+fallback - two different drivers for the same visual, matched to
+whichever mechanism is actually moving the strip in each mode.
+
+**One more real bug, caught the same way as the others in this file (DOM
+measurement, not a screenshot):** the custom cursor's `position: fixed`
+initially failed to track the real viewport once pinning engaged -
+`getBoundingClientRect()` returned coordinates in the thousands instead
+of viewport-space ones. Cause: GSAP's pin writes an inline `transform` to
+`.gallery__stage` while pinned (even the identity matrix
+`matrix(1, 0, 0, 1, 0, 0)`, not just a moving one), and _any_ non-`none`
+transform on an ancestor makes that ancestor the containing block for a
+`position: fixed` descendant - the same "a transform, even a static one,
+promotes its own containing/stacking context" family of bug already
+documented for Hero's scroll parallax elsewhere in this file. The cursor
+was originally nested inside `.gallery__stage`; moved it to be a sibling
+instead (still inside `<section class="gallery">`, which itself is never
+transformed), which was enough to restore true viewport-relative
+positioning once pinning starts. The progress bar didn't need the same
+fix - it's `position: absolute`, not `fixed`, so it's supposed to move
+with the pinned stage rather than stay outside it.
+
+**Gallery, fifth pass — the cursor still didn't work, plus a real
+restructure:** direct follow-up after the fourth pass shipped: the
+circular cursor still wasn't working, "(scroll)" read as brackets rather
+than a cta, the section's chalk background was unwanted, and - the
+substantial one - the title was scrolling away from the tiles while
+pinned, which wasn't the ask at all.
+
+**Why the title scrolled away:** the fourth pass's `ScrollTrigger` still
+only pinned `.gallery__stage`, not the section - `.gallery__inner` (which
+holds the `SectionMarker` title) sits in normal document flow next to it,
+so once the stage locked in place, the page kept scrolling underneath and
+carried the title off the top of the screen while the tiles stayed put.
+Per direct feedback ("I want them to stay in place, just scroll
+horizontally... once the section is into full view"), the fix pins the
+whole `<section class="gallery">` instead - `trigger` and the implicit
+pin target both changed from `stage` to `section` - so the title and the
+strip now lock together for the entire scrub. `start` went back to
+`top top`, but on the whole section this time: since the section (title
+included) starts higher up the page than the stage alone did, reaching
+`top top` this way needed _less_ scroll than the stage-only version did
+even with its `top 65%` patch, and because the section's total height
+comfortably fits inside a typical viewport, "top of section at top of
+viewport" already means the whole thing is in full view - solving both
+the title-separation problem and the earlier "too far to scroll"
+complaint from the fourth pass, without needing a separate early-start
+hack anymore.
+
+**Why the cursor still didn't work:** two bugs stacked on each other.
+First, moving the whole section (not just the stage) meant the cursor -
+previously a sibling of `.gallery__stage` but still a child of
+`<section class="gallery">` - was still nested inside the newly-pinned
+transform, so the fourth pass's containing-block fix no longer held once
+the pin target changed; moved the cursor to be a sibling of the `<section>`
+itself (same level as the lightbox markup), which is never transformed by
+anything. Second, and the one that actually explains "the circle doesn't
+scale in even when it should be visible": `.gallery__cursor` used GSAP
+`quickTo`/`gsap.set` for `x`/`y` positioning _and_ a CSS `transform: scale()`
+toggled by `.is-active` on the very same element - GSAP's inline
+`transform` silently wins once it's touched the property, so the CSS
+scale never actually applied once the pointer moved even a single pixel
+(confirmed directly: `getComputedStyle` showed `matrix(0.6, 0, 0, 0.6, ...)`
+permanently, even with `.is-active` present in the class list). Same
+family of bug as bug 3 in this file's Header/Hero section, just hitting
+a script this project itself wrote instead of a component. Fixed the
+way that whole bug family gets fixed here: two elements instead of one -
+`.gallery__cursor` is now a pure GSAP-owned positioning wrapper (`x`/`y`
+only, no CSS transform of its own), and a new `.gallery__cursor-inner`
+span inside it owns the CSS `scale`/`opacity` for the hover state, so the
+two never touch the same property. Also hardened the event wiring while
+in there: listeners moved from a single delegated `pointermove` on
+`.gallery__viewport` to per-trigger `pointerenter`/`pointermove`/
+`pointerleave`, with `pointerenter` snapping the cursor to the entry
+point via `gsap.set` before the eased `quickTo` takes over for movement
+within the tile - the previous version let `quickTo` ease in from
+wherever it last was (often the origin corner), which could read as
+broken rather than as a deliberate lag on a fast first hover.
+
+**The other two, smaller:** the "(scroll)" hint dropped its parentheses
+and gained a small inline arrow SVG (`.gallery__hint-arrow`, matching the
+stroke style already used for `.gallery__expand`'s icon) instead of
+reading as a bracketed label - "Scroll" plus an arrow, not another
+`[ bracketed ]` tag. `.gallery`'s `background: var(--color-bg-secondary)`
+was removed outright per direct request; the section now sits on the
+page's own porcelain background like the rest of the homepage instead of
+the chalk field it shared with a couple of neighboring sections.
+
+**Gallery, sixth pass — arrow out, hint folded into the track, a real
+progress-bar bug, and an intentional locked-rule exception:** four more
+direct follow-ups on the fifth pass.
+
+The fifth pass's inline arrow SVG next to "Scroll" is gone again per
+direct request ("remove the arrow"). More structurally, the hint itself
+moved from an absolutely-positioned overlay with its own `REVEAL_FRACTION`/
+`OVERLAP` reveal math into a plain `<li>` at the head of `.gallery__track`
+itself - it's a real flex item now, sitting directly next to the first
+tile because it's laid out next to it, not because a tween was aimed to
+put it there. This deleted the separate `tl.to(hint, ...)` tween and the
+constants that sized the old reveal window; the track's resting `x` is
+now just `.gallery__inner`'s own left padding (read via
+`getComputedStyle` so it can't drift out of sync with the title's actual
+margin), not a fraction of the stage's width.
+
+**A real, confirmed bug in the progress bar:** direct feedback that "the
+line underneath is not updating" turned out to be a positioning bug, not
+a dead script - `.gallery__progress-bar` had `top: 1.5rem` while its
+1px-tall container `.gallery__progress` only ever had a ~2px box, so the
+bar was scaling correctly the entire time, just a full line-height below
+where the (also-present, low-opacity) static backing line actually sat -
+invisible in practice. Fixed by moving the bar to `top: 0`, and used the
+same follow-up to redesign the visual per direct request: the static
+`::before` backing line is gone outright, the bar itself is thicker
+(1px → 2px) and switched from a low-opacity `--color-accent` to a solid
+`--color-text-secondary` - the same weight and color the placeholder
+tiles' own borders use - so it now appears from nothing and grows only
+as far as it already used to reach at 100% scroll, instead of always
+being faintly visible as an unchanging full-width line with an
+invisible bar drawn somewhere beneath it.
+
+**The hover-bob became a locked-rule exception, on purpose, same as
+before:** direct request - "while hovering, only the image being hovered
+stops moving, the rest of the gallery continues its breathing motion" -
+means the bob can no longer be "off until the section is hovered, then
+all 15 tiles bob together." It now runs continuously, for as long as the
+page is open, and a specific tile's own `pointerenter`/`pointerleave`
+only `pause()`/`resume()` _that tile's_ tween (pausing freezes it exactly
+where it is in its cycle; resuming continues from that same point, not a
+reset). This is a second, explicit instance of the same locked-rule
+exception CLAUDE.md's design system section flags for "no constant/
+looping animation" - the first was the second pass's auto-scrolling
+marquee (since removed). Surfacing it again here for the same reason:
+`prefers-reduced-motion` skips it entirely as always, so it never becomes
+motion nobody asked for, but it is a genuine ambient loop the rest of the
+time, and worth a future reader knowing that was a deliberate, requested
+trade-off rather than an oversight.
+
+**Gallery, seventh pass — small progress-line refinements:** three
+direct tweaks to the sixth pass's progress bar, no mechanism changes.
+`transform-origin` moved from `left center` to `center` - since the bar
+already spans the container's full inset width via `left: 0; right: 0`,
+that one property change was enough to make it grow outward from the
+middle as you scroll, instead of filling left-to-right. `margin-top`
+went from `1.5rem` to `3rem` after direct feedback that the line sat too
+close to the tiles above it - verified with `getBoundingClientRect()`
+sampled across several seconds (to catch the continuous bob near its
+peak dip, not just whatever phase a single snapshot happened to catch)
+that the gap between the lowest possible tile edge and the line is a
+steady 20px, not overlapping at any point in the bob's cycle. Also
+re-verified the whole pinned section (title + stage + progress line)
+still fits inside one viewport at a shorter-than-usual 760px height, not
+just the 900px this project's checks default to - per the same "make
+sure the whole section is still in view" instruction that shaped the
+fifth pass's pin restructure. Thickness came down slightly, 2px → 1.5px,
+to sit closer to the weight of the "Scroll" label and the placeholder
+tiles' own hairline borders rather than reading heavier than either.
+
+**Navigation pass — Work/Contact anchors, full-screen tablet+mobile menu,
+About's back-link, title/subtitle parity:** six explicit requests
+covering Header.astro, Footer.astro, and AboutIntro.astro. None of the
+homepage/About locked content or copy changed — this pass is wayfinding
+and typography-alignment only.
+
+Work and Contact in Header's nav no longer point at `/work` and
+`/contact` — those pages don't exist yet (CLAUDE.md "Current status":
+still proposed, unbuilt) and previously 404'd. Work now points at
+`${withBase('/')}#work` (SelectedWork.astro already had `id="work"` from
+an earlier pass — nothing to add there), which always resolves to the
+homepage's own section regardless of which page you click it from.
+Contact points at a bare `#contact`, a new id on Footer's contact row
+(`.site-footer__row--contact`) — since Footer renders on every page, a
+plain hash (no leading path) scrolls to the current page's own footer
+instead of forcing a navigation to the homepage, which reads smoother
+when you're already on a page that has one. The header wordmark already
+linked home (`withBase('/')`) before this pass — confirmed, not changed.
+
+**The mobile nav breakpoint moved from 768px to 1023px, and the panel
+itself became a full-screen overlay instead of a small dropdown** — per
+direct request ("the menu on tablet and mobile screens should fill the
+entire screen"). 1024px matches this project's own established tablet/
+desktop split used elsewhere (Hero's tablet range, AboutIntro/
+AboutStory's breakpoints), not the narrower boundary this used before,
+when tablet still got the plain inline nav. The panel is `position: fixed;
+inset: 0`, body scroll gets locked while it's open (same pattern the
+lightbox already uses), and the entrance uses a softer fade + gentle
+scale(0.98→1) on a custom `cubic-bezier(0.22, 1, 0.36, 1)` curve instead
+of the old translateY(-8px) snap on the sitewide `--motion-easing` (a
+plain `ease-out`, which accelerates hard out of the gate) — per direct
+request that the animation read as softer.
+
+**A real bug, caught by DOM measurement, not the screenshot (which showed
+the CV button simply missing):** giving the logo/CV/toggle a higher
+`z-index` than the now-full-screen nav should have kept them visible
+above it, but the CV button stayed invisible anyway - `getComputedStyle`
+showed its `z-index` was still `0`, not the `2` just set. Cause: the same
+Astro-scoping specificity trap already documented once in Hero.astro -
+`Button.astro`'s own `.btn--primary` rule already sets
+`position: relative; z-index: 0`, and its selector (a class plus Astro's
+scope-hash attribute) outranks a plain `:global(.site-header__cv)` class
+selector regardless of source order. Hero's own mobile CTA override hit
+this exact problem before and settled on `!important` rather than relying
+on a specificity tie that stylesheet injection order would resolve
+unpredictably; used the same fix here for the same reason, and left a
+comment pointing at that precedent so a future z-index override on
+anything wrapping `<Button>` knows to expect this.
+
+**AboutIntro gained a "back to homepage" link** (small mono label style,
+matching the plate mark rather than a bold CTA, with the same left-arrow
+SVG the lightbox's prev control already uses) sitting above the "(01)"
+plate mark. First attempt used `display: inline-flex` on the link, which
+kept it on the same line as the plate mark that follows it in the markup
+instead of stacking above it as intended - `display: flex` (block-level
+by default) plus `width: fit-content` (so the link's own hit area/outline
+doesn't stretch to the full line) fixed it, caught by screenshot before
+calling the work done, not assumed correct from the code alone.
+
+**Title/subtitle typography now matches Hero's, where the two pages have
+real equivalents:** `.about-intro__headline`'s `line-height`/
+`letter-spacing` now match `.hero__title-visual` exactly (0.8 /
+-0.03em) — font-size keeps its own `clamp()` rather than adopting Hero's
+cqw mechanism, since that edge-to-edge device is still deliberately
+homepage-only (see this file's earlier "Header/Hero rebuild v2" section
+and AboutIntro's own file-header comment). `.about-intro__text` - the
+paragraph directly under the headline, About's closest equivalent to
+Hero's `.hero__intro` subtitle paragraph - now matches its font-size
+`clamp()`, `line-height: 1.5`, and `color: var(--color-text-secondary)`
+instead of its own previous bespoke values (a larger clamp, full ink).
+Hero's own bold-uppercase `.hero__role` treatment was deliberately not
+copied onto this paragraph — that's a short role label, not body prose,
+and forcing that treatment onto several full sentences would hurt
+readability rather than align two pages' styles in any way that reads as
+consistent.
+
+**A real bug in `withBase()`, breaking every link to the homepage:**
+direct report - "on the about page it leads to portfolio/... this slash
+prevents the link from working... same with the name at the top."
+`trailingSlash: 'never'` (astro.config.mjs) means the homepage's own
+emitted route is slash-free (`/portfolio`, not `/portfolio/`), but
+`withBase('/')` joined `base + "/"` unconditionally, producing
+`/portfolio/` — a URL that doesn't match any emitted route. Every other
+call site was fine (`withBase('/about')` never had a trailing slash to
+begin with), so this only ever bit the root path specifically, which is
+exactly the two places it surfaced: Header's logo and (from the previous
+pass) AboutIntro's new back-link. Fixed in the one shared utility
+(`src/utils/url.ts`) rather than patching each call site - `withBase('/')`
+now returns the bare base with no trailing slash, matching the project's
+own `trailingSlash: 'never'` convention consistently instead of treating
+root as a special case that happened to be wrong.
+
+**Gallery spotlight - the hover interaction reads as more intentional
+now, per direct request** ("make the gallery feel more intentional and
+apparent... when one card is hovered it should be clear that this is in
+focus, with the rest of the page temporarily darkening, like in the image
+preview"): a new `.gallery__spotlight` element, living outside `<section
+class="gallery">` for the same containing-block reason the cursor and
+lightbox already do, uses the classic box-shadow cutout technique - a
+small box positioned/sized to match the hovered trigger's own rect, with
+`box-shadow: 0 0 0 9999px rgb(23 21 15 / 0.7)`. A box-shadow never paints
+inside its own element's box, so the shadow darkens the entire viewport
+except that one rectangle, and the real tile underneath (an unrelated
+element, unaffected by any of this) simply shows through the gap at full
+brightness. This sidesteps the alternative approach entirely - raising
+the actual tile's z-index above a full-page overlay - which would have
+meant fighting the tile's own nested, transformed, pinned ancestor chain
+for stacking priority (the same class of problem the cursor and CV
+z-index bugs above already ran into twice this session). Reuses the
+lightbox's own backdrop color/opacity rather than inventing a new one, so
+the two "something is in focus, everything else recedes" moments in this
+section share one visual language. Gated the same way as the custom
+cursor (`prefers-reduced-motion` and `pointer: fine` both skip it) since
+it's a decorative focus cue, not something the gallery depends on to stay
+usable.
+
+**Progress line, one more small pass:** per direct follow-up, thinner
+again (1.5px → 1px) and a bit more clearance above the tiles
+(`margin-top`: 3rem → 3.5rem) - verified against the same "whole pinned
+section still fits in one viewport" budget as the previous pass rather
+than assumed fine.
+
+**The brutalist-pass hairline boxes around SectionMarker's index and
+AboutIntro's own "(01)" plate are gone again**, per direct request
+("remove the squares around the (01) etc on the about page"). Both now
+fall back to SectionMarker's own plain index styling (mono,
+text-secondary, no border) - the same look the homepage's SectionMarker
+instances already have, so About's index marks no longer diverge from
+that shared default. See AboutStory.astro and AboutIntro.astro's own
+comments for exactly which rule was removed.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

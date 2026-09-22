@@ -34,6 +34,19 @@ const cvHref = '#';
 
 <section class="about-intro">
   <div class="about-intro__inner">
+    <a href={withBase('/')} class="about-intro__back">
+      <svg class="about-intro__back-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path
+          d="M13 8H3M3 8L6.75 4.25M3 8L6.75 11.75"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      Back to homepage
+    </a>
+
     <span class="about-intro__plate" aria-hidden="true">
       ( 01 )
     </span>
@@ -102,29 +115,74 @@ const cvHref = '#';
     padding-inline: var(--space-outer);
   }
 
-  /* This page's plate mark, matching SectionMarker's mono/hairline-box
-     language (see AboutStory's global override) but authored locally -
+  /* A delicate back-link, per direct request - small mono label style
+     (matching the plate mark/tags rather than a bold CTA), text-secondary
+     at rest so it reads as a quiet wayfinding aid above the page's actual
+     content, not a competing headline. */
+  .about-intro__back {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: var(--space-24);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+    transition: color var(--motion-duration) var(--motion-easing);
+  }
+
+  .about-intro__back:hover,
+  .about-intro__back:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .about-intro__back:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+
+  .about-intro__back-arrow {
+    width: 0.9em;
+    height: 0.9em;
+    transition: transform var(--motion-duration) var(--motion-easing);
+  }
+
+  .about-intro__back:hover .about-intro__back-arrow,
+  .about-intro__back:focus-visible .about-intro__back-arrow {
+    transform: translateX(-0.15em);
+  }
+
+  /* This page's plate mark, matching SectionMarker's own plain index
+     styling exactly (no hairline box - removed again per direct
+     follow-up request, "remove the squares around the (01) etc", see
+     AboutStory's own comment on the same change) but authored locally -
      Intro doesn't use SectionMarker itself (it isn't a labeled section,
      it's the page opener, same as Hero on the homepage), so this keeps
      the numbering system honest without forcing an index+label pair onto
      something that isn't one. */
   .about-intro__plate {
-    display: inline-block;
-    padding: 0.2em 0.6em;
-    border: var(--border-hairline) solid var(--color-ink);
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
-    color: var(--color-ink);
+    color: var(--color-text-secondary);
   }
 
+  /* Weight/case/tracking/line-height now match Hero's .hero__title-visual
+     exactly (line-height: 0.8, letter-spacing: -0.03em) per direct request
+     to align the two pages' title styling - font-size keeps its own
+     clamp() rather than Hero's cqw mechanism, since that edge-to-edge
+     device is still deliberately homepage-only (see the file header
+     comment); this page's headline settles for a smaller fixed anchor,
+     not a full-bleed one. */
   .about-intro__headline {
     margin-top: var(--space-16);
     font-family: var(--font-display);
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: -0.035em;
-    line-height: 0.88;
+    letter-spacing: -0.03em;
+    line-height: 0.8;
     font-size: clamp(3.5rem, 7vw + 2rem, 9rem);
     color: var(--color-ink);
   }
@@ -137,13 +195,18 @@ const cvHref = '#';
     align-items: start;
   }
 
+  /* This page's closest equivalent to Hero's subtitle paragraph
+     (.hero__intro, directly under its own title) - matched to the same
+     size/line-height/color per direct request, in place of this page's
+     previous bespoke values (a slightly larger clamp, ink instead of
+     text-secondary). */
   .about-intro__text {
     grid-column: 1 / 8;
     max-width: 65ch;
     font-family: var(--font-body);
-    font-size: clamp(1.0625rem, 0.3vw + 1rem, 1.25rem);
-    line-height: var(--text-body-leading);
-    color: var(--color-ink);
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
   }
 
   /* The page's one terracotta wink - a small pinned note, not a banner.

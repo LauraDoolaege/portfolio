@@ -56,12 +56,11 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   </div>
 
   <div class="gallery__stage">
-    <p class="gallery__bg-title" aria-hidden="true">
-      Gallery
-    </p>
-
     <div class="gallery__viewport" data-total={TOTAL}>
       <ul class="gallery__track">
+        <li class="gallery__hint" aria-hidden="true">
+          Scroll
+        </li>
         {tiles.map((tile, i) => (
           <li
             class={`gallery__tile gallery__tile--${tile.aspectClass} gallery__tile--${tile.floatClass}`}
@@ -91,8 +90,53 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
         ))}
       </ul>
     </div>
+
+    <div class="gallery__progress" aria-hidden="true">
+      <span class="gallery__progress-bar"></span>
+    </div>
   </div>
 </section>
+
+<!--
+  Deliberately a sibling of <section class="gallery">, not nested inside
+  it: GSAP's pin sets an inline transform on whatever it pins while
+  pinned (even an identity one), and any transform - not just a moving
+  one - makes that element the containing block for its `position: fixed`
+  descendants (same family of bug as AGENTS.md's stacking-context note on
+  Hero's parallax). The whole section is the pin target now (see the
+  script - title and stage pin together), so the cursor has to live
+  outside the section entirely, not just outside .gallery__stage like
+  before.
+
+  Two elements, not one: GSAP's x/y follow (script) writes an inline
+  `transform` on the outer .gallery__cursor every frame, which would
+  silently override a CSS `transform: scale()` on the same element - the
+  is-active state's scale-in never actually took effect once GSAP had
+  touched the property, another instance of the same "GSAP vs static
+  transform" conflict documented elsewhere in this file. The inner
+  .gallery__cursor-inner instead owns the CSS transform/opacity for the
+  hover state, so the two never fight over the same property.
+-->
+<div class="gallery__cursor" aria-hidden="true">
+  <span class="gallery__cursor-inner">View</span>
+</div>
+
+<!--
+  Same reasoning as the cursor above for living outside <section
+  class="gallery"> - a fixed, full-viewport element, so it can't be a
+  descendant of anything GSAP might transform while pinning. The "hole"
+  is a single small box-shadow trick (0 0 0 9999px), not a page-wide dim
+  layer plus a raised tile: the hovered tile never needs its own z-index
+  above this at all, since a box-shadow never paints inside its own
+  element's box - whatever's genuinely underneath that rectangle (the
+  real tile, in normal DOM order) just shows through unobscured, while
+  everywhere else on the page goes dark. Positioned/sized to match
+  whichever trigger is hovered, per direct request ("when one card is
+  hovered it should be clear that this is in focus, with the rest of the
+  page temporarily darkening, like in the image preview" - i.e. the
+  lightbox's own full-viewport backdrop, reused here as a hover cue).
+-->
+<div class="gallery__spotlight" aria-hidden="true"></div>
 
 <div
   class="lightbox"
@@ -161,10 +205,14 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
+  const section = document.querySelector<HTMLElement>('.gallery');
+  const inner = document.querySelector<HTMLElement>('.gallery__inner');
   const stage = document.querySelector<HTMLElement>('.gallery__stage');
-  const bgTitle = document.querySelector<HTMLElement>('.gallery__bg-title');
   const viewport = document.querySelector<HTMLElement>('.gallery__viewport');
   const track = document.querySelector<HTMLElement>('.gallery__track');
+  const progressBar = document.querySelector<HTMLElement>('.gallery__progress-bar');
+  const cursor = document.querySelector<HTMLElement>('.gallery__cursor');
+  const spotlight = document.querySelector<HTMLElement>('.gallery__spotlight');
   const lightbox = document.getElementById('gallery-lightbox');
   const lightboxStage = lightbox?.querySelector<HTMLElement>('.lightbox__stage');
   const numberEl = lightbox?.querySelector<HTMLElement>('.lightbox__number');
@@ -175,8 +223,9 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   const backdrop = lightbox?.querySelector<HTMLButtonElement>('.lightbox__backdrop');
 
   if (
+    section &&
+    inner &&
     stage &&
-    bgTitle &&
     viewport &&
     track &&
     lightbox &&
@@ -196,73 +245,159 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       // strip instead, so every tile stays reachable with zero
       // scroll-driven motion (see the file header comment).
       viewport.classList.add('gallery__viewport--static');
+
+      // Progress line still tracks position, just driven by the native
+      // scroll position instead of a ScrollTrigger - same "functional
+      // equivalent, motion removed" idea: the line itself doesn't move
+      // under motion, it just reflects a value.
+      if (progressBar) {
+        const syncProgress = () => {
+          const max = viewport.scrollWidth - viewport.clientWidth;
+          const progress = max > 0 ? viewport.scrollLeft / max : 0;
+          progressBar.style.transform = `scaleX(${progress})`;
+        };
+        viewport.addEventListener('scroll', syncProgress, { passive: true });
+        syncProgress();
+      }
     } else {
-      // --- Scroll-linked pin: track and watermark both driven by one
-      // shared scrub timeline (see the file header comment for the why).
-      // Measured fresh each time (not cached once) so resize invalidation
-      // recomputes correct start/end values instead of stale ones.
-      const OVERLAP = 64; // px the first tile creeps into the watermark's tail
-      const PUSH_ASIDE = 0.7; // fraction of its own width the watermark slides left
+      // --- Scroll-linked pin: the track slides across while pinned (see
+      // the file header comment for the why). Measured fresh each time
+      // (not cached once) so resize invalidation recomputes correct
+      // start/end values instead of stale ones.
+      //
+      // The "Scroll" hint is a real flex item at the head of the track
+      // now (see the markup), not a separately positioned/animated
+      // watermark - it sits directly next to the first image and simply
+      // scrolls away with everything else once the track starts moving,
+      // instead of needing its own tween to drift or fade it out of the
+      // way. startX is just the same left inset .gallery__inner uses
+      // above it, so the strip's resting position lines up with the
+      // title's own left margin rather than an arbitrary reveal fraction.
+      const startInset = parseFloat(getComputedStyle(inner).paddingLeft) || 0;
 
       const measure = () => {
-        const startX = bgTitle.getBoundingClientRect().width - OVERLAP;
         const endX = -(track.scrollWidth - viewport.clientWidth);
-        return { startX, endX, travel: startX - endX };
+        return { startX: startInset, endX, travel: startInset - endX };
       };
 
       gsap.set(track, { x: measure().startX });
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: stage,
+          // The whole section (title included), not just the stage, is
+          // both the trigger and the pin target - per direct feedback
+          // that the title was scrolling away from the gallery while
+          // only the tile strip stayed pinned. Pinning the section keeps
+          // the title and the strip locked together for the whole
+          // scrub, exactly like the trigger's own top-level Astro markup
+          // groups them. "top top" - the pin engages once the section's
+          // own top reaches the top of the viewport - reads as "once the
+          // section is into full view" for this section's height, and
+          // pinning the section (which starts higher up the page than
+          // the stage alone did) reaches that point with less scrolling
+          // than before, without needing a separate earlier-start hack.
+          trigger: section,
           start: 'top top',
           end: () => `+=${measure().travel}`,
           pin: true,
           scrub: 1,
           invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            if (progressBar) progressBar.style.transform = `scaleX(${self.progress})`;
+          },
         },
       });
       tl.to(track, { x: () => measure().endX, ease: 'none' }, 0);
-      tl.to(
-        bgTitle,
-        { x: () => -bgTitle.getBoundingClientRect().width * PUSH_ASIDE, ease: 'none' },
-        0,
-      );
     }
 
-    // Subtle bob, hover-only: each tile's trigger (not the tile itself -
-    // see the file header comment on why) drifts a few px up and down in
-    // a slow, soft loop, but only while the pointer is over the section.
-    // A per-tile duration offset keeps them from bobbing in perfect
-    // unison, which would read as one mechanical pulse instead of
-    // something organic. Independent of the scroll-pin above - both can
-    // run at once without conflict (different elements, different GSAP
-    // properties).
+    // Continuous "breathing" bob: every tile's trigger (not the tile
+    // itself - see the file header comment on why) drifts a few px up
+    // and down in a slow, soft loop for as long as the page is open, not
+    // just while the section is hovered - per direct request, hovering a
+    // specific tile should freeze only that one, while the rest keep
+    // breathing. A per-tile duration offset keeps them from moving in
+    // perfect unison, which would read as one mechanical pulse instead
+    // of something organic. Independent of the scroll-pin above - both
+    // can run at once without conflict (different elements, different
+    // GSAP properties).
     if (!reduceMotion) {
       const triggers = Array.from(viewport.querySelectorAll<HTMLElement>('.gallery__trigger'));
-      let bobTweens: gsap.core.Tween[] = [];
+      const bobTweens = triggers.map((el, i) =>
+        gsap.to(el, {
+          y: 7,
+          duration: 2.4 + (i % 5) * 0.2,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true,
+        }),
+      );
 
-      const startBob = () => {
-        if (bobTweens.length) return;
-        bobTweens = triggers.map((el, i) =>
-          gsap.to(el, {
-            y: 7,
-            duration: 2.4 + (i % 5) * 0.2,
-            ease: 'sine.inOut',
-            repeat: -1,
-            yoyo: true,
-          }),
-        );
-      };
+      // Pausing (not killing) freezes the tile exactly where it is in its
+      // cycle; resuming continues from that same point rather than
+      // restarting or snapping back to a rest position, so the freeze
+      // itself reads as "this one stopped," not as a separate animation.
+      triggers.forEach((trigger, i) => {
+        trigger.addEventListener('pointerenter', () => bobTweens[i].pause());
+        trigger.addEventListener('pointerleave', () => bobTweens[i].resume());
+      });
+    }
 
-      const stopBob = () => {
-        bobTweens.forEach((tween) => tween.kill());
-        bobTweens = [];
-        gsap.to(triggers, { y: 0, duration: 0.6, ease: 'sine.out' });
-      };
+    // Custom "View" cursor: a small circle that follows the pointer and
+    // only appears over a tile, replacing the system cursor there. Gated
+    // on a fine pointer (mouse/trackpad) as well as reduced motion - on
+    // touch there's no hover to react to, and the lag below is motion
+    // that reduced-motion users didn't ask for.
+    //
+    // Listeners are bound per-trigger, not delegated via a single
+    // viewport-level pointermove: binding directly to the element that's
+    // actually supposed to trigger the cursor is simpler to reason about
+    // and doesn't depend on event bubbling still working the way this
+    // first version assumed. On pointerenter the cursor snaps to the
+    // entry point immediately (gsap.set, not the eased quickTo) before
+    // switching to the smooth follow for movement within the tile - the
+    // first version let quickTo ease in from wherever it last was
+    // (often (0,0), off in the corner), which read as broken rather than
+    // as a deliberate lag.
+    if (!reduceMotion && cursor && window.matchMedia('(pointer: fine)').matches) {
+      viewport.classList.add('gallery__viewport--custom-cursor');
+      const moveX = gsap.quickTo(cursor, 'x', { duration: 0.35, ease: 'power3.out' });
+      const moveY = gsap.quickTo(cursor, 'y', { duration: 0.35, ease: 'power3.out' });
 
-      viewport.addEventListener('pointerenter', startBob);
-      viewport.addEventListener('pointerleave', stopBob);
+      viewport.querySelectorAll<HTMLElement>('.gallery__trigger').forEach((trigger) => {
+        trigger.addEventListener('pointerenter', (event) => {
+          gsap.set(cursor, { x: event.clientX, y: event.clientY });
+          cursor.classList.add('is-active');
+        });
+        trigger.addEventListener('pointermove', (event) => {
+          moveX(event.clientX);
+          moveY(event.clientY);
+        });
+        trigger.addEventListener('pointerleave', () => cursor.classList.remove('is-active'));
+      });
+    }
+
+    // Spotlight: dims the rest of the page while a tile is hovered, so
+    // that one tile reads as clearly in focus - per direct request,
+    // echoing the lightbox's own full-viewport backdrop as a hover cue
+    // rather than inventing a separate visual language for it. Sized and
+    // positioned from the hovered trigger's own rect on pointerenter (the
+    // hover-bob above already freezes that specific tile in place for the
+    // duration of the hover, so its position doesn't drift out from under
+    // the hole while it's open). Gated the same way as the custom cursor -
+    // reduced motion and touch both skip it, since it's a decorative focus
+    // cue, not something the gallery depends on to stay usable.
+    if (!reduceMotion && spotlight && window.matchMedia('(pointer: fine)').matches) {
+      viewport.querySelectorAll<HTMLElement>('.gallery__trigger').forEach((trigger) => {
+        trigger.addEventListener('pointerenter', () => {
+          const rect = trigger.getBoundingClientRect();
+          spotlight.style.left = `${rect.left}px`;
+          spotlight.style.top = `${rect.top}px`;
+          spotlight.style.width = `${rect.width}px`;
+          spotlight.style.height = `${rect.height}px`;
+          spotlight.classList.add('is-active');
+        });
+        trigger.addEventListener('pointerleave', () => spotlight.classList.remove('is-active'));
+      });
     }
 
     // --- Lightbox ---
@@ -358,8 +493,9 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 
 <style>
   .gallery {
-    padding-block: var(--space-section);
-    background: var(--color-bg-secondary);
+    /* Smaller than the sitewide --space-section (140px) on purpose: per direct feedback the section's overall footprint - and therefore how far you had to scroll before the pinned reveal engaged - was too big. A tighter block padding here, paired with the ScrollTrigger start point below, keeps the section from taking up more page height than the interaction actually needs. */
+    padding-block: clamp(3rem, 6vw, 4.5rem);
+    /* No background fill (per direct request) - the section sits directly on the page's own bg-primary instead of the chalk bg-secondary field the rest of the homepage's alternating sections use. */
     /* The stage below breaks out to 100vw; on a page with a vertical scrollbar, 100vw can be a hair wider than the visible viewport in some browsers, which would otherwise show as a slim horizontal scrollbar. This contains that sub-pixel case without affecting anything else on the page (only this section's own box). */
     overflow-x: hidden;
   }
@@ -378,24 +514,15 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     overflow: hidden;
   }
 
-  /* Sits behind the strip (z-index below .gallery__viewport), sized to fill roughly half the viewport width at rest, per direct request ("gallery... filling around half the horizontal width of the screen"). text-secondary at low opacity (a token, not a new hardcoded color) reads as a soft watermark rather than legible content - aria-hidden because of that: SectionMarker's own "Gallery" h2 above already is the accessible heading. */
-  .gallery__bg-title {
-    position: absolute;
-    top: 50%;
-    left: clamp(1rem, 4vw, var(--space-outer));
-    transform: translateY(-50%);
-    z-index: 0;
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 800;
+  /* A tasteful scroll cta, not the giant "Gallery" wordmark this replaced (per direct request) - now a real flex item at the head of the track (see the markup), sitting directly next to the first image instead of floating independently over the strip. Mono/bracket-adjacent styling matches the site's established label device (see Tag.astro) instead of borrowing the display headline treatment. aria-hidden: SectionMarker's own "Gallery" h2 above is still the accessible heading. */
+  .gallery__hint {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
     text-transform: uppercase;
-    line-height: 0.85;
-    letter-spacing: -0.02em;
-    font-size: clamp(6rem, 17vw, 17rem);
+    letter-spacing: var(--tracking-wide);
     color: var(--color-text-secondary);
-    opacity: 0.4;
     white-space: nowrap;
-    pointer-events: none;
     user-select: none;
   }
 
@@ -403,14 +530,17 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     position: relative;
     z-index: 1;
     overflow: hidden;
-    /* Vertical room for the float offset and hover bob below so nothing clips: the pinned scroll animation only ever moves the track horizontally, but this still needs enough height that floated/bobbing tiles never touch this box's own top/bottom edge. Negative margin cancels the padding's footprint on .gallery__stage's own auto height, so this trick doesn't add visible extra whitespace around the section. */
-    padding-block: 4rem;
-    margin-block: -4rem;
+    /* Vertical room for the float offset and hover bob below so nothing clips: the pinned scroll animation only ever moves the track horizontally, but this still needs enough height that floated/bobbing tiles never touch this box's own top/bottom edge. Negative margin cancels the padding's footprint on .gallery__stage's own auto height, so this trick doesn't add visible extra whitespace around the section. Trimmed from 4rem/-4rem - part of the same "section is too big" fix as .gallery's own padding above. */
+    padding-block: 2.5rem;
+    margin-block: -2.5rem;
   }
 
-  /* Reduced-motion fallback: a plain native-scrollable strip, no pin, no
-     scrub, no transform-driven track - see the script's own comment for
-     why this is the right equivalent rather than a degraded one. */
+  /* Custom "View" cursor replaces the system pointer only where it's shown - falls back to the native cursor everywhere else (including when JS/motion is unavailable, since this class is only ever added by the script once it decides to run the effect). */
+  .gallery__viewport--custom-cursor .gallery__trigger {
+    cursor: none;
+  }
+
+  /* Reduced-motion fallback: a plain native-scrollable strip, no pin, no scrub, no transform-driven track - see the script's own comment for why this is the right equivalent rather than a degraded one. */
   .gallery__viewport--static {
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -514,6 +644,102 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     width: 1.5rem;
     height: 1.5rem;
     color: var(--color-ink);
+  }
+
+  /* Follows the pointer via GSAP quickTo (see the script) - x/y only, no CSS transform of its own, so GSAP's inline transform never has to fight a class-toggled one (see the markup comment for the bug this avoids). Purely a positioning wrapper; the circle itself is .gallery__cursor-inner below. */
+  .gallery__cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    width: 4.25rem;
+    height: 4.25rem;
+    margin: -2.125rem;
+    pointer-events: none;
+  }
+
+  /* The actual visible circle - scale/opacity are CSS-owned here, never touched by GSAP, so the .is-active toggle always takes effect regardless of how often the outer element's position updates. Black text on a porcelain circle reads clearly over any placeholder tile without needing per-tile contrast logic. */
+  .gallery__cursor-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--color-bg-primary);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      opacity var(--motion-duration) var(--motion-easing),
+      transform var(--motion-duration) var(--motion-easing);
+  }
+
+  .gallery__cursor.is-active .gallery__cursor-inner {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  @media (max-width: 900px) {
+    /* Fine-pointer gated in the script, but keep it out of layout entirely below the breakpoint where a fine pointer stops being realistic. */
+    .gallery__cursor {
+      display: none;
+    }
+  }
+
+  /* Positioned/sized from JS to match the hovered trigger's own rect. The box-shadow is the entire trick - it never paints inside this element's own box, so a spread of 9999px reads as "everywhere except this rectangle," darkening the whole viewport while leaving the real tile underneath (a separate element, unaffected) fully visible through the gap. z-index: 50 sits above the header (10) and everything else in normal page flow, but below the lightbox (100) - the two are mutually exclusive states in practice, but there's no reason to leave the ordering ambiguous. */
+  .gallery__spotlight {
+    position: fixed;
+    z-index: 50;
+    border-radius: var(--radius-image);
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 0 0 9999px rgb(23 21 15 / 0.7);
+    transition: opacity var(--motion-duration-slow) var(--motion-easing);
+  }
+
+  .gallery__spotlight.is-active {
+    opacity: 1;
+  }
+
+  @media (max-width: 900px) {
+    /* Same fine-pointer reasoning as the cursor above. */
+    .gallery__spotlight {
+      display: none;
+    }
+  }
+
+  /* Tracks how far through the horizontal reveal the track has scrubbed - no static backing line anymore, just this bar growing from nothing as you scroll and stopping at the same full inset width once the gallery ends, per direct request ("appears and grows... stopping growth at the size it is now"). Sits within the same inset as .gallery__inner so it lines up with the section marker above rather than running the full breakout width. A bigger top margin than a plain hairline gap needs - per direct feedback the line was sitting too close to the tiles above it (the floated/bobbing ones dip into the same vertical room .gallery__viewport already reserves for them), so this clears that zone with room to spare rather than trimming the reserved room itself, which would clip the bob. */
+  .gallery__progress {
+    position: relative;
+    z-index: 1;
+    height: 1px;
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    margin-top: 3.5rem;
+    padding-inline: var(--space-outer);
+  }
+
+  .gallery__progress-bar {
+    /* top: 0, left/right: 0 - absolute offsets are measured from the containing block's own padding edge, so this fills .gallery__progress's full height/inset without repeating its padding-inline value. transform-origin: center (not left) so the bar grows outward from the middle as you scroll, per direct request, instead of filling left-to-right like a conventional loading bar. */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--color-text-secondary);
+    transform-origin: center;
+    transform: scaleX(0);
+  }
+
+  @media (max-width: 640px) {
+    .gallery__progress {
+      padding-inline: 1.5rem;
+    }
   }
 
   @media (max-width: 640px) {

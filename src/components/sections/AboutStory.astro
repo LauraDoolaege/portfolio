@@ -16,11 +16,15 @@
 //
 // Brutalist-structure pass (explicit request, About-only scope): the
 // section's top hairline (a repeated "plate boundary" rule across all
-// four About sections) and the SectionMarker index's hairline box are
-// declared once here via :global() - that reaches every .section-marker
-// on THIS page (Astro only ships a component's styles to pages that
-// import it, so this never loads on the homepage bundle and never
-// touches the shared SectionMarker.astro file itself).
+// four About sections) is declared once here via :global() - that
+// reaches every .section-marker on THIS page (Astro only ships a
+// component's styles to pages that import it, so this never loads on the
+// homepage bundle and never touches the shared SectionMarker.astro file
+// itself). The SectionMarker index's own hairline box, part of that same
+// pass, was later removed again (direct follow-up request, "remove the
+// squares around the (01) etc") - the index now stays whatever
+// SectionMarker.astro's own default styling gives it, same as the
+// homepage.
 import SectionMarker from '../ui/SectionMarker.astro';
 ---
 
@@ -114,15 +118,6 @@ import SectionMarker from '../ui/SectionMarker.astro';
 
   .about-story__inner > :global(.section-marker) {
     grid-column: 1 / -1;
-  }
-
-  /* Turns SectionMarker's plain index text into a small hairline-boxed
-     plate, matching AboutIntro's own "( 01 )" mark - declared once here
-     via :global() (see the frontmatter comment for why that's safe). */
-  :global(.section-marker__index) {
-    display: inline-block;
-    padding: 0.2em 0.6em;
-    border: var(--border-hairline) solid var(--color-ink);
   }
 
   .about-story__column {

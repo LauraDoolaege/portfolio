@@ -14,10 +14,13 @@
 // what is currently a single use. Its hover transitions were softened to
 // match Button.astro's own `--motion-easing-soft` fix (see that file).
 //
-// Gained a soft porcelain-to-transparent gradient wash over its own top
-// edge, per direct request for "a smooth transition... between the
-// design principles, gallery and contact me/footer" - see the section's
-// own `::before` rule below for how.
+// A porcelain-to-transparent gradient wash briefly sat over this
+// section's own top edge (an attempt at "a smooth transition... between
+// the design principles, gallery and contact me/footer") - removed again
+// per direct follow-up ("remove the awful fade at the bottom of the
+// page"). The underlying ask (the sections should read as flowing into
+// each other, not cutting) is still open; explicitly deferred rather
+// than immediately re-attempted with a different technique.
 import { withBase } from '../../utils/url';
 
 // TODO: point at a real destination once the Contact page (PROJECT_BRIEF.md
@@ -36,38 +39,12 @@ const contactHref = withBase('/contact');
 
 <style>
   .contact-cta {
-    position: relative;
     padding-block: var(--space-section);
     background: var(--color-dark-field);
     color: var(--color-bg-primary);
   }
 
-  /* Smooth transition into this section's dark-field, per direct
-     request ("a smooth transition... between the design principles,
-     gallery and contact me/footer") - Gallery (and Principles before it)
-     sit on the plain porcelain page background, so this is the one real
-     color seam in that run of sections. A porcelain-to-transparent
-     gradient painted over the section's own top edge, fading out within
-     the first ~8rem, reads as the dark background gradually emerging
-     from the page rather than cutting to it - a positioned pseudo-
-     element paints after the section's own solid background-color (see
-     the CSS painting order), so the gradient sits visibly on top of it
-     without needing a second element. Only tokens this project already
-     locks (bg-primary, dark-field) are used - no new hue. */
-  .contact-cta::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 8rem;
-    background: linear-gradient(to bottom, var(--color-bg-primary), transparent);
-    pointer-events: none;
-  }
-
   .contact-cta__inner {
-    position: relative;
-    z-index: 1;
     max-width: var(--content-max-width);
     margin-inline: auto;
     padding-inline: var(--space-outer);
@@ -99,8 +76,8 @@ const contactHref = withBase('/contact');
     color: var(--color-bg-primary);
     border: var(--border-hairline) solid var(--color-bg-primary);
     /* --motion-easing-soft, matching Button.astro's own primary variant
-             (this is a local dark-context copy of it) - same "tactile glide"
-             fix applied there per direct feedback. */
+                 (this is a local dark-context copy of it) - same "tactile glide"
+                 fix applied there per direct feedback. */
     transition:
       color var(--motion-duration) var(--motion-easing-soft),
       transform var(--motion-duration) var(--motion-easing-soft);

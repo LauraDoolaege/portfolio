@@ -39,21 +39,49 @@
 // used to accompany the lift is gone outright, per the same feedback;
 // the lift and the border darkening to ink already carry the "this one's
 // active" read without it.
+//
+// `fullTitle`: per direct request, the card keeps showing its generic
+// "Project N" label at rest (this matters most in SelectedWork's
+// accordion, where the collapsed, rotated spine label has no room for a
+// real project name) and reveals the real title only on hover/focus - a
+// plain `display` swap between two stacked spans, not an opacity
+// cross-fade: cross-fading would mean both strings briefly occupy layout
+// at once, and their very different lengths (a short "Project 01" next
+// to a real title like "A Space Journey through Screentime") would
+// reserve space for whichever is longer even while invisible. `display:
+// none` removes the hidden one from layout entirely, so there's nothing
+// to reserve. Falls back to always showing `title` when `fullTitle` isn't
+// given (a still-placeholder project). The anchor's `aria-label` always
+// uses the real name when there is one, since that's the actually
+// meaningful description regardless of what's visible before hover.
 import Tag from './Tag.astro';
 
 interface Props {
   number: string;
   title: string;
+  fullTitle?: string;
   roleTag: string;
   year?: string;
   href?: string;
   class?: string;
 }
 
-const { number, title, roleTag, year = 'TBD', href = '#', class: className } = Astro.props;
+const {
+  number,
+  title,
+  fullTitle,
+  roleTag,
+  year = 'TBD',
+  href = '#',
+  class: className,
+} = Astro.props;
 ---
 
-<a href={href} class:list={['project-card', className]} aria-label={`${title} — ${roleTag}`}>
+<a
+  href={href}
+  class:list={['project-card', className]}
+  aria-label={`${fullTitle ?? title} — ${roleTag}`}
+>
   <span class="project-card__frame">
     <span class="project-card__image">
       <!-- TODO: replace with a real project image once photography exists (PROJECT_BRIEF.md Section 6) -->
@@ -84,7 +112,10 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
           {year}
         </span>
       </span>
-      <span class="project-card__title">{title}</span>
+      <span class="project-card__title" aria-hidden={fullTitle ? 'true' : undefined}>
+        <span class="project-card__title-rest">{title}</span>
+        {fullTitle && <span class="project-card__title-full">{fullTitle}</span>}
+      </span>
     </span>
   </span>
 </a>
@@ -151,11 +182,11 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
     border-radius: var(--radius-image);
     overflow: hidden;
     /* --motion-easing-soft (not the plain --motion-easing/ease-out this
-             used before), and a touch longer than --motion-duration-slow - per
-             direct feedback that the card's hover movement read as "very
-             harsh." Plain ease-out decelerates evenly the whole way, which
-             reads mechanical on a 6px lift; the soft cubic-bezier eases in
-             more gradually, closer to a physical glide. */
+                 used before), and a touch longer than --motion-duration-slow - per
+                 direct feedback that the card's hover movement read as "very
+                 harsh." Plain ease-out decelerates evenly the whole way, which
+                 reads mechanical on a 6px lift; the soft cubic-bezier eases in
+                 more gradually, closer to a physical glide. */
     transition:
       transform 0.55s var(--motion-easing-soft),
       border-color var(--motion-duration) var(--motion-easing-soft);
@@ -295,5 +326,21 @@ const { number, title, roleTag, year = 'TBD', href = '#', class: className } = A
   .project-card:hover .project-card__title,
   .project-card:focus-visible .project-card__title {
     color: var(--color-accent);
+  }
+
+  /* The hover-reveal swap - see this file's header comment for why a
+     plain display toggle, not an opacity cross-fade. */
+  .project-card__title-full {
+    display: none;
+  }
+
+  .project-card:hover .project-card__title-rest,
+  .project-card:focus-visible .project-card__title-rest {
+    display: none;
+  }
+
+  .project-card:hover .project-card__title-full,
+  .project-card:focus-visible .project-card__title-full {
+    display: inline;
   }
 </style>

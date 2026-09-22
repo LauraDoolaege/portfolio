@@ -950,14 +950,16 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   /* The solid segment tracking actual scroll progress, drawn over the
      faint track above. transform-origin: left (back to growing
      left-to-right like a conventional loading bar, per direct request -
-     a previous pass had this growing outward from the center instead). */
+     a previous pass had this growing outward from the center instead).
+     Solid ink, not text-secondary - per direct follow-up request to make
+     this indicator black. */
   .gallery__progress-bar {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 1px;
-    background: var(--color-text-secondary);
+    background: var(--color-ink);
     transform-origin: left;
     transform: scaleX(0);
   }

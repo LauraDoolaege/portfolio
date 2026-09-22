@@ -96,10 +96,11 @@ band"). Because `dark-field` is so close in value to `ink`, ContactCTA
 uses a local dark-context copy of the button style rather than reusing
 `Button.astro` directly, which hardcodes ink/porcelain colors.
 
-Real project titles/images, the Gallery's images, and the exact
-"Currently working on" / "How I think" intro copy are still placeholders
-— see each component's own header comment for what's a direct brief
-descriptor vs. an invented structural stand-in.
+Selected Work's project titles are real now (see this file's later
+entry on that) - only the images (Selected Work and Gallery both) and
+the exact "Currently working on" intro copy are still placeholders — see
+each component's own header comment for what's a direct brief descriptor
+vs. an invented structural stand-in.
 
 **About page (built):** content and section order are locked
 (PROJECT_BRIEF.md Section 4/5 — intro+CV, "How I got here"+pull-quote,
@@ -1430,6 +1431,48 @@ real scroll (`scaleX` and `left`/`width` moving together, not just
 assumed from the code); and the ContactCTA gradient is visible as a
 soft lightening at the very top of the dark section rather than a hard
 cut from Gallery's porcelain.
+
+**Four more direct follow-ups on the previous pass: black progress
+indicator, real project titles revealed on hover, and the ContactCTA
+gradient reverted.**
+
+Gallery's progress bar (`.gallery__progress-bar`) switched from
+`--color-text-secondary` to `--color-ink` - "make the progress bar
+indicator black," and ink is this project's actual black token. The
+thinner "you are here" thumb from the previous pass was already ink-
+colored, so only the fill bar itself needed the change.
+
+**Real project titles landed** - the first non-placeholder content
+Selected Work has had. Per direct message: Design group is "Nine to
+Thrive" / "Miles and Meals" / "Kickstarter: Izumi"; Experience group is
+"A Space Journey through Screentime" / "Nexxus" / "Plan A". But the
+generic "Project N" label stays what's visible at rest - "keep the
+titles as project 1 in the initial state but on hover give the full
+project title" - so `ProjectCard.astro` gained an optional `fullTitle`
+prop: two stacked spans inside `.project-card__title`
+(`.project-card__title-rest` / `.project-card__title-full`), a plain
+`display: none`/`display: inline` swap on `:hover`/`:focus-within`, not
+an opacity cross-fade - cross-fading would mean both strings briefly
+occupy layout at once, and "Project 01" next to "A Space Journey through
+Screentime" are wildly different lengths, so the invisible one would
+still reserve space for whichever is longer. `display: none` removes it
+from layout entirely instead. The anchor's own `aria-label` now prefers
+`fullTitle` when present, since that's the actually meaningful
+description regardless of what's visible before hover. `SelectedWork.astro`'s
+own `design`/`experience` arrays each gained a `fullTitle` field: this
+was silent-content-decision territory before ("use clearly-labeled
+placeholders... until real assets are supplied," CLAUDE.md "Content") -
+now real, supplied directly, so used verbatim rather than paraphrased.
+
+**The ContactCTA gradient from the previous pass is gone again** - "remove
+the awful fade at the bottom of the page with the footer." The
+underlying ask behind it (Principles/Gallery/ContactCTA reading as
+flowing into each other, not cutting) is still open per the same
+message ("but we will find a fix for that later") - explicitly not
+re-attempted with a different technique in the same breath; `ContactCTA.astro`
+is back to a plain solid `dark-field` background, and the
+`.contact-cta__inner` `position: relative; z-index: 1` that only existed
+to layer content above that gradient came out with it.
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

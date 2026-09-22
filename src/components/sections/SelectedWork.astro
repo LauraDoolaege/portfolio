@@ -1,9 +1,14 @@
 ---
-// Homepage "Selected work" (PROJECT_BRIEF.md Section 4, item 2). Content is
-// final per the brief: two groups, three projects each — Design/individual
-// work, Experience design/group projects. Real project titles/images don't
-// exist yet (Section 6), so cards are numbered placeholders, not invented
-// project names.
+// Homepage "Selected work" (PROJECT_BRIEF.md Section 4, item 2). Content
+// structure is final per the brief: two groups, three projects each -
+// Design/individual work, Experience design/group projects. Real project
+// titles are now supplied (per direct message: "project 1 => Nine to
+// Thrive, project 2 => Miles and Meals, project 3 => Kickstarter: Izumi"
+// for Design, "a space journey through screentime, nexxus and plan A" for
+// Experience) - each card's `fullTitle` (see ProjectCard.astro), revealed
+// on hover, while the generic "Project N" label (`title`) stays visible
+// at rest. Images still don't exist (Section 6), so the image slot stays
+// a flat placeholder regardless.
 //
 // DESIGN_VARIANCE: 9 (see CLAUDE.md "Experimental design dials") — this is
 // the section's second rebuild in one session. The first (an asymmetric
@@ -37,15 +42,20 @@ import SectionMarker from '../ui/SectionMarker.astro';
 import ProjectCard from '../ui/ProjectCard.astro';
 
 const design = [
-  { number: '01', title: 'Project 01', roleTag: 'design' },
-  { number: '02', title: 'Project 02', roleTag: 'design' },
-  { number: '03', title: 'Project 03', roleTag: 'design' },
+  { number: '01', title: 'Project 01', fullTitle: 'Nine to Thrive', roleTag: 'design' },
+  { number: '02', title: 'Project 02', fullTitle: 'Miles and Meals', roleTag: 'design' },
+  { number: '03', title: 'Project 03', fullTitle: 'Kickstarter: Izumi', roleTag: 'design' },
 ];
 
 const experience = [
-  { number: '04', title: 'Project 04', roleTag: 'experience design' },
-  { number: '05', title: 'Project 05', roleTag: 'experience design' },
-  { number: '06', title: 'Project 06', roleTag: 'experience design' },
+  {
+    number: '04',
+    title: 'Project 04',
+    fullTitle: 'A Space Journey through Screentime',
+    roleTag: 'experience design',
+  },
+  { number: '05', title: 'Project 05', fullTitle: 'Nexxus', roleTag: 'experience design' },
+  { number: '06', title: 'Project 06', fullTitle: 'Plan A', roleTag: 'experience design' },
 ];
 ---
 
@@ -127,16 +137,16 @@ const experience = [
 
   @media (min-width: 900px) {
     /* A fixed-height row is what makes an accordion read as one object
-             instead of three cards of changing aspect-ratio - the height stays
-             constant, only each panel's share of the width changes. 18rem, not
-             the 30rem this first shipped with - per direct feedback the panels
-             read as "quite tall" at that height, more like portrait cards than
-             the short, horizontal, rectangular strip that's actually wanted.
-             flex-grow (not width or flex-basis) is what's animated: every
-             panel starts equal (grow: 1) and the hovered/focused one steps up
-             to grow: 6, so it takes roughly 6/8 of the row while its two
-             siblings compress to about 1/8 each, without any JS or per-panel
-             width math. */
+                 instead of three cards of changing aspect-ratio - the height stays
+                 constant, only each panel's share of the width changes. 18rem, not
+                 the 30rem this first shipped with - per direct feedback the panels
+                 read as "quite tall" at that height, more like portrait cards than
+                 the short, horizontal, rectangular strip that's actually wanted.
+                 flex-grow (not width or flex-basis) is what's animated: every
+                 panel starts equal (grow: 1) and the hovered/focused one steps up
+                 to grow: 6, so it takes roughly 6/8 of the row while its two
+                 siblings compress to about 1/8 each, without any JS or per-panel
+                 width math. */
     .selected-work__accordion {
       display: flex;
       align-items: stretch;
@@ -149,8 +159,8 @@ const experience = [
       min-width: 0;
       overflow: hidden;
       /* --motion-easing-soft, not a hand-typed cubic-bezier literal - see
-                     that token's own comment (global.css) for why this exact curve
-                     is now shared across several places instead of copy-pasted. */
+                             that token's own comment (global.css) for why this exact curve
+                             is now shared across several places instead of copy-pasted. */
       transition: flex-grow 0.6s var(--motion-easing-soft);
     }
 
@@ -160,8 +170,8 @@ const experience = [
     }
 
     /* The card fills its panel's full box instead of holding its own
-                 aspect-ratio - same "stretch to fill a flex/grid cell" technique
-                 the bento's featured card used before this replaced it. */
+                     aspect-ratio - same "stretch to fill a flex/grid cell" technique
+                     the bento's featured card used before this replaced it. */
     .selected-work__accordion :global(.project-card) {
       display: flex;
       flex-direction: column;
@@ -174,12 +184,12 @@ const experience = [
     }
 
     /* Collapsed (rest) state: a panel this narrow has no room for a
-                 horizontal title/tag/year row, so the title runs vertically along
-                 the panel instead (the classic accordion-gallery "spine label"),
-                 and the tag/year/dashed-stub - which would just wrap illegibly at
-                 this width - are hidden rather than shrunk into something
-                 unreadable. The number badge and arrow badge stay put; both are
-                 already small, self-contained, and legible at any panel width. */
+                     horizontal title/tag/year row, so the title runs vertically along
+                     the panel instead (the classic accordion-gallery "spine label"),
+                     and the tag/year/dashed-stub - which would just wrap illegibly at
+                     this width - are hidden rather than shrunk into something
+                     unreadable. The number badge and arrow badge stay put; both are
+                     already small, self-contained, and legible at any panel width. */
     .selected-work__accordion :global(.project-card__body) {
       flex: 0 0 auto;
       display: flex;
@@ -200,9 +210,9 @@ const experience = [
     }
 
     /* Expanded state: the panel is wide enough again for the card's
-                 normal upright reading layout, so everything reverts - the title
-                 un-rotates, the tag/year/stub reappear, the body padding grows
-                 back to the card's usual space-24 inset. */
+                     normal upright reading layout, so everything reverts - the title
+                     un-rotates, the tag/year/stub reappear, the body padding grows
+                     back to the card's usual space-24 inset. */
     .selected-work__accordion > li:hover :global(.project-card__body),
     .selected-work__accordion > li:focus-within :global(.project-card__body) {
       align-items: flex-start;

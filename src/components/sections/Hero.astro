@@ -559,9 +559,9 @@ const letters = titleWord.split('');
     }
 
     /* Hidden below desktop rather than repositioned - the collage overlap
-                                                       is tuned to the desktop image's own 5/9 column range; keeping it in
-                                                       sync with every other width's own image position isn't worth the
-                                                       complexity for a decorative secondary chip. */
+                                                           is tuned to the desktop image's own 5/9 column range; keeping it in
+                                                           sync with every other width's own image position isn't worth the
+                                                           complexity for a decorative secondary chip. */
     .hero__image-chip {
       display: none;
     }
@@ -575,10 +575,10 @@ const letters = titleWord.split('');
     }
 
     /* Same role -> status -> intro -> tools -> CTA row order as the base
-                             rule (unchanged here, just a wider column span) - only the column
-                             range needs overriding for the narrower 7-column grid.
-                             .hero__cta-row already spans 1 / -1 at every width, so it needs
-                             no override here. */
+                                 rule (unchanged here, just a wider column span) - only the column
+                                 range needs overriding for the narrower 7-column grid.
+                                 .hero__cta-row already spans 1 / -1 at every width, so it needs
+                                 no override here. */
     .hero__role,
     .hero__status,
     .hero__intro,
@@ -606,7 +606,7 @@ const letters = titleWord.split('');
     }
 
     /* Same reasoning as the tablet range - hidden rather than
-                                                       repositioned for a decorative secondary chip. */
+                                                           repositioned for a decorative secondary chip. */
     .hero__image-chip {
       display: none;
     }
@@ -647,11 +647,11 @@ const letters = titleWord.split('');
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                     markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                                                     which is already the same role -> location -> paragraph -> tools
-                                                     order the base rule's explicit grid-rows give every wider
-                                                     breakpoint, so nothing here needs to re-specify row/column
-                                                     placement the way it used to. */
+                                                             markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                                                             which is already the same role -> location -> paragraph -> tools
+                                                             order the base rule's explicit grid-rows give every wider
+                                                             breakpoint, so nothing here needs to re-specify row/column
+                                                             placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }

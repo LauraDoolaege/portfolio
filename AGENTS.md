@@ -2128,6 +2128,38 @@ line... this also needs to change in the product cards"), applied to
 both together in one pass so they can't drift back out of sync with
 each other.
 
+**A real sitewide grid mismatch, fixed at the token level - per direct
+request with a sketch** (red guide lines marking Hero's own margins,
+arrows showing Selected Work's title and cards sitting inside them
+instead of flush with them). Header and Hero have used their own wider,
+fluid-margin grid (`--intro-max-width`: 1600px / `--intro-margin`:
+`clamp(20px, 5vw, 72px)`) since the "Header/Hero rebuild v2" pass
+earlier in this file - every section below the fold, on both the
+homepage and About, was still on a separate, narrower, flat-margin
+pair (`--content-max-width`: 1320px / `--space-outer`: 100px) that
+predates that rebuild. That was a deliberate split at the time (the
+intro tokens' own comment called the narrower pair "the locked sitewide
+grid for every section below the fold"), but it's exactly what the
+sketch flags as wrong now, so the split is retired rather than
+re-justified.
+
+`--content-max-width` and `--space-outer` are removed from
+`global.css` outright, not kept as aliases pointing at the intro
+values - two token names permanently equal to each other would only
+invite them drifting apart again later, the same failure mode this
+fix is undoing. Every section that referenced them (`SelectedWork`,
+`Principles`, `Gallery`, `CurrentlyWorkingOn`, `ContactCTA`, `Footer`,
+and About's `AboutIntro`/`AboutStory`/`AboutProcess`/`AboutDrives`) now
+references `--intro-max-width`/`--intro-margin` directly instead - a
+single token-level change that would have needed touching all ten
+files anyway, so there was no cheaper version of this fix available.
+Verified via `getBoundingClientRect()` rather than eyeballing: the
+header wordmark, Hero's own content, Selected Work's title, and
+Principles' title all now share the exact same left edge (70px at a
+1400px viewport) on both the homepage and About page, where before the
+fix Selected Work's own edge would have measured further in from
+Hero's.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

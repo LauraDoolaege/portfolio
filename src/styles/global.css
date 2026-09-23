@@ -54,11 +54,9 @@
   --tracking-wide: 0.08em;
 
   /* Spacing — desktop (Section 3 "Spacing", chosen from the 80-120 / 120-160 ranges) */
-  --space-outer: 100px;
   --space-section: 140px;
 
   /* Layout */
-  --content-max-width: 1320px;
   --grid-columns: 12;
 
   /* Borders / radii (Section 3 "Borders / radii") */
@@ -94,10 +92,18 @@
   --space-96: 96px;
   --space-128: 128px;
 
-  /* "Intro" layout tokens — the wider, fluid-margin grid used only by the
-     full-viewport opening screen (Header + Hero). Deliberately separate
-     from --content-max-width/--space-outer (1320px/100px), which stay
-     the locked sitewide grid for every section below the fold. */
+  /* "Intro" layout tokens — originally scoped to just the full-viewport
+     opening screen (Header + Hero), deliberately separate from a
+     narrower, flat-100px sitewide grid every section below the fold
+     used instead (--content-max-width: 1320px / --space-outer: 100px).
+     Per direct request, with a sketch showing the two grids visibly
+     misaligned (arrows marking Selected Work's title and cards sitting
+     inside Hero's own margin lines instead of flush with them) - every
+     section now uses these same tokens instead of its own separate
+     pair, so the whole page shares one consistent margin, not two. The
+     old --content-max-width/--space-outer tokens are removed rather
+     than kept as aliases pointing at the same values - two names for
+     one number would only invite them drifting apart again later. */
   --intro-max-width: 1600px;
   --intro-margin: clamp(20px, 5vw, 72px);
   --intro-gutter: var(--space-24);

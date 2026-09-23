@@ -1960,6 +1960,73 @@ at a size and position matched to the tap-hint circles: the thumb now
 reads unambiguously solid black, same as they do, not the visibly
 lighter gray a side-by-side screenshot had shown before the fix.
 
+**Gallery, fourth interaction-model pass - back to continuous
+auto-scroll, progress bar removed, a tag+caption footer added to every
+tile.** Direct request: "I want the images to auto scroll, remove the
+progress bar. stop the auto scroll on while hovering an image. like in
+the example add a tag below the image and space for a few words on what
+it is about."
+
+The page-scroll-driven pin+scrub from the third pass (see this file's
+own earlier entries) is gone, replaced by a self-contained GSAP tween:
+the track renders the 15-tile list twice (a real, interactive set plus
+a decorative clone set, `aria-hidden` + untabbable + `pointer-events:
+none`) and one tween walks it from `xPercent: 0` to `xPercent: -50` on
+`repeat: -1` - since both halves are pixel-identical, the loop point is
+invisible with no manual wrap-detection needed. This is closer to the
+project's own second-pass marquee (see this file's much earlier
+history) than the pin ever was, just without that pass's drag gesture
+(not asked for this time) and without its `scrollLeft`-driven motion
+(a GSAP `xPercent` transform doesn't hit the sub-pixel rounding bug a
+plain `scrollLeft` write does at slow speeds - see that old entry).
+Pausing on hover happens at the viewport level (entering the strip
+anywhere pauses the tween, leaving resumes it), not per-tile - simpler,
+and it means a tile can never drift out from under a stationary cursor
+while its own hover effects (bob-pause, magnetic shift, custom cursor,
+spotlight - all unchanged, just re-wired to only the real tile set) are
+active, which is exactly why the pin-era version needed a
+synthetic-`pointerleave`-on-scroll-tick workaround that this version
+doesn't need at all.
+
+The progress bar (flanking `1`/`{TOTAL}` labels, fill bar, "you are
+here" thumb) is removed outright - markup, script, and all of its CSS -
+per direct request; it measured progress through a page-scroll-driven
+pin that no longer exists, so there was nothing left for it to track.
+The "Scroll" hint that used to open the track is gone too, for the same
+underlying reason - it was an instruction to scroll the *page* to
+reveal more, which stopped being true the moment the strip started
+moving on its own.
+
+**Every tile gained a tag + one-line caption below the image** - per
+direct request, after a reference image showing each photo followed by
+a bracket-style medium/year tag and a short line of copy. No real
+project facts exist for this section yet (PROJECT_BRIEF.md Section 6),
+so both are clearly-labeled placeholders rather than invented specifics
+(CLAUDE.md "Content"): the tag cycles through three generic
+documentary/process categories (Process / Detail / Concept - the same
+category one tile's `[ process ]` tag already signaled, just applied to
+all 15 now instead of a sparse few) using `Tag.astro` (already bracket-
+styled, reused rather than duplicated), and the caption is a literal
+"Short description of this piece, once supplied." placeholder sentence
+with a TODO marking where real copy goes - not fabricated flavor text
+standing in as if it were real. Required restructuring the tile itself:
+aspect-ratio used to live on the `<li>` directly, which no longer works
+once a content-sized footer needs to sit below the image inside the
+same tile - moved the aspect-ratio classes onto `.gallery__trigger`
+(the image button) instead, with the `<li>` now a plain flex column
+holding the image and the footer as two independently-sized children.
+
+Verified in the browser: the track's computed `transform` changes on
+its own (no scroll or interaction needed) and genuinely pauses/resumes
+on a real hover (not a synthetic `pointerenter` dispatch, which - as
+elsewhere in this project - doesn't reliably trigger real pointer
+behavior in this sandbox); the lightbox's FLIP open/close still works
+correctly against the new tile structure; every tile shows its tag and
+caption at both 1400px and 375px; and the clone set (30 total `<li>`s
+in the track, 15 real + 15 clone) is hidden outright under the
+reduced-motion static-strip fallback, since a plain user-scrolled strip
+has no loop to sell.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

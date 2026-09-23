@@ -1993,7 +1993,7 @@ here" thumb) is removed outright - markup, script, and all of its CSS -
 per direct request; it measured progress through a page-scroll-driven
 pin that no longer exists, so there was nothing left for it to track.
 The "Scroll" hint that used to open the track is gone too, for the same
-underlying reason - it was an instruction to scroll the *page* to
+underlying reason - it was an instruction to scroll the _page_ to
 reveal more, which stopped being true the moment the strip started
 moving on its own.
 
@@ -2026,6 +2026,57 @@ caption at both 1400px and 375px; and the clone set (30 total `<li>`s
 in the track, 15 real + 15 clone) is hidden outright under the
 reduced-motion static-strip fallback, since a plain user-scrolled strip
 has no loop to sell.
+
+**Subtitle layout redesign, chosen from three live options rather than
+picked unilaterally.** Direct request: "I want to play around with page
+subtitles like in the sketch I showed you. give me 3 options for the
+placement of the paragraph and the 01 in relation to the selected work
+title before implementing it to all subtitles on the homepage." Built
+three real variants (same actual title/copy, real tokens/fonts) on an
+unlinked scratch page (`zz-subtitle-scratch.astro`, never committed -
+deleted immediately after screenshotting) rather than describing them
+abstractly, then asked via a structured choice:
+
+1. Inline index + paragraph beside (closest to the sketch: "(01)"
+   inline after the title, paragraph in its own column to the right,
+   vertically centered).
+2. Stacked kicker + title, paragraph as a narrow indented column below
+   (not full-width) - a diagonal reading path.
+3. The site's actual current default (index + title on one baseline,
+   paragraph full-width below) as an explicit baseline to compare
+   against, not just a strawman.
+
+**Option 2 was chosen.** `SectionMarker.astro` changed from a flex row
+(index and label sharing one baseline) to a stacked column: the index
+is now a small kicker line above the label, and a new optional
+`description` prop renders a third line below it, indented into a
+narrow column (`margin-left: 10ch`, `max-width: 30ch`) rather than
+running the full width underneath - collapsing to a plain flush-left
+block below 640px, since an indent needs real width to read as
+deliberate rather than just "the paragraph lost its left edge."
+`description` is a plain string prop, not a slot - Astro slots aren't
+shadow DOM, so a paragraph passed in via `<slot>` would keep the
+_calling_ component's own scope, and SectionMarker's `<style>` block
+couldn't reach it without `:global()` (the same Astro-scoping trap
+Button.astro's own comment already documents); a plain prop keeps the
+paragraph inside SectionMarker's own template, so the indent styling
+lives in exactly one place and can't drift out of sync between the
+three sections that use it.
+
+Applied to all three homepage subtitles as asked, but only Selected
+Work actually gained new paragraph text - its existing "A mix of solo
+design work..." line moved from a separate `<p class="selected-work__
+intro">` (now deleted, markup and CSS both) into `SectionMarker`'s own
+`description` prop. Principles and Gallery got the same structural
+layout change (their index+label now stack the same way) but no
+`description` prop - neither had subtitle copy before this pass, and
+inventing a placeholder sentence for either would be exactly the kind
+of fabricated content CLAUDE.md's "Content" section already rules out;
+they're one call away from getting a real one once copy exists. Verified
+in the browser at 1400px (all three sections' kicker/title/indent read
+correctly, Selected Work's paragraph offset matches the chosen mockup)
+and 375px (the indent drops to flush-left, confirmed via screenshot,
+not just the media query reading correct in the source).
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

@@ -15,36 +15,53 @@
 // page's numbered running-head sequence (01 Selected Work, 02 Principles,
 // 03 Gallery) stays a clean ascending read without a section physically
 // sitting out of order in it. Omitting `index` just skips the "( NN )"
-// span entirely rather than rendering an empty pair of parens.
+// line entirely rather than rendering an empty pair of parens.
+//
+// Layout pass ("subtitle Option 2," chosen from 3 live comparisons -
+// see AGENTS.md for the other two): the index used to sit inline before
+// the label on one baseline ("( 01 )  SELECTED WORK"). It's now a small
+// kicker line stacked above the label instead, and a new optional
+// `description` prop renders a third line below the label - a short
+// paragraph indented into a narrow column rather than running the full
+// width underneath, so the eye travels down and across rather than in
+// one straight vertical block. `description` is a plain prop (not a
+// slot) deliberately: Astro slots aren't shadow DOM, so a paragraph
+// passed in via `<slot>` would keep the *calling* component's own scope
+// and SectionMarker's `<style>` block couldn't reach it without
+// `:global()` (the same Astro-scoping trap documented elsewhere in this
+// project, e.g. Button.astro's own comment on it) - a plain string prop
+// keeps the paragraph inside SectionMarker's own template instead, so
+// its styling lives in exactly one place and stays consistent everywhere
+// this component is used, rather than being re-declared per section.
 interface Props {
   index?: string;
   label: string;
+  description?: string;
 }
 
-const { index, label } = Astro.props;
+const { index, label, description } = Astro.props;
 ---
 
 <div class="section-marker">
   {index && (
-    <span class="section-marker__index" aria-hidden="true">
+    <p class="section-marker__index" aria-hidden="true">
       ( {index} )
-    </span>
+    </p>
   )}
   <h2 class="section-marker__label">
     {label}
     <slot name="suffix" />
   </h2>
+  {description && <p class="section-marker__description">{description}</p>}
 </div>
 
 <style>
   .section-marker {
-    display: flex;
-    align-items: baseline;
-    gap: 0.85rem;
     margin-bottom: 3rem;
   }
 
   .section-marker__index {
+    margin: 0 0 0.5rem;
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
@@ -52,11 +69,40 @@ const { index, label } = Astro.props;
   }
 
   .section-marker__label {
+    margin: 0;
     font-family: var(--font-display);
     font-weight: 700;
     font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
     text-transform: uppercase;
     letter-spacing: -0.01em;
     line-height: 1;
+  }
+
+  /* Indented into a narrow column rather than running full-width below
+     the label - the chosen option's whole point is a diagonal reading
+     path (kicker top-left, title big below it, paragraph offset further
+     right still) instead of one straight left-aligned block. The indent
+     is a fixed ch value tuned to this label size specifically (not the
+     bigger, more dramatic mockup size used to compare options) - it's a
+     deliberate offset, not meant to precisely align under any particular
+     letter of the title above it. */
+  .section-marker__description {
+    margin: 1.25rem 0 0 10ch;
+    max-width: 30ch;
+    font-family: var(--font-body);
+    font-size: 1.125rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    /* The indent needs room to read as deliberate rather than just "the
+           paragraph is missing its left edge" - below this width it drops
+           back to a plain flush-left block, same "macro asymmetry drops at
+           a width threshold" pattern used everywhere else in this project. */
+    .section-marker__description {
+      margin-left: 0;
+      max-width: none;
+    }
   }
 </style>

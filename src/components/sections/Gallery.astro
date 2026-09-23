@@ -602,7 +602,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery {
     padding-block: clamp(3rem, 6vw, 4.5rem);
     /* No background fill (per earlier direct request) - the section sits
-         directly on the page's own bg-primary. */
+             directly on the page's own bg-primary. */
     overflow-x: hidden;
   }
 
@@ -627,8 +627,8 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     z-index: 1;
     overflow: hidden;
     /* Vertical room for the float offset and hover bob so nothing clips.
-         Negative margin cancels the padding's footprint on .gallery__stage's
-         own auto height. */
+             Negative margin cancels the padding's footprint on .gallery__stage's
+             own auto height. */
     padding-block: 2.5rem;
     margin-block: -2.5rem;
   }

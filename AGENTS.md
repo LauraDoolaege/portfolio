@@ -1772,6 +1772,62 @@ card measured 483px against 302px siblings (was 634px/326px at
 `flex-grow: 3`) - a real, confirmed reduction, not just a smaller number
 in the source that might not have translated to a visibly calmer effect.
 
+**Hero's bottom block reordered, and Tools moved off the right side of
+the desktop layout - two direct follow-ups.** Per direct request ("on
+desktop the tools should not be on the right like that... I want the
+order to be (on all screens) experience designer to be => location line
+=> paragraph => tools"), `Hero.astro`'s reading order is now the same at
+every viewport: role, then the location/availability line, then the
+intro paragraph, then Tools, then the CTA - all in one left column
+(`grid-column: 1 / 6`), each with an explicit `grid-row` (1 through 5)
+rather than relying on DOM order + grid auto-placement, so the sequence
+can't silently drift if a future edit reorders the markup. Two things
+changed structurally to get there: the location line
+(`.hero__status`) used to be mobile-only (hidden `display: none` on
+desktop/tablet, since Header's own copy of the same fact covered those
+widths) - it's now always visible, moved to sit directly under the role
+line at every width, per the explicit "on all screens" ask. And Tools
+used to share row 1 with the role line via the grid's own row-sparse
+auto-placement (`grid-column: 8 / 13`, off to the right) - it's now
+just the fourth item in the same single-column stack, after the intro
+paragraph, not a separate side-by-side element.
+
+Making the location line always-visible in Hero created a real
+duplication risk: Header.astro renders on every page and already shows
+the identical line (`.site-header__status`) whenever the viewport is
+≥640px, so the homepage specifically would have shown the same fact
+twice on screen at once (header nav + Hero, stacked one above the
+other) at any width past phone. Rather than silently accept that or
+unilaterally delete Header's copy (which every other page still needs -
+only the homepage has a Hero to carry it), `Header.astro` now takes an
+`isHome` flag (`Astro.url.pathname === withBase('/')`) and skips
+rendering its own `.site-header__status` paragraph only on the
+homepage; About and any future page keep it exactly as before. Verified
+in the browser: the homepage's header shows no location line at any
+width (Hero's own copy is the only one), while About's header still
+shows it at 1400px.
+
+**Gallery: the tile's own hover-reveal expand icon merged into the
+round cursor, replacing the "View" text label** - per direct request
+("instead of having both the grow icon on the gallery image upon hover,
+and the view cursor, why not put the icon inside the round cursor
+instead of view"). `.gallery__expand` (the corner-arrows SVG that used
+to fade in as its own absolutely-positioned overlay on
+`.gallery__placeholder`, plus its own opacity/background-tint hover
+transition) is removed outright, markup and CSS both - the circular
+cursor is now the only "this opens" affordance during hover, on the
+same reasoning ProjectCard's own cursor-vs-arrow split already uses
+elsewhere (avoid two competing calls to action doing the same job).
+`.gallery__cursor-inner` now renders that same corner-arrows SVG instead
+of the word "View" - same circle, same `is-active` opacity/scale toggle,
+same gating (`prefers-reduced-motion` + `pointer: fine`), just a
+different glyph inside it. A same-message follow-up then brought its
+colors in line with SelectedWork.astro's own arrow cursor too ("the
+cursor icon should be black with white text like the arrow cursor
+icon") - solid `--color-ink` circle, `--color-bg-primary` icon, the
+inverse of what this cursor used before, so the site's two custom
+cursors now share one visual language instead of each having its own.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

@@ -105,44 +105,12 @@ const letters = titleWord.split('');
       </p>
 
       <!--
-        Moved here from About's own dedicated Tools section, per direct
-        request ("I think I should include them at the top of the page
-        close to the experience designer to-be paragraph") - a plain row
-        of icons rather than the bracket-tag chips the About version
-        used ("the tools can be just icons like in this example"), still
-        placeholder (no real toolkit confirmed yet - see the removed
-        AboutTools.astro's own history in AGENTS.md for why).
-      -->
-      <div class="hero__tools">
-        <p class="hero__tools-label">Tools</p>
-        <ul class="hero__tools-list">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <li>
-              <span class="hero__tools-icon" aria-label={`Tool ${i + 1}`}>
-                <!-- TODO: replace with a real tool icon once the toolkit is supplied -->
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <p class="hero__intro">
-        I'm Laura, a digital development &amp; design student with a background in marketing
-        communication, currently specialising in user experience design.
-      </p>
-
-      <!--
-        Mobile-only echo of Header's own location/availability line
-        (Header.astro's .site-header__status) - per direct request. That
-        line hides below 640px because the header row is already tight
-        with the name/CV/toggle sharing one line, so on phone it has
-        nowhere left to live up there; here, under the intro paragraph,
-        there's room, and it reads naturally as one more line of
-        "about me" rather than a header detail. Same icon/copy/markup
-        shape as the header version, kept as a separate element (not a
-        shared component) since it only exists at this one breakpoint in
-        this one place - hidden by default, shown only in the mobile
-        media query below.
+        Echoes Header's own location/availability line
+        (Header.astro's .site-header__status). Per direct request the
+        reading order here is now role -> location -> paragraph -> tools
+        on every screen size, not just mobile (this used to be
+        mobile-only, hidden on desktop/tablet in favor of the header's
+        own copy) - it now always shows, right under the role line.
       -->
       <p class="hero__status">
         <svg class="hero__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -156,6 +124,39 @@ const letters = titleWord.split('');
         </svg>
         Belgium <span aria-hidden="true">|</span> Available Feb 2027
       </p>
+
+      <p class="hero__intro">
+        I'm Laura, a digital development &amp; design student with a background in marketing
+        communication, currently specialising in user experience design.
+      </p>
+
+      <!--
+        Moved here from About's own dedicated Tools section, per direct
+        request ("I think I should include them at the top of the page
+        close to the experience designer to-be paragraph") - a plain row
+        of icons rather than the bracket-tag chips the About version
+        used ("the tools can be just icons like in this example"), still
+        placeholder (no real toolkit confirmed yet - see the removed
+        AboutTools.astro's own history in AGENTS.md for why). Per a later
+        direct request it no longer sits beside the role line on desktop
+        (grid_column 8/13, sharing row 1) - it now sits in the same
+        column as the role/status/intro above it, after the paragraph,
+        so the reading order (role, location, paragraph, tools) is
+        identical at every viewport width instead of desktop having its
+        own separate order.
+      -->
+      <div class="hero__tools">
+        <p class="hero__tools-label">Tools</p>
+        <ul class="hero__tools-list">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <li>
+              <span class="hero__tools-icon" aria-label={`Tool ${i + 1}`}>
+                <!-- TODO: replace with a real tool icon once the toolkit is supplied -->
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <Button href={withBase('/about')} variant="primary" icon="arrow" class="hero__cta">
         Get to know me
@@ -407,6 +408,7 @@ const letters = titleWord.split('');
 
   .hero__role {
     grid-column: 1 / 6;
+    grid-row: 1;
     font-family: var(--font-body);
     font-weight: 700;
     font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
@@ -415,14 +417,68 @@ const letters = titleWord.split('');
     color: var(--color-ink);
   }
 
-  /* Shares row 1 with .hero__role (auto-placed - the grid's own
-     row-sparse algorithm finds columns 8/13 already free in row 1, since
-     .hero__role only claims 1/6), sitting at the same height as the role
-     line rather than stacked below it. */
+  /* role -> location -> paragraph -> tools, in that order on every
+     screen width (explicit grid-row per element rather than relying on
+     DOM order + auto-placement, so the sequence can't silently drift if
+     a future edit reorders the markup). Used to sit beside .hero__role
+     in its own column (8/13, sharing row 1) and only show on mobile at
+     all - per direct request it's now always visible, directly under
+     the role line, matching Header's own .site-header__status copy. */
+  .hero__status {
+    grid-column: 1 / 6;
+    grid-row: 2;
+    position: relative;
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.4em;
+    margin-top: var(--space-16);
+    padding-left: 0.85rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .hero__status::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.2em;
+    bottom: 0.2em;
+    width: var(--border-hairline);
+    background: var(--color-text-secondary);
+  }
+
+  .hero__status-icon {
+    width: 0.9em;
+    height: 0.9em;
+    flex-shrink: 0;
+  }
+
+  .hero__status span {
+    margin-inline: 0.15em;
+  }
+
+  .hero__intro {
+    grid-column: 1 / 6;
+    grid-row: 3;
+    margin-top: var(--space-16);
+    max-width: 38ch;
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  /* Now stacked below the paragraph (same 1/6 column, row 4), not beside
+     the role line - per direct request that it "not be on the right
+     like that" on desktop. */
   .hero__tools {
-    grid-column: 8 / 13;
-    grid-row: 1;
-    align-self: start;
+    grid-column: 1 / 6;
+    grid-row: 4;
+    margin-top: var(--space-24);
   }
 
   .hero__tools-label {
@@ -448,30 +504,20 @@ const letters = titleWord.split('');
     border-radius: var(--radius-image);
   }
 
-  .hero__intro {
-    grid-column: 1 / 6;
-    margin-top: var(--space-32);
-    max-width: 38ch;
-    font-family: var(--font-body);
-    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
-    line-height: 1.5;
-    color: var(--color-text-secondary);
-  }
-
-  /* Desktop/tablet: Header's own .site-header__status already carries this, so this echo stays hidden until the mobile query below turns it on. */
-  .hero__status {
-    display: none;
-  }
-
   /* :global() is required — Button.astro renders its own <a>, which carries Button's own Astro scope hash, not Hero's, so an unscoped ".hero__cta" rule would silently never match it. */
   :global(.hero__cta) {
     grid-column: 1 / 6;
+    grid-row: 5;
     margin-top: var(--space-48);
     justify-self: start;
   }
 
+  /* Spans every row this block generates and aligns to the bottom, so it
+     stays pinned bottom-right regardless of how many rows the
+     role/status/intro/tools/CTA stack above it now occupies. */
   .hero__scroll {
     grid-column: 12 / 13;
+    grid-row: 1 / -1;
     align-self: end;
     justify-self: end;
     font-family: var(--font-mono);
@@ -491,9 +537,9 @@ const letters = titleWord.split('');
     }
 
     /* Hidden below desktop rather than repositioned - the collage overlap
-                                 is tuned to the desktop image's own 5/9 column range; keeping it in
-                                 sync with every other width's own image position isn't worth the
-                                 complexity for a decorative secondary chip. */
+                                     is tuned to the desktop image's own 5/9 column range; keeping it in
+                                     sync with every other width's own image position isn't worth the
+                                     complexity for a decorative secondary chip. */
     .hero__image-chip {
       display: none;
     }
@@ -506,22 +552,15 @@ const letters = titleWord.split('');
       grid-template-columns: repeat(7, 1fr);
     }
 
+    /* Same role -> status -> intro -> tools -> CTA row order as the base
+           rule (unchanged here, just a wider column span) - only the column
+           range needs overriding for the narrower 7-column grid. */
     .hero__role,
+    .hero__status,
     .hero__intro,
+    .hero__tools,
     :global(.hero__cta) {
       grid-column: 1 / 8;
-    }
-
-    /* No room to sit beside .hero__role in a 7-column grid the way it
-                         does at full desktop width - stacks below it instead. */
-    .hero__tools {
-      grid-column: 1 / 8;
-      grid-row: 2;
-      margin-top: var(--space-24);
-    }
-
-    .hero__intro {
-      grid-row: 3;
     }
   }
 
@@ -544,7 +583,7 @@ const letters = titleWord.split('');
     }
 
     /* Same reasoning as the tablet range - hidden rather than
-                                 repositioned for a decorative secondary chip. */
+                                     repositioned for a decorative secondary chip. */
     .hero__image-chip {
       display: none;
     }
@@ -584,12 +623,14 @@ const letters = titleWord.split('');
     }
 
     .hero__bottom {
+      /* Grid becomes irrelevant here - a plain block stack follows the
+                 markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                 which is already the same role -> location -> paragraph -> tools
+                 order the base rule's explicit grid-rows give every wider
+                 breakpoint, so nothing here needs to re-specify row/column
+                 placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
-    }
-
-    .hero__tools {
-      margin-top: var(--space-24);
     }
 
     /* Forces "to-be" onto its own line (display: block after inline text breaks the line, same as the nav "/" separator elsewhere in this project) instead of letting it wrap mid-word wherever the viewport happens to cut it off, and de-emphasizes it slightly against "Experience designer." */
@@ -604,47 +645,7 @@ const letters = titleWord.split('');
       max-width: none;
     }
 
-    /* Turned on only here - see the base rule's comment above. Same visual language as Header's version (hairline rule, mono, text-secondary) so it reads as the same fact stated twice in two contexts, not a new device. Sits between the intro paragraph and the CTA button - margin-top here and the CTA's own margin-top override just below are both var(--space-24), so the tag gets equal breathing room above (from the paragraph) and below (to the button) rather than the mismatched space-16/space-48 gap this had before.
-
-                                                     Real bug, caught after the fact on certain viewport widths: `display: inline-flex` (needed for the icon+text row inside this element) is an INLINE-level outer display, not a block one - inside .hero__bottom's `display: block` mobile layout, that meant this element didn't get its own line at all, it just joined the inline flow alongside the next inline-level sibling (.hero__cta, itself `display: inline-flex` via Button.astro's `.btn`), so at any width wide enough for both to fit side by side, the button rendered next to the tag instead of below it. `display: flex` (block-level outside, flex inside) fixes it the same way .hero__role-soft's own `display: block` already solves an identical problem one rule up - the flex layout inside for the icon/text row is unaffected, only the outer box type changes. */
-    .hero__status {
-      position: relative;
-      display: flex;
-      width: fit-content;
-      align-items: center;
-      gap: 0.4em;
-      margin-top: var(--space-24);
-      padding-left: 0.85rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-label);
-      letter-spacing: var(--tracking-wide);
-      color: var(--color-text-secondary);
-      white-space: nowrap;
-    }
-
-    .hero__status::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0.2em;
-      bottom: 0.2em;
-      width: var(--border-hairline);
-      background: var(--color-text-secondary);
-    }
-
-    .hero__status-icon {
-      width: 0.9em;
-      height: 0.9em;
-      flex-shrink: 0;
-    }
-
-    .hero__status span {
-      margin-inline: 0.15em;
-    }
-
     :global(.hero__cta) {
-      /* Overrides the base rule's space-48 so the gap down to the status tag above matches that tag's own space-24 margin-top exactly - see .hero__status's comment. No !important needed: same selector, later in the cascade, no specificity fight with Button.astro's own rules (margin isn't something that component sets). */
-      margin-top: var(--space-24);
       /* 44px+ touch target, per WCAG target-size guidance. */
       min-height: 44px;
     }

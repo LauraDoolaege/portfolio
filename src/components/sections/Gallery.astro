@@ -73,17 +73,6 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
             >
               <span class="gallery__placeholder">
                 {tile.caption && <span class="gallery__caption">[ {tile.caption} ]</span>}
-                <span class="gallery__expand" aria-hidden="true">
-                  <svg viewBox="0 0 16 16" fill="none">
-                    <path
-                      d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10"
-                      stroke="currentColor"
-                      stroke-width="1.3"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
               </span>
             </button>
           </li>
@@ -138,9 +127,26 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   transform" conflict documented elsewhere in this file. The inner
   .gallery__cursor-inner instead owns the CSS transform/opacity for the
   hover state, so the two never fight over the same property.
+
+  Per direct feedback ("instead of having both the grow icon on the
+  gallery image upon hover, and the view cursor, why not put the icon
+  inside the round cursor instead") the tile's own separate expand-icon
+  overlay (.gallery__expand, previously absolutely positioned over the
+  placeholder) is gone - this circle is the only "this opens" affordance
+  now, carrying the same corner-arrows icon instead of the word "View".
 -->
 <div class="gallery__cursor" aria-hidden="true">
-  <span class="gallery__cursor-inner">View</span>
+  <span class="gallery__cursor-inner">
+    <svg viewBox="0 0 16 16" fill="none">
+      <path
+        d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10"
+        stroke="currentColor"
+        stroke-width="1.3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </span>
 </div>
 
 <!--
@@ -812,31 +818,6 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     color: var(--color-text-secondary);
   }
 
-  .gallery__expand {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgb(23 21 15 / 0);
-    opacity: 0;
-    transition:
-      opacity var(--motion-duration) var(--motion-easing),
-      background-color var(--motion-duration) var(--motion-easing);
-  }
-
-  .gallery__trigger:hover .gallery__expand,
-  .gallery__trigger:focus-visible .gallery__expand {
-    opacity: 1;
-    background: rgb(23 21 15 / 0.1);
-  }
-
-  .gallery__expand svg {
-    width: 1.5rem;
-    height: 1.5rem;
-    color: var(--color-ink);
-  }
-
   /* Follows the pointer via GSAP quickTo (see the script) - x/y only, no CSS transform of its own, so GSAP's inline transform never has to fight a class-toggled one (see the markup comment for the bug this avoids). Purely a positioning wrapper; the circle itself is .gallery__cursor-inner below. z-index: 55 - above the spotlight (50), which otherwise darkened whatever part of the circle fell outside the tile's own hole (the cursor sits at the pointer, near a tile's edge that's exactly where it tends to spill past it). Still below the lightbox (100). */
   .gallery__cursor {
     position: fixed;
@@ -849,7 +830,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     pointer-events: none;
   }
 
-  /* The actual visible circle - scale/opacity are CSS-owned here, never touched by GSAP, so the .is-active toggle always takes effect regardless of how often the outer element's position updates. Black text on a porcelain circle reads clearly over any placeholder tile without needing per-tile contrast logic. */
+  /* The actual visible circle - scale/opacity are CSS-owned here, never touched by GSAP, so the .is-active toggle always takes effect regardless of how often the outer element's position updates. Solid ink circle, porcelain icon - matching SelectedWork.astro's own arrow cursor (per direct request, "the cursor icon should be black with white text like the arrow cursor icon") rather than this cursor's previous inverse (porcelain circle, ink icon) - the two cursors now share one visual language instead of each having its own. */
   .gallery__cursor-inner {
     display: flex;
     align-items: center;
@@ -857,17 +838,18 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: var(--color-bg-primary);
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
+    background: var(--color-ink);
+    color: var(--color-bg-primary);
     opacity: 0;
     transform: scale(0.6);
     transition:
       opacity var(--motion-duration) var(--motion-easing),
       transform var(--motion-duration) var(--motion-easing);
+  }
+
+  .gallery__cursor-inner svg {
+    width: 1.35rem;
+    height: 1.35rem;
   }
 
   .gallery__cursor.is-active .gallery__cursor-inner {

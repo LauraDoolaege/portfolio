@@ -44,6 +44,15 @@ const navItems = [
 // carries one either, so this can compare directly against `withBase()`
 // output without normalizing either side.
 const currentPath = Astro.url.pathname;
+
+// The header's own location/availability line is skipped on the homepage
+// specifically: per direct request, Hero.astro now shows the identical
+// line itself (role -> location -> paragraph -> tools) on every screen
+// width, not just mobile like it used to. Header renders on every page
+// though, and everywhere except the homepage there's no Hero to carry it,
+// so it still needs to show here on About/etc. - only the homepage would
+// otherwise show the same fact twice on screen at once.
+const isHome = currentPath === withBase('/');
 ---
 
 <header class="site-header">
@@ -68,18 +77,20 @@ const currentPath = Astro.url.pathname;
         weight as the nav - a quiet business-card detail next to the
         wordmark, not a second competing headline.
       -->
-      <p class="site-header__status">
-        <svg class="site-header__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M8 14.2C8 14.2 12.5 9.8 12.5 6.3C12.5 3.8 10.5 1.8 8 1.8C5.5 1.8 3.5 3.8 3.5 6.3C3.5 9.8 8 14.2 8 14.2Z"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linejoin="round"
-          />
-          <circle cx="8" cy="6.3" r="1.6" stroke="currentColor" stroke-width="1.2" />
-        </svg>
-        Belgium <span aria-hidden="true">|</span> Available Feb 2027
-      </p>
+      {!isHome && (
+        <p class="site-header__status">
+          <svg class="site-header__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M8 14.2C8 14.2 12.5 9.8 12.5 6.3C12.5 3.8 10.5 1.8 8 1.8C5.5 1.8 3.5 3.8 3.5 6.3C3.5 9.8 8 14.2 8 14.2Z"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+            <circle cx="8" cy="6.3" r="1.6" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+          Belgium <span aria-hidden="true">|</span> Available Feb 2027
+        </p>
+      )}
     </div>
 
     <div class="site-header__right">

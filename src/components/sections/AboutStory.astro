@@ -422,10 +422,12 @@ import SectionMarker from '../ui/SectionMarker.astro';
 </script>
 
 <style>
+  /* The repeated top hairline that used to sit here (and on AboutProcess/
+     AboutDrives) - a "plate boundary" turning section padding into a
+     visible dossier-page break - is gone per direct request ("remove
+     the lines in between the sections on the about me page"). */
   .about-story {
     padding-block: var(--space-section);
-    /* Plate boundary: the same top hairline repeats on AboutStory, AboutProcess, and AboutDrives, turning section padding into a visible dossier-page break instead of implicit whitespace. Intro skips it (Header's own edge already reads as the page's top). */
-    border-top: var(--border-hairline) solid var(--color-text-secondary);
   }
 
   .about-story__inner {
@@ -648,16 +650,16 @@ import SectionMarker from '../ui/SectionMarker.astro';
 
   @media (max-width: 1023px) {
     /* The drift needs room to zig - below this width every beat (and the
-                                                               quote/image) fall back to one straight column, same pattern used
-                                                               everywhere else in this project once macro asymmetry runs out of
-                                                               space. The rail stays (repositioned closer to the now-single text
-                                                               column below) and each asset drops into normal document flow as
-                                                               its own small stacked image between beats - "on mobile screens
-                                                               it's looking kind of boring, find a way to still get the
-                                                               storytelling in there," so this is a simplified version of the
-                                                               device, not a removed one. The ticks are the one piece still tied
-                                                               to the zigzag's own leftover column space, which doesn't exist
-                                                               once beats go full-width - those stay desktop-only. */
+                                                                 quote/image) fall back to one straight column, same pattern used
+                                                                 everywhere else in this project once macro asymmetry runs out of
+                                                                 space. The rail stays (repositioned closer to the now-single text
+                                                                 column below) and each asset drops into normal document flow as
+                                                                 its own small stacked image between beats - "on mobile screens
+                                                                 it's looking kind of boring, find a way to still get the
+                                                                 storytelling in there," so this is a simplified version of the
+                                                                 device, not a removed one. The ticks are the one piece still tied
+                                                                 to the zigzag's own leftover column space, which doesn't exist
+                                                                 once beats go full-width - those stay desktop-only. */
     :global(.about-story__chapter-tick) {
       display: none;
     }

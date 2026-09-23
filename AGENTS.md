@@ -2647,6 +2647,76 @@ step's own image row from `opacity: 0` to ~1 and back down on release;
 and at a 375px viewport the track measured `overflow-x: auto`,
 `flex-direction: row`, with each step at a full 327px slide width.
 
+**Plate-boundary lines removed across About, and How I Work corrected
+back to the circular layout with a genuine rotation, not a crossfade.**
+Two direct follow-ups.
+
+The repeated top hairline that used to open AboutStory, AboutProcess,
+and AboutDrives (a "plate boundary" turning section padding into a
+visible dossier-page break) is gone from all three - "remove the lines
+in between the sections on the about me page."
+
+**AboutProcess, fourth pass - a direct correction of the previous one:**
+"you misunderstood me, the how i work paragraphs should still be in the
+half circle position, a new step should just rotate to the top on
+scroll." The pinned single-slot crossfade from the previous pass (one
+step visible at a time, in a fixed spot) is gone - the ring and its
+three fixed slots (top-center / bottom-left / bottom-right) are back,
+all three steps visible simultaneously like the original circular pass.
+The new part is the rotation itself: `SLOTS[(i - rotation + length) %
+length]` reassigns which step occupies which slot on each scroll-driven
+index change, so the step reading "at the top" changes while the other
+two swap into the bottom slots rather than disappearing - a genuine
+round-robin, not a fade between one shared position. No `pin` this
+time - the rotation reads the diagram's own natural scroll position
+passing through the viewport via a plain `ScrollTrigger.create()` with
+no `pin: true`, not a scroll-jacked sequence.
+
+**A real, confirmed bug in the rotation math:** the base (no-JS)
+CSS positioned steps 0/2 with `transform: translateX(-50%)` /
+`translateX(-100%)` for pixel-perfect centering/right-alignment without
+JS. But the script also positions these same elements via GSAP's
+`xPercent` (a transform-based offset, the standard technique for
+combining a responsive `left` percentage with true centering). Once the
+script ran, `getComputedStyle` showed the resulting inline `transform`
+as _two chained_ `translate()` calls -
+`translate(-100%, 0%) translate(-272px, 0px)` - not one: GSAP's
+`xPercent` calculation was compounding with the stylesheet-authored
+`transform` already present on the element instead of replacing it,
+doubling the offset and pushing the bottom-left/bottom-right steps into
+overlapping positions (confirmed via `getBoundingClientRect()` showing
+their rects overlapping by over 50px). Fixed by removing `transform`
+from the base CSS rule entirely, so GSAP is the only thing that ever
+writes it - the base/no-JS positions are approximated with plain `left`
+percentages instead (a touch off from pixel-perfect without JS, an
+accepted trade-off for a case this project already treats as
+progressive-enhancement "close enough," not pixel-exact). Verified via
+`getBoundingClientRect()` after the fix: the two bottom slots render at
+completely disjoint x-ranges (317-589 and 810-1083 at a 1400px
+viewport), no overlap.
+
+Each step's small images ("while hovering the section you get little
+images that belong to the step") are now its own absolutely-positioned
+children scattered around its text box (`top: -2.75rem; left: -3rem`
+and `bottom: -2.25rem; right: -3rem`, tilted) rather than a row beneath
+it - "hovering around the paragraph" - so they travel along with the
+step as rotation repositions it, and are hidden entirely (`display:
+none` via a `.about-process--no-images` class, not merely inert) on any
+device that can't hover, not shown as a static fallback - "for non hover
+supported screens you can just leave out the images, they're a sneak
+peek for desktop," read literally rather than reusing the "always-
+visible fallback" pattern this project uses for other hover-only
+reveals. Phone's own separate horizontally-scrollable fallback (previous
+pass) is unchanged.
+
+Verified in the browser: at a 1400px viewport, scrolling through the
+diagram's own scroll range visibly rotated which step's text sits at
+the same x-range the top slot previously occupied (confirmed by reading
+which step carries `.is-active` at each sampled scroll position);
+toggling `.is-hovering` on the section took the _active_ step's own
+images from `opacity: 0` to ~1 and back; and `about-process`,
+`about-story`, `about-drives` all measured `border-top-width: 0px`.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

@@ -75,6 +75,19 @@ const letters = titleWord.split('');
         -->
       </span>
 
+      <!--
+        A second image placeholder, per direct request ("maybe just think
+        to add more images... to the current image") - a smaller chip
+        peeking from behind the main portrait's lower-left corner, the
+        same "pinned collage" language the About page's redesign now uses
+        too. Grid-placed (overlapping the main image's own column range,
+        layered via z-index), not absolutely positioned - simpler to keep
+        in sync with the responsive grid than computing an offset by hand.
+      -->
+      <span class="hero__image-chip" aria-hidden="true">
+        <!-- TODO: replace with a second real photo once photography exists (PROJECT_BRIEF.md Section 6) -->
+      </span>
+
       <h1 class="hero__title" aria-label={titleWord}>
         <span class="hero__title-visual" aria-hidden="true">
           {letters.map((letter) => (
@@ -137,6 +150,7 @@ const letters = titleWord.split('');
   const hero = document.querySelector('.hero');
   if (hero) {
     const image = hero.querySelector<HTMLElement>('.hero__image');
+    const chip = hero.querySelector<HTMLElement>('.hero__image-chip');
     const letters = hero.querySelectorAll<HTMLElement>('.hero__letter');
     const meta = hero.querySelector<HTMLElement>('.hero__meta');
     const bottom = hero.querySelector<HTMLElement>('.hero__bottom');
@@ -148,6 +162,7 @@ const letters = titleWord.split('');
       gsap.set(image, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1.05 });
       gsap.set(letters, { yPercent: 115 });
       gsap.set([meta, bottom], { autoAlpha: 0, y: 24 });
+      if (chip) gsap.set(chip, { autoAlpha: 0, y: 16 });
 
       // Each element gets its own weight and character rather than one
       // eased curve applied uniformly to everything — that uniformity is
@@ -173,6 +188,25 @@ const letters = titleWord.split('');
         )
         .to(meta, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 0.65)
         .to(bottom, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 0.8);
+
+      if (chip) {
+        gsap.to(chip, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.5 });
+        // A slow, continuous idle float once the entrance settles - per
+        // direct request to add "some animation... to the current
+        // image." Small amplitude (8px) and a long, gentle duration (4s
+        // each way) so it reads as ambient life, not a distracting loop -
+        // same "locked-rule exception for a genuine ambient loop" pattern
+        // already used for the Gallery tiles' own continuous bob (see
+        // AGENTS.md), gated behind prefers-reduced-motion the same way.
+        gsap.to(chip, {
+          y: '+=8',
+          duration: 4,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: 1.3,
+        });
+      }
 
       // Gentle scroll parallax on the image, capped at +/-40px. scrub: 1
       // (a one-second smoothing lag) rather than scrub: true (1:1 instant
@@ -275,6 +309,25 @@ const letters = titleWord.split('');
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Overlaps the main image's own grid range (column 5/9) on its left
+     edge, aligned to the bottom of row 1 and nudged further down/left -
+     a grid-item overlap (z-index alone, no absolute positioning) so it
+     tracks the responsive column widths automatically instead of a
+     hand-computed offset. */
+  .hero__image-chip {
+    grid-column: 3 / 6;
+    grid-row: 1;
+    align-self: end;
+    z-index: 1;
+    width: 55%;
+    aspect-ratio: 4 / 5;
+    justify-self: end;
+    transform: translateY(28%) rotate(-4deg);
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    box-shadow: 0 16px 28px -18px rgb(23 21 15 / 0.32);
   }
 
   /* Full-width, edge-to-edge title. container-type turns on cqw sizing for .hero__title-visual below — the word's font-size tracks this element's own rendered width, not the viewport, so it fills the grid at any width from 320px to well past 2560px without a hand-tuned breakpoint ladder. The negative margin-top is in em (title's own font-size), not px or %, so the overlap into the image's lower third scales with the word instead of drifting at other viewports. */
@@ -382,6 +435,14 @@ const letters = titleWord.split('');
       grid-column: 4 / 9;
     }
 
+    /* Hidden below desktop rather than repositioned - the collage overlap
+               is tuned to the desktop image's own 5/9 column range; keeping it in
+               sync with every other width's own image position isn't worth the
+               complexity for a decorative secondary chip. */
+    .hero__image-chip {
+      display: none;
+    }
+
     .hero__meta {
       grid-column: 9 / 13;
     }
@@ -413,6 +474,12 @@ const letters = titleWord.split('');
       order: 1;
       align-self: center;
       width: 50%;
+    }
+
+    /* Same reasoning as the tablet range - hidden rather than
+               repositioned for a decorative secondary chip. */
+    .hero__image-chip {
+      display: none;
     }
 
     .hero__title {
@@ -468,7 +535,7 @@ const letters = titleWord.split('');
 
     /* Turned on only here - see the base rule's comment above. Same visual language as Header's version (hairline rule, mono, text-secondary) so it reads as the same fact stated twice in two contexts, not a new device. Sits between the intro paragraph and the CTA button - margin-top here and the CTA's own margin-top override just below are both var(--space-24), so the tag gets equal breathing room above (from the paragraph) and below (to the button) rather than the mismatched space-16/space-48 gap this had before.
 
-                           Real bug, caught after the fact on certain viewport widths: `display: inline-flex` (needed for the icon+text row inside this element) is an INLINE-level outer display, not a block one - inside .hero__bottom's `display: block` mobile layout, that meant this element didn't get its own line at all, it just joined the inline flow alongside the next inline-level sibling (.hero__cta, itself `display: inline-flex` via Button.astro's `.btn`), so at any width wide enough for both to fit side by side, the button rendered next to the tag instead of below it. `display: flex` (block-level outside, flex inside) fixes it the same way .hero__role-soft's own `display: block` already solves an identical problem one rule up - the flex layout inside for the icon/text row is unaffected, only the outer box type changes. */
+                                   Real bug, caught after the fact on certain viewport widths: `display: inline-flex` (needed for the icon+text row inside this element) is an INLINE-level outer display, not a block one - inside .hero__bottom's `display: block` mobile layout, that meant this element didn't get its own line at all, it just joined the inline flow alongside the next inline-level sibling (.hero__cta, itself `display: inline-flex` via Button.astro's `.btn`), so at any width wide enough for both to fit side by side, the button rendered next to the tag instead of below it. `display: flex` (block-level outside, flex inside) fixes it the same way .hero__role-soft's own `display: block` already solves an identical problem one rule up - the flex layout inside for the icon/text row is unaffected, only the outer box type changes. */
     .hero__status {
       position: relative;
       display: flex;

@@ -12,13 +12,19 @@
 // the heading, the exact example the brief itself gives for this color.
 // It appears nowhere else on the homepage — don't add a second one.
 //
-// Moved to sit directly below Selected Work, per direct request - and
-// dropped its own SectionMarker number in the move (index="04" ->
-// omitted) so the page's numbered sections still read as a clean
-// ascending sequence (01 Selected Work, 02 Principles, 03 Gallery) with
-// this one sitting quietly in between rather than interrupting it with
-// an out-of-order "04". SectionMarker's `index` prop is optional for
-// exactly this case (see that file).
+// Sits directly below Selected Work, per direct request, and carries its
+// own number again ("02" - Selected Work is "01", Principles "03",
+// Gallery "04") - per a later direct request that every section's
+// subtitle stay consistent (small index + bold title, the same device
+// used everywhere else), this went back to using SectionMarker's index
+// rather than staying the one deliberately unnumbered aside.
+//
+// Redesign pass (explicit feedback that this section "felt too stale or
+// too condensed"): each item gained an image placeholder - a flat gray
+// div, same placeholder language as ProjectCard's, not invented imagery -
+// so two lines of text no longer sit alone in a wide empty row, and a
+// settle-in entrance reveal (this section had no motion of its own at
+// all before).
 import SectionMarker from '../ui/SectionMarker.astro';
 
 const items = [
@@ -35,7 +41,7 @@ const items = [
 
 <section class="currently">
   <div class="currently__inner">
-    <SectionMarker label="Currently working on">
+    <SectionMarker index="02" label="Currently working on">
       <span class="currently__wink" aria-hidden="true" slot="suffix">
         *
       </span>
@@ -44,6 +50,9 @@ const items = [
     <ul class="currently__list">
       {items.map((item) => (
         <li class="currently__item">
+          <span class="currently__image" aria-hidden="true">
+            <!-- TODO: replace with a real process/progress image once photography exists (PROJECT_BRIEF.md Section 6) -->
+          </span>
           <span class="currently__tag" aria-hidden="true">
             [ in progress ]
           </span>
@@ -54,6 +63,27 @@ const items = [
     </ul>
   </div>
 </section>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const items = document.querySelectorAll<HTMLElement>('.currently__item');
+  if (items.length && !prefersReducedMotion()) {
+    // A plain staggered settle - this section had no entrance motion at
+    // all before the redesign pass; one quiet, shared reveal per item is
+    // enough here, the image placeholders are the visual interest, not
+    // the motion.
+    gsap.set(items, { autoAlpha: 0, y: 24 });
+    gsap.to(items, {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.7,
+      ease: 'power2.out',
+      stagger: 0.12,
+      scrollTrigger: { trigger: '.currently__list', start: 'top 85%' },
+    });
+  }
+</script>
 
 <style>
   .currently {
@@ -74,12 +104,26 @@ const items = [
 
   .currently__list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 3rem;
-    margin-top: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-48) var(--space-32);
+    margin-top: var(--space-48);
+  }
+
+  .currently__item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .currently__image {
+    display: block;
+    aspect-ratio: 16 / 10;
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    border-radius: var(--radius-image);
   }
 
   .currently__tag {
+    margin-top: var(--space-24);
     font-family: var(--font-mono);
     font-size: var(--text-label);
     text-transform: uppercase;
@@ -91,7 +135,7 @@ const items = [
     margin-top: 0.75rem;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 2rem;
+    font-size: 2.25rem;
     text-transform: uppercase;
     letter-spacing: -0.01em;
     line-height: 1.1;

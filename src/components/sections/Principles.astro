@@ -1,33 +1,29 @@
 ---
-// Homepage "3 design principles," between Selected Work and Gallery - per
-// direct request, in "a really subtle fashion." Body copy is the same
-// three sentences as About's own "How I work" section (AboutProcess.astro)
-// - reused verbatim rather than rewritten, per this project's own "no
-// fabricated copy" rule. Each item's short title is reused too, from the
-// homepage's former "How I think" section (HowIThink.astro, now removed
-// per direct request - "add the titles from the last section... to the 3
-// design principles" then "remove the how I think section... i do not
-// need it anymore") - "Understand before designing" / "Creative, but
-// defendable" / "Make it make sense", paired in order with the three
-// process sentences rather than re-authored.
+// Homepage "3 design principles," between Currently Working On and
+// Gallery. Body copy is the same three sentences as About's own "How I
+// work" section (AboutProcess.astro) - reused verbatim rather than
+// rewritten, per this project's own "no fabricated copy" rule. Each
+// item's short title is reused too, from the homepage's former "How I
+// think" section (HowIThink.astro, now removed per direct request) -
+// "Understand before designing" / "Creative, but defendable" / "Make it
+// make sense", paired in order with the three process sentences rather
+// than re-authored.
 //
-// Now carries a real numbered kicker ("( 02 ) My design principles",
-// exact text per direct request) instead of the plain unnumbered
-// "Approach" label the first version used - the section is a peer to the
-// other numbered sections now, not deliberately outside that rhythm.
-// Still kept in the small mono kicker style rather than promoted to a
-// full SectionMarker h2, though: Barlow Condensed is this page's
-// one-headline-anchor type (PROJECT_BRIEF.md Section 3), already spent
-// on Hero's "PORTFOLIO", and a second big display headline here would
-// compete with it rather than stay the quiet aside this was asked to be.
+// First shipped as a deliberately unnumbered, small mono "( 02 ) My
+// design principles" kicker (a quiet aside, not a peer to the numbered
+// sections). Per a later direct request ("make subtitles... consistent
+// across all pages... small number indication and bigger bolder font for
+// the title, like it already is on the homepage for selected work and
+// gallery"), it now uses the real `SectionMarker` component instead -
+// same index+label device every other section uses, standard
+// `--space-section` padding instead of its own smaller clamp() - the
+// "stay quiet" intent from the first version is retired in favor of
+// site-wide consistency, which is what was actually asked for this time.
 //
-// Numbering: Selected Work is "01" and this is "02" per the exact text
-// requested, with Gallery unchanged at "03" - a clean ascending read.
-// Currently Working On sits physically between Selected Work and this
-// section on the page ("directly below the selected works", a separate
-// direct request), but dropped its own number in the move rather than
-// claiming "02" itself and pushing this one to "03" - see that file's
-// own comment and SectionMarker.astro's now-optional `index` prop.
+// Numbering: Selected Work "01", Currently Working On "02", this "03",
+// Gallery "04" - a clean ascending sequence matching physical page order.
+import SectionMarker from '../ui/SectionMarker.astro';
+
 const principles = [
   {
     title: 'Understand before designing',
@@ -46,14 +42,14 @@ const principles = [
 
 <section class="principles">
   <div class="principles__inner">
-    <p class="principles__kicker">
-      <span aria-hidden="true">( 02 )</span>
-      My design principles
-    </p>
+    <SectionMarker index="03" label="My design principles" />
 
     <ul class="principles__list">
-      {principles.map((item) => (
+      {principles.map((item, index) => (
         <li class="principles__item">
+          <span class="principles__number" aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+          </span>
           <h3 class="principles__title">{item.title}</h3>
           <p class="principles__text">{item.text}</p>
         </li>
@@ -65,29 +61,23 @@ const principles = [
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const section = document.querySelector<HTMLElement>('.principles');
-  if (section && !prefersReducedMotion()) {
-    // One plain, quiet fade/rise for the whole block - no stagger, no
-    // per-element choreography. This section's entire point is to not
-    // draw attention to itself, so it gets the single stillest reveal on
-    // the homepage rather than a scaled-down version of a louder one.
-    gsap.set(section, { autoAlpha: 0, y: 16 });
-    gsap.to(section, {
+  const items = document.querySelectorAll<HTMLElement>('.principles__item');
+  if (items.length && !prefersReducedMotion()) {
+    gsap.set(items, { autoAlpha: 0, y: 20 });
+    gsap.to(items, {
       autoAlpha: 1,
       y: 0,
-      duration: 0.7,
+      duration: 0.65,
       ease: 'power2.out',
-      scrollTrigger: { trigger: section, start: 'top 92%' },
+      stagger: 0.1,
+      scrollTrigger: { trigger: '.principles__list', start: 'top 85%' },
     });
   }
 </script>
 
 <style>
-  /* Roughly a third of the sitewide --space-section (140px) - a quiet
-     aside reads as one if it takes up noticeably less room than the
-     numbered sections around it, not just a different color/type. */
   .principles {
-    padding-block: clamp(2.5rem, 5vw, 3.5rem);
+    padding-block: var(--space-section);
   }
 
   .principles__inner {
@@ -96,19 +86,8 @@ const principles = [
     padding-inline: var(--space-outer);
   }
 
-  .principles__kicker {
-    display: flex;
-    align-items: center;
-    gap: 0.6em;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
-  }
-
   .principles__list {
-    margin-top: var(--space-24);
+    margin-top: var(--space-48);
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-32);
@@ -117,9 +96,8 @@ const principles = [
   .principles__item {
     padding-left: var(--space-24);
     /* A hairline divider between columns, not a border/background per
-                 item - the same "fine print" register as the kicker above, not a
-                 card. Only items after the first get one, so the row doesn't open
-                 with a stray rule before any content. */
+               item. Only items after the first get one, so the row doesn't open
+               with a stray rule before any content. */
     border-left: var(--border-hairline) solid var(--color-text-secondary);
   }
 
@@ -128,34 +106,49 @@ const principles = [
     border-left: none;
   }
 
+  .principles__number {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  /* Bigger, bolder, display-font titles - matching the weight Selected
+     Work/Gallery's own SectionMarker labels carry, per direct request,
+     rather than the small mono item-title the first version used. */
   .principles__title {
-    font-family: var(--font-body);
+    margin-top: var(--space-8);
+    font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--text-nav);
-    letter-spacing: -0.005em;
+    font-size: 1.75rem;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
     color: var(--color-ink);
   }
 
   .principles__text {
-    margin-top: var(--space-8);
+    margin-top: var(--space-16);
+    max-width: 32ch;
     font-family: var(--font-body);
-    font-size: var(--text-caption);
-    line-height: 1.5;
+    font-size: var(--text-body);
+    line-height: var(--text-body-leading);
     color: var(--color-text-secondary);
   }
 
   @media (max-width: 900px) {
     .principles__list {
       grid-template-columns: 1fr;
-      gap: var(--space-16);
+      gap: var(--space-32);
     }
 
     /* Horizontal dividers instead of vertical ones once the columns
-                 stack - the same device rotated 90 degrees rather than a
-                 different one. */
+               stack - the same device rotated 90 degrees rather than a
+               different one. */
     .principles__item {
       padding-left: 0;
-      padding-top: var(--space-16);
+      padding-top: var(--space-24);
       border-left: none;
       border-top: var(--border-hairline) solid var(--color-text-secondary);
     }

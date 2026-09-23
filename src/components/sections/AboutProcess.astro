@@ -4,37 +4,78 @@
 // the user, kept verbatim except one em dash rewritten as a colon (see
 // AboutStory's frontmatter comment - same reason).
 //
-// Deliberately the one quiet section on this page - no scroll reveal, no
-// grid break beyond the shared plate-boundary rule below. AboutIntro,
-// AboutStory, and AboutDrives each already carry their own moment (a
-// load-in, a pull-quote emphasis, a settling card scatter); repeating a
-// reveal here too would be the banned "same entrance on every section"
-// pattern, and a page needs a still beat between its louder ones as much
-// as it needs the loud ones themselves.
+// Was deliberately the one still section on this page (no scroll reveal,
+// no grid break) - a page needs a quiet beat between its louder ones.
+// Redesign pass (explicit feedback that the page's sections "feel too
+// stale or too condensed"): this one specifically had zero imagery and
+// zero motion, which read as underbuilt rather than "deliberately quiet"
+// once the rest of the page gained placeholders and reveals of their
+// own. It now gets a small scattered collage of image placeholders next
+// to the text - a literal, not decorative, visualization of the copy's
+// own language ("paper, whiteboards, sticky notes, messy diagrams"),
+// which is what earns it a moment rather than staying the one section
+// with nothing to look at. The scatter/settle motion echoes AboutDrives'
+// own device one section below (tilted cards easing into their resting
+// angle) rather than inventing a third animation recipe on one page.
 import SectionMarker from '../ui/SectionMarker.astro';
+
+const notes = [{ rotate: -4 }, { rotate: 3 }, { rotate: -2 }];
 ---
 
 <section class="about-process">
   <div class="about-process__inner">
     <SectionMarker index="03" label="How I work" />
 
-    <div class="about-process__column">
-      <p class="about-process__lead">I like starting analog.</p>
+    <div class="about-process__row">
+      <div class="about-process__column">
+        <p class="about-process__lead">I like starting analog.</p>
 
-      <p>
-        Paper, whiteboards, sticky notes, messy diagrams: anything that lets ideas move faster than
-        my concern for how they look.
-      </p>
+        <p>
+          Paper, whiteboards, sticky notes, messy diagrams: anything that lets ideas move faster
+          than my concern for how they look.
+        </p>
 
-      <p>
-        I especially enjoy collaborative ideation: getting different perspectives in the room,
-        throwing ideas around, combining them and challenging each other's assumptions.
-      </p>
+        <p>
+          I especially enjoy collaborative ideation: getting different perspectives in the room,
+          throwing ideas around, combining them and challenging each other's assumptions.
+        </p>
 
-      <p>Once the messy thinking starts to make sense, I move into digital tools and prototypes.</p>
+        <p>
+          Once the messy thinking starts to make sense, I move into digital tools and prototypes.
+        </p>
+      </div>
+
+      <ul class="about-process__notes" aria-hidden="true">
+        {notes.map((note) => (
+          <li class="about-process__note" style={`--rotate: ${note.rotate}deg`}>
+            <!-- TODO: replace with a real process/whiteboard/sticky-note image once photography exists (PROJECT_BRIEF.md Section 6) -->
+          </li>
+        ))}
+      </ul>
     </div>
   </div>
 </section>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const notes = document.querySelectorAll<HTMLElement>('.about-process__note');
+  if (notes.length && !prefersReducedMotion()) {
+    notes.forEach((note, index) => {
+      const targetRotate = note.style.getPropertyValue('--rotate');
+      gsap.set(note, { autoAlpha: 0, y: 16, rotate: 0 });
+      gsap.to(note, {
+        autoAlpha: 1,
+        y: 0,
+        rotate: targetRotate,
+        duration: 0.5,
+        ease: 'back.out(1.2)',
+        delay: index * 0.1,
+        scrollTrigger: { trigger: note, start: 'top 92%' },
+      });
+    });
+  }
+</script>
 
 <style>
   .about-process {
@@ -49,9 +90,17 @@ import SectionMarker from '../ui/SectionMarker.astro';
     padding-inline: var(--space-outer);
   }
 
+  .about-process__row {
+    margin-top: var(--space-16);
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--space-24);
+    align-items: start;
+  }
+
   .about-process__column {
-    max-width: 65ch;
-    margin-left: 8.3333%;
+    grid-column: 2 / 8;
+    max-width: 60ch;
     display: flex;
     flex-direction: column;
     gap: var(--space-24);
@@ -70,13 +119,56 @@ import SectionMarker from '../ui/SectionMarker.astro';
     color: var(--color-ink);
   }
 
+  .about-process__notes {
+    grid-column: 9 / 13;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-16);
+  }
+
+  .about-process__note {
+    rotate: var(--rotate);
+    aspect-ratio: 1;
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    box-shadow: 0 10px 20px -14px rgb(23 21 15 / 0.3);
+  }
+
+  /* First tile spans both columns and sits taller - reads as the "main"
+     sheet of paper with two smaller sticky notes layered around it,
+     rather than three identical tiles in a grid. */
+  .about-process__note:first-child {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 10;
+  }
+
+  @media (max-width: 1023px) {
+    .about-process__column {
+      grid-column: 1 / 8;
+    }
+
+    .about-process__notes {
+      grid-column: 8 / 13;
+    }
+  }
+
   @media (max-width: 639px) {
     .about-process__inner {
       padding-inline: 1.5rem;
     }
 
+    .about-process__row {
+      grid-template-columns: 1fr;
+    }
+
     .about-process__column {
-      margin-left: 0;
+      grid-column: 1;
+    }
+
+    .about-process__notes {
+      grid-column: 1;
+      margin-top: var(--space-32);
+      max-width: 20rem;
     }
   }
 </style>

@@ -24,6 +24,14 @@
 // contrast without touching the locked palette/type families or any
 // shared component - nothing here changes what Header, Footer, or the
 // homepage look like.
+//
+// Redesign pass (explicit request - "upgrade the about page... really
+// give it that extra awwwards feel... add more image placeholders"):
+// this section was pure type before, no imagery at all. A single portrait
+// placeholder now sits beside the intro text, tilted a couple of degrees
+// like a print pinned to a board - the same "placed by hand" language the
+// footnote card already established, not a new device. Still not Hero's
+// object-in-letterform move - that stays homepage-only (see above).
 import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
 
@@ -60,13 +68,19 @@ const cvHref = '#';
         explore web and motion design.
       </p>
 
-      <aside class="about-intro__footnote">
-        <span class="about-intro__footnote-mark" aria-hidden="true">
-          *
+      <div class="about-intro__aside">
+        <span class="about-intro__portrait" aria-hidden="true">
+          <!-- TODO: replace with a real portrait once photography exists (PROJECT_BRIEF.md Section 6) -->
         </span>
-        You knew that already by now. Let me use this opportunity to tell you a little more about
-        me.
-      </aside>
+
+        <aside class="about-intro__footnote">
+          <span class="about-intro__footnote-mark" aria-hidden="true">
+            *
+          </span>
+          You knew that already by now. Let me use this opportunity to tell you a little more about
+          me.
+        </aside>
+      </div>
     </div>
 
     <Button href={withBase(cvHref)} variant="primary" icon="download" class="about-intro__cta">
@@ -209,17 +223,44 @@ const cvHref = '#';
     color: var(--color-text-secondary);
   }
 
+  /* Holds the new portrait placeholder and the existing footnote card as
+     one small collage, the footnote overlapping the image's lower-right
+     corner - a print-and-a-pinned-note arrangement, not two unrelated
+     elements sharing a column. */
+  .about-intro__aside {
+    position: relative;
+    grid-column: 9 / 13;
+    align-self: start;
+  }
+
+  /* A second image placeholder on this page (the first is Hero's own
+     portrait slot) - same flat-gray, no-real-photo language, tilted the
+     opposite way from the footnote so the two don't read as parallel
+     duplicates of the same gesture. */
+  .about-intro__portrait {
+    display: block;
+    aspect-ratio: 3 / 4;
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    transform: rotate(2deg);
+  }
+
   /* The page's one terracotta wink - a small pinned note, not a banner.
      Kept off the grid's straight edges on purpose (a slight rotation, an
      asymmetric self-position) so it reads as placed by hand rather than
      laid out. Sharp corners (no radius token) rather than the sitewide
      hairline-rounded default - reads more like a cut paper scrap than a
-     soft printed card, which suits "pinned by hand" better. */
+     soft printed card, which suits "pinned by hand" better. Now
+     overlapping the portrait's own corner (a negative margin pulling it
+     up and left) instead of sitting in its own clear column - the two
+     read as one small collage rather than a stacked pair. */
   .about-intro__footnote {
-    grid-column: 9 / 13;
-    align-self: start;
-    justify-self: end;
-    max-width: 26ch;
+    position: relative;
+    z-index: 1;
+    width: 80%;
+    margin-top: -2.5rem;
+    margin-left: auto;
+    margin-right: -1rem;
     padding: var(--space-16);
     background: var(--color-bg-primary);
     border: var(--border-hairline) solid var(--color-text-secondary);
@@ -252,10 +293,10 @@ const cvHref = '#';
       grid-column: 1 / 13;
     }
 
-    .about-intro__footnote {
+    .about-intro__aside {
       grid-column: 1 / 13;
-      justify-self: start;
-      margin-top: var(--space-24);
+      margin-top: var(--space-32);
+      max-width: 22rem;
     }
   }
 
@@ -272,8 +313,11 @@ const cvHref = '#';
       margin-top: var(--space-32);
     }
 
+    .about-intro__aside {
+      max-width: 14rem;
+    }
+
     .about-intro__footnote {
-      max-width: none;
       transform: rotate(-2deg);
     }
   }

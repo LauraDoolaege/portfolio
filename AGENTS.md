@@ -69,9 +69,9 @@ our actual tools.
 The full homepage and the full About page are built: Header/nav, Hero,
 SelectedWork, CurrentlyWorkingOn, Principles, Gallery, ContactCTA,
 Footer (in that page order), and (About) AboutIntro, AboutStory,
-AboutProcess, AboutDrives. `HowIThink.astro` was built and later
-removed outright per direct request — see this file's own history below
-for why. Every other
+AboutProcess, AboutTools, AboutDrives (in that page order).
+`HowIThink.astro` was built and later removed outright per direct
+request — see this file's own history below for why. Every other
 page is **not built yet** — Work index, case study, and Contact layouts
 are still PROPOSED and unapproved. Don't build page content without
 checking the brief section for that page first.
@@ -1473,6 +1473,141 @@ re-attempted with a different technique in the same breath; `ContactCTA.astro`
 is back to a plain solid `dark-field` background, and the
 `.contact-cta__inner` `position: relative; z-index: 1` that only existed
 to layer content above that gradient came out with it.
+
+**A large `/impeccable`-driven redesign pass, spanning both pages** - one
+message covering several distinct direct requests plus an open-ended
+"upgrade the about page... give both pages that extra awwwards feel"
+brief with reference imagery (Loop, Tsunami Solutions, Craig Reynolds,
+Acne Studios, a 3D-skills report), explicitly not to be copied literally
+but used for inspiration on layout/imagery/motion. Header and Hero's
+core layout were explicitly out of scope ("does not need to be touched
+for now" / "the main layout will also remain the same").
+
+**ProjectCard's title reverted from hover-reveal to always-visible** -
+"the full project title should be visible at all times instead of just
+on hover," directly reversing the previous pass's own explicit request.
+The two stacked `.project-card__title-rest`/`-full` spans and their
+display-swap CSS are gone; the component just renders `fullTitle ?? title`
+once, always. This mattered most for the Selected Work accordion's
+collapsed, rotated spine label, which surfaced a real bug once real
+(long) titles had to render there unconditionally instead of a short
+"Project N" placeholder: with no explicit height on the title, the
+browser let the vertical text run as long as it needed rather than
+wrapping into new columns, which on the longest title ("A Space Journey
+through Screentime") squeezed `.project-card__frame` down to ~44px tall
+on that one card while its shorter-titled siblings kept a normal,
+balanced frame/body split - each card looked like a different
+proportions system depending on its own title length. Fixed by giving
+`.project-card__body` a fixed `flex: 0 0 9rem` (not content-driven) and
+the collapsed title an explicit `height: 7rem` - in `writing-mode:
+vertical-rl`, `height` maps to the _inline_ size (block flows
+horizontally), so an explicit value is what actually forces the wrap
+into additional narrow columns instead of one arbitrarily tall one.
+Verified directly: all six collapsed cards now measure an identical
+142px frame / 144px body split regardless of title length, and the long
+title itself wraps into three ~19px columns rather than overflowing.
+
+**Section subtitles made consistent site-wide, per direct request**
+("small number indication and bigger bolder font for the title, like it
+already is on the homepage for selected work and gallery"). Two
+sections had drifted from the shared `SectionMarker` device
+(mono index + bold Barlow Condensed h2) for reasons that made sense in
+isolation at the time but broke consistency once asked for directly:
+
+- `Principles.astro` had been deliberately built as a small, unnumbered
+  mono kicker (see its own earlier entries in this file) to stay a
+  "quiet aside." That reasoning is retired now that site-wide
+  consistency was explicitly asked for - it renders a real
+  `SectionMarker` (`index="03"`, `label="My design principles"`) like
+  every other section, with standard `--space-section` padding instead
+  of its own smaller clamp().
+- `CurrentlyWorkingOn.astro` had dropped its own index in an earlier
+  pass specifically to keep the numbered sequence from reading out of
+  order once it moved to sit between Selected Work and Principles. With
+  Principles now numbered "03" instead of literally "02," that
+  constraint is gone - Currently Working On reclaimed `index="02"`, and
+  the full sequence (Selected Work 01, Currently Working On 02,
+  Principles 03, Gallery 04) now reads as a clean ascending sequence by
+  physical page order, with no unnumbered exception anywhere.
+
+**Currently Working On and Principles both got a redesign pass of their
+own**, per direct feedback that "for all other sections im not 100%
+pleased... they feel too stale or too condensed": Currently Working On
+gained an image placeholder per item (previously two lines of text
+alone in a wide empty row) and its first-ever entrance motion (a plain
+staggered settle - it had none before at all). Principles' item titles
+moved from a small mono line to the same bold Barlow Condensed treatment
+as the rest of the site's item titles, and gained their own entrance
+stagger. `ContactCTA.astro` (shared by both pages) also gained an
+entrance reveal - headline then button, a beat apart - since it had no
+motion of its own before either.
+
+**Hero gained a second image placeholder, per direct request ("maybe
+just think to add more images or some animation there to the current
+image")** - `.hero__image-chip`, a smaller tilted collage element
+overlapping the main portrait's lower-left corner. Grid-placed (an
+overlapping `grid-column`/`grid-row` range on `.hero__visual`, layered
+via `z-index`) rather than absolutely positioned, so it tracks the
+responsive column widths for free instead of needing a hand-computed
+offset - and hidden outright below 1024px rather than repositioned,
+since re-tuning a decorative collage overlap for every breakpoint wasn't
+worth the complexity. It fades in with the rest of the entrance
+timeline, then picks up a slow, continuous 8px idle float once that
+settles (`repeat: -1, yoyo: true`, prefers-reduced-motion gated) - the
+same kind of deliberate, informed "locked-rule exception for a genuine
+ambient loop" already documented elsewhere in this file for the Gallery
+tiles' own continuous bob, not an oversight.
+
+**About page: a real content-driven redesign, not a re-skin** - the
+direct instruction was to "really read the content... and understand
+the story, then proceed to convey that story in the layout," so each
+section's own copy shaped what changed, not a uniform template applied
+four times:
+
+- **AboutIntro** gained this page's first image placeholder - a
+  portrait, tilted, with the existing terracotta footnote card now
+  overlapping its lower-right corner instead of sitting in its own
+  clear column - the two read as one small pinned collage. A real bug
+  here, caught by screenshot at 375px and not by the 1023px breakpoint
+  check alone: the mobile override set the aside's `max-width` to
+  `none`, so on a narrow viewport the portrait stretched to the full
+  content width at its 3:4 aspect ratio (~450px tall) and the modest 2°
+  rotation read as a heavy, skewed diagonal at that size. Fixed with a
+  real mobile max-width (14rem) instead of removing the constraint.
+- **AboutStory** ("How I got here") gained a documentary-style image
+  placeholder sitting in the two grid columns the pull-quote's own
+  `1 / 11` span already leaves open on the right - both explicitly
+  `grid-row: 3` so they share a row instead of the image falling to its
+  own line below.
+- **AboutProcess** ("How I work") was the biggest change: it was
+  deliberately the one still, imageless section on this page before (a
+  considered choice at the time - a page needs a quiet beat). Once every
+  other section gained placeholders and motion of its own, "quiet" had
+  drifted into "underbuilt," per the same "too stale" feedback. It now
+  has a small scattered collage of three image placeholders next to the
+  text - a literal visualization of the copy's own language ("paper,
+  whiteboards, sticky notes, messy diagrams"), not decoration for its
+  own sake - with a settle-in stagger reusing AboutDrives' own rotational
+  device (tilted, easing into a resting angle) rather than inventing a
+  third animation recipe on one page.
+- **AboutDrives** ("What drives me") is unchanged beyond its `index`
+  moving from "04" to "05" to make room for the new section below.
+
+**New section, `AboutTools.astro` ("Tools I work with," index "04"),
+placed directly after "How I work"** - per direct request: "at some
+point, I will have to also tell them what tools I use... think of a way
+to show it, use your judgement to add it to a section that makes sense
+for recruiters." Placed right after the process section specifically so
+a recruiter reading About encounters it while process/fit is still the
+active question, not tacked onto the very end of the page. No real tool
+list was supplied - "I will have to also tell them" describes a future
+action, not content given now - so this ships as a real, working,
+three-category grid (Design / Prototyping & motion / Development) of
+clearly-placeholder `Tag.astro` chips (`[ Tool ]`, repeated), the same
+"real placeholder, not invented content" rule this project already
+applies to project titles/images (CLAUDE.md "Content"). A code comment
+marks exactly where to swap in the real list; the layout doesn't need to
+change when that happens.
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

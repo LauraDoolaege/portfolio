@@ -25,6 +25,12 @@
 // squares around the (01) etc") - the index now stays whatever
 // SectionMarker.astro's own default styling gives it, same as the
 // homepage.
+//
+// Redesign pass: a documentary-style image placeholder now sits beside
+// the pull-quote, breaking up what used to be five paragraphs and a
+// quote with no imagery at all - the "documentary/process, black-and-
+// white" imagery mode the brief names (PROJECT_BRIEF.md Section 3),
+// placed here because this section is literally the origin-story process.
 import SectionMarker from '../ui/SectionMarker.astro';
 ---
 
@@ -62,6 +68,10 @@ import SectionMarker from '../ui/SectionMarker.astro';
       <span class="about-story__quote-rule" aria-hidden="true"></span>I turned my tendency to
       overthink into a habit of observing, questioning and challenging assumptions.
     </blockquote>
+
+    <span class="about-story__image" aria-hidden="true">
+      <!-- TODO: replace with a real documentary/process image once photography exists (PROJECT_BRIEF.md Section 6) -->
+    </span>
 
     <div class="about-story__column">
       <p>
@@ -135,6 +145,7 @@ import SectionMarker from '../ui/SectionMarker.astro';
   .about-story__quote {
     position: relative;
     grid-column: 1 / 11;
+    grid-row: 3;
     margin: 0;
     padding-left: var(--space-32);
     font-family: var(--font-editorial);
@@ -143,6 +154,19 @@ import SectionMarker from '../ui/SectionMarker.astro';
     font-size: clamp(1.75rem, 2vw + 1.25rem, 2.75rem);
     line-height: 1.25;
     color: var(--color-ink);
+  }
+
+  /* Sits in the two columns the quote's own 1/11 span leaves open on the
+     right, same row - a small documentary-style placeholder breaking up
+     the quote's own macro-asymmetry move instead of duplicating it. */
+  .about-story__image {
+    display: block;
+    grid-column: 11 / 13;
+    grid-row: 3;
+    align-self: start;
+    aspect-ratio: 3 / 4;
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
   }
 
   /* A real element, not border-left: GSAP needs a node it can scale
@@ -166,6 +190,13 @@ import SectionMarker from '../ui/SectionMarker.astro';
 
     .about-story__quote {
       grid-column: 1 / -1;
+      grid-row: auto;
+    }
+
+    .about-story__image {
+      grid-column: 1 / -1;
+      grid-row: auto;
+      max-width: 16rem;
     }
   }
 

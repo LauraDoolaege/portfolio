@@ -37,6 +37,24 @@ const contactHref = withBase('/contact');
   </div>
 </section>
 
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const headline = document.querySelector<HTMLElement>('.contact-cta__headline');
+  const button = document.querySelector<HTMLElement>('.contact-cta__button');
+  if (headline && button && !prefersReducedMotion()) {
+    // This section had no motion at all before - a plain, calm fade/rise,
+    // headline first then the button a beat later. Reused across both
+    // pages (About also renders this component unmodified), so it needed
+    // to be simple and content-agnostic, not a bespoke sequence.
+    gsap.set([headline, button], { autoAlpha: 0, y: 20 });
+    gsap
+      .timeline({ scrollTrigger: { trigger: headline, start: 'top 85%' } })
+      .to(headline, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' })
+      .to(button, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.15);
+  }
+</script>
+
 <style>
   .contact-cta {
     padding-block: var(--space-section);
@@ -76,8 +94,8 @@ const contactHref = withBase('/contact');
     color: var(--color-bg-primary);
     border: var(--border-hairline) solid var(--color-bg-primary);
     /* --motion-easing-soft, matching Button.astro's own primary variant
-                 (this is a local dark-context copy of it) - same "tactile glide"
-                 fix applied there per direct feedback. */
+                         (this is a local dark-context copy of it) - same "tactile glide"
+                         fix applied there per direct feedback. */
     transition:
       color var(--motion-duration) var(--motion-easing-soft),
       transform var(--motion-duration) var(--motion-easing-soft);

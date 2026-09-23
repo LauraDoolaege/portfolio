@@ -2160,6 +2160,31 @@ Principles' title all now share the exact same left edge (70px at a
 fix Selected Work's own edge would have measured further in from
 Hero's.
 
+**A real bug in Gallery's bottom alignment, caught from a screenshot
+with a straightedge drawn across the tile captions.** The previous
+pass's `align-items: flex-end` fix (see its own entry above) bottom-
+aligned each tile correctly at the flex layout level - but every tile
+still carried a leftover per-tile "float" class (`.gallery__tile--up`/
+`--down`, a `translateY(±28px)`) from the section's very first build,
+back when tiles were top-aligned and the float existed to add gentle
+vertical variety to an otherwise flat top edge. A `transform` is
+applied after flex layout has already positioned everything, so that
+±28px nudge was undoing the bottom-alignment fix for exactly the tiles
+it landed on - the captions/tags ended up staggered at three different
+heights instead of one shared line, visible as a jagged edge across a
+straightedge laid across the row.
+
+The float didn't have a job to do anymore once bottom-alignment became
+the section's actual visual anchor (the two ideas are close to
+opposites: one holds tiles to a shared line, the other deliberately
+pushes them off one), so it's removed outright rather than
+re-tuned - the `FLOATS` array, each tile's `floatClass` field, the
+`gallery__tile--{up,down}` classes in the markup, and both the desktop
+and mobile versions of their CSS rules. Verified via
+`getBoundingClientRect()`: every visible tile's `<Tag>` element now
+reports the identical `top` value, not just close/eyeballed-similar
+values.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

@@ -180,11 +180,11 @@ const displayTitle = fullTitle ?? title;
     border-radius: var(--radius-image);
     overflow: hidden;
     /* --motion-easing-soft (not the plain --motion-easing/ease-out this
-                                                                     used before), and a touch longer than --motion-duration-slow - per
-                                                                     direct feedback that the card's hover movement read as "very
-                                                                     harsh." Plain ease-out decelerates evenly the whole way, which
-                                                                     reads mechanical on a 6px lift; the soft cubic-bezier eases in
-                                                                     more gradually, closer to a physical glide. */
+                                                                         used before), and a touch longer than --motion-duration-slow - per
+                                                                         direct feedback that the card's hover movement read as "very
+                                                                         harsh." Plain ease-out decelerates evenly the whole way, which
+                                                                         reads mechanical on a 6px lift; the soft cubic-bezier eases in
+                                                                         more gradually, closer to a physical glide. */
     transition:
       transform 0.55s var(--motion-easing-soft),
       border-color var(--motion-duration) var(--motion-easing-soft);
@@ -250,9 +250,9 @@ const displayTitle = fullTitle ?? title;
     display: block;
     margin-bottom: var(--space-16);
     /* Solid, not the dashed "tear-line" this used before - per direct
-               request ("use solid lines instead of a dashed line"), applied
-               here and to Gallery's matching tile-footer rule together so the
-               two stay consistent. */
+                   request ("use solid lines instead of a dashed line"), applied
+                   here and to Gallery's matching tile-footer rule together so the
+                   two stay consistent. */
     border-top: var(--border-hairline) solid var(--color-text-secondary);
   }
 

@@ -62,15 +62,11 @@ import Tag from '../ui/Tag.astro';
 
 const TOTAL = 15;
 const ASPECTS = ['wide', 'tall', 'square'] as const;
-const FLOATS = ['up', 'flat', 'down'] as const;
 const TAGS = ['Process', 'Detail', 'Concept'] as const;
 
 const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   number: String(i + 1).padStart(2, '0'),
   aspectClass: ASPECTS[i % ASPECTS.length],
-  // Offset by 1 from the aspect cycle so the two patterns don't lock
-  // step and repeat identically every 3 tiles.
-  floatClass: FLOATS[(i + 1) % FLOATS.length],
   tag: TAGS[i % TAGS.length],
 }));
 ---
@@ -90,7 +86,6 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
               class:list={[
                 'gallery__tile',
                 `gallery__tile--${tile.aspectClass}`,
-                `gallery__tile--${tile.floatClass}`,
                 { 'gallery__tile--clone': isClone },
               ]}
               aria-hidden={isClone ? 'true' : undefined}
@@ -343,14 +338,14 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     }
 
     // Continuous "breathing" bob: every real tile's trigger (not the
-    // tile itself - the tile already carries a static CSS transform for
-    // its up/down float, and GSAP animating a second transform on the
-    // same element would silently fight that one, same "GSAP vs static
-    // transform" conflict documented elsewhere in this file) drifts a
-    // few px up and down in a slow, soft loop for as long as the page is
-    // open. Hovering a specific tile freezes only that one (pause, not
-    // kill, so it resumes from the same point in its cycle rather than
-    // resetting).
+    // tile itself, which the flex track bottom-aligns via layout, not a
+    // transform - but keeping the bob off the tile and on a child
+    // element still means it can never fight a future static transform
+    // added to the tile, same "GSAP vs static transform" conflict
+    // documented elsewhere in this file) drifts a few px up and down in
+    // a slow, soft loop for as long as the page is open. Hovering a
+    // specific tile freezes only that one (pause, not kill, so it
+    // resumes from the same point in its cycle rather than resetting).
     if (!reduceMotion) {
       const bobTweens = triggers.map((el, i) =>
         gsap.to(el, {
@@ -602,7 +597,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery {
     padding-block: clamp(3rem, 6vw, 4.5rem);
     /* No background fill (per earlier direct request) - the section sits
-                     directly on the page's own bg-primary. */
+                         directly on the page's own bg-primary. */
     overflow-x: hidden;
   }
 
@@ -627,8 +622,8 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     z-index: 1;
     overflow: hidden;
     /* Vertical room for the float offset and hover bob so nothing clips.
-                     Negative margin cancels the padding's footprint on .gallery__stage's
-                     own auto height. */
+                         Negative margin cancels the padding's footprint on .gallery__stage's
+                         own auto height. */
     padding-block: 2.5rem;
     margin-block: -2.5rem;
   }
@@ -657,12 +652,17 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery__track {
     display: flex;
     /* Bottom-aligned, not top - per direct request ("align gallery
-               items at the bottom"). Tiles vary in height (three aspect
-               ratios), so this is what actually gives the strip one shared
-               baseline instead of each tile hanging from an arbitrary top
-               edge; the per-tile up/down float transforms still nudge
-               individual tiles off that baseline for visual variety, they just
-               nudge from a bottom reference point now instead of a top one. */
+           items at the bottom"). Tiles vary in height (three aspect
+           ratios), so this is what actually gives the strip one shared
+           baseline instead of each tile hanging from an arbitrary top edge.
+           A real bug, caught from a screenshot with a straightedge across
+           the captions: the per-tile up/down "float" transform (removed
+           below) used to nudge each *whole* tile - image and caption
+           together - a further ±28px off whatever baseline flex-end had
+           just established, which directly undid this alignment for
+           exactly the tiles it was applied to. Flex alignment happens
+           before a transform is ever painted, so there was no way for the
+           two to coexist - the float had to go, not the alignment. */
     align-items: flex-end;
     gap: 1.5rem;
     width: max-content;
@@ -680,14 +680,6 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
      already set in the markup. */
   .gallery__tile--clone {
     pointer-events: none;
-  }
-
-  .gallery__tile--up {
-    transform: translateY(-28px);
-  }
-
-  .gallery__tile--down {
-    transform: translateY(28px);
   }
 
   /* Aspect ratio now lives on the trigger (the image button), not the
@@ -866,14 +858,6 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   @media (max-width: 640px) {
     .gallery__inner {
       padding-inline: 1.5rem;
-    }
-
-    .gallery__tile--up {
-      transform: translateY(-14px);
-    }
-
-    .gallery__tile--down {
-      transform: translateY(14px);
     }
   }
 

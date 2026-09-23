@@ -2563,6 +2563,90 @@ reaches 0 and all three steps reach `opacity: 1` after scrolling into
 view, and at 375px the same three steps render as a plain stacked list
 with no ring, no arrow, and no off-screen overflow.
 
+**Chapter ticks refined, and How I Work rebuilt a third time - the
+circular diagram is gone.** Two direct follow-ups in one message, plus a
+larger redesign request for AboutProcess.
+
+The chapter ticks (previous pass) are longer (1.5rem -> 2.25rem) and no
+longer a discrete on/off threshold tween - per direct feedback that they
+"should also appear on scroll, not just be there statically." Diagnosed
+before fixing: this section's beats sit close enough together that
+several of their `'top 90%'` thresholds were clearing within one short
+scroll into the section, so four of five ticks could already be at full
+length the moment the section came into view - technically scroll-
+triggered, but reading as "just there" since there was nothing left to
+visibly animate. Switched to `scrub: 0.3` against each beat's own
+`'top 95%'` → `'top 55%'` range (the same mechanism already driving the
+rail's own progress line) so the tick's growth now tracks the scrollbar
+directly - confirmed via `getComputedStyle` sampled at three scroll
+positions, showing genuine intermediate `scaleX` values (not just 0 or
+
+1. as the page scrolls.
+
+**AboutProcess ("How I work"), third rebuild of its interaction model -
+direct follow-up: "the giant circle does not need to be there, I want
+that on scroll, a new step appears at the top, and while hovering the
+section you get little images that belong to the step."** The circular
+ring diagram from the previous pass is removed outright, not re-skinned
+
+- replaced with a pinned scroll sequence: the section pins for a fixed
+  scroll distance (450px per step), and the active step crossfades to the
+  next as the reader scrolls through that range, always displayed in the
+  same slot. Each step carries its own three small placeholder images,
+  revealed only while the section is genuinely hovered (`opacity: 0` by
+  default under `.about-process--interactive`, `1` only when both
+  `.is-hovering` on the section and `.is-active` on that specific step are
+  present) - "while hovering the section you get little images that
+  belong to the step" is a real gate, not just visually-empty-but-present
+  markup. No new copy: the same three step groupings/labels from the
+  previous pass (Analog first / Collaborate / Go digital) carry over
+  unchanged.
+
+Three response modes, matching this project's established "no gesture-
+gated interaction without a working alternative" principle:
+
+- Fine pointer, motion allowed, not phone width: the interactive pinned/
+  scrubbed/hover-gated version above (a JS-added
+  `.about-process--interactive` class, gated on
+  `matchMedia('(hover: hover) and (pointer: fine)')` and
+  `prefersReducedMotion()`).
+- Reduced motion, or a device with no real hover at non-phone widths (a
+  touchscreen laptop, a tablet): no pin, no hover-gating - every step
+  renders in normal document flow, already visible, its images already
+  visible beneath it. Same "functional equivalent, no gesture required"
+  fallback this project already uses for ProjectCard's touch overlay,
+  Gallery's tap-hint, and so on.
+- Phone specifically (`max-width: 639px`), regardless of motion
+  preference or hover support - a native horizontally-scrollable, scroll-
+  snapped strip, one step per "slide": direct request, "on phone (and
+  phone only) the half circle layout can change to scrollable
+  horizontally." Read as applying to whatever replaced the circular
+  layout, not the (now-removed) circle specifically, since it arrived in
+  the same message as the request to remove the circle entirely -
+  flagging that interpretation here rather than silently assuming it.
+  This variant is CSS-only (`overflow-x` + `scroll-snap-type`), not GSAP-
+  driven, so a phone in reduced-motion mode still gets a real working
+  swipeable strip instead of falling back further to a plain stack.
+
+One real, known limitation, noted rather than silently accepted: the
+interactive-vs-fallback decision is made once, from `matchMedia` reads
+at page load - it doesn't re-evaluate on a live resize (a device
+rotating, or a desktop window being resized after load). This project's
+own browser-testing tool resizes the live tab mid-session routinely,
+which surfaced the gap immediately; a real visitor essentially never
+resizes past this section's own breakpoints on an already-loaded page,
+so it wasn't treated as worth the real complexity a resize-reactive
+version would add (destroying and recreating the ScrollTrigger pin,
+mainly) - worth knowing if a future report describes this section
+looking broken specifically after a live resize or orientation change.
+
+Verified in the browser: scrolling through the pinned range moved the
+active step 0 → 1 → 2 with genuine intermediate crossfade opacities (not
+a hard cut); toggling `.is-hovering` on the section took the active
+step's own image row from `opacity: 0` to ~1 and back down on release;
+and at a 375px viewport the track measured `overflow-x: auto`,
+`flex-direction: row`, with each step at a full 327px slide width.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

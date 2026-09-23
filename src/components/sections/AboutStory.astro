@@ -349,14 +349,25 @@ import SectionMarker from '../ui/SectionMarker.astro';
         scrollTrigger: { trigger: beat, start: 'top 90%' },
       });
 
+      // Scrubbed, not a discrete on/off threshold like the text above -
+      // per direct feedback that the ticks "should also appear on
+      // scroll, not just be there statically." A fixed-duration tween
+      // on the same 'top 90%' threshold as the text was technically
+      // scroll-triggered, but most beats in this section sit close
+      // enough together that several of their thresholds clear within
+      // one short scroll, so four of the five ticks could already be at
+      // their end state the moment the section came into view - reading
+      // as "just there" rather than something that happened in response
+      // to scrolling. Tying it to `scrub` instead makes the growth
+      // track the scrollbar directly, the same technique already used
+      // for the rail's own progress line above.
       const tick = ticks[i];
       if (tick) {
         gsap.set(tick, { scaleX: 0 });
         gsap.to(tick, {
           scaleX: 1,
-          duration: 0.5,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: beat, start: 'top 90%' },
+          ease: 'none',
+          scrollTrigger: { trigger: beat, start: 'top 95%', end: 'top 55%', scrub: 0.3 },
         });
       }
     });
@@ -491,7 +502,7 @@ import SectionMarker from '../ui/SectionMarker.astro';
   :global(.about-story__chapter-tick) {
     position: absolute;
     left: -1rem;
-    width: 1.5rem;
+    width: 2.25rem;
     height: 1px;
     background: var(--color-text-secondary);
     transform-origin: left;
@@ -637,16 +648,16 @@ import SectionMarker from '../ui/SectionMarker.astro';
 
   @media (max-width: 1023px) {
     /* The drift needs room to zig - below this width every beat (and the
-                                                             quote/image) fall back to one straight column, same pattern used
-                                                             everywhere else in this project once macro asymmetry runs out of
-                                                             space. The rail stays (repositioned closer to the now-single text
-                                                             column below) and each asset drops into normal document flow as
-                                                             its own small stacked image between beats - "on mobile screens
-                                                             it's looking kind of boring, find a way to still get the
-                                                             storytelling in there," so this is a simplified version of the
-                                                             device, not a removed one. The ticks are the one piece still tied
-                                                             to the zigzag's own leftover column space, which doesn't exist
-                                                             once beats go full-width - those stay desktop-only. */
+                                                               quote/image) fall back to one straight column, same pattern used
+                                                               everywhere else in this project once macro asymmetry runs out of
+                                                               space. The rail stays (repositioned closer to the now-single text
+                                                               column below) and each asset drops into normal document flow as
+                                                               its own small stacked image between beats - "on mobile screens
+                                                               it's looking kind of boring, find a way to still get the
+                                                               storytelling in there," so this is a simplified version of the
+                                                               device, not a removed one. The ticks are the one piece still tied
+                                                               to the zigzag's own leftover column space, which doesn't exist
+                                                               once beats go full-width - those stay desktop-only. */
     :global(.about-story__chapter-tick) {
       display: none;
     }

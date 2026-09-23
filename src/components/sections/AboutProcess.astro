@@ -2,38 +2,46 @@
 // About page "How I work" (PROJECT_BRIEF.md Section 4/5, item 3): the
 // analog-first process description. Copy is final, supplied directly by
 // the user, kept verbatim except one em dash rewritten as a colon (see
-// AboutStory's frontmatter comment - same reason).
+// AboutStory's frontmatter comment - same reason). No new copy here
+// either: the same three step groupings/labels from the previous pass
+// carry over unchanged (see git history for that pass's own reasoning
+// on why "Analog first"/"Collaborate"/"Go digital" are structural
+// captions, not new claims in her voice).
 //
-// Rebuilt around a circular process diagram, per direct request with a
-// reference image (a studio site's dark "THE PROCESS" section: a ring
-// with three numbered steps arranged around it, top/bottom-left/
-// bottom-right, plus a small arrow below). Structure only, not its
-// look - the same "borrow the layout, not the theme" reading already
-// applied to ContactCTA/Footer's own reference-image redesign earlier in
-// this project: the reference's dark background is out of scope
-// (CLAUDE.md "Design system" reserves dark-field for the footer/one CTA
-// band, not a second dark section), so this stays on the page's own
-// porcelain background with the locked palette/type.
+// Third rebuild of this section's interaction model - direct follow-up,
+// "the giant circle does not need to be there, I want that on scroll, a
+// new step appears at the top, and while hovering the section you get
+// little images that belong to the step." The circular diagram (ring +
+// three positioned steps) from the previous pass is gone entirely, not
+// just re-skinned - replaced with a pinned scroll sequence: the section
+// pins for a scroll distance, and as the reader scrolls through that
+// range, the active step crossfades to the next one, always displayed
+// in the same slot near the top of the stage. Each step carries its own
+// small set of placeholder images, revealed only while the section is
+// hovered (a fine pointer, not reduced motion) - "while hovering the
+// section you get little images that belong to the step" is a hover-
+// gated reveal, not a permanent gallery, so it's genuinely absent
+// (opacity: 0, not just visually empty) until that gesture happens.
 //
-// No new copy: the existing lead line plus three body paragraphs (i.e.
-// exactly what was here before) are grouped into three steps, one
-// paragraph each, each gaining a short structural label - "Analog
-// first," "Collaborate," "Go digital" - the same kind of objective,
-// two-word caption AboutStory's own chapter names already are (see that
-// file's header comment): a structural device for organizing her
-// existing words into the three-step shape the reference calls for, not
-// a new claim added in her voice. The old scattered-collage-of-three-
-// notes device (a previous pass's answer to this section reading
-// "underbuilt") is retired now that the section has a real, considered
-// structure of its own instead of decoration standing in for one.
-//
-// The ring is a plain SVG circle (stroke only, no fill) that draws on
-// scroll via stroke-dashoffset - "a map being drawn" - then each step
-// fades/rises in, staggered. Below ~880px there isn't room for three
-// text blocks arranged around a circle without them colliding, so it
-// drops to a plain stacked numbered list, same "macro asymmetry drops
-// at a width threshold" pattern used everywhere else in this project -
-// the ring itself is hidden there rather than shrunk into illegibility.
+// Three response modes, not one mechanism forced everywhere:
+// - Fine pointer, motion allowed, not phone width: the interactive
+//   pinned/scrubbed/hover-gated version above.
+// - Reduced motion, or no real hover (a touchscreen laptop, tablet,
+//   etc. at non-phone widths): no pin, no hover-gating - every step
+//   renders in normal document flow, already visible, images already
+//   visible beneath their own step. Same "functional equivalent, no
+//   gesture required" fallback this project uses everywhere a hover- or
+//   motion-driven interaction has no equivalent (ProjectCard's touch
+//   overlay, Gallery's tap-hint, etc.) - nothing here depends on a
+//   gesture the device or the reader's own preference can't offer.
+// - Phone specifically (max-width: 639px), regardless of motion
+//   preference or hover support: a native horizontally-scrollable,
+//   scroll-snapped strip - one step per "slide" - per direct request
+//   ("on phone (and phone only) the half circle layout can change to
+//   scrollable horizontally"). This is CSS-only (overflow-x + scroll-
+//   snap-type), not GSAP-driven, so it needs no reduced-motion gate of
+//   its own; a phone in reduced-motion mode still gets a real, working
+//   swipeable strip rather than falling back further to a plain stack.
 import SectionMarker from '../ui/SectionMarker.astro';
 
 const steps = [
@@ -59,63 +67,96 @@ const steps = [
   <div class="about-process__inner">
     <SectionMarker index="03" label="How I work" />
 
-    <div class="about-process__diagram">
-      <svg class="about-process__ring" viewBox="0 0 600 600" aria-hidden="true">
-        <circle class="about-process__ring-path" cx="300" cy="300" r="270" fill="none" />
-      </svg>
+    <div class="about-process__stage">
+      <div class="about-process__track">
+        {steps.map((step, i) => (
+          <div class="about-process__step" data-step={i}>
+            <p class="about-process__step-heading">
+              <span class="about-process__step-number" aria-hidden="true">
+                {step.number}
+              </span>
+              <span class="about-process__step-label">{step.label}</span>
+            </p>
+            <p class="about-process__step-text">{step.text}</p>
 
-      {steps.map((step, i) => (
-        <div class:list={['about-process__step', `about-process__step--${i + 1}`]}>
-          <p class="about-process__step-heading">
-            <span class="about-process__step-number" aria-hidden="true">
-              {step.number}
-            </span>
-            <span class="about-process__step-label">{step.label}</span>
-          </p>
-          <p class="about-process__step-text">{step.text}</p>
-        </div>
-      ))}
-
-      <span class="about-process__arrow" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path
-            d="M4 12h16M14 6l6 6-6 6"
-            stroke="currentColor"
-            stroke-width="1.3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </span>
+            <div class="about-process__images" aria-hidden="true">
+              <!-- TODO: replace with real process/whiteboard/prototype photography once it exists (PROJECT_BRIEF.md Section 6) - one small image per step, standing in for "what this step actually looked like." -->
+              <span class="about-process__image-tile" />
+              <span class="about-process__image-tile" />
+              <span class="about-process__image-tile" />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </section>
 
 <script>
-  import { gsap, prefersReducedMotion } from '../../utils/motion';
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
 
-  const ring = document.querySelector<SVGCircleElement>('.about-process__ring-path');
-  const steps = document.querySelectorAll<HTMLElement>('.about-process__step');
-  const arrow = document.querySelector<HTMLElement>('.about-process__arrow');
-  const diagram = document.querySelector<HTMLElement>('.about-process__diagram');
+  const section = document.querySelector<HTMLElement>('.about-process');
+  const stage = document.querySelector<HTMLElement>('.about-process__stage');
+  const stepEls = document.querySelectorAll<HTMLElement>('.about-process__step');
 
-  if (ring && diagram && !prefersReducedMotion()) {
-    // "The map being drawn": the ring's own circumference (2 * pi * r,
-    // r=270 in the SVG's own coordinate space) becomes its
-    // stroke-dasharray, offset by that same length so nothing shows at
-    // rest, then animated back to 0 - a classic SVG line-draw, matching
-    // this page's existing "rule draws down" device on the quote
-    // (AboutStory.astro) rather than inventing a third reveal recipe.
-    const length = 2 * Math.PI * 270;
-    ring.style.strokeDasharray = `${length}`;
-    gsap.set(ring, { strokeDashoffset: length });
-    gsap.set([...steps, arrow], { autoAlpha: 0, y: 16 });
+  if (section && stage && stepEls.length) {
+    const reduceMotion = prefersReducedMotion();
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const isPhone = window.matchMedia('(max-width: 639px)').matches;
 
-    gsap
-      .timeline({ scrollTrigger: { trigger: diagram, start: 'top 75%' } })
-      .to(ring, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' })
-      .to(steps, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.15 }, 0.3)
-      .to(arrow, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.2');
+    if (!isPhone && !reduceMotion && canHover) {
+      section.classList.add('about-process--interactive');
+      stepEls[0].classList.add('is-active');
+
+      gsap.set(stepEls, { autoAlpha: 0, y: 16 });
+      gsap.set(stepEls[0], { autoAlpha: 1, y: 0 });
+
+      // Only one step is ever the "active" one - its own .about-process__images
+      // is the only one CSS lets opacity through on while
+      // .about-process--interactive.is-hovering is set (see the
+      // stylesheet). Crossfading via autoAlpha/y rather than a hard
+      // swap so the new step genuinely "appears," not just pops in.
+      let activeIndex = 0;
+      const setActive = (index: number) => {
+        if (index === activeIndex) return;
+        const prev = stepEls[activeIndex];
+        const next = stepEls[index];
+        prev.classList.remove('is-active');
+        next.classList.add('is-active');
+        activeIndex = index;
+        gsap.to(prev, { autoAlpha: 0, y: -16, duration: 0.4, ease: 'power2.in' });
+        gsap.fromTo(
+          next,
+          { autoAlpha: 0, y: 16 },
+          { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        );
+      };
+
+      // Pins the stage for a fixed scroll distance (450px per step) and
+      // drives which step is active off the pin's own scrub progress -
+      // "on scroll, a new step appears." 450px/step is enough scroll
+      // room to feel deliberate without turning a 3-step section into
+      // an outsized scroll-jack.
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'top top',
+        end: () => `+=${stepEls.length * 450}`,
+        pin: true,
+        scrub: 1,
+        onUpdate: (self) => {
+          const idx = Math.min(stepEls.length - 1, Math.floor(self.progress * stepEls.length));
+          setActive(idx);
+        },
+      });
+
+      section.addEventListener('pointerenter', () => section.classList.add('is-hovering'));
+      section.addEventListener('pointerleave', () => section.classList.remove('is-hovering'));
+    } else {
+      // Reduced motion, no real hover, or (handled entirely in CSS,
+      // needs no branch here) phone width - every step and its images
+      // are already visible, no pin and no gesture required.
+      gsap.set(stepEls, { autoAlpha: 1, y: 0 });
+    }
   }
 </script>
 
@@ -132,40 +173,28 @@ const steps = [
     padding-inline: var(--intro-margin);
   }
 
-  /* A square stage the ring and its three steps are positioned within -
-     capped so it never dominates the page at very wide viewports (the
-     reference is a full standalone section; this stays one section
-     among several, matching this page's own restrained scale). */
-  .about-process__diagram {
-    position: relative;
-    width: min(100%, 46rem);
-    aspect-ratio: 1;
-    margin: var(--space-64) auto 0;
+  .about-process__stage {
+    margin-top: var(--space-64);
   }
 
-  .about-process__ring {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    color: var(--color-text-secondary);
-  }
-
-  .about-process__ring-path {
-    stroke: currentColor;
-    stroke-width: 1;
+  /* Base/fallback layout: every step stacked in normal flow, already
+     visible - this is what non-interactive devices (reduced motion, no
+     real hover) get permanently, and what phone briefly is before the
+     639px override below turns it into a horizontal strip. */
+  .about-process__track {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-64);
   }
 
   .about-process__step {
-    position: absolute;
-    width: 17rem;
-    text-align: center;
+    width: 100%;
+    max-width: 36rem;
   }
 
   .about-process__step-heading {
     display: flex;
     align-items: baseline;
-    justify-content: center;
     gap: 0.5em;
     margin: 0 0 var(--space-8);
   }
@@ -180,7 +209,7 @@ const steps = [
   .about-process__step-label {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     text-transform: uppercase;
     letter-spacing: -0.01em;
     color: var(--color-ink);
@@ -188,95 +217,108 @@ const steps = [
 
   .about-process__step-text {
     margin: 0;
+    max-width: 42ch;
     font-family: var(--font-body);
-    font-size: var(--text-caption);
-    line-height: 1.5;
+    font-size: var(--text-body);
+    line-height: var(--text-body-leading);
     color: var(--color-text-secondary);
   }
 
-  /* Top-center, sitting just above the ring's own top edge. */
-  .about-process__step--1 {
-    top: -1rem;
-    left: 50%;
-    transform: translateX(-50%);
+  /* Always visible in the fallback layout - "little images that belong
+     to the step" without a hover gate once there's no reliable hover to
+     gate behind. A small resting tilt on the outer two tiles for the
+     same "pinned by hand" read the rest of this page's placeholders
+     already use. */
+  .about-process__images {
+    display: flex;
+    gap: var(--space-16);
+    margin-top: var(--space-24);
   }
 
-  /* Bottom-left, roughly the 8 o'clock position - left-aligned text
-     reading outward from the ring. */
-  .about-process__step--2 {
-    bottom: 8%;
-    left: -2%;
-    text-align: left;
+  .about-process__image-tile {
+    display: block;
+    width: 5rem;
+    aspect-ratio: 4 / 3;
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
   }
 
-  /* Bottom-right, mirrored from step 2. */
-  .about-process__step--3 {
-    bottom: 8%;
-    right: -2%;
-    text-align: right;
+  .about-process__image-tile:nth-child(1) {
+    rotate: -3deg;
   }
 
-  .about-process__arrow {
+  .about-process__image-tile:nth-child(3) {
+    rotate: 2deg;
+  }
+
+  /* --- Interactive mode (fine pointer, motion allowed, not phone) --- */
+  /* Added by the script, never present without JS - the fallback layout
+     above already renders correctly with no JS at all. */
+  .about-process--interactive .about-process__stage {
+    display: flex;
+    align-items: center;
+    min-height: 70vh;
+  }
+
+  .about-process--interactive .about-process__track {
+    position: relative;
+    width: 100%;
+    max-width: 42rem;
+  }
+
+  /* Every step stacks in the exact same spot - the crossfade (script)
+     is what makes only one read as present at a time, "a new step
+     appears" in place of the last rather than pushing the page's own
+     layout around. */
+  .about-process--interactive .about-process__step {
     position: absolute;
-    bottom: -2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--color-text-secondary);
+    inset: 0;
+    max-width: 42rem;
   }
 
-  .about-process__arrow svg {
-    width: 1.5rem;
-    height: 1.5rem;
+  /* Hidden by default - only the currently active step's own images
+     show, and only while the section is genuinely hovered (JS toggles
+     both classes; CSS never shows this from one alone). */
+  .about-process--interactive .about-process__images {
+    opacity: 0;
+    transition: opacity var(--motion-duration-slow) var(--motion-easing-soft);
   }
 
-  @media (max-width: 880px) {
-    /* Three text blocks arranged around a ring need real width to avoid
-         colliding - below this, the diagram drops to a plain stacked
-         numbered list (ring and arrow hidden outright) rather than
-         shrinking the circle until the text no longer fits it. */
-    .about-process__ring,
-    .about-process__arrow {
-      display: none;
-    }
-
-    .about-process__diagram {
-      width: 100%;
-      aspect-ratio: auto;
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-32);
-      margin-top: var(--space-32);
-    }
-
-    /* A real bug, caught by measuring the rendered step rather than
-         trusting position: static to be enough on its own: the desktop
-         rules (.about-process__step--1/2/3, below) each set their own
-         `transform` (translateX(-50%) on step 1, for centering against
-         `left: 50%`) - switching `position` to `static` here doesn't
-         clear that transform, so step 1 was still shifting itself left by
-         half its own width and overflowing off the left edge of the
-         viewport. `transform: none` here overrides all three variants at
-         once. */
-    .about-process__step {
-      position: static;
-      transform: none;
-      width: 100%;
-      max-width: 32rem;
-      text-align: left;
-    }
-
-    .about-process__step-heading {
-      justify-content: flex-start;
-    }
-
-    .about-process__step-text {
-      max-width: none;
-    }
+  .about-process--interactive.is-hovering .about-process__step.is-active .about-process__images {
+    opacity: 1;
   }
 
   @media (max-width: 639px) {
     .about-process__inner {
       padding-inline: 1.5rem;
+    }
+
+    .about-process__stage {
+      margin-top: var(--space-32);
+    }
+
+    /* Phone-only horizontal scroll-snap strip, regardless of motion
+         preference or hover support - per direct request. Plain
+         overflow-x/scroll-snap, no GSAP: native scrolling needs no
+         reduced-motion gate of its own, so a phone in reduced-motion mode
+         still gets a real swipeable strip instead of falling back further
+         to a plain stack. The interactive-mode rules above never apply
+         here - `canHover` is false on essentially every phone, and this
+         breakpoint's own layout takes priority regardless. */
+    .about-process__track {
+      flex-direction: row;
+      gap: 0;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+    }
+
+    .about-process__step {
+      flex: 0 0 100%;
+      max-width: none;
+      scroll-snap-align: start;
+      padding-right: var(--space-24);
     }
   }
 </style>

@@ -597,7 +597,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery {
     padding-block: clamp(3rem, 6vw, 4.5rem);
     /* No background fill (per earlier direct request) - the section sits
-                                   directly on the page's own bg-primary. */
+                                     directly on the page's own bg-primary. */
     overflow-x: hidden;
   }
 
@@ -651,17 +651,17 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     z-index: 1;
     overflow: hidden;
     /* Vertical room for the hover bob, magnetic shift, and hover scale so
-                 nothing clips - bumped up from 2.5rem after a direct report that
-                 hovered tiles were getting cut off. Measured directly, not just
-                 guessed: the tallest tile (20rem at a wide viewport) only had
-                 ~40px of headroom above the row at the old 2.5rem padding, which
-                 the hover scale (1.05x) and the magnetic shift (up to 16px) alone
-                 could already come close to using entirely - stacking the
-                 continuous breathing bob's own motion on top of that (mid-cycle,
-                 right as a hover begins and before it's had time to pause) was
-                 enough to occasionally push a tile's edge past that budget.
-                 Negative margin cancels the padding's footprint on
-                 .gallery__stage's own auto height. */
+                   nothing clips - bumped up from 2.5rem after a direct report that
+                   hovered tiles were getting cut off. Measured directly, not just
+                   guessed: the tallest tile (20rem at a wide viewport) only had
+                   ~40px of headroom above the row at the old 2.5rem padding, which
+                   the hover scale (1.05x) and the magnetic shift (up to 16px) alone
+                   could already come close to using entirely - stacking the
+                   continuous breathing bob's own motion on top of that (mid-cycle,
+                   right as a hover begins and before it's had time to pause) was
+                   enough to occasionally push a tile's edge past that budget.
+                   Negative margin cancels the padding's footprint on
+                   .gallery__stage's own auto height. */
     padding-block: 4rem;
     margin-block: -4rem;
   }
@@ -690,17 +690,17 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery__track {
     display: flex;
     /* Bottom-aligned, not top - per direct request ("align gallery
-                     items at the bottom"). Tiles vary in height (three aspect
-                     ratios), so this is what actually gives the strip one shared
-                     baseline instead of each tile hanging from an arbitrary top edge.
-                     A real bug, caught from a screenshot with a straightedge across
-                     the captions: the per-tile up/down "float" transform (removed
-                     below) used to nudge each *whole* tile - image and caption
-                     together - a further ±28px off whatever baseline flex-end had
-                     just established, which directly undid this alignment for
-                     exactly the tiles it was applied to. Flex alignment happens
-                     before a transform is ever painted, so there was no way for the
-                     two to coexist - the float had to go, not the alignment. */
+                       items at the bottom"). Tiles vary in height (three aspect
+                       ratios), so this is what actually gives the strip one shared
+                       baseline instead of each tile hanging from an arbitrary top edge.
+                       A real bug, caught from a screenshot with a straightedge across
+                       the captions: the per-tile up/down "float" transform (removed
+                       below) used to nudge each *whole* tile - image and caption
+                       together - a further ±28px off whatever baseline flex-end had
+                       just established, which directly undid this alignment for
+                       exactly the tiles it was applied to. Flex alignment happens
+                       before a transform is ever painted, so there was no way for the
+                       two to coexist - the float had to go, not the alignment. */
     align-items: flex-end;
     gap: 1.5rem;
     width: max-content;

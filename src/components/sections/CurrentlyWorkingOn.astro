@@ -6,11 +6,17 @@
 // the one-line descriptions below are a direct expansion of those
 // descriptors, not invented content — swap in the real copy if it differs.
 //
-// This section holds the page's one terracotta "wink" (PROJECT_BRIEF.md
-// Section 3 palette table, accent-signal — locked, NOT touched by the
-// design-variance override in CLAUDE.md): a single rotated asterisk after
-// the heading, the exact example the brief itself gives for this color.
-// It appears nowhere else on the homepage — don't add a second one.
+// This section holds the homepage's original terracotta "wink"
+// (PROJECT_BRIEF.md Section 3 palette table, accent-signal - locked,
+// NOT touched by the design-variance override in CLAUDE.md): a rotated
+// asterisk, the exact example the brief itself gives for this color -
+// now leading the heading rather than trailing it ("the asterix should
+// be before currently working on"), a direct follow-up correction. A
+// second wink now exists too, on Selected Work's own closing CTA (see
+// that file's header comment) - a deliberate, direct-request exception
+// to this section's own former "don't add a second one" rule, not an
+// oversight; see AGENTS.md's "Design system" section for the updated
+// reasoning.
 //
 // Demoted back down to a small, unnumbered aside - per direct request,
 // "the currently working on should not be a major section as it is now,
@@ -41,10 +47,10 @@ const items = [
 <section class="currently">
   <div class="currently__inner">
     <p class="currently__label">
-      Currently working on
       <span class="currently__wink" aria-hidden="true">
         *
       </span>
+      Currently working on
     </p>
 
     <ul class="currently__list">

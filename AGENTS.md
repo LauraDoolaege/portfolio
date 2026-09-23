@@ -86,11 +86,21 @@ work" numbered running-head repeated at the top of each section below the
 hero, echoing the numbered Context/Approach/Outcome pattern already
 proposed for case studies in PROJECT_BRIEF.md Section 5).
 
-The homepage's one locked terracotta "wink" (Section 3 palette table —
-NOT touched by the design-variance override above) is the rotated
-asterisk after "Currently working on" — the brief's own named example for
-this color. Don't add a second terracotta moment anywhere else on the
-homepage.
+The homepage's original locked terracotta "wink" (Section 3 palette
+table — NOT touched by the design-variance override above) was the
+rotated asterisk after "Currently working on" — the brief's own named
+example for this color, with "don't add a second terracotta moment
+anywhere else on the homepage" as the original rule. That single-wink
+rule is now explicitly superseded, per direct request: Selected Work's
+own closing "Let's talk." CTA gained a matching rotated-asterisk wink,
+paired with a second asterisk appended after Selected Work's own
+SectionMarker description, so the two visually connect as a footnote-
+and-reference pair ("but in that case give it an asterix like for
+currently working on, and add the asterisk too behind the selected
+works paragraph to connect them"). See SelectedWork.astro's own header
+comment for the implementation - there are now two winks on the
+homepage, not one, and that's a deliberate, direct-request exception to
+this rule, not an oversight.
 
 ContactCTA and Footer are both `dark-field`, deliberately paired as one
 continuous dark closing zone (Section 3 permits "footer / at most one CTA

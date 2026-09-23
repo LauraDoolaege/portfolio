@@ -105,6 +105,21 @@
 //   follow-up ("I dont want the spotlight anymore for selected works") -
 //   removed outright, not just disabled, along with the markup/script/
 //   CSS it needed and had nothing else depending on it.
+//
+// A closing contact prompt sits after the last group - direct request
+// ("in the selected work section add a cta where suited to contact
+// me"), flagged before implementing per that same message's own
+// instruction ("if you think this is a bad idea tell me before
+// implementing and ask me with alternatives"): a full boxed CTA here
+// would have made three separate contact/CTA moments on one homepage
+// (Principles' own "Get to know me," this one, and the big ContactCTA
+// band at the page's end), which risked reading as repetitive rather
+// than confident. Given the choice, a small quiet text link ("Like what
+// you see? Let's talk.") was picked over a full button or skipping it
+// outright - closes out the browsing moment without competing for
+// attention the way a second boxed button would. Links to `#contact`,
+// the same bare-hash convention Header's own nav Contact link already
+// uses (resolves to whichever page's own ContactCTA is present).
 import SectionMarker from '../ui/SectionMarker.astro';
 import ProjectCard from '../ui/ProjectCard.astro';
 
@@ -209,6 +224,16 @@ const motion = [
         </ul>
       </div>
     </div>
+
+    <p class="selected-work__cta">
+      <span class="selected-work__cta-wink" aria-hidden="true">
+        *
+      </span>
+      Like what you see?{' '}
+      <a href="#contact" class="selected-work__cta-link">
+        Let's talk.
+      </a>
+    </p>
   </div>
 </section>
 
@@ -331,8 +356,75 @@ const motion = [
     padding-inline: var(--intro-margin);
   }
 
+  /* The other half of the footnote-and-reference pair (see
+     .selected-work__cta-wink above) - a matching terracotta asterisk
+     closing this section's own SectionMarker description, connecting it
+     to the closing CTA's own leading asterisk. :global() and ::after
+     rather than a change to SectionMarker.astro itself or its
+     `description` prop (a plain string, deliberately not a slot - see
+     that component's own header comment on why) - this is a one-off
+     connection specific to this section, not a generic SectionMarker
+     feature, so it's scoped here via `.selected-work` as an ancestor. */
+  .selected-work :global(.section-marker__description)::after {
+    content: ' *';
+    display: inline-block;
+    font-family: var(--font-display);
+    color: var(--color-accent-signal);
+    transform: rotate(-8deg);
+  }
+
   .selected-work__group {
     margin-top: 3rem;
+  }
+
+  /* A quiet closing line, not a second boxed CTA - see the file header
+     comment for why. Same fine-print register as the group labels
+     (mono, text-secondary), so it reads as a soft aside rather than a
+     competing headline. */
+  .selected-work__cta {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-top: 3rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  /* Matches CurrentlyWorkingOn's own .currently__wink exactly - the
+     homepage's second terracotta wink (see the file header comment),
+     paired with the asterisk closing SectionMarker's own description
+     below as a footnote-and-reference pair, per direct request ("give
+     it an asterix like for currently working on, and add the asterisk
+     too behind the selected works paragraph to connect them"). Leads
+     the line rather than trailing it, matching CurrentlyWorkingOn's own
+     asterisk placement after its own direct correction ("the asterix
+     should be before currently working on and like what you see"). */
+  .selected-work__cta-wink {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--color-accent-signal);
+    transform: rotate(-8deg);
+  }
+
+  .selected-work__cta-link {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    transition: color var(--motion-duration) var(--motion-easing-soft);
+  }
+
+  .selected-work__cta-link:hover,
+  .selected-work__cta-link:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .selected-work__cta-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
   }
 
   /* The whole label row is now a real button, toggling the panel below
@@ -434,11 +526,11 @@ const motion = [
 
   @media (min-width: 900px) {
     /* A fixed-height row is what makes an accordion read as one object
-                                                             instead of three cards of changing aspect-ratio - the height stays
-                                                             constant, only each panel's share of the width changes. 18rem, not
-                                                             the 30rem this first shipped with - per direct feedback the panels
-                                                             read as "quite tall" at that height, more like portrait cards than
-                                                             the short, horizontal, rectangular strip that's actually wanted. */
+                                                               instead of three cards of changing aspect-ratio - the height stays
+                                                               constant, only each panel's share of the width changes. 18rem, not
+                                                               the 30rem this first shipped with - per direct feedback the panels
+                                                               read as "quite tall" at that height, more like portrait cards than
+                                                               the short, horizontal, rectangular strip that's actually wanted. */
     .selected-work__accordion {
       display: flex;
       align-items: stretch;
@@ -447,38 +539,38 @@ const motion = [
     }
 
     /* flex-grow (not width or flex-basis) is what's animated: every
-                                                             panel starts equal (grow: 1) and the hovered/focused one steps up
-                                                             to grow: 1.6 on hover, below. That number has come down twice now
-                                                             - 6, then 3, then this - per two rounds of direct feedback ("I
-                                                             don't like how dramatically the project cards stretch," then
-                                                             "still feels too plastic and extreme for my brand"). The second
-                                                             round wasn't just "3 is still too big, try a smaller number": a
-                                                             fixed-height row with a flex-grow-driven width change is
-                                                             literally stretching one rectangle's aspect ratio every tick of
-                                                             the transition (height pinned at 18rem, width changing), which is
-                                                             what reads as "plastic" regardless of how far it goes - a
-                                                             real photo cropped to one shape distorting toward a very
-                                                             different one doesn't look like a considered reveal, it looks
-                                                             like it's being pulled. 1.6 keeps that same distortion but makes
-                                                             it small enough (roughly 44% of the row instead of 60%, versus
-                                                             each panel's 33% at rest) that it reads as a gentle emphasis
-                                                             rather than an elastic snap - and the transition itself slowed
-                                                             from 0.6s to 0.8s so the motion itself reads calmer, not just
-                                                             smaller. --motion-easing-soft (not a hand-typed cubic-bezier
-                                                             literal - see that token's own comment (global.css) for why this
-                                                             exact curve is shared across several places instead of
-                                                             copy-pasted) already eases gently; the extra time gives it room
-                                                             to actually read as gradual instead of quick-then-eased. */
+                                                               panel starts equal (grow: 1) and the hovered/focused one steps up
+                                                               to grow: 1.6 on hover, below. That number has come down twice now
+                                                               - 6, then 3, then this - per two rounds of direct feedback ("I
+                                                               don't like how dramatically the project cards stretch," then
+                                                               "still feels too plastic and extreme for my brand"). The second
+                                                               round wasn't just "3 is still too big, try a smaller number": a
+                                                               fixed-height row with a flex-grow-driven width change is
+                                                               literally stretching one rectangle's aspect ratio every tick of
+                                                               the transition (height pinned at 18rem, width changing), which is
+                                                               what reads as "plastic" regardless of how far it goes - a
+                                                               real photo cropped to one shape distorting toward a very
+                                                               different one doesn't look like a considered reveal, it looks
+                                                               like it's being pulled. 1.6 keeps that same distortion but makes
+                                                               it small enough (roughly 44% of the row instead of 60%, versus
+                                                               each panel's 33% at rest) that it reads as a gentle emphasis
+                                                               rather than an elastic snap - and the transition itself slowed
+                                                               from 0.6s to 0.8s so the motion itself reads calmer, not just
+                                                               smaller. --motion-easing-soft (not a hand-typed cubic-bezier
+                                                               literal - see that token's own comment (global.css) for why this
+                                                               exact curve is shared across several places instead of
+                                                               copy-pasted) already eases gently; the extra time gives it room
+                                                               to actually read as gradual instead of quick-then-eased. */
     /* Fixed basis assuming a 3-panel row (the largest group, Experience
-                   design), not flex: 1 1 0% - per direct request that a group with
-                   fewer than 3 projects ("Digital design projects" has 2, "Motion
-                   design" has 1) still uses the same per-panel width as a 3-panel
-                   row instead of stretching to fill the whole row. flex-grow: 0 at
-                   rest means a shorter row (2 or 1 panels) just leaves the
-                   remaining width empty rather than inflating each panel to fill
-                   it - a lone Motion design card now reads as one panel-width, not
-                   a full-width banner. flex-shrink: 1 still lets siblings compress
-                   when the hovered panel grows (below). */
+                     design), not flex: 1 1 0% - per direct request that a group with
+                     fewer than 3 projects ("Digital design projects" has 2, "Motion
+                     design" has 1) still uses the same per-panel width as a 3-panel
+                     row instead of stretching to fill the whole row. flex-grow: 0 at
+                     rest means a shorter row (2 or 1 panels) just leaves the
+                     remaining width empty rather than inflating each panel to fill
+                     it - a lone Motion design card now reads as one panel-width, not
+                     a full-width banner. flex-shrink: 1 still lets siblings compress
+                     when the hovered panel grows (below). */
     .selected-work__accordion > li {
       flex: 0 1 calc((100% - 2 * var(--space-16)) / 3);
       min-width: 0;
@@ -487,33 +579,33 @@ const motion = [
     }
 
     /* Temporarily disabled per direct request ("remove the stretching
-               effect temporarily from all the cards") - every panel now just
-               holds its own fixed basis above, hover or not. Left commented
-               rather than deleted so the accordion-expand behavior (and all the
-               reasoning above about why 1.6/0.8s were chosen) is one uncomment
-               away from coming back, not lost.
-            .selected-work__accordion > li:hover,
-            .selected-work__accordion > li:focus-within {
-              flex-grow: 1.6;
-            }
-            */
+                 effect temporarily from all the cards") - every panel now just
+                 holds its own fixed basis above, hover or not. Left commented
+                 rather than deleted so the accordion-expand behavior (and all the
+                 reasoning above about why 1.6/0.8s were chosen) is one uncomment
+                 away from coming back, not lost.
+              .selected-work__accordion > li:hover,
+              .selected-work__accordion > li:focus-within {
+                flex-grow: 1.6;
+              }
+              */
 
     /* The card fills its panel's full box instead of holding its own
-                     aspect-ratio - same "stretch to fill a flex/grid cell" technique
-                     the bento's featured card used before this replaced it.
-                     ProjectCard.astro was rebuilt (direct request: "the image to fill
-                     the entire card at first... reveals the part with the info while
-                     hovering") around a full-bleed image with its own hover-reveal
-                     info overlay - it no longer has a separate frame/body split or a
-                     collapsed "spine label" state to maintain here at all. That
-                     rebuild is what actually fixes the clipping bug this accordion
-                     kept reintroducing across three earlier attempts (see AGENTS.md):
-                     the writing-mode column-budget mechanism that caused it doesn't
-                     exist anymore, there's nothing left to widen a fourth time. The
-                     card's own `:hover` fires the moment the pointer is over it, which
-                     is also while this panel is mid-expansion, so the overlay reveal
-                     and the accordion's width change happen together with zero extra
-                     wiring needed here. */
+                       aspect-ratio - same "stretch to fill a flex/grid cell" technique
+                       the bento's featured card used before this replaced it.
+                       ProjectCard.astro was rebuilt (direct request: "the image to fill
+                       the entire card at first... reveals the part with the info while
+                       hovering") around a full-bleed image with its own hover-reveal
+                       info overlay - it no longer has a separate frame/body split or a
+                       collapsed "spine label" state to maintain here at all. That
+                       rebuild is what actually fixes the clipping bug this accordion
+                       kept reintroducing across three earlier attempts (see AGENTS.md):
+                       the writing-mode column-budget mechanism that caused it doesn't
+                       exist anymore, there's nothing left to widen a fourth time. The
+                       card's own `:hover` fires the moment the pointer is over it, which
+                       is also while this panel is mid-expansion, so the overlay reveal
+                       and the accordion's width change happen together with zero extra
+                       wiring needed here. */
     .selected-work__accordion :global(.project-card) {
       height: 100%;
       aspect-ratio: auto;

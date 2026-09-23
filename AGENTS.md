@@ -1927,6 +1927,39 @@ established visual language, not a new accent color the locked palette
 doesn't have. Header.astro's nav still gets full site nav on every
 page, so removing Footer's own copy of it doesn't reduce reachability.
 
+**A real bug in the Gallery progress "you are here" thumb, per a direct
+follow-up with a screenshot** ("it's this part of the progress bar that
+needs to be black. change it"). The thumb's own computed color was
+already solid `--color-ink` (verified via `getComputedStyle` before
+looking any further) - the previous pass's fix genuinely applied, but
+the _visible result_ still read as mid-gray, confirmed directly by
+forcing the thumb to a fixed position/size and screenshotting it next
+to the (now-solid-black) Gallery tap-hint circles in the same frame for
+a fair comparison. First guess (a too-thin hairline anti-aliasing
+itself toward gray) was wrong - bumping the thumb from 3px to 4px, then
+8px as a test, made no visible difference at all, which is what
+actually pointed at the real cause instead: `.gallery__progress-bar`
+and `.gallery__progress-thumb` are both positioned absolute _inside_
+`.gallery__progress-track` (see the markup), and the track had
+`opacity: 0.25` on itself to look like a faint backing line - CSS
+`opacity` doesn't just fade an element's own paint, it flattens the
+element and everything inside it into one layer at that opacity, so the
+bar/thumb's own solid ink was silently diluted to 25% strength too,
+regardless of their own (correct) computed color. Fixed by giving the
+track a translucent _background color_
+(`color-mix(in srgb, var(--color-text-secondary) 25%, transparent)`)
+instead of reduced element opacity - that fades only the track's own
+painted line, leaving the bar and thumb nested inside it fully opaque.
+The thumb's height went back down to 3px (the 4px/8px bump was chasing
+the wrong cause and is no longer needed) but kept its
+`top: 50%; transform: translateY(-50%)` centering from the abandoned
+attempt, which is a genuine small improvement over the old hand-typed
+`translateY(-1px)` - it stays correctly centered on the 1px track at
+any future height instead of needing re-tuning. Verified in the browser
+at a size and position matched to the tap-hint circles: the thumb now
+reads unambiguously solid black, same as they do, not the visibly
+lighter gray a side-by-side screenshot had shown before the fix.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

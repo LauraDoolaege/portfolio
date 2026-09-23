@@ -981,13 +981,22 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 
   /* The faint full-length line between the two labels - the reference
      example's own thin base line, at rest the whole way from 1 to
-     {TOTAL}. */
+     {TOTAL}. A translucent background color, not `opacity: 0.25` on
+     this element - the bar and thumb below are positioned absolute
+     *inside* this element (see the markup), so CSS opacity here doesn't
+     just fade the backing line, it fades everything painted inside it
+     as one flattened layer. That silently diluted the bar/thumb's own
+     solid --color-ink down to 25% strength too, which is exactly the
+     "gray, not black" bug reported after the bar/thumb were switched to
+     ink - their own computed color was correct the whole time
+     (confirmed via getComputedStyle before finding this), the visible
+     result wasn't. color-mix() fades only this element's own paint,
+     leaving descendants unaffected. */
   .gallery__progress-track {
     position: relative;
     flex: 1 1 auto;
     height: 1px;
-    background: var(--color-text-secondary);
-    opacity: 0.25;
+    background: color-mix(in srgb, var(--color-text-secondary) 25%, transparent);
   }
 
   /* The solid segment tracking actual scroll progress, drawn over the
@@ -1014,12 +1023,18 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
      the two can vary independently (the fill bar only ever needs a
      single scaleX; this needs a width *and* a position). Solid ink,
      thicker than the 1px bar/track underneath it but still a hairline
-     multiple, not a heavy bar of its own - "subtle," per the request. */
+     multiple, not a heavy bar of its own - "subtle," per the request.
+     Re-centered via top: 50% / translateY(-50%) (was top: 0 / a
+     hand-typed translateY(-1px) tuned for one specific height) so it
+     stays correctly centered on the 1px track regardless of future
+     height tweaks - this element's own color was never actually the bug
+     (see .gallery__progress-track's own comment for the real cause of
+     the "still reads gray" report: its parent's opacity, not this). */
   .gallery__progress-thumb {
     position: absolute;
-    top: 0;
+    top: 50%;
     height: 3px;
-    transform: translateY(-1px);
+    transform: translateY(-50%);
     background: var(--color-ink);
   }
 

@@ -41,7 +41,9 @@
 // the number or the paragraph"):
 //
 // 1. `.section-marker__label`'s font-size ceiling roughly doubled (2.75rem
-//    -> ~6rem). The index/paragraph keep their previous sizes entirely.
+//    -> ~6rem, later bumped again to ~8.5rem per a same-session direct
+//    follow-up that it still wasn't big enough). The index/paragraph
+//    keep their previous sizes entirely both times.
 // 2. The label now sits in a constrained-width grid column (roughly 7/12)
 //    instead of running the section's full width - at this much bigger
 //    size, a multi-word label like "Selected work" no longer fits that
@@ -116,7 +118,11 @@ const { index, label, description } = Astro.props;
     margin: 0;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(3rem, 6vw + 1rem, 6rem);
+    /* Bumped again per direct follow-up ("selected work title and other
+           main subtitles should be larger") - the max-width above is in ch,
+           so it scales with this font-size and keeps wrapping at the same
+           word boundary rather than needing its own re-tuning. */
+    font-size: clamp(3.5rem, 8vw + 1rem, 8.5rem);
     text-transform: uppercase;
     letter-spacing: -0.01em;
     line-height: 0.92;
@@ -138,10 +144,10 @@ const { index, label, description } = Astro.props;
 
   @media (max-width: 900px) {
     /* The two-column split needs real width to read as "pushed to the
-                   right" rather than just cramped - below this, label and
-                   description both drop to a plain single stacked column, same
-                   "macro asymmetry drops at a width threshold" pattern used
-                   everywhere else in this project. */
+                       right" rather than just cramped - below this, label and
+                       description both drop to a plain single stacked column, same
+                       "macro asymmetry drops at a width threshold" pattern used
+                       everywhere else in this project. */
     .section-marker {
       grid-template-columns: 1fr;
       row-gap: 1.25rem;
@@ -155,7 +161,7 @@ const { index, label, description } = Astro.props;
 
   @media (max-width: 640px) {
     .section-marker__label {
-      font-size: clamp(2.25rem, 10vw, 3.5rem);
+      font-size: clamp(2.5rem, 13vw, 4.5rem);
     }
   }
 </style>

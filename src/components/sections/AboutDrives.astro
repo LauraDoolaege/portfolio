@@ -1,29 +1,42 @@
 ---
 // About page "What drives me" (PROJECT_BRIEF.md Section 4/5, item 4).
-// Copy is final, supplied directly by the user, kept verbatim as four
-// short statements.
+// Copy is final, supplied directly by the user.
 //
-// This is the page's tactile centerpiece, per direct request ("have fun
-// with it, make it tactile"): each item reads as a small paper card
-// scattered rather than gridded, echoing the "paper, sticky notes, messy
-// diagrams" language from "How I work" one section above - a scattered
-// grid is a DESIGN_VARIANCE: 9 move earned by the content itself, not
-// decoration for its own sake. The chalk section background reads as the
-// desk the cards sit on.
+// Redesigned per direct follow-up request: "Summarize the what drives
+// me section to 3 points and make the layout the same as the design
+// principle cards on the homepage." This replaces the page's earlier
+// "tactile centerpiece" treatment (four short statements as small
+// rotated note cards on a chalk field - see this project's own AGENTS.md
+// for that pass's full reasoning) outright, not a variant layered
+// alongside it - a direct instruction to match a specific existing
+// layout supersedes the earlier "have fun with it, make it tactile"
+// brief this replaces.
 //
-// Brutalist-structure pass (explicit request, About-only scope): sharp
-// (unrounded) corners instead of the sitewide radius token, and a corner
-// plate number per card - borrowing ProjectCard's own established
-// corner-number device (already locked sitewide) rather than inventing a
-// new one, which is why this reads as "more structural" without reading
-// as foreign to the rest of the site.
+// Four statements summarized to three, without inventing new claims:
+// the original items 3 ("Turning insights into concepts") and 4
+// ("Making things creative and grounded") are combined into one - both
+// were about the same step (turning raw insight into a considered,
+// grounded concept), so folding them together is a real summary of her
+// own words, not new content. Items 1 and 2 are unchanged verbatim.
+//
+// Layout now reuses Principles.astro's own device exactly - a 3-column
+// grid, hairline dividers between items (skipped on the first so the
+// row doesn't open with a stray rule), mono index above a bold
+// Barlow Condensed line - rather than inventing a new one, per the
+// direct request to match it. AboutDrives' own items are single short
+// phrases with no separate title/body split the way Principles' three
+// sentences have, so there's no second `<p>` here - just the phrase
+// itself, styled the same weight Principles' own title line uses. The
+// chalk section background and the tilted-card shadow/sharp-corner
+// styling from the previous version are gone with it - Principles
+// itself has no section-level background of its own, and matching its
+// layout means matching that too, not just the grid.
 import SectionMarker from '../ui/SectionMarker.astro';
 
 const items = [
-  { number: '01', text: 'Understanding why things do/don’t work', rotate: -2.5 },
-  { number: '02', text: 'Those "lightbulb" moments', rotate: 1.5 },
-  { number: '03', text: 'Turning insights into concepts', rotate: -1.5 },
-  { number: '04', text: 'Making things creative and grounded', rotate: 2 },
+  'Understanding why things do or don’t work',
+  'Those "lightbulb" moments',
+  'Turning insights into concepts that are creative and grounded',
 ];
 ---
 
@@ -32,12 +45,12 @@ const items = [
     <SectionMarker index="04" label="What drives me" />
 
     <ul class="about-drives__list">
-      {items.map((item) => (
-        <li class="about-drives__card" style={`--rotate: ${item.rotate}deg`}>
+      {items.map((text, index) => (
+        <li class="about-drives__item">
           <span class="about-drives__number" aria-hidden="true">
-            {item.number}
+            {String(index + 1).padStart(2, '0')}
           </span>
-          {item.text}
+          <p class="about-drives__text">{text}</p>
         </li>
       ))}
     </ul>
@@ -47,27 +60,20 @@ const items = [
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const cards = document.querySelectorAll<HTMLElement>('.about-drives__card');
-  if (cards.length && !prefersReducedMotion()) {
-    // A rotational settle, not a plain fade/rise: each card starts flatter
-    // and slightly lower, then eases into its own resting tilt - reads as
-    // being set down rather than fading in, which is the one thing this
-    // page's other two reveals (a wipe, a rule draw-in) don't do. A
-    // tighter overshoot (1.2, not 1.6) and a quicker duration than before:
-    // a firm stamp-down reads more like deliberate placement, less like a
-    // bouncy toss, which fits this page's more structural character.
-    cards.forEach((card, index) => {
-      const targetRotate = card.style.getPropertyValue('--rotate');
-      gsap.set(card, { autoAlpha: 0, y: 20, rotate: 0 });
-      gsap.to(card, {
-        autoAlpha: 1,
-        y: 0,
-        rotate: targetRotate,
-        duration: 0.55,
-        ease: 'back.out(1.2)',
-        delay: index * 0.08,
-        scrollTrigger: { trigger: card, start: 'top 90%' },
-      });
+  const items = document.querySelectorAll<HTMLElement>('.about-drives__item');
+  if (items.length && !prefersReducedMotion()) {
+    // Same plain fade/rise stagger Principles.astro's own list uses -
+    // matching that layout means matching its motion too, not just its
+    // markup/CSS, rather than keeping the previous version's rotational
+    // settle for a shape this section no longer has.
+    gsap.set(items, { autoAlpha: 0, y: 20 });
+    gsap.to(items, {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.65,
+      ease: 'power2.out',
+      stagger: 0.1,
+      scrollTrigger: { trigger: '.about-drives__list', start: 'top 85%' },
     });
   }
 </script>
@@ -75,8 +81,7 @@ const items = [
 <style>
   .about-drives {
     padding-block: var(--space-section);
-    background: var(--color-bg-secondary);
-    /* Plate boundary - see AboutStory's matching rule for why. Sits on top of the chalk background, so it also marks the porcelain-to-chalk section change, not just a padding gap. */
+    /* Plate boundary - see AboutStory's matching rule for why. */
     border-top: var(--border-hairline) solid var(--color-text-secondary);
   }
 
@@ -87,50 +92,71 @@ const items = [
   }
 
   .about-drives__list {
-    margin-top: var(--space-16);
+    margin-top: var(--space-48);
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-32) var(--space-24);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-32);
   }
 
-  .about-drives__card {
-    /* This standalone `rotate` only ever paints when the script below doesn't run (JS-disabled or prefers-reduced-motion): once it does, GSAP animates the same visual rotation through the `transform` shorthand instead (its own internal choice, not something this tween config requested) and explicitly zeroes this property out - an inline style always wins, so a breakpoint override here would be silently inert once GSAP has run, which is why there isn't one. */
-    rotate: var(--rotate);
-    padding: var(--space-24);
-    background: var(--color-bg-primary);
-    border: var(--border-hairline) solid var(--color-text-secondary);
-    /* Sharp corners, not the sitewide --radius-image token: a hard-edged card reads more like a cut paper scrap than a soft printed one, which suits "placed by hand" better - and borrows the industrial-brutalist skill's "reject border-radius" discipline for this page specifically, without touching the shared token. */
-    box-shadow: 0 10px 24px -14px rgb(23 21 15 / 0.32);
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 1.125rem;
-    line-height: 1.35;
+  .about-drives__item {
+    padding-left: var(--space-24);
+    /* A hairline divider between columns, not a border/background per
+           item - only items after the first get one, so the row doesn't
+           open with a stray rule before any content. */
+    border-left: var(--border-hairline) solid var(--color-text-secondary);
+  }
+
+  .about-drives__item:first-child {
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .about-drives__number {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  .about-drives__text {
+    margin: 0;
+    margin-top: var(--space-8);
+    max-width: 28ch;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.75rem;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
     color: var(--color-ink);
   }
 
-  /* A block line above the text, not an absolutely-positioned corner mark
-     like ProjectCard's own number: ProjectCard's sits over a separate
-     image zone with nothing else in that corner, but this card is pure
-     text, so an absolute corner mark would risk colliding with a longer
-     item's first line. A plate number heading each card keeps the
-     cataloged read without that risk. */
-  .about-drives__number {
-    display: block;
-    margin-bottom: var(--space-8);
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    font-weight: 400;
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
+  @media (max-width: 900px) {
+    .about-drives__list {
+      grid-template-columns: 1fr;
+      gap: var(--space-32);
+    }
+
+    /* Horizontal dividers instead of vertical ones once the columns
+           stack - the same device rotated 90 degrees, matching Principles'
+           own mobile fallback exactly. */
+    .about-drives__item {
+      padding-left: 0;
+      padding-top: var(--space-24);
+      border-left: none;
+      border-top: var(--border-hairline) solid var(--color-text-secondary);
+    }
+
+    .about-drives__item:first-child {
+      padding-top: 0;
+      border-top: none;
+    }
   }
 
   @media (max-width: 639px) {
     .about-drives__inner {
       padding-inline: 1.5rem;
-    }
-
-    .about-drives__list {
-      grid-template-columns: 1fr;
     }
   }
 </style>

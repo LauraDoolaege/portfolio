@@ -2185,6 +2185,86 @@ and mobile versions of their CSS rules. Verified via
 reports the identical `top` value, not just close/eyeballed-similar
 values.
 
+**A large multi-part pass, one message: two real clipping bugs, a
+third project category, and two more redesigns.**
+
+**Selected Work's collapsed spine titles were clipping real text** -
+per direct report with a screenshot showing "Miles and Meals" rendering
+as "ND MEALS" and "Kickstarter: Izumi" as "STARTER: IZUMI" (missing
+their own opening characters). The collapsed panel's fixed
+body/title budget (9rem / 7rem, in `writing-mode: vertical-rl` where
+`height` maps to the _inline_ size - see this file's earlier entry on
+why that mapping matters here) was tuned against short placeholder
+titles and wasn't generous enough for some of the real ones. Fixed two
+ways together: the budget grew (9rem/7rem -> 10.5rem/8.5rem), and
+`overflow: hidden` came off the collapsed `.project-card__body`
+entirely - the outer `<li>` already has its own `overflow: hidden` and
+remains the panel's real visible edge, so a title that still needs more
+room than the taller budget now spills into the card's own (normally
+empty during collapse) frame area above it instead of silently losing
+its own first few characters. Clipping the actual text was always the
+wrong failure mode for this, regardless of how generous the fixed
+budget was.
+
+**Gallery tiles were clipping on hover too, from the same message** -
+measured directly rather than just widened blindly: at a wide viewport
+the tallest tile (20rem) only had ~40px of headroom above the row at
+the existing `padding-block: 2.5rem`, and the hover scale (1.05x) plus
+the magnetic shift (up to 16px) alone could already come close to using
+that entire budget - stacking the continuous breathing bob's own motion
+on top (mid-cycle, right as a hover begins and before it's had time to
+pause) was enough to occasionally push past it. `padding-block` (and
+its paired negative `margin-block`) went from 2.5rem to 4rem for real
+margin instead of an exact-fit one.
+
+**Selected Work gained a third category, and the existing two were
+renamed and reordered** - per direct request: "change the order
+between group projects and individual work. change the title to
+experience design projects. individual work should be changed to
+digital design projects. add a 3rd category called motion design and
+add the izumi card to that." `design`/`experience` (two arrays) became
+`experience`/`digital`/`motion` (three) - Izumi moved out of the old
+`design` array into its own single-item `motion` array, the other two
+kept their projects. Display order is now Experience design projects,
+Digital design projects, Motion design (was Individual work then Group
+projects) - numbering re-sequenced 01-06 in this new order rather than
+kept pinned to each project's old number, so the badges still read as
+one clean ascending sequence down the page. The accordion mechanism
+itself (flex-grow expand, disclosure toggles, first-group-open-by-
+default) needed no changes - it already worked for any number of
+groups of any size, including the new one-item Motion design group.
+
+**"What drives me" was summarized from four points to three and
+rebuilt to match Principles.astro's own layout exactly** - per direct
+request: "Summarize the what drives me section to 3 points and make
+the layout the same as the design principle cards on the homepage."
+This replaces the page's earlier "tactile centerpiece" treatment
+(rotated note cards on a chalk field - see this file's own much earlier
+entry for that pass's full reasoning) outright, not a variant kept
+alongside it: a direct instruction to match a specific existing layout
+supersedes the "have fun with it, make it tactile" brief that produced
+the version being replaced. The four original statements' items 3
+("Turning insights into concepts") and 4 ("Making things creative and
+grounded") are combined into one - both described the same step, so
+folding them together is a real summary of her own words, not new
+content; items 1 and 2 are unchanged verbatim. Layout, CSS, and even
+the entrance motion now reuse Principles.astro's own device exactly (a
+3-column grid, hairline dividers skipped on the first item, mono index
+above a bold Barlow Condensed line, the same fade/rise stagger) - the
+chalk section background and sharp-corner/shadow card styling from the
+previous version are gone with it, since Principles itself has no
+section-level background and matching its layout means matching that
+too, not just the grid shape.
+
+**Section titles scaled up again, per direct follow-up in the same
+message** ("selected work title and other 'main' subtitles should be
+larger") - `SectionMarker.astro`'s `.section-marker__label` font-size
+ceiling went from ~6rem to ~8.5rem (a second bump in the same session;
+see this file's own immediately-preceding entry for the first one). The
+`max-width: 10ch` wrap constraint didn't need retuning - it's in `ch`,
+so it scales with the font-size automatically and keeps wrapping at the
+same word boundary.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

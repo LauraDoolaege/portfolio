@@ -1,16 +1,28 @@
 ---
-// Homepage "Selected work" (PROJECT_BRIEF.md Section 4, item 2). Content
-// structure is final per the brief: two groups, three projects each -
-// Design/individual work, Experience design/group projects. Real project
-// titles are supplied (per direct message: "project 1 => Nine to Thrive,
-// project 2 => Miles and Meals, project 3 => Kickstarter: Izumi" for
-// Design, "a space journey through screentime, nexxus and plan A" for
+// Homepage "Selected work" (PROJECT_BRIEF.md Section 4, item 2). Real
+// project titles are supplied (per direct message: "project 1 => Nine to
+// Thrive, project 2 => Miles and Meals, project 3 => Kickstarter: Izumi"
+// for Design, "a space journey through screentime, nexxus and plan A" for
 // Experience) - each card's `fullTitle` (see ProjectCard.astro), visible
 // at all times, including the accordion's collapsed/rotated spine label -
 // an earlier version only revealed the real name on hover, generic
 // "Project N" the rest of the time; direct follow-up asked for it to
 // show always instead. Images still don't exist (Section 6), so the
 // image slot stays a flat placeholder regardless.
+//
+// Three groups now, not two - direct follow-up request: "change the
+// order between group projects and individual work. change the title to
+// experience design projects. individual work should be changed to
+// digital design projects. add a 3rd category called motion design and
+// add the izumi card to that." Izumi moves out of the design group into
+// its own single-item "Motion design" group; the other two groups keep
+// their existing projects, renamed and reordered - Experience design
+// projects now leads (was second), Digital design projects second (was
+// first, "Individual work"), Motion design new and last. Numbering is
+// re-sequenced 01-06 in this new display order (not kept pinned to each
+// project's old number) so the badges still read as one clean ascending
+// sequence down the page rather than jumping around to preserve history
+// nobody can see anyway.
 //
 // DESIGN_VARIANCE: 9 (see CLAUDE.md "Experimental design dials") — this is
 // the section's second rebuild in one session. The first (an asymmetric
@@ -82,21 +94,24 @@
 import SectionMarker from '../ui/SectionMarker.astro';
 import ProjectCard from '../ui/ProjectCard.astro';
 
-const design = [
-  { number: '01', title: 'Project 01', fullTitle: 'Nine to Thrive', roleTag: 'design' },
-  { number: '02', title: 'Project 02', fullTitle: 'Miles and Meals', roleTag: 'design' },
-  { number: '03', title: 'Project 03', fullTitle: 'Kickstarter: Izumi', roleTag: 'design' },
-];
-
 const experience = [
   {
-    number: '04',
-    title: 'Project 04',
+    number: '01',
+    title: 'Project 01',
     fullTitle: 'A Space Journey through Screentime',
     roleTag: 'experience design',
   },
-  { number: '05', title: 'Project 05', fullTitle: 'Nexxus', roleTag: 'experience design' },
-  { number: '06', title: 'Project 06', fullTitle: 'Plan A', roleTag: 'experience design' },
+  { number: '02', title: 'Project 02', fullTitle: 'Nexxus', roleTag: 'experience design' },
+  { number: '03', title: 'Project 03', fullTitle: 'Plan A', roleTag: 'experience design' },
+];
+
+const digital = [
+  { number: '04', title: 'Project 04', fullTitle: 'Nine to Thrive', roleTag: 'digital design' },
+  { number: '05', title: 'Project 05', fullTitle: 'Miles and Meals', roleTag: 'digital design' },
+];
+
+const motion = [
+  { number: '06', title: 'Project 06', fullTitle: 'Kickstarter: Izumi', roleTag: 'motion design' },
 ];
 ---
 
@@ -113,17 +128,18 @@ const experience = [
         type="button"
         class="selected-work__toggle"
         aria-expanded="true"
-        aria-controls="selected-work-design"
+        aria-controls="selected-work-experience"
       >
         <span class="selected-work__group-label">
-          Individual work <span class="selected-work__group-count">({design.length})</span>
+          Experience design projects
+          <span class="selected-work__group-count">({experience.length})</span>
           <span class="selected-work__group-line" aria-hidden="true"></span>
         </span>
         <span class="selected-work__toggle-icon" aria-hidden="true"></span>
       </button>
-      <div class="selected-work__panel" id="selected-work-design">
+      <div class="selected-work__panel" id="selected-work-experience">
         <ul class="selected-work__accordion">
-          {design.map((project) => (
+          {experience.map((project) => (
             <li>
               <ProjectCard {...project} />
             </li>
@@ -137,17 +153,41 @@ const experience = [
         type="button"
         class="selected-work__toggle"
         aria-expanded="true"
-        aria-controls="selected-work-experience"
+        aria-controls="selected-work-digital"
       >
         <span class="selected-work__group-label">
-          Group projects <span class="selected-work__group-count">({experience.length})</span>
+          Digital design projects <span class="selected-work__group-count">({digital.length})</span>
           <span class="selected-work__group-line" aria-hidden="true"></span>
         </span>
         <span class="selected-work__toggle-icon" aria-hidden="true"></span>
       </button>
-      <div class="selected-work__panel" id="selected-work-experience">
+      <div class="selected-work__panel" id="selected-work-digital">
         <ul class="selected-work__accordion">
-          {experience.map((project) => (
+          {digital.map((project) => (
+            <li>
+              <ProjectCard {...project} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="selected-work__group">
+      <button
+        type="button"
+        class="selected-work__toggle"
+        aria-expanded="true"
+        aria-controls="selected-work-motion"
+      >
+        <span class="selected-work__group-label">
+          Motion design <span class="selected-work__group-count">({motion.length})</span>
+          <span class="selected-work__group-line" aria-hidden="true"></span>
+        </span>
+        <span class="selected-work__toggle-icon" aria-hidden="true"></span>
+      </button>
+      <div class="selected-work__panel" id="selected-work-motion">
+        <ul class="selected-work__accordion">
+          {motion.map((project) => (
             <li>
               <ProjectCard {...project} />
             </li>
@@ -380,11 +420,11 @@ const experience = [
 
   @media (min-width: 900px) {
     /* A fixed-height row is what makes an accordion read as one object
-                                           instead of three cards of changing aspect-ratio - the height stays
-                                           constant, only each panel's share of the width changes. 18rem, not
-                                           the 30rem this first shipped with - per direct feedback the panels
-                                           read as "quite tall" at that height, more like portrait cards than
-                                           the short, horizontal, rectangular strip that's actually wanted. */
+                                               instead of three cards of changing aspect-ratio - the height stays
+                                               constant, only each panel's share of the width changes. 18rem, not
+                                               the 30rem this first shipped with - per direct feedback the panels
+                                               read as "quite tall" at that height, more like portrait cards than
+                                               the short, horizontal, rectangular strip that's actually wanted. */
     .selected-work__accordion {
       display: flex;
       align-items: stretch;
@@ -393,28 +433,28 @@ const experience = [
     }
 
     /* flex-grow (not width or flex-basis) is what's animated: every
-                                           panel starts equal (grow: 1) and the hovered/focused one steps up
-                                           to grow: 1.6 on hover, below. That number has come down twice now
-                                           - 6, then 3, then this - per two rounds of direct feedback ("I
-                                           don't like how dramatically the project cards stretch," then
-                                           "still feels too plastic and extreme for my brand"). The second
-                                           round wasn't just "3 is still too big, try a smaller number": a
-                                           fixed-height row with a flex-grow-driven width change is
-                                           literally stretching one rectangle's aspect ratio every tick of
-                                           the transition (height pinned at 18rem, width changing), which is
-                                           what reads as "plastic" regardless of how far it goes - a
-                                           real photo cropped to one shape distorting toward a very
-                                           different one doesn't look like a considered reveal, it looks
-                                           like it's being pulled. 1.6 keeps that same distortion but makes
-                                           it small enough (roughly 44% of the row instead of 60%, versus
-                                           each panel's 33% at rest) that it reads as a gentle emphasis
-                                           rather than an elastic snap - and the transition itself slowed
-                                           from 0.6s to 0.8s so the motion itself reads calmer, not just
-                                           smaller. --motion-easing-soft (not a hand-typed cubic-bezier
-                                           literal - see that token's own comment (global.css) for why this
-                                           exact curve is shared across several places instead of
-                                           copy-pasted) already eases gently; the extra time gives it room
-                                           to actually read as gradual instead of quick-then-eased. */
+                                               panel starts equal (grow: 1) and the hovered/focused one steps up
+                                               to grow: 1.6 on hover, below. That number has come down twice now
+                                               - 6, then 3, then this - per two rounds of direct feedback ("I
+                                               don't like how dramatically the project cards stretch," then
+                                               "still feels too plastic and extreme for my brand"). The second
+                                               round wasn't just "3 is still too big, try a smaller number": a
+                                               fixed-height row with a flex-grow-driven width change is
+                                               literally stretching one rectangle's aspect ratio every tick of
+                                               the transition (height pinned at 18rem, width changing), which is
+                                               what reads as "plastic" regardless of how far it goes - a
+                                               real photo cropped to one shape distorting toward a very
+                                               different one doesn't look like a considered reveal, it looks
+                                               like it's being pulled. 1.6 keeps that same distortion but makes
+                                               it small enough (roughly 44% of the row instead of 60%, versus
+                                               each panel's 33% at rest) that it reads as a gentle emphasis
+                                               rather than an elastic snap - and the transition itself slowed
+                                               from 0.6s to 0.8s so the motion itself reads calmer, not just
+                                               smaller. --motion-easing-soft (not a hand-typed cubic-bezier
+                                               literal - see that token's own comment (global.css) for why this
+                                               exact curve is shared across several places instead of
+                                               copy-pasted) already eases gently; the extra time gives it room
+                                               to actually read as gradual instead of quick-then-eased. */
     .selected-work__accordion > li {
       flex: 1 1 0%;
       min-width: 0;
@@ -428,8 +468,8 @@ const experience = [
     }
 
     /* The card fills its panel's full box instead of holding its own
-                                                                             aspect-ratio - same "stretch to fill a flex/grid cell" technique
-                                                                             the bento's featured card used before this replaced it. */
+                                                                                 aspect-ratio - same "stretch to fill a flex/grid cell" technique
+                                                                                 the bento's featured card used before this replaced it. */
     .selected-work__accordion :global(.project-card) {
       display: flex;
       flex-direction: column;
@@ -442,27 +482,39 @@ const experience = [
     }
 
     /* Collapsed (rest) state: a panel this narrow has no room for a
-                                                                             horizontal title/tag/year row, so the title runs vertically along
-                                                                             the panel instead (the classic accordion-gallery "spine label"),
-                                                                             and the tag/year/dashed-stub - which would just wrap illegibly at
-                                                                             this width - are hidden rather than shrunk into something
-                                                                             unreadable. The number badge and arrow badge stay put; both are
-                                                                             already small, self-contained, and legible at any panel width. */
+                                                                                 horizontal title/tag/year row, so the title runs vertically along
+                                                                                 the panel instead (the classic accordion-gallery "spine label"),
+                                                                                 and the tag/year/dashed-stub - which would just wrap illegibly at
+                                                                                 this width - are hidden rather than shrunk into something
+                                                                                 unreadable. The number badge and arrow badge stay put; both are
+                                                                                 already small, self-contained, and legible at any panel width. */
     /* A fixed height (not flex: 0 0 auto driven by content) - real titles
-                                                             vary a lot in length ("Plan A" vs "A Space Journey through
-                                                             Screentime"), and letting the body size itself to whichever title
-                                                             happens to be longest would squeeze the frame above it down to
-                                                             almost nothing on that one card, throwing off every card's frame/
-                                                             body proportion inconsistently. Fixing the height means every
-                                                             collapsed panel keeps the same frame/body split regardless of its
-                                                             own title length - the title wraps into more (narrower) columns
-                                                             instead of growing the body taller. */
+                                                                 vary a lot in length ("Plan A" vs "A Space Journey through
+                                                                 Screentime"), and letting the body size itself to whichever title
+                                                                 happens to be longest would squeeze the frame above it down to
+                                                                 almost nothing on that one card, throwing off every card's frame/
+                                                                 body proportion inconsistently. Fixing the height means every
+                                                                 collapsed panel keeps the same frame/body split regardless of its
+                                                                 own title length - the title wraps into more (narrower) columns
+                                                                 instead of growing the body taller. */
     .selected-work__accordion :global(.project-card__body) {
-      flex: 0 0 9rem;
+      flex: 0 0 10.5rem;
       display: flex;
       align-items: center;
       padding: var(--space-16);
-      overflow: hidden;
+      /* No overflow: hidden here anymore - a real bug, caught from a
+                 screenshot showing collapsed titles missing their own opening
+                 characters ("Miles and Meals" rendering as "ND MEALS"). The
+                 fixed 9rem/7rem (body/title) budget this used before was tuned
+                 against short test titles and turned out not to be generous
+                 enough for some of the real ones - clipping the *title itself*
+                 at this element's own edge is the wrong place for that to fail
+                 silently. The outer <li> above still has its own
+                 `overflow: hidden`, which remains the real edge of the visible
+                 panel, so a title that still needs more room than the taller
+                 10.5rem/8.5rem budget below now spills into the card's own
+                 (normally empty during collapse) frame area above it instead of
+                 being cut - reads as "a bit tall," not "unreadable." */
     }
 
     .selected-work__accordion :global(.project-card__stub),
@@ -471,29 +523,31 @@ const experience = [
     }
 
     /* white-space: normal (not nowrap) matters once titles are real,
-                                                             supplied names instead of a short "Project N" placeholder - in
-                                                             vertical-rl, wrapping stacks a new column to the left instead of
-                                                             breaking the line downward. `height` here maps to the *inline*
-                                                             size in vertical-rl (block flows horizontally), so setting an
-                                                             explicit one is what actually forces that wrap to happen at all -
-                                                             without it the browser lets the column run as tall as the text
-                                                             needs, which is what let one long title's body swallow the whole
-                                                             card in an earlier version of this. 7rem = the body's own 9rem
-                                                             minus its 2 x space-16 padding. */
+                                                                 supplied names instead of a short "Project N" placeholder - in
+                                                                 vertical-rl, wrapping stacks a new column to the left instead of
+                                                                 breaking the line downward. `height` here maps to the *inline*
+                                                                 size in vertical-rl (block flows horizontally), so setting an
+                                                                 explicit one is what actually forces that wrap to happen at all -
+                                                                 without it the browser lets the column run as tall as the text
+                                                                 needs, which is what let one long title's body swallow the whole
+                                                                 card in an earlier version of this. 8.5rem = the body's own
+                                                                 10.5rem minus its 2 x space-16 padding - bumped up from a
+                                                                 tighter 7rem/9rem pair that was clipping real titles (see the
+                                                                 body rule's own comment above for the bug this fixes). */
     .selected-work__accordion :global(.project-card__title) {
       writing-mode: vertical-rl;
       transform: rotate(180deg);
       white-space: normal;
-      height: 7rem;
+      height: 8.5rem;
       font-size: 0.9rem;
       line-height: 1.3;
       letter-spacing: 0;
     }
 
     /* Expanded state: the panel is wide enough again for the card's
-                                                                             normal upright reading layout, so everything reverts - the title
-                                                                             un-rotates, the tag/year/stub reappear, the body padding grows
-                                                                             back to the card's usual space-24 inset. */
+                                                                                 normal upright reading layout, so everything reverts - the title
+                                                                                 un-rotates, the tag/year/stub reappear, the body padding grows
+                                                                                 back to the card's usual space-24 inset. */
     .selected-work__accordion > li:hover :global(.project-card__body),
     .selected-work__accordion > li:focus-within :global(.project-card__body) {
       flex-basis: auto;

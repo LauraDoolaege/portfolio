@@ -26,12 +26,6 @@
 // SectionMarker.astro's own default styling gives it, same as the
 // homepage.
 //
-// Redesign pass: a documentary-style image placeholder now sits beside
-// the pull-quote, breaking up what used to be five paragraphs and a
-// quote with no imagery at all - the "documentary/process, black-and-
-// white" imagery mode the brief names (PROJECT_BRIEF.md Section 3),
-// placed here because this section is literally the origin-story process.
-//
 // Chapter pass (explicit request, "add subtitles and subtle delicate
 // chapter names to make the story feel more like a story... does it have
 // to be straight up and down or do we travel across the page gently"):
@@ -49,6 +43,39 @@
 // else in this project - a zigzag reading path needs room to zig.
 // Copy itself is untouched, split only at its own existing sentence/
 // paragraph breaks - no line was rewritten to make the grouping work.
+//
+// Timeline + cascade + draggable-asset pass (direct request: "the
+// paragraphs to appear one by one on scroll, with a soft timeline on the
+// left as you reach a new chapter... paragraphs should gently alternate
+// in alignment [already true, above], with placeholders for fun assets
+// supporting the story from the paragraph... these images will be
+// draggable with gsap, so already set that up"):
+//
+// - Each beat's own reveal changed from one fade/rise on the whole block
+//   to a cascade through its own children (chapter caption, then each
+//   paragraph in turn) via a single staggered tween - "appear one by
+//   one," not all four/five words of a two-paragraph beat arriving at
+//   once.
+// - `.about-story__rail` is a new absolutely-positioned vertical line
+//   sitting in the left gutter (outside the 12-col grid, so it never
+//   competes with the quote's own column-1 start) - a faint full-height
+//   track plus a solid progress overlay that grows via a scrubbed
+//   ScrollTrigger tied to the whole chapters block's own scroll range.
+//   Its `top`/`height` are measured in the script (not hardcoded), since
+//   SectionMarker's own rendered height varies and the rail should start
+//   exactly at the first chapter, not "roughly after the title."
+// - `.about-story__asset` - one small placeholder per beat, "supporting
+//   the story from the paragraph" - sits in whichever columns that
+//   beat's own zigzag range leaves free (same "explicit grid-column,
+//   shares its sibling's implicit row" technique already proven by the
+//   quote/image pair below), alternating sides rather than defaulting to
+//   one edge every time. Registered with GSAP's Draggable (see
+//   utils/motion.ts) so they can be nudged around - a direct, literal
+//   request to "already set that up," not gated behind
+//   prefers-reduced-motion (dragging is user-initiated interaction, not
+//   autoplaying motion; only the entrance settle-in below is gated).
+//   Inertia/throw-on-release isn't wired up - that needs GSAP's paid
+//   InertiaPlugin, not part of the free bundle this project installs.
 import SectionMarker from '../ui/SectionMarker.astro';
 ---
 
@@ -56,95 +83,129 @@ import SectionMarker from '../ui/SectionMarker.astro';
   <div class="about-story__inner">
     <SectionMarker index="02" label="How I got here" />
 
-    <div class="about-story__beat about-story__beat--a">
-      <p class="about-story__chapter">
-        <span class="about-story__chapter-index" aria-hidden="true">
-          01
-        </span>
-        <span class="about-story__chapter-name">Before design</span>
-      </p>
-      <p>Before design, I thought I wanted to become a copywriter.</p>
-    </div>
+    <div class="about-story__chapters">
+      <div class="about-story__rail" aria-hidden="true">
+        <span class="about-story__rail-track"></span>
+        <span class="about-story__rail-progress"></span>
+      </div>
 
-    <div class="about-story__beat about-story__beat--b">
-      <p class="about-story__chapter">
-        <span class="about-story__chapter-index" aria-hidden="true">
-          02
-        </span>
-        <span class="about-story__chapter-name">Finding my voice</span>
-      </p>
-      <p>
-        I've always been a storyteller. As a kid, I used to write little stories about my sister's
-        favourite Nintendo characters just to convince her to read. It worked.
-      </p>
-      <p>
-        That instinct never really disappeared. I still love turning ideas into stories, finding
-        creative angles and figuring out how to communicate something in a way that makes people
-        care.
-      </p>
-    </div>
+      <div class="about-story__beat about-story__beat--a">
+        <p class="about-story__chapter">
+          <span class="about-story__chapter-index" aria-hidden="true">
+            01
+          </span>
+          <span class="about-story__chapter-name">Before design</span>
+        </p>
+        <p>Before design, I thought I wanted to become a copywriter.</p>
+      </div>
+      <span
+        class="about-story__asset about-story__asset--1"
+        aria-hidden="true"
+        data-rest-rotate="3"
+      ></span>
 
-    <div class="about-story__beat about-story__beat--a">
-      <p class="about-story__chapter">
-        <span class="about-story__chapter-index" aria-hidden="true">
-          03
-        </span>
-        <span class="about-story__chapter-name">Into marketing</span>
-      </p>
-      <p>
-        That eventually led me to marketing communication, where I discovered that a campaign isn't
-        just a creative execution. It's a creative response to a real problem.
-      </p>
-    </div>
+      <div class="about-story__beat about-story__beat--b">
+        <p class="about-story__chapter">
+          <span class="about-story__chapter-index" aria-hidden="true">
+            02
+          </span>
+          <span class="about-story__chapter-name">Finding my voice</span>
+        </p>
+        <p>
+          I've always been a storyteller. As a kid, I used to write little stories about my sister's
+          favourite Nintendo characters just to convince her to read. It worked.
+        </p>
+        <p>
+          That instinct never really disappeared. I still love turning ideas into stories, finding
+          creative angles and figuring out how to communicate something in a way that makes people
+          care.
+        </p>
+      </div>
+      <span
+        class="about-story__asset about-story__asset--2"
+        aria-hidden="true"
+        data-rest-rotate="-4"
+      ></span>
 
-    <div class="about-story__beat about-story__beat--b">
-      <p class="about-story__chapter">
-        <span class="about-story__chapter-index" aria-hidden="true">
-          04
-        </span>
-        <span class="about-story__chapter-name">Toward UX</span>
-      </p>
-      <p>
-        From there, I became increasingly interested in what happens beyond communication: how
-        people experience products, services and systems themselves. That's what pulled me toward UX
-        and experience design.
-      </p>
-    </div>
+      <div class="about-story__beat about-story__beat--a">
+        <p class="about-story__chapter">
+          <span class="about-story__chapter-index" aria-hidden="true">
+            03
+          </span>
+          <span class="about-story__chapter-name">Into marketing</span>
+        </p>
+        <p>
+          That eventually led me to marketing communication, where I discovered that a campaign
+          isn't just a creative execution. It's a creative response to a real problem.
+        </p>
+      </div>
+      <span
+        class="about-story__asset about-story__asset--3"
+        aria-hidden="true"
+        data-rest-rotate="-2"
+      ></span>
 
-    <blockquote class="about-story__quote">
-      <span class="about-story__quote-rule" aria-hidden="true"></span>I turned my tendency to
-      overthink into a habit of observing, questioning and challenging assumptions.
-    </blockquote>
+      <div class="about-story__beat about-story__beat--b">
+        <p class="about-story__chapter">
+          <span class="about-story__chapter-index" aria-hidden="true">
+            04
+          </span>
+          <span class="about-story__chapter-name">Toward UX</span>
+        </p>
+        <p>
+          From there, I became increasingly interested in what happens beyond communication: how
+          people experience products, services and systems themselves. That's what pulled me toward
+          UX and experience design.
+        </p>
+      </div>
+      <span
+        class="about-story__asset about-story__asset--4"
+        aria-hidden="true"
+        data-rest-rotate="4"
+      ></span>
 
-    <span class="about-story__image" aria-hidden="true">
-      <!-- TODO: replace with a real documentary/process image once photography exists (PROJECT_BRIEF.md Section 6) -->
-    </span>
+      <blockquote class="about-story__quote">
+        <span class="about-story__quote-rule" aria-hidden="true"></span>I turned my tendency to
+        overthink into a habit of observing, questioning and challenging assumptions.
+      </blockquote>
 
-    <div class="about-story__beat about-story__beat--c">
-      <p class="about-story__chapter">
-        <span class="about-story__chapter-index" aria-hidden="true">
-          05
-        </span>
-        <span class="about-story__chapter-name">Still noticing</span>
-      </p>
-      <p>
-        My brain rarely leaves things alone. A confusing website, an inefficient queue, a frustrated
-        customer: I immediately start wondering what could make the experience better.
-      </p>
-      <p>
-        Working at a grocery store has unexpectedly become one of my favourite places to observe
-        human behaviour.
-      </p>
+      <span class="about-story__image" aria-hidden="true">
+        <!-- TODO: replace with a real documentary/process image once photography exists (PROJECT_BRIEF.md Section 6) -->
+      </span>
+
+      <div class="about-story__beat about-story__beat--c">
+        <p class="about-story__chapter">
+          <span class="about-story__chapter-index" aria-hidden="true">
+            05
+          </span>
+          <span class="about-story__chapter-name">Still noticing</span>
+        </p>
+        <p>
+          My brain rarely leaves things alone. A confusing website, an inefficient queue, a
+          frustrated customer: I immediately start wondering what could make the experience better.
+        </p>
+        <p>
+          Working at a grocery store has unexpectedly become one of my favourite places to observe
+          human behaviour.
+        </p>
+      </div>
+      <span
+        class="about-story__asset about-story__asset--5"
+        aria-hidden="true"
+        data-rest-rotate="-3"
+      ></span>
     </div>
   </div>
 </section>
 
 <script>
-  import { gsap, prefersReducedMotion } from '../../utils/motion';
+  import { gsap, Draggable, prefersReducedMotion } from '../../utils/motion';
+
+  const reduceMotion = prefersReducedMotion();
 
   const quote = document.querySelector<HTMLElement>('.about-story__quote');
   const rule = quote?.querySelector<HTMLElement>('.about-story__quote-rule');
-  if (quote && rule && !prefersReducedMotion()) {
+  if (quote && rule && !reduceMotion) {
     // The one emphasis-reveal on this page: the rule draws down first, like
     // a mark being ruled onto a page, then the text settles in behind it.
     // Distinct from the plain fade/rise used elsewhere, marking this as the
@@ -160,20 +221,107 @@ import SectionMarker from '../ui/SectionMarker.astro';
       .to(quote, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.2);
   }
 
-  // Each beat gets a quiet fade/rise as it scrolls in - not the quote's
-  // own bigger emphasis reveal, just enough to keep the page from feeling
-  // static as the reading path drifts left/right down the column.
+  // Each beat now cascades through its own children (chapter caption,
+  // then each paragraph) rather than fading in as one block - "the
+  // paragraphs to appear one by one on scroll." A single staggered tween
+  // per beat, not a separate ScrollTrigger per paragraph: they all still
+  // trigger together as the beat scrolls into view, just arriving a beat
+  // apart from each other instead of simultaneously.
   const beats = document.querySelectorAll<HTMLElement>('.about-story__beat');
-  if (beats.length && !prefersReducedMotion()) {
+  if (beats.length && !reduceMotion) {
     beats.forEach((beat) => {
-      gsap.set(beat, { autoAlpha: 0, y: 20 });
-      gsap.to(beat, {
+      const items = Array.from(beat.children) as HTMLElement[];
+      gsap.set(items, { autoAlpha: 0, y: 20 });
+      gsap.to(items, {
         autoAlpha: 1,
         y: 0,
         duration: 0.6,
         ease: 'power2.out',
+        stagger: 0.15,
         scrollTrigger: { trigger: beat, start: 'top 90%' },
       });
+    });
+  }
+
+  // Timeline rail: a faint full-height track plus a solid progress line
+  // that grows as the reader scrolls through the chapters block - "a
+  // soft timeline on the left as you reach a new chapter." Measured in
+  // JS, not hardcoded, since SectionMarker's own rendered height (and so
+  // where the first chapter actually starts) isn't a fixed number.
+  const chapters = document.querySelector<HTMLElement>('.about-story__chapters');
+  const rail = document.querySelector<HTMLElement>('.about-story__rail');
+  const railProgress = document.querySelector<HTMLElement>('.about-story__rail-progress');
+  const firstBeat = document.querySelector<HTMLElement>('.about-story__beat');
+  const lastBeat = document.querySelector<HTMLElement>('.about-story__beat--c');
+
+  if (chapters && rail && railProgress && firstBeat && lastBeat) {
+    const positionRail = () => {
+      // offsetTop is already relative to .about-story__chapters itself
+      // (it's `position: relative`, making it the offsetParent for its
+      // descendants) - subtracting chapters.offsetTop again would double
+      // that up against chapters' own distance from *its* offsetParent,
+      // producing a wildly wrong (and often negative) top. A real bug,
+      // caught by measuring the rendered rail's rect directly rather
+      // than trusting the arithmetic read correctly.
+      const top = firstBeat.offsetTop;
+      const bottom = lastBeat.offsetTop + lastBeat.offsetHeight;
+      rail.style.top = `${top}px`;
+      rail.style.height = `${bottom - top}px`;
+    };
+
+    positionRail();
+    window.addEventListener('resize', positionRail);
+
+    if (!reduceMotion) {
+      gsap.set(railProgress, { scaleY: 0 });
+      gsap.to(railProgress, {
+        scaleY: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: rail,
+          start: 'top 75%',
+          end: 'bottom 60%',
+          scrub: 0.3,
+        },
+      });
+    } else {
+      gsap.set(railProgress, { scaleY: 1 });
+    }
+  }
+
+  // Fun assets: a small settle-in on scroll (skipped under reduced
+  // motion, same as every other entrance on this page), then registered
+  // with GSAP's Draggable regardless of reduced motion - dragging is a
+  // direct, user-initiated action, not autoplaying motion, so it isn't
+  // something prefers-reduced-motion is meant to suppress. Each asset's
+  // own resting tilt comes from its `data-rest-rotate` attribute (see
+  // the markup) rather than a CSS custom property, since the entrance
+  // tween needs that exact number as its animation target too.
+  const assets = document.querySelectorAll<HTMLElement>('.about-story__asset');
+  if (assets.length) {
+    assets.forEach((asset) => {
+      const restRotate = Number(asset.dataset.restRotate ?? '0');
+      if (!reduceMotion) {
+        gsap.set(asset, { autoAlpha: 0, scale: 0.9, rotate: restRotate - 8 });
+        gsap.to(asset, {
+          autoAlpha: 1,
+          scale: 1,
+          rotate: restRotate,
+          duration: 0.7,
+          ease: 'back.out(1.6)',
+          scrollTrigger: { trigger: asset, start: 'top 92%' },
+        });
+      } else {
+        gsap.set(asset, { rotate: restRotate });
+      }
+    });
+
+    Draggable.create(assets, {
+      type: 'x,y',
+      bounds: '.about-story__inner',
+      edgeResistance: 0.65,
+      cursor: 'grab',
+      activeCursor: 'grabbing',
     });
   }
 </script>
@@ -197,6 +345,46 @@ import SectionMarker from '../ui/SectionMarker.astro';
 
   .about-story__inner > :global(.section-marker) {
     grid-column: 1 / -1;
+  }
+
+  /* Wraps everything below the title - the rail (below) measures its own
+     top/height against this element specifically, not the whole
+     .about-story__inner (which also contains SectionMarker), and it's
+     what the rail's ScrollTrigger scrubs against. Stays a grid itself
+     (not a nested independent grid) so beats/quote/image/assets keep
+     sharing the same 12 columns and the existing row-sharing tricks
+     (quote+image, beat+asset) keep working exactly as before. */
+  .about-story__chapters {
+    position: relative;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--space-24);
+    row-gap: var(--space-32);
+  }
+
+  /* Sits in the left gutter, outside the 12-col grid - deliberately not
+     column 1, which the quote (grid-column: 1/11) also starts flush
+     against further down. top/height are set from the script (measured
+     against the first/last beat), not hardcoded, since SectionMarker's
+     own height varies. */
+  .about-story__rail {
+    position: absolute;
+    left: -1.5rem;
+    width: 2px;
+  }
+
+  .about-story__rail-track {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-text-secondary) 30%, transparent);
+  }
+
+  .about-story__rail-progress {
+    position: absolute;
+    inset: 0;
+    background: var(--color-ink);
+    transform-origin: top;
   }
 
   .about-story__beat {
@@ -256,6 +444,48 @@ import SectionMarker from '../ui/SectionMarker.astro';
     grid-column: 3 / 9;
   }
 
+  /* One small placeholder per beat, sized and pinned (align-self: start,
+     a fixed aspect ratio rather than stretching to the row's own
+     height) so it reads as a pinned photo, not a second column of
+     content. Each sits in whichever columns its own beat's zigzag range
+     leaves free that row - same explicit-grid-column/shared-implicit-row
+     technique the quote+image pair below already relies on. Alternates
+     sides rather than always falling to the same edge, and each gets its
+     own small resting tilt (set from data-rest-rotate in the script) for
+     the same "pinned by hand" read AboutProcess's own collage already
+     uses. Grabbable via GSAP Draggable (see the script) - cursor: grab
+     signals that before the user ever tries. */
+  .about-story__asset {
+    display: block;
+    align-self: start;
+    width: clamp(5rem, 9vw, 7.5rem);
+    aspect-ratio: 4 / 3;
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .about-story__asset--1 {
+    grid-column: 9 / 12;
+  }
+
+  .about-story__asset--2 {
+    grid-column: 1 / 4;
+  }
+
+  .about-story__asset--3 {
+    grid-column: 9 / 12;
+  }
+
+  .about-story__asset--4 {
+    grid-column: 1 / 4;
+  }
+
+  .about-story__asset--5 {
+    grid-column: 10 / 13;
+  }
+
   .about-story__quote {
     position: relative;
     grid-column: 1 / 11;
@@ -297,9 +527,19 @@ import SectionMarker from '../ui/SectionMarker.astro';
 
   @media (max-width: 1023px) {
     /* The drift needs room to zig - below this width every beat (and the
-                                                       quote/image) fall back to one straight column, same pattern used
-                                                       everywhere else in this project once macro asymmetry runs out of
-                                                       space. */
+                                                           quote/image) fall back to one straight column, same pattern used
+                                                           everywhere else in this project once macro asymmetry runs out of
+                                                           space. The rail and the per-beat assets go with it: a single
+                                                           column has no "gutter" or "leftover columns" left for either to
+                                                           sit in without colliding with the text itself. */
+    .about-story__rail {
+      display: none;
+    }
+
+    .about-story__asset {
+      display: none;
+    }
+
     .about-story__beat--a,
     .about-story__beat--b,
     .about-story__beat--c {

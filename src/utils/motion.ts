@@ -7,8 +7,9 @@
 // Astro frontmatter (no `window`/DOM at build/SSR time).
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Draggable } from 'gsap/Draggable';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Draggable);
 
 // CLAUDE.md "Motion": prefers-reduced-motion must always be respected.
 // The global CSS reset (global.css) already neutralizes CSS
@@ -19,4 +20,4 @@ export function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-export { gsap, ScrollTrigger };
+export { gsap, ScrollTrigger, Draggable };

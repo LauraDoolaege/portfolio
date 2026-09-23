@@ -2278,7 +2278,7 @@ tweak.
 
 `ProjectCard.astro`'s old image-frame/info-body split (a fixed-ratio
 frame stacked over a separately-padded body holding a stub/tag/year/
-title/arrow) is gone, replaced by one element: the whole card *is* the
+title/arrow) is gone, replaced by one element: the whole card _is_ the
 image, with a `.project-card__overlay` panel absolutely positioned at
 its bottom edge, translated fully out of view (`translateY(100%)`, not
 just `opacity: 0` - so it can't be read as a sliver or catch a stray
@@ -2317,7 +2317,7 @@ padding a second time.** The previous pass's fix (bumping
 negative `margin-block` so it doesn't add height to the layout) was a
 real improvement but didn't actually solve it, because it couldn't:
 `.gallery__stage` - the full-bleed breakout wrapper one level up - had a
-plain `overflow: hidden` on *both* axes, and the viewport's negative-
+plain `overflow: hidden` on _both_ axes, and the viewport's negative-
 margin trick only fixes the layout height it contributes to the stage;
 the viewport's own rendered box still visually extends into that padding
 above/below the stage's box, which the stage was clipping the entire
@@ -2329,7 +2329,7 @@ with the viewport and `.gallery` both already correctly scoped to
 The fix needed a second attempt to actually work: `overflow-x: hidden;
 overflow-y: visible;` looks like it should isolate the axes, but per the
 CSS Overflow spec, setting one axis to anything other than `visible` (or
-`clip`) forces a `visible` value on the *other* axis to compute as
+`clip`) forces a `visible` value on the _other_ axis to compute as
 `auto` instead - confirmed via `getComputedStyle`, which reported
 `overflow-y: auto` even with `visible` written in the source, and `auto`
 still establishes its own clipping/scroll box, so tiles were still
@@ -2343,6 +2343,107 @@ stage's own box on either edge. Horizontal clipping (the actual reason
 the stage needs an overflow rule at all - the full-bleed 100vw breakout)
 stayed intact throughout, confirmed via `document.body.scrollWidth`
 never exceeding `window.innerWidth`.
+
+**Two direct follow-ups on the accordion, plus a real redesign of
+AboutStory's "How I got here."**
+
+Selected Work's accordion panels no longer stretch to fill the row when
+a group has fewer than three projects - per direct request ("I want the
+projects that have less than 3 items to still have the same width as on
+one item"). `.selected-work__accordion > li` changed from `flex: 1 1 0%`
+(divides the row evenly among however many items exist - a lone Motion
+design card was rendering as a full-width banner) to a fixed basis,
+`flex: 0 1 calc((100% - 2 * var(--space-16)) / 3)`, assuming a 3-panel
+row (the largest group, Experience design) regardless of how many
+panels are actually present. `flex-grow: 0` at rest means a shorter row
+just leaves the remaining width empty instead of inflating each panel;
+`flex-shrink: 1` still lets siblings compress when the hovered panel's
+`flex-grow: 1.6` kicks in. Verified via `getBoundingClientRect()`: all
+three groups (3, 2, and 1 items) now measure identical per-panel widths
+at rest.
+
+The touch fallback ("on screens that do not support hover states, I
+want the title and arrow to already be on the card") needed no change -
+it's exactly what ProjectCard's `(hover: none)` branch from the previous
+pass already does (see that entry above): the overlay renders
+`position: static`, always visible, no gesture required. Confirmed this
+is still true rather than assumed.
+
+**AboutStory ("How I got here") redesign** - direct, detailed request:
+"the paragraphs to appear one by one on scroll, with a soft timeline on
+the left as you reach a new chapter. the paragraphs should gently
+alternate in alignment [already true from the earlier chapter pass],
+with placeholders for fun assets supporting the story from the
+paragraph. these images will be draggable with gsap, so already set
+that up."
+
+Each beat's reveal changed from one fade/rise on the whole block to a
+staggered cascade through its own children (`Array.from(beat.children)`
+
+- the chapter caption, then each paragraph) via a single tween with
+  `stagger: 0.15` - "appear one by one," not a two-paragraph beat's four
+  sentences arriving simultaneously. Still one ScrollTrigger per beat
+  (`start: 'top 90%'`), not one per paragraph - they cascade relative to
+  each other, not to further scroll position.
+
+`.about-story__rail` is new: a faint full-height track plus a solid
+`.about-story__rail-progress` overlay that grows via a scrubbed
+ScrollTrigger as the reader scrolls through the chapters block - "a soft
+timeline on the left as you reach a new chapter." It's absolutely
+positioned in the left gutter (`left: -1.5rem`, outside the 12-column
+grid) specifically so it never lands in column 1, which the quote
+(`grid-column: 1 / 11`) also starts flush against further down the same
+block. Its `top`/`height` are measured in the script against the first
+and last beat's own `offsetTop`, not hardcoded, since SectionMarker's
+rendered height (and so where the first chapter actually starts) isn't
+a fixed number. **A real bug here, caught by measuring the rendered rail
+rather than trusting the arithmetic:** the first version subtracted
+`chapters.offsetTop` from `firstBeat.offsetTop`, but `offsetTop` is
+already relative to an element's own `offsetParent` - since
+`.about-story__chapters` is `position: relative`, it _is_ the
+offsetParent for its beat children, so `firstBeat.offsetTop` was already
+the correct relative distance and subtracting `chapters.offsetTop` a
+second time double-counted the reference frame, producing a wildly wrong
+(and negative) rail position. Fixed by using `firstBeat.offsetTop`
+directly. Verified via `getBoundingClientRect()`: the rail's top now
+matches the first beat's top to the pixel, and its computed `transform`
+genuinely changes `scaleY` as the page scrolls (checked before/after a
+600px scroll, not just read from the tween config).
+
+`.about-story__asset` - one small, tilted placeholder per beat, "fun
+assets supporting the story from the paragraph" - sits in whichever
+columns that beat's own zigzag range leaves free that row, alternating
+sides rather than defaulting to one edge (beats using column range
+`2/8` free up `9/12` on the right; `4/10` frees `1/4` on the left; `3/9`
+frees `10/13` on the right). This reuses the exact "explicit
+grid-column, shares its sibling's implicit row" technique the
+quote+image pair in this same file already proved works, rather than
+inventing a new placement mechanism. Each asset's own resting tilt comes
+from a `data-rest-rotate` attribute (read by the script, which needs
+that same number as its entrance-tween target) rather than a CSS custom
+property. A modest settle-in (scale + rotate from a flatter, more
+rotated starting point) plays on scroll, gated behind
+`prefers-reduced-motion` like every other entrance on this page.
+
+Registered with GSAP's Draggable (`type: 'x,y'`,
+`bounds: '.about-story__inner'`) - "these images will be draggable with
+gsap, so already set that up," a literal, direct request rather than a
+finished interaction to polish. Draggable is newly registered in
+`utils/motion.ts` (`gsap.registerPlugin(ScrollTrigger, Draggable)`),
+exported alongside `gsap`/`ScrollTrigger` from that one canonical entry
+point rather than imported ad hoc. Deliberately _not_ gated behind
+`prefers-reduced-motion` - dragging is a direct, user-initiated action,
+not autoplaying motion, so it isn't what that preference is meant to
+suppress; only the entrance settle-in above is gated. No inertia/
+throw-on-release - that needs GSAP's paid InertiaPlugin, not part of the
+free `gsap` npm package this project installs, so a release just stops
+where the pointer let go. Verified as far as this sandbox allows: a
+synthetic `pointerdown` on an asset made Draggable set `z-index: 1000`
+on it (its own drag-start marker), confirming the plugin is genuinely
+attached to the element - full drag-gesture simulation hits the same
+synthetic-pointer-event limitation already documented elsewhere in this
+file for `:hover`, so the drag motion itself wasn't further chased once
+the wiring was confirmed live.
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

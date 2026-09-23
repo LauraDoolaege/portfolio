@@ -74,8 +74,41 @@
 //   request to "already set that up," not gated behind
 //   prefers-reduced-motion (dragging is user-initiated interaction, not
 //   autoplaying motion; only the entrance settle-in below is gated).
-//   Inertia/throw-on-release isn't wired up - that needs GSAP's paid
-//   InertiaPlugin, not part of the free bundle this project installs.
+//
+// Follow-up refinement pass, several direct requests in one message:
+//
+// - The rail is thinner (2px -> 1px), and its faint always-visible
+//   "track" backing line is gone outright - "the black line is on top
+//   of the gray line, but I don't want to see the gray line." There's
+//   nothing left to see ahead of where the reader has scrolled, which is
+//   the intended read now: the line exists only as far as the story has
+//   actually progressed.
+// - Each chapter gets a small `.about-story__chapter-tick` - "a gentle
+//   line extends from the timeline to the subtitle" - a short horizontal
+//   mark, generated and positioned in the script (one per beat, aligned
+//   to that beat's own chapter-caption row), revealed alongside that
+//   beat's own cascade. Deliberately a fixed short length rather than
+//   reaching all the way to the caption text ("not fully connected on
+//   both sides") - a gesture toward the subtitle, not a technical
+//   connector diagram; it also sidesteps needing to compute each
+//   zigzagging beat's own exact horizontal text position.
+// - Mobile no longer drops the rail/assets outright ("on mobile screens
+//   it's looking kind of boring, find a way to still get the
+//   storytelling in there") - both stay, just adapted: the rail sits
+//   closer to the (now single-column) text edge, and each asset falls
+//   into normal document flow as its own small stacked image between
+//   beats instead of sharing a row via an explicit grid-column (there's
+//   no "leftover column" to share once beats go full-width). The ticks
+//   are the one piece that stays desktop-only - they're sized against
+//   the zigzag's own leftover space, which doesn't exist once the
+//   column collapses to one.
+// - Draggable now uses real GSAP inertia - "use gsap inertia so the user
+//   can flick and have the motion decelerate smoothly based on
+//   momentum" - via `inertia: true` plus `InertiaPlugin`, newly
+//   registered in utils/motion.ts. This used to need GSAP's paid Club
+//   bonus plugin; it's part of the regular free `gsap` package now
+//   (Webflow's acquisition made all of GSAP's plugins free), so no
+//   separate license or CDN token was needed to wire it up.
 import SectionMarker from '../ui/SectionMarker.astro';
 ---
 
@@ -85,7 +118,6 @@ import SectionMarker from '../ui/SectionMarker.astro';
 
     <div class="about-story__chapters">
       <div class="about-story__rail" aria-hidden="true">
-        <span class="about-story__rail-track"></span>
         <span class="about-story__rail-progress"></span>
       </div>
 
@@ -221,38 +253,32 @@ import SectionMarker from '../ui/SectionMarker.astro';
       .to(quote, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.2);
   }
 
-  // Each beat now cascades through its own children (chapter caption,
-  // then each paragraph) rather than fading in as one block - "the
-  // paragraphs to appear one by one on scroll." A single staggered tween
-  // per beat, not a separate ScrollTrigger per paragraph: they all still
-  // trigger together as the beat scrolls into view, just arriving a beat
-  // apart from each other instead of simultaneously.
-  const beats = document.querySelectorAll<HTMLElement>('.about-story__beat');
-  if (beats.length && !reduceMotion) {
-    beats.forEach((beat) => {
-      const items = Array.from(beat.children) as HTMLElement[];
-      gsap.set(items, { autoAlpha: 0, y: 20 });
-      gsap.to(items, {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.6,
-        ease: 'power2.out',
-        stagger: 0.15,
-        scrollTrigger: { trigger: beat, start: 'top 90%' },
-      });
-    });
-  }
-
-  // Timeline rail: a faint full-height track plus a solid progress line
-  // that grows as the reader scrolls through the chapters block - "a
-  // soft timeline on the left as you reach a new chapter." Measured in
-  // JS, not hardcoded, since SectionMarker's own rendered height (and so
-  // where the first chapter actually starts) isn't a fixed number.
+  // Timeline rail setup happens before the beat loop below, since each
+  // beat's own chapter-tick (created here, one per beat) needs to exist
+  // before that loop can reveal it alongside the beat's own cascade.
   const chapters = document.querySelector<HTMLElement>('.about-story__chapters');
   const rail = document.querySelector<HTMLElement>('.about-story__rail');
   const railProgress = document.querySelector<HTMLElement>('.about-story__rail-progress');
-  const firstBeat = document.querySelector<HTMLElement>('.about-story__beat');
+  const beats = document.querySelectorAll<HTMLElement>('.about-story__beat');
+  const firstBeat = beats[0];
   const lastBeat = document.querySelector<HTMLElement>('.about-story__beat--c');
+
+  // One tick per beat - "a gentle line extends from the timeline to the
+  // subtitle" - created here rather than hardcoded per beat in the
+  // markup, so its position logic lives in one place next to the rail's
+  // own. A fixed short length (set in CSS), not computed against each
+  // beat's own zigzagging caption position - "not fully connected on
+  // both sides," a gesture toward the subtitle, not a drawn connector.
+  const ticks: HTMLElement[] = [];
+  if (chapters) {
+    beats.forEach(() => {
+      const tick = document.createElement('span');
+      tick.className = 'about-story__chapter-tick';
+      tick.setAttribute('aria-hidden', 'true');
+      chapters.appendChild(tick);
+      ticks.push(tick);
+    });
+  }
 
   if (chapters && rail && railProgress && firstBeat && lastBeat) {
     const positionRail = () => {
@@ -267,6 +293,20 @@ import SectionMarker from '../ui/SectionMarker.astro';
       const bottom = lastBeat.offsetTop + lastBeat.offsetHeight;
       rail.style.top = `${top}px`;
       rail.style.height = `${bottom - top}px`;
+
+      // Each tick centers on its own beat's chapter-caption line -
+      // measured fresh here too, since it depends on the same layout
+      // (font metrics, column width) the rail itself depends on.
+      beats.forEach((beat, i) => {
+        const caption = beat.querySelector<HTMLElement>('.about-story__chapter');
+        const tick = ticks[i];
+        if (!caption || !tick) return;
+        // Same fix as the rail's own top/bottom above: caption.offsetTop
+        // is already relative to .about-story__chapters (its
+        // offsetParent, since .about-story__beat itself isn't
+        // positioned), so no second subtraction here either.
+        tick.style.top = `${caption.offsetTop + caption.offsetHeight / 2}px`;
+      });
     };
 
     positionRail();
@@ -287,6 +327,41 @@ import SectionMarker from '../ui/SectionMarker.astro';
     } else {
       gsap.set(railProgress, { scaleY: 1 });
     }
+  }
+
+  // Each beat now cascades through its own children (chapter caption,
+  // then each paragraph) rather than fading in as one block - "the
+  // paragraphs to appear one by one on scroll." A single staggered tween
+  // per beat, not a separate ScrollTrigger per paragraph: they all still
+  // trigger together as the beat scrolls into view, just arriving a beat
+  // apart from each other instead of simultaneously. Each beat's own
+  // tick (above) reveals alongside it on the same trigger.
+  if (beats.length && !reduceMotion) {
+    beats.forEach((beat, i) => {
+      const items = Array.from(beat.children) as HTMLElement[];
+      gsap.set(items, { autoAlpha: 0, y: 20 });
+      gsap.to(items, {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        stagger: 0.15,
+        scrollTrigger: { trigger: beat, start: 'top 90%' },
+      });
+
+      const tick = ticks[i];
+      if (tick) {
+        gsap.set(tick, { scaleX: 0 });
+        gsap.to(tick, {
+          scaleX: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: beat, start: 'top 90%' },
+        });
+      }
+    });
+  } else if (beats.length) {
+    gsap.set(ticks, { scaleX: 1 });
   }
 
   // Fun assets: a small settle-in on scroll (skipped under reduced
@@ -316,10 +391,19 @@ import SectionMarker from '../ui/SectionMarker.astro';
       }
     });
 
+    // inertia: true - "flick and have the motion decelerate smoothly
+    // based on momentum" - hands off to InertiaPlugin (registered in
+    // utils/motion.ts) on release, which reads the pointer's recent
+    // velocity and keeps the asset moving with its own natural
+    // deceleration instead of just stopping dead where the pointer let
+    // go. Still bounded to the section, so a hard flick can't send it
+    // off-page - InertiaPlugin respects Draggable's own `bounds` and
+    // eases to a stop against the edge rather than clipping through it.
     Draggable.create(assets, {
       type: 'x,y',
       bounds: '.about-story__inner',
       edgeResistance: 0.65,
+      inertia: true,
       cursor: 'grab',
       activeCursor: 'grabbing',
     });
@@ -367,17 +451,14 @@ import SectionMarker from '../ui/SectionMarker.astro';
      column 1, which the quote (grid-column: 1/11) also starts flush
      against further down. top/height are set from the script (measured
      against the first/last beat), not hardcoded, since SectionMarker's
-     own height varies. */
+     own height varies. No permanent "track" backing line anymore - per
+     direct request ("the black line is on top of the gray line, but I
+     don't want to see the gray line") - so there's nothing rendered
+     ahead of wherever the reader has actually scrolled to. */
   .about-story__rail {
     position: absolute;
     left: -1.5rem;
-    width: 2px;
-  }
-
-  .about-story__rail-track {
-    position: absolute;
-    inset: 0;
-    background: color-mix(in srgb, var(--color-text-secondary) 30%, transparent);
+    width: 1px;
   }
 
   .about-story__rail-progress {
@@ -385,6 +466,35 @@ import SectionMarker from '../ui/SectionMarker.astro';
     inset: 0;
     background: var(--color-ink);
     transform-origin: top;
+  }
+
+  /* "A gentle line extends from the timeline to the subtitle" - a short
+     mark near (not touching) the rail on one end and the chapter
+     caption on the other, generated and positioned per-beat in the
+     script. Fixed length, not stretched to actually reach the caption -
+     "not fully connected on both sides."
+
+     :global() is required here, not a style preference: Astro scopes a
+     component's CSS by stamping a data-astro-cid attribute onto every
+     element that exists in its *server-rendered* markup, and a plain
+     (non-global) selector compiles down to expect that attribute. These
+     spans are created at runtime via document.createElement, so they
+     never receive it - the scoped rule was silently matching nothing
+     (position stayed the default `static`, so the ticks were rendering
+     as ordinary auto-placed grid items instead of the positioned marks
+     they're meant to be), confirmed via getComputedStyle rather than
+     assumed from the CSS reading right. Same underlying Astro-scoping
+     trap already documented elsewhere in this project (see Button.astro
+     and Hero.astro's own comments on it), just triggered by a
+     dynamically-created element instead of a class passed into another
+     component. */
+  :global(.about-story__chapter-tick) {
+    position: absolute;
+    left: -1rem;
+    width: 1.5rem;
+    height: 1px;
+    background: var(--color-text-secondary);
+    transform-origin: left;
   }
 
   .about-story__beat {
@@ -527,17 +637,23 @@ import SectionMarker from '../ui/SectionMarker.astro';
 
   @media (max-width: 1023px) {
     /* The drift needs room to zig - below this width every beat (and the
-                                                           quote/image) fall back to one straight column, same pattern used
-                                                           everywhere else in this project once macro asymmetry runs out of
-                                                           space. The rail and the per-beat assets go with it: a single
-                                                           column has no "gutter" or "leftover columns" left for either to
-                                                           sit in without colliding with the text itself. */
-    .about-story__rail {
+                                                             quote/image) fall back to one straight column, same pattern used
+                                                             everywhere else in this project once macro asymmetry runs out of
+                                                             space. The rail stays (repositioned closer to the now-single text
+                                                             column below) and each asset drops into normal document flow as
+                                                             its own small stacked image between beats - "on mobile screens
+                                                             it's looking kind of boring, find a way to still get the
+                                                             storytelling in there," so this is a simplified version of the
+                                                             device, not a removed one. The ticks are the one piece still tied
+                                                             to the zigzag's own leftover column space, which doesn't exist
+                                                             once beats go full-width - those stay desktop-only. */
+    :global(.about-story__chapter-tick) {
       display: none;
     }
 
     .about-story__asset {
-      display: none;
+      grid-column: 1 / -1;
+      margin-bottom: var(--space-8);
     }
 
     .about-story__beat--a,
@@ -561,6 +677,10 @@ import SectionMarker from '../ui/SectionMarker.astro';
     .about-story__inner {
       padding-inline: 1.5rem;
       row-gap: var(--space-24);
+    }
+
+    .about-story__rail {
+      left: -0.85rem;
     }
 
     .about-story__quote {

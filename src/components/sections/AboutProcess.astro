@@ -4,54 +4,89 @@
 // the user, kept verbatim except one em dash rewritten as a colon (see
 // AboutStory's frontmatter comment - same reason).
 //
-// Was deliberately the one still section on this page (no scroll reveal,
-// no grid break) - a page needs a quiet beat between its louder ones.
-// Redesign pass (explicit feedback that the page's sections "feel too
-// stale or too condensed"): this one specifically had zero imagery and
-// zero motion, which read as underbuilt rather than "deliberately quiet"
-// once the rest of the page gained placeholders and reveals of their
-// own. It now gets a small scattered collage of image placeholders next
-// to the text - a literal, not decorative, visualization of the copy's
-// own language ("paper, whiteboards, sticky notes, messy diagrams"),
-// which is what earns it a moment rather than staying the one section
-// with nothing to look at. The scatter/settle motion echoes AboutDrives'
-// own device one section below (tilted cards easing into their resting
-// angle) rather than inventing a third animation recipe on one page.
+// Rebuilt around a circular process diagram, per direct request with a
+// reference image (a studio site's dark "THE PROCESS" section: a ring
+// with three numbered steps arranged around it, top/bottom-left/
+// bottom-right, plus a small arrow below). Structure only, not its
+// look - the same "borrow the layout, not the theme" reading already
+// applied to ContactCTA/Footer's own reference-image redesign earlier in
+// this project: the reference's dark background is out of scope
+// (CLAUDE.md "Design system" reserves dark-field for the footer/one CTA
+// band, not a second dark section), so this stays on the page's own
+// porcelain background with the locked palette/type.
+//
+// No new copy: the existing lead line plus three body paragraphs (i.e.
+// exactly what was here before) are grouped into three steps, one
+// paragraph each, each gaining a short structural label - "Analog
+// first," "Collaborate," "Go digital" - the same kind of objective,
+// two-word caption AboutStory's own chapter names already are (see that
+// file's header comment): a structural device for organizing her
+// existing words into the three-step shape the reference calls for, not
+// a new claim added in her voice. The old scattered-collage-of-three-
+// notes device (a previous pass's answer to this section reading
+// "underbuilt") is retired now that the section has a real, considered
+// structure of its own instead of decoration standing in for one.
+//
+// The ring is a plain SVG circle (stroke only, no fill) that draws on
+// scroll via stroke-dashoffset - "a map being drawn" - then each step
+// fades/rises in, staggered. Below ~880px there isn't room for three
+// text blocks arranged around a circle without them colliding, so it
+// drops to a plain stacked numbered list, same "macro asymmetry drops
+// at a width threshold" pattern used everywhere else in this project -
+// the ring itself is hidden there rather than shrunk into illegibility.
 import SectionMarker from '../ui/SectionMarker.astro';
 
-const notes = [{ rotate: -4 }, { rotate: 3 }, { rotate: -2 }];
+const steps = [
+  {
+    number: '01',
+    label: 'Analog first',
+    text: 'I like starting analog. Paper, whiteboards, sticky notes, messy diagrams: anything that lets ideas move faster than my concern for how they look.',
+  },
+  {
+    number: '02',
+    label: 'Collaborate',
+    text: 'I especially enjoy collaborative ideation: getting different perspectives in the room, throwing ideas around, combining them and challenging each other’s assumptions.',
+  },
+  {
+    number: '03',
+    label: 'Go digital',
+    text: 'Once the messy thinking starts to make sense, I move into digital tools and prototypes.',
+  },
+];
 ---
 
 <section class="about-process">
   <div class="about-process__inner">
     <SectionMarker index="03" label="How I work" />
 
-    <div class="about-process__row">
-      <div class="about-process__column">
-        <p class="about-process__lead">I like starting analog.</p>
+    <div class="about-process__diagram">
+      <svg class="about-process__ring" viewBox="0 0 600 600" aria-hidden="true">
+        <circle class="about-process__ring-path" cx="300" cy="300" r="270" fill="none" />
+      </svg>
 
-        <p>
-          Paper, whiteboards, sticky notes, messy diagrams: anything that lets ideas move faster
-          than my concern for how they look.
-        </p>
+      {steps.map((step, i) => (
+        <div class:list={['about-process__step', `about-process__step--${i + 1}`]}>
+          <p class="about-process__step-heading">
+            <span class="about-process__step-number" aria-hidden="true">
+              {step.number}
+            </span>
+            <span class="about-process__step-label">{step.label}</span>
+          </p>
+          <p class="about-process__step-text">{step.text}</p>
+        </div>
+      ))}
 
-        <p>
-          I especially enjoy collaborative ideation: getting different perspectives in the room,
-          throwing ideas around, combining them and challenging each other's assumptions.
-        </p>
-
-        <p>
-          Once the messy thinking starts to make sense, I move into digital tools and prototypes.
-        </p>
-      </div>
-
-      <ul class="about-process__notes" aria-hidden="true">
-        {notes.map((note) => (
-          <li class="about-process__note" style={`--rotate: ${note.rotate}deg`}>
-            <!-- TODO: replace with a real process/whiteboard/sticky-note image once photography exists (PROJECT_BRIEF.md Section 6) -->
-          </li>
-        ))}
-      </ul>
+      <span class="about-process__arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path
+            d="M4 12h16M14 6l6 6-6 6"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
     </div>
   </div>
 </section>
@@ -59,21 +94,28 @@ const notes = [{ rotate: -4 }, { rotate: 3 }, { rotate: -2 }];
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const notes = document.querySelectorAll<HTMLElement>('.about-process__note');
-  if (notes.length && !prefersReducedMotion()) {
-    notes.forEach((note, index) => {
-      const targetRotate = note.style.getPropertyValue('--rotate');
-      gsap.set(note, { autoAlpha: 0, y: 16, rotate: 0 });
-      gsap.to(note, {
-        autoAlpha: 1,
-        y: 0,
-        rotate: targetRotate,
-        duration: 0.5,
-        ease: 'back.out(1.2)',
-        delay: index * 0.1,
-        scrollTrigger: { trigger: note, start: 'top 92%' },
-      });
-    });
+  const ring = document.querySelector<SVGCircleElement>('.about-process__ring-path');
+  const steps = document.querySelectorAll<HTMLElement>('.about-process__step');
+  const arrow = document.querySelector<HTMLElement>('.about-process__arrow');
+  const diagram = document.querySelector<HTMLElement>('.about-process__diagram');
+
+  if (ring && diagram && !prefersReducedMotion()) {
+    // "The map being drawn": the ring's own circumference (2 * pi * r,
+    // r=270 in the SVG's own coordinate space) becomes its
+    // stroke-dasharray, offset by that same length so nothing shows at
+    // rest, then animated back to 0 - a classic SVG line-draw, matching
+    // this page's existing "rule draws down" device on the quote
+    // (AboutStory.astro) rather than inventing a third reveal recipe.
+    const length = 2 * Math.PI * 270;
+    ring.style.strokeDasharray = `${length}`;
+    gsap.set(ring, { strokeDashoffset: length });
+    gsap.set([...steps, arrow], { autoAlpha: 0, y: 16 });
+
+    gsap
+      .timeline({ scrollTrigger: { trigger: diagram, start: 'top 75%' } })
+      .to(ring, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' })
+      .to(steps, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.15 }, 0.3)
+      .to(arrow, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.2');
   }
 </script>
 
@@ -90,85 +132,151 @@ const notes = [{ rotate: -4 }, { rotate: 3 }, { rotate: -2 }];
     padding-inline: var(--intro-margin);
   }
 
-  .about-process__row {
-    margin-top: var(--space-16);
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    column-gap: var(--space-24);
-    align-items: start;
-  }
-
-  .about-process__column {
-    grid-column: 2 / 8;
-    max-width: 60ch;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-24);
-    font-family: var(--font-body);
-    font-size: var(--text-body);
-    line-height: var(--text-body-leading);
-    color: var(--color-ink);
-  }
-
-  .about-process__lead {
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: clamp(1.75rem, 1.5vw + 1.25rem, 2.25rem);
-    letter-spacing: -0.01em;
-    line-height: 1.15;
-    color: var(--color-ink);
-  }
-
-  .about-process__notes {
-    grid-column: 9 / 13;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-16);
-  }
-
-  .about-process__note {
-    rotate: var(--rotate);
+  /* A square stage the ring and its three steps are positioned within -
+     capped so it never dominates the page at very wide viewports (the
+     reference is a full standalone section; this stays one section
+     among several, matching this page's own restrained scale). */
+  .about-process__diagram {
+    position: relative;
+    width: min(100%, 46rem);
     aspect-ratio: 1;
-    background: var(--color-bg-secondary);
-    border: var(--border-hairline) solid var(--color-text-secondary);
-    box-shadow: 0 10px 20px -14px rgb(23 21 15 / 0.3);
+    margin: var(--space-64) auto 0;
   }
 
-  /* First tile spans both columns and sits taller - reads as the "main"
-     sheet of paper with two smaller sticky notes layered around it,
-     rather than three identical tiles in a grid. */
-  .about-process__note:first-child {
-    grid-column: 1 / -1;
-    aspect-ratio: 16 / 10;
+  .about-process__ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--color-text-secondary);
   }
 
-  @media (max-width: 1023px) {
-    .about-process__column {
-      grid-column: 1 / 8;
+  .about-process__ring-path {
+    stroke: currentColor;
+    stroke-width: 1;
+  }
+
+  .about-process__step {
+    position: absolute;
+    width: 17rem;
+    text-align: center;
+  }
+
+  .about-process__step-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5em;
+    margin: 0 0 var(--space-8);
+  }
+
+  .about-process__step-number {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  .about-process__step-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  .about-process__step-text {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-caption);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  /* Top-center, sitting just above the ring's own top edge. */
+  .about-process__step--1 {
+    top: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Bottom-left, roughly the 8 o'clock position - left-aligned text
+     reading outward from the ring. */
+  .about-process__step--2 {
+    bottom: 8%;
+    left: -2%;
+    text-align: left;
+  }
+
+  /* Bottom-right, mirrored from step 2. */
+  .about-process__step--3 {
+    bottom: 8%;
+    right: -2%;
+    text-align: right;
+  }
+
+  .about-process__arrow {
+    position: absolute;
+    bottom: -2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-text-secondary);
+  }
+
+  .about-process__arrow svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  @media (max-width: 880px) {
+    /* Three text blocks arranged around a ring need real width to avoid
+         colliding - below this, the diagram drops to a plain stacked
+         numbered list (ring and arrow hidden outright) rather than
+         shrinking the circle until the text no longer fits it. */
+    .about-process__ring,
+    .about-process__arrow {
+      display: none;
     }
 
-    .about-process__notes {
-      grid-column: 8 / 13;
+    .about-process__diagram {
+      width: 100%;
+      aspect-ratio: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-32);
+      margin-top: var(--space-32);
+    }
+
+    /* A real bug, caught by measuring the rendered step rather than
+         trusting position: static to be enough on its own: the desktop
+         rules (.about-process__step--1/2/3, below) each set their own
+         `transform` (translateX(-50%) on step 1, for centering against
+         `left: 50%`) - switching `position` to `static` here doesn't
+         clear that transform, so step 1 was still shifting itself left by
+         half its own width and overflowing off the left edge of the
+         viewport. `transform: none` here overrides all three variants at
+         once. */
+    .about-process__step {
+      position: static;
+      transform: none;
+      width: 100%;
+      max-width: 32rem;
+      text-align: left;
+    }
+
+    .about-process__step-heading {
+      justify-content: flex-start;
+    }
+
+    .about-process__step-text {
+      max-width: none;
     }
   }
 
   @media (max-width: 639px) {
     .about-process__inner {
       padding-inline: 1.5rem;
-    }
-
-    .about-process__row {
-      grid-template-columns: 1fr;
-    }
-
-    .about-process__column {
-      grid-column: 1;
-    }
-
-    .about-process__notes {
-      grid-column: 1;
-      margin-top: var(--space-32);
-      max-width: 20rem;
     }
   }
 </style>

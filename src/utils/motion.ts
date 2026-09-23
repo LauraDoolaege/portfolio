@@ -8,8 +8,14 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Draggable } from 'gsap/Draggable';
+import { InertiaPlugin } from 'gsap/InertiaPlugin';
 
-gsap.registerPlugin(ScrollTrigger, Draggable);
+// InertiaPlugin - "flick and decelerate based on momentum" for
+// Draggable's `inertia: true` option. Used to be a paid Club GSAP bonus
+// plugin; GSAP's plugins (including this one) became free with the
+// regular npm package after the Webflow acquisition, so no separate
+// license/CDN token is needed - just register it like any other plugin.
+gsap.registerPlugin(ScrollTrigger, Draggable, InertiaPlugin);
 
 // CLAUDE.md "Motion": prefers-reduced-motion must always be respected.
 // The global CSS reset (global.css) already neutralizes CSS

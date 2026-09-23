@@ -2445,6 +2445,124 @@ synthetic-pointer-event limitation already documented elsewhere in this
 file for `:hover`, so the drag motion itself wasn't further chased once
 the wiring was confirmed live.
 
+**A large follow-up pass, one message: the accordion stretch paused,
+AboutStory's rail/tick/mobile/inertia refined, and AboutProcess rebuilt
+around a circular diagram** - several direct requests plus a reference
+image (a studio site's dark "THE PROCESS" section: a ring with three
+numbered steps and an arrow beneath).
+
+Selected Work's accordion no longer expands the hovered panel at all -
+"remove the stretching effect temporarily from all the cards." The
+`:hover`/`:focus-within { flex-grow: 1.6 }` rule is commented out, not
+deleted, so the whole reasoning trail behind that number (two earlier
+rounds of "too dramatic"/"too plastic" feedback) is one uncomment away
+from returning rather than lost. Every panel now just holds its fixed
+3-panel-row basis from the previous pass, hover or not - the overlay
+reveal on the card itself (unrelated to the accordion's own width
+mechanism) still works exactly as before.
+
+**AboutStory refinements**, all direct requests in one message: the
+rail dropped from 2px to 1px, and its permanent gray "track" backing
+line is gone outright - "the black line is on top of the gray line, but
+I don't want to see the gray line" - so nothing renders ahead of
+wherever the reader has actually scrolled. Each chapter gained a small
+`.about-story__chapter-tick`, generated and positioned in the script (one
+per beat) rather than hardcoded per beat in the markup - "a gentle line
+extends from the timeline to the subtitle (not fully connected on both
+sides)" - a short, fixed-length mark near the rail, deliberately not
+stretched to actually reach the caption text.
+
+**A real bug, the same family as the rail's own earlier one:** the
+tick's own position math reintroduced the exact `offsetTop` double-
+subtraction bug already fixed once for the rail (`caption.offsetTop -
+chapters.offsetTop`, when `caption.offsetTop` is already relative to
+`.about-story__chapters` as its offsetParent) - confirmed via
+`getBoundingClientRect()` showing a tick rendering far off-page. Fixed
+the same way, by dropping the second subtraction.
+
+**A second real bug, a new one:** even after fixing the position math,
+the ticks still weren't rendering as positioned marks -
+`getComputedStyle` showed `position: static` and an auto-sized width/
+height instead of the CSS's own `position: absolute; width: 1.5rem;
+height: 1px`. Cause: Astro scopes a component's CSS by stamping a
+`data-astro-cid-*` attribute onto every element present in its
+_server-rendered_ markup; the tick `<span>`s are created at runtime via
+`document.createElement`, so they never receive that attribute, and the
+scoped selector was silently matching nothing - the same family of
+Astro-scoping trap already documented in this file for `Button.astro`
+and `Hero.astro`, just triggered by a dynamically-created element
+instead of a class passed into a component. Fixed by wrapping the
+selector in `:global()` (both the base rule and its mobile
+`display: none` override).
+
+Mobile no longer drops the rail/assets outright - "on mobile screens
+it's looking kind of boring, find a way to still get the storytelling in
+there." Both stay: the rail repositions closer to the now-single text
+column, and each asset falls into normal document flow as its own small
+stacked image between beats (there's no "leftover column" to share once
+beats go full-width). The chapter ticks are the one piece that stays
+desktop-only, since they're sized against the zigzag's own leftover
+column space specifically.
+
+Draggable's assets now use real inertia - "use gsap inertia so the user
+can flick and have the motion decelerate smoothly based on momentum" -
+via `inertia: true` plus a newly-registered `InertiaPlugin` in
+`utils/motion.ts`. This used to be a paid Club GSAP bonus plugin;
+Webflow's acquisition of GSAP made the whole plugin set free as part of
+the regular npm package, so registering it needed no separate license or
+CDN token - confirmed the module exists in the installed `gsap` version
+before wiring it up.
+
+**AboutProcess ("How I work") rebuilt around a circular process
+diagram** - direct request with a reference image, explicitly structure-
+only: the reference's dark background is out of scope (CLAUDE.md
+"Design system" reserves dark-field for the footer/one CTA band, not a
+second dark section), so this stays on the page's own porcelain
+background with the locked palette/type - the same "borrow the layout,
+not the theme" reading already used for the ContactCTA/Footer redesign
+earlier in this project. No new copy: the section's existing lead line
+and three body paragraphs are grouped into three steps, one paragraph
+each, gaining a short structural label per step ("Analog first,"
+"Collaborate," "Go digital") - the same kind of objective, two-word
+caption AboutStory's own chapter names already are, not a new claim
+added in her voice. The previous scattered-collage-of-three-notes device
+(itself an earlier pass's fix for this section reading "underbuilt") is
+retired now that the section has a real, considered structure instead of
+decoration standing in for one.
+
+The ring is a plain SVG `<circle>` that draws on scroll via
+`stroke-dasharray`/`stroke-dashoffset` (circumference computed from its
+own radius, `2 * Math.PI * r`) - "a map being drawn," the same reveal
+language as AboutStory's own quote-rule, not a third reveal recipe
+invented for one section. The three steps are absolutely positioned
+around it (top-center, bottom-left, bottom-right, matching the
+reference's own arrangement) and fade/rise in staggered once the ring
+finishes drawing. Below 880px, three text blocks arranged around a ring
+have no room to avoid colliding, so the ring and arrow hide outright and
+the steps drop to a plain stacked numbered list - same "macro asymmetry
+drops at a width threshold" pattern used everywhere else in this
+project, not a shrunk version of the circular layout.
+
+**A real bug, caught by measuring the mobile layout rather than trusting
+`position: static` to be enough on its own:** step 1's desktop rule sets
+its own `transform: translateX(-50%)` (to center it against `left:
+50%`); switching `position` to `static` in the mobile media query didn't
+clear that transform, so the step kept shifting itself left by half its
+own width and rendered overflowing off the left edge of a 375px
+viewport - confirmed via `getBoundingClientRect()` showing a negative
+`x`. Fixed with an explicit `transform: none` in the same mobile rule
+that sets `position: static`.
+
+Verified in the browser throughout: Selected Work's panels measure
+identical widths before and after a forced hover (no stretch); the
+About Story rail renders 1px wide with no separate track element, ticks
+render as genuine 24×1px positioned marks aligned to their own beat's
+caption line, and both the rail and assets remain visible (repositioned)
+at a 375px viewport; the About Process ring's `stroke-dashoffset`
+reaches 0 and all three steps reach `opacity: 1` after scrolling into
+view, and at 375px the same three steps render as a plain stacked list
+with no ring, no arrow, and no off-screen overflow.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

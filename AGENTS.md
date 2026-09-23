@@ -1744,6 +1744,34 @@ position). AboutStory's beats visibly alternate left/right down the page
 at 1400px and collapse to one straight column at 375px, with the chapter
 captions still legible at both widths.
 
+**Selected Work's spotlight removed, and the accordion stretch toned
+down a third time.** Two direct follow-ups in one message: "I dont want
+the spotlight anymore for selected works you can remove it" and "the
+stretching of the cards still feels too plastic and extreme for my
+brand."
+
+The spotlight (the box-shadow-cutout dim effect adapted from Gallery's
+own, added two passes ago) is gone outright - the markup
+(`.selected-work__spotlight`), the script's `syncSpotlight`/ticker/
+class-toggling, and its CSS all removed rather than just disabled. The
+custom arrow cursor stays; only the spotlight half of that pass is gone.
+
+On the stretch: `flex-grow: 3` (already once reduced from `6`) still
+read as "too plastic and extreme." Rather than just picking a third,
+smaller number, the actual cause got named this time: a fixed-height
+(`18rem`) row with a `flex-grow`-driven width change is, mechanically,
+one rectangle's aspect ratio being pulled sideways every tick of the
+transition (height pinned, width changing) - that distortion is what
+reads as "plastic" regardless of how far it goes, since a real photo
+cropped to one shape stretching toward a very different one never looks
+like a considered reveal. The fix: `flex-grow: 1.6` (hovered card ~44%
+of the row instead of ~60%, versus ~33% at rest for all three), and the
+transition slowed from `0.6s` to `0.8s` so the motion itself reads
+calmer, not just smaller. Verified in the browser: a genuinely hovered
+card measured 483px against 302px siblings (was 634px/326px at
+`flex-grow: 3`) - a real, confirmed reduction, not just a smaller number
+in the source that might not have translated to a visibly calmer effect.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

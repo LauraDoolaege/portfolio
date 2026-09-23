@@ -4,10 +4,10 @@
 // appears (homepage Selected Work now, Work index later). Content-agnostic
 // via props, so it lives in ui/ rather than sections/.
 //
-// "Ticket" isn't just a name: the dashed rule between image and info block
-// is a literal stub tear-line, and the corner number is a plate/ticket
-// numeral — small, load-bearing details rather than decoration for its
-// own sake.
+// "Ticket" isn't just a name: the rule between image and info block is a
+// literal stub tear-line (solid, not dashed - see its own comment below
+// for that change), and the corner number is a plate/ticket numeral —
+// small, load-bearing details rather than decoration for its own sake.
 //
 // href defaults to "#" — case-study pages are PROPOSED, not built yet
 // (PROJECT_BRIEF.md Section 5), same placeholder-link pattern already used
@@ -180,11 +180,11 @@ const displayTitle = fullTitle ?? title;
     border-radius: var(--radius-image);
     overflow: hidden;
     /* --motion-easing-soft (not the plain --motion-easing/ease-out this
-                                                             used before), and a touch longer than --motion-duration-slow - per
-                                                             direct feedback that the card's hover movement read as "very
-                                                             harsh." Plain ease-out decelerates evenly the whole way, which
-                                                             reads mechanical on a 6px lift; the soft cubic-bezier eases in
-                                                             more gradually, closer to a physical glide. */
+                                                                 used before), and a touch longer than --motion-duration-slow - per
+                                                                 direct feedback that the card's hover movement read as "very
+                                                                 harsh." Plain ease-out decelerates evenly the whole way, which
+                                                                 reads mechanical on a 6px lift; the soft cubic-bezier eases in
+                                                                 more gradually, closer to a physical glide. */
     transition:
       transform 0.55s var(--motion-easing-soft),
       border-color var(--motion-duration) var(--motion-easing-soft);
@@ -249,7 +249,11 @@ const displayTitle = fullTitle ?? title;
   .project-card__stub {
     display: block;
     margin-bottom: var(--space-16);
-    border-top: var(--border-hairline) dashed var(--color-text-secondary);
+    /* Solid, not the dashed "tear-line" this used before - per direct
+           request ("use solid lines instead of a dashed line"), applied
+           here and to Gallery's matching tile-footer rule together so the
+           two stay consistent. */
+    border-top: var(--border-hairline) solid var(--color-text-secondary);
   }
 
   .project-card__info {

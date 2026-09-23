@@ -2078,6 +2078,56 @@ correctly, Selected Work's paragraph offset matches the chosen mockup)
 and 375px (the indent drops to flush-left, confirmed via screenshot,
 not just the media query reading correct in the source).
 
+**Follow-up pass, same session: section titles scaled way up with real
+wrapping, the paragraph pushed further right, Gallery tiles bigger and
+bottom-aligned, dashed lines gone site-wide.** One message, several
+direct requests plus a reference screenshot.
+
+`SectionMarker.astro`'s `.section-marker__label` font-size roughly
+doubled (2.75rem ceiling -> 6rem) - explicitly not the index or the
+paragraph, both left alone ("the selected work part, not the number or
+the paragraph"). Getting "titles with 2 or more words... broken up on
+different lines" to actually happen took a second attempt: the label's
+grid column (7/12) was already narrower than the section's full width,
+but Barlow Condensed is narrow enough per character that "SELECTED
+WORK" at 96px only measures ~554px unconstrained (confirmed directly by
+rendering it off-screen and measuring, not assumed) - well inside that
+column's own ~640px, so nothing was actually forcing a wrap. Fixed with
+a `max-width: 10ch` on the label itself, tuned live in the browser by
+setting several candidate values via `style.maxWidth` and screenshotting
+each until "Selected work" wrapped cleanly after the first word without
+starving "Gallery" (the shortest real label) for space - not a
+hardcoded `<br/>` per label, which would only coincidentally work for
+two-word titles and do the wrong thing the moment a label's word count
+changes. The description's own grid column (`9 / 13`, from the previous
+pass) didn't need to move - "the paragraph aligns more on the right of
+the page" turned out to already be true of that placement; what was
+undermining it was the label sitting in an unnecessarily wide 7/12
+column despite the text itself now only needing ~10ch of it. Leaving
+the label's grid column at 7/12 (rather than narrowing it to match its
+new `max-width`) keeps a wide gap of empty space between where the
+label visually ends and where the description sits, which is what
+actually reads as "pushed to the right side of the page" rather than
+"sitting just past the title."
+
+Gallery's tiles grew slightly (`clamp(12rem, 19vw, 18rem)` ->
+`clamp(14rem, 21vw, 20rem)`) and the track switched from
+`align-items: flex-start` to `flex-end` - per direct request ("make
+sure the gallery images are slightly bigger... align gallery items at
+the bottom"), so tiles of different heights (three aspect ratios) now
+share one bottom baseline instead of each hanging from an arbitrary top
+edge; the existing per-tile up/down float transforms still nudge
+individual tiles for visual variety, just from that bottom reference
+point now instead of a top one.
+
+The dashed "ticket stub" rule is gone, replaced with a solid hairline,
+in both places it existed - `ProjectCard.astro`'s own stub between
+image and info block, and Gallery's newer tile-footer divider above the
+tag/caption - per direct request ("use solid lines instead of a dashed
+line... this also needs to change in the product cards"), applied to
+both together in one pass so they can't drift back out of sync with
+each other.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

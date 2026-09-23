@@ -602,7 +602,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery {
     padding-block: clamp(3rem, 6vw, 4.5rem);
     /* No background fill (per earlier direct request) - the section sits
-             directly on the page's own bg-primary. */
+                 directly on the page's own bg-primary. */
     overflow-x: hidden;
   }
 
@@ -627,8 +627,8 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     z-index: 1;
     overflow: hidden;
     /* Vertical room for the float offset and hover bob so nothing clips.
-             Negative margin cancels the padding's footprint on .gallery__stage's
-             own auto height. */
+                 Negative margin cancels the padding's footprint on .gallery__stage's
+                 own auto height. */
     padding-block: 2.5rem;
     margin-block: -2.5rem;
   }
@@ -656,13 +656,21 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 
   .gallery__track {
     display: flex;
-    align-items: flex-start;
+    /* Bottom-aligned, not top - per direct request ("align gallery
+           items at the bottom"). Tiles vary in height (three aspect
+           ratios), so this is what actually gives the strip one shared
+           baseline instead of each tile hanging from an arbitrary top
+           edge; the per-tile up/down float transforms still nudge
+           individual tiles off that baseline for visual variety, they just
+           nudge from a bottom reference point now instead of a top one. */
+    align-items: flex-end;
     gap: 1.5rem;
     width: max-content;
   }
 
   .gallery__tile {
-    flex: 0 0 clamp(12rem, 19vw, 18rem);
+    /* Slightly bigger than before, per direct request. */
+    flex: 0 0 clamp(14rem, 21vw, 20rem);
     display: flex;
     flex-direction: column;
   }
@@ -766,14 +774,16 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
      about"). A hairline rule doubles as the tile's own bottom edge - the
      same "ticket stub" device ProjectCard.astro already uses between its
      image and info block, reused here rather than inventing a second
-     divider style. */
+     divider style. Solid, not dashed - per direct follow-up request
+     ("use solid lines instead of a dashed line... this also needs to
+     change in the product cards"), applied to both together. */
   .gallery__tile-footer {
     margin-top: var(--space-16);
     padding-top: var(--space-16);
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    border-top: var(--border-hairline) dashed var(--color-text-secondary);
+    border-top: var(--border-hairline) solid var(--color-text-secondary);
   }
 
   .gallery__tile-caption {

@@ -1692,6 +1692,58 @@ bracket-tag chips per the reference image's own visual language (no real
 brand logos used - we don't have those assets, and the reference was for
 layout/style inspiration, not literal tool confirmation).
 
+**Two more direct follow-ups: Selected Work's group labels/default-open
+state, and a chapter/zigzag redesign of About's "How I got here."**
+
+Group labels shortened again - "change the title from design: individual
+work to simply individual work with the number of projects stated, same
+applies for experience design." `SelectedWork.astro`'s two labels are now
+plain "Individual work" / "Group projects," each with `({design.length})`/
+`({experience.length})` in parens right after - read from the array's own
+length, not a hand-typed number, so it can't silently drift if a project
+is ever added or removed. Separately, "have the first one popped open by
+default": the disclosure-collapse script now skips the first
+`.selected-work__toggle` (`index === 0`) entirely, leaving it
+`aria-expanded="true"` with `height: 'auto'` instead of collapsing it
+like the second - the page no longer opens with zero projects visible.
+
+**AboutStory.astro's "How I got here" is no longer one straight column** -
+per direct request ("add subtitles and subtle delicate chapter names to
+make the story feel more like a story... does it have to be straight up
+and down or do we travel across the page gently"). The five paragraphs
+(plus the closing two) are now five small "beats," each with a delicate
+chapter caption above it - a plain mono index plus an italic body-font
+name (deliberately not Instrument Serif, which stays this page's one
+italic moment, spent on the pull-quote alone) - and each beat's own
+`grid-column` range alternates between two positions (`2 / 8` and
+`4 / 10`), both narrower than the quote's own `1 / 11` break so nothing
+competes with it; the closing beat after the quote gets a third, smaller
+shift (`3 / 9`) that reads as the drift settling back down rather than
+snapping to an earlier position. Removing the quote/image's own
+hardcoded `grid-row: 3` (a relic from when there were only two elements
+before them) was necessary, not just simplification - with four beats
+now ahead of them, that row number would have been wrong; letting the
+grid's own row-sparse auto-placement figure it out instead happens to
+still land the image in the same row as the quote (it fits neatly in
+the two columns the quote's own `1 / 11` span leaves open), so the
+visual result is unchanged. Falls back to a single straight column below
+1024px, same "macro asymmetry drops at a width threshold" pattern used
+everywhere else in this project - a zigzag reading path needs room to
+zig. The copy itself is untouched, split only at its own existing
+sentence/paragraph breaks - no line was rewritten to make the five-beat
+grouping work, and the chapter names are new structural captions
+(objective one/two-word labels), not new claims put in her own voice.
+
+Verified in the browser: Selected Work's first group renders open by
+default with the second collapsed, and a genuine hover on one of its
+cards showed the spotlight dimming the rest of the page and the custom
+arrow cursor active at once (resolving the "couldn't get a reliable
+hover in this sandbox" caveat from the previous pass's summary - this
+time it triggered from a real interaction, not a leftover mouse
+position). AboutStory's beats visibly alternate left/right down the page
+at 1400px and collapse to one straight column at 375px, with the chapter
+captions still legible at both widths.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

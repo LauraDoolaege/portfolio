@@ -31,6 +31,24 @@
 // quote with no imagery at all - the "documentary/process, black-and-
 // white" imagery mode the brief names (PROJECT_BRIEF.md Section 3),
 // placed here because this section is literally the origin-story process.
+//
+// Chapter pass (explicit request, "add subtitles and subtle delicate
+// chapter names to make the story feel more like a story... does it have
+// to be straight up and down or do we travel across the page gently"):
+// the five paragraphs (plus the closing two) used to sit in one straight
+// vertical column. They're now five small "beats," each with a delicate
+// chapter caption above it - a plain mono index + an italic body-font
+// name, not Instrument Serif (that's still spent once, on the quote
+// alone) - and each beat's own column range in the 12-col grid alternates
+// left/right, so the eye drifts gently across the page reading down
+// instead of tracking one dead-straight edge. The quote stays the
+// section's one biggest, most dramatic break (`1 / 11`, unchanged); the
+// beats' own drift is deliberately smaller than that so nothing competes
+// with it. Collapses back to a single straight column below 1024px, same
+// "macro asymmetry drops at a width threshold" pattern used everywhere
+// else in this project - a zigzag reading path needs room to zig.
+// Copy itself is untouched, split only at its own existing sentence/
+// paragraph breaks - no line was rewritten to make the grouping work.
 import SectionMarker from '../ui/SectionMarker.astro';
 ---
 
@@ -38,25 +56,54 @@ import SectionMarker from '../ui/SectionMarker.astro';
   <div class="about-story__inner">
     <SectionMarker index="02" label="How I got here" />
 
-    <div class="about-story__column">
+    <div class="about-story__beat about-story__beat--a">
+      <p class="about-story__chapter">
+        <span class="about-story__chapter-index" aria-hidden="true">
+          01
+        </span>
+        <span class="about-story__chapter-name">Before design</span>
+      </p>
       <p>Before design, I thought I wanted to become a copywriter.</p>
+    </div>
 
+    <div class="about-story__beat about-story__beat--b">
+      <p class="about-story__chapter">
+        <span class="about-story__chapter-index" aria-hidden="true">
+          02
+        </span>
+        <span class="about-story__chapter-name">Finding my voice</span>
+      </p>
       <p>
         I've always been a storyteller. As a kid, I used to write little stories about my sister's
         favourite Nintendo characters just to convince her to read. It worked.
       </p>
-
       <p>
         That instinct never really disappeared. I still love turning ideas into stories, finding
         creative angles and figuring out how to communicate something in a way that makes people
         care.
       </p>
+    </div>
 
+    <div class="about-story__beat about-story__beat--a">
+      <p class="about-story__chapter">
+        <span class="about-story__chapter-index" aria-hidden="true">
+          03
+        </span>
+        <span class="about-story__chapter-name">Into marketing</span>
+      </p>
       <p>
         That eventually led me to marketing communication, where I discovered that a campaign isn't
         just a creative execution. It's a creative response to a real problem.
       </p>
+    </div>
 
+    <div class="about-story__beat about-story__beat--b">
+      <p class="about-story__chapter">
+        <span class="about-story__chapter-index" aria-hidden="true">
+          04
+        </span>
+        <span class="about-story__chapter-name">Toward UX</span>
+      </p>
       <p>
         From there, I became increasingly interested in what happens beyond communication: how
         people experience products, services and systems themselves. That's what pulled me toward UX
@@ -73,12 +120,17 @@ import SectionMarker from '../ui/SectionMarker.astro';
       <!-- TODO: replace with a real documentary/process image once photography exists (PROJECT_BRIEF.md Section 6) -->
     </span>
 
-    <div class="about-story__column">
+    <div class="about-story__beat about-story__beat--c">
+      <p class="about-story__chapter">
+        <span class="about-story__chapter-index" aria-hidden="true">
+          05
+        </span>
+        <span class="about-story__chapter-name">Still noticing</span>
+      </p>
       <p>
         My brain rarely leaves things alone. A confusing website, an inefficient queue, a frustrated
         customer: I immediately start wondering what could make the experience better.
       </p>
-
       <p>
         Working at a grocery store has unexpectedly become one of my favourite places to observe
         human behaviour.
@@ -107,6 +159,23 @@ import SectionMarker from '../ui/SectionMarker.astro';
       .to(rule, { scaleY: 1, duration: 0.5, ease: 'power4.out' })
       .to(quote, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.2);
   }
+
+  // Each beat gets a quiet fade/rise as it scrolls in - not the quote's
+  // own bigger emphasis reveal, just enough to keep the page from feeling
+  // static as the reading path drifts left/right down the column.
+  const beats = document.querySelectorAll<HTMLElement>('.about-story__beat');
+  if (beats.length && !prefersReducedMotion()) {
+    beats.forEach((beat) => {
+      gsap.set(beat, { autoAlpha: 0, y: 20 });
+      gsap.to(beat, {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: beat, start: 'top 90%' },
+      });
+    });
+  }
 </script>
 
 <style>
@@ -130,22 +199,66 @@ import SectionMarker from '../ui/SectionMarker.astro';
     grid-column: 1 / -1;
   }
 
-  .about-story__column {
-    grid-column: 2 / 9;
+  .about-story__beat {
     display: flex;
     flex-direction: column;
-    gap: var(--space-24);
-    max-width: 68ch;
+    gap: var(--space-16);
+    max-width: 60ch;
     font-family: var(--font-body);
     font-size: var(--text-body);
     line-height: var(--text-body-leading);
     color: var(--color-ink);
   }
 
+  .about-story__beat > p:not(.about-story__chapter) {
+    margin: 0;
+  }
+
+  /* A delicate caption, not a second headline - plain mono index (same
+     register as every numbered device sitewide) plus an italic body-font
+     name. Deliberately not Instrument Serif - that stays this page's one
+     italic moment, spent on the quote alone. */
+  .about-story__chapter {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6em;
+    margin: 0;
+  }
+
+  .about-story__chapter-index {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  .about-story__chapter-name {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: var(--text-caption);
+    color: var(--color-text-secondary);
+  }
+
+  /* The zigzag: two alternating column ranges, both narrower than the
+     quote's own 1/11 break so nothing competes with it. */
+  .about-story__beat--a {
+    grid-column: 2 / 8;
+  }
+
+  .about-story__beat--b {
+    grid-column: 4 / 10;
+  }
+
+  /* The closing beat, after the quote - a smaller shift than a/b, reads
+     as the drift settling back down rather than snapping to either
+     earlier position. */
+  .about-story__beat--c {
+    grid-column: 3 / 9;
+  }
+
   .about-story__quote {
     position: relative;
     grid-column: 1 / 11;
-    grid-row: 3;
     margin: 0;
     padding-left: var(--space-32);
     font-family: var(--font-editorial);
@@ -162,7 +275,6 @@ import SectionMarker from '../ui/SectionMarker.astro';
   .about-story__image {
     display: block;
     grid-column: 11 / 13;
-    grid-row: 3;
     align-self: start;
     aspect-ratio: 3 / 4;
     background: var(--color-bg-secondary);
@@ -184,18 +296,23 @@ import SectionMarker from '../ui/SectionMarker.astro';
   }
 
   @media (max-width: 1023px) {
-    .about-story__column {
+    /* The drift needs room to zig - below this width every beat (and the
+             quote/image) fall back to one straight column, same pattern used
+             everywhere else in this project once macro asymmetry runs out of
+             space. */
+    .about-story__beat--a,
+    .about-story__beat--b,
+    .about-story__beat--c {
       grid-column: 1 / -1;
+      max-width: none;
     }
 
     .about-story__quote {
       grid-column: 1 / -1;
-      grid-row: auto;
     }
 
     .about-story__image {
       grid-column: 1 / -1;
-      grid-row: auto;
       max-width: 16rem;
     }
   }

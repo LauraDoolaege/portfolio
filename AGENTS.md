@@ -2265,6 +2265,85 @@ see this file's own immediately-preceding entry for the first one). The
 so it scales with the font-size automatically and keeps wrapping at the
 same word boundary.
 
+**ProjectCard rebuilt around a full-bleed image with a hover-reveal info
+overlay - this is what finally fixed the accordion clipping bug, not
+another round of enlarging the old budget.** Direct report that the
+collapsed Selected Work cards were "still being cut off on hover,"
+followed by a specific new instruction: "I need the image to fill the
+entire card at first (numbers in the left corners can stay), and then it
+reveals the part with the info while hovering." This reverses an earlier
+direct request that the full title stay visible at all times - the live
+instruction wins, and this one specified a mechanism, not just a copy
+tweak.
+
+`ProjectCard.astro`'s old image-frame/info-body split (a fixed-ratio
+frame stacked over a separately-padded body holding a stub/tag/year/
+title/arrow) is gone, replaced by one element: the whole card *is* the
+image, with a `.project-card__overlay` panel absolutely positioned at
+its bottom edge, translated fully out of view (`translateY(100%)`, not
+just `opacity: 0` - so it can't be read as a sliver or catch a stray
+click while "closed") and sliding up to cover the bottom portion of the
+image on `:hover`/`:focus-visible`. The number badge stays, pinned
+top-left, as asked. This is a root-cause fix for the clipping bug, not a
+cosmetic change alongside it: the entire mechanism that kept clipping
+real titles - a spine label rotated into `writing-mode: vertical-rl`
+inside a fixed-height column budget, enlarged three separate times
+across earlier passes and still not generous enough - no longer exists.
+There's no separate "collapsed" visual state to maintain at all anymore;
+`SelectedWork.astro`'s accordion just resizes the same full-bleed card
+via `flex-grow`, and the card's own `:hover` already fires the moment
+the pointer is over it (which is also while the panel is mid-expansion),
+so the overlay reveal and the accordion's width change happen together
+with no extra wiring - `SelectedWork.astro`'s own `:global()` overrides
+for the accordion shrank from a large block of writing-mode/body/stub/
+meta rules down to one line (`height: 100%; aspect-ratio: auto;`).
+Touch has no hover to reveal the overlay with, so under `(hover: none)`
+the card drops the overlay pattern entirely: the image gets a fixed
+aspect-ratio and returns to normal flow above a permanently-visible,
+non-overlapping panel - the same "always show the facts, no gesture
+required" fallback already used for the arrow-vs-cursor split, just
+covering the whole info panel instead of one icon. Verified in the
+browser, not assumed from the CSS: a genuine hover on a collapsed
+accordion panel showed the full un-truncated title ("Nine to Thrive")
+rendering with the overlay's `getBoundingClientRect()` staying entirely
+within the card's own box at every sample; at 375px with `(hover: none)`
+matching, the overlay computed as `position: static` with the full title
+visible with no interaction needed.
+
+**A second, separate, genuinely still-present clipping bug - Gallery
+tiles being cut off on hover, root-caused rather than patched with more
+padding a second time.** The previous pass's fix (bumping
+`.gallery__viewport`'s `padding-block` to 4rem, cancelled with an equal
+negative `margin-block` so it doesn't add height to the layout) was a
+real improvement but didn't actually solve it, because it couldn't:
+`.gallery__stage` - the full-bleed breakout wrapper one level up - had a
+plain `overflow: hidden` on *both* axes, and the viewport's negative-
+margin trick only fixes the layout height it contributes to the stage;
+the viewport's own rendered box still visually extends into that padding
+above/below the stage's box, which the stage was clipping the entire
+time. Confirmed directly via `getBoundingClientRect()`: the hovered
+tile's spotlight rect measured several px above the stage's own rect,
+with the viewport and `.gallery` both already correctly scoped to
+`overflow-x` only - the stage was the one remaining culprit.
+
+The fix needed a second attempt to actually work: `overflow-x: hidden;
+overflow-y: visible;` looks like it should isolate the axes, but per the
+CSS Overflow spec, setting one axis to anything other than `visible` (or
+`clip`) forces a `visible` value on the *other* axis to compute as
+`auto` instead - confirmed via `getComputedStyle`, which reported
+`overflow-y: auto` even with `visible` written in the source, and `auto`
+still establishes its own clipping/scroll box, so tiles were still
+getting cut, just silently instead of via a visible scrollbar. `clip` is
+exempt from that forcing rule (grouped with `visible` in the spec's own
+exemption list), so `overflow-x: clip; overflow-y: visible;` is what
+actually works - verified via `getComputedStyle` reporting genuine
+`overflow-y: visible` this time, and via `getBoundingClientRect()`
+showing the hovered tile's spotlight rect no longer poking past the
+stage's own box on either edge. Horizontal clipping (the actual reason
+the stage needs an overflow rule at all - the full-bleed 100vw breakout)
+stayed intact throughout, confirmed via `document.body.scrollWidth`
+never exceeding `window.innerWidth`.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

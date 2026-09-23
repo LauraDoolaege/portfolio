@@ -3,12 +3,20 @@
 // project titles are supplied (per direct message: "project 1 => Nine to
 // Thrive, project 2 => Miles and Meals, project 3 => Kickstarter: Izumi"
 // for Design, "a space journey through screentime, nexxus and plan A" for
-// Experience) - each card's `fullTitle` (see ProjectCard.astro), visible
-// at all times, including the accordion's collapsed/rotated spine label -
-// an earlier version only revealed the real name on hover, generic
-// "Project N" the rest of the time; direct follow-up asked for it to
-// show always instead. Images still don't exist (Section 6), so the
-// image slot stays a flat placeholder regardless.
+// Experience) - each card's `fullTitle` (see ProjectCard.astro). Images
+// still don't exist (Section 6), so the image slot stays a flat
+// placeholder regardless.
+//
+// ProjectCard's title visibility has changed twice now: an early version
+// only revealed the real name on hover, a follow-up asked for it to show
+// always instead, and the most recent direct request ("the image to fill
+// the entire card at first... reveals the part with the info while
+// hovering") reverses that again - the title (and the rest of the info:
+// tag, year, arrow) is back to hover-only, but the mechanism is new: a
+// sliding overlay panel over a full-bleed image, not the old always-
+// visible info block below a smaller image frame. See ProjectCard.astro's
+// own header comment for the full reasoning, including why this also
+// fixes the accordion's recurring collapsed-title clipping bug.
 //
 // Three groups now, not two - direct follow-up request: "change the
 // order between group projects and individual work. change the title to
@@ -420,11 +428,11 @@ const motion = [
 
   @media (min-width: 900px) {
     /* A fixed-height row is what makes an accordion read as one object
-                                               instead of three cards of changing aspect-ratio - the height stays
-                                               constant, only each panel's share of the width changes. 18rem, not
-                                               the 30rem this first shipped with - per direct feedback the panels
-                                               read as "quite tall" at that height, more like portrait cards than
-                                               the short, horizontal, rectangular strip that's actually wanted. */
+                                                 instead of three cards of changing aspect-ratio - the height stays
+                                                 constant, only each panel's share of the width changes. 18rem, not
+                                                 the 30rem this first shipped with - per direct feedback the panels
+                                                 read as "quite tall" at that height, more like portrait cards than
+                                                 the short, horizontal, rectangular strip that's actually wanted. */
     .selected-work__accordion {
       display: flex;
       align-items: stretch;
@@ -433,28 +441,28 @@ const motion = [
     }
 
     /* flex-grow (not width or flex-basis) is what's animated: every
-                                               panel starts equal (grow: 1) and the hovered/focused one steps up
-                                               to grow: 1.6 on hover, below. That number has come down twice now
-                                               - 6, then 3, then this - per two rounds of direct feedback ("I
-                                               don't like how dramatically the project cards stretch," then
-                                               "still feels too plastic and extreme for my brand"). The second
-                                               round wasn't just "3 is still too big, try a smaller number": a
-                                               fixed-height row with a flex-grow-driven width change is
-                                               literally stretching one rectangle's aspect ratio every tick of
-                                               the transition (height pinned at 18rem, width changing), which is
-                                               what reads as "plastic" regardless of how far it goes - a
-                                               real photo cropped to one shape distorting toward a very
-                                               different one doesn't look like a considered reveal, it looks
-                                               like it's being pulled. 1.6 keeps that same distortion but makes
-                                               it small enough (roughly 44% of the row instead of 60%, versus
-                                               each panel's 33% at rest) that it reads as a gentle emphasis
-                                               rather than an elastic snap - and the transition itself slowed
-                                               from 0.6s to 0.8s so the motion itself reads calmer, not just
-                                               smaller. --motion-easing-soft (not a hand-typed cubic-bezier
-                                               literal - see that token's own comment (global.css) for why this
-                                               exact curve is shared across several places instead of
-                                               copy-pasted) already eases gently; the extra time gives it room
-                                               to actually read as gradual instead of quick-then-eased. */
+                                                 panel starts equal (grow: 1) and the hovered/focused one steps up
+                                                 to grow: 1.6 on hover, below. That number has come down twice now
+                                                 - 6, then 3, then this - per two rounds of direct feedback ("I
+                                                 don't like how dramatically the project cards stretch," then
+                                                 "still feels too plastic and extreme for my brand"). The second
+                                                 round wasn't just "3 is still too big, try a smaller number": a
+                                                 fixed-height row with a flex-grow-driven width change is
+                                                 literally stretching one rectangle's aspect ratio every tick of
+                                                 the transition (height pinned at 18rem, width changing), which is
+                                                 what reads as "plastic" regardless of how far it goes - a
+                                                 real photo cropped to one shape distorting toward a very
+                                                 different one doesn't look like a considered reveal, it looks
+                                                 like it's being pulled. 1.6 keeps that same distortion but makes
+                                                 it small enough (roughly 44% of the row instead of 60%, versus
+                                                 each panel's 33% at rest) that it reads as a gentle emphasis
+                                                 rather than an elastic snap - and the transition itself slowed
+                                                 from 0.6s to 0.8s so the motion itself reads calmer, not just
+                                                 smaller. --motion-easing-soft (not a hand-typed cubic-bezier
+                                                 literal - see that token's own comment (global.css) for why this
+                                                 exact curve is shared across several places instead of
+                                                 copy-pasted) already eases gently; the extra time gives it room
+                                                 to actually read as gradual instead of quick-then-eased. */
     .selected-work__accordion > li {
       flex: 1 1 0%;
       min-width: 0;
@@ -468,112 +476,24 @@ const motion = [
     }
 
     /* The card fills its panel's full box instead of holding its own
-                                                                                 aspect-ratio - same "stretch to fill a flex/grid cell" technique
-                                                                                 the bento's featured card used before this replaced it. */
+         aspect-ratio - same "stretch to fill a flex/grid cell" technique
+         the bento's featured card used before this replaced it.
+         ProjectCard.astro was rebuilt (direct request: "the image to fill
+         the entire card at first... reveals the part with the info while
+         hovering") around a full-bleed image with its own hover-reveal
+         info overlay - it no longer has a separate frame/body split or a
+         collapsed "spine label" state to maintain here at all. That
+         rebuild is what actually fixes the clipping bug this accordion
+         kept reintroducing across three earlier attempts (see AGENTS.md):
+         the writing-mode column-budget mechanism that caused it doesn't
+         exist anymore, there's nothing left to widen a fourth time. The
+         card's own `:hover` fires the moment the pointer is over it, which
+         is also while this panel is mid-expansion, so the overlay reveal
+         and the accordion's width change happen together with zero extra
+         wiring needed here. */
     .selected-work__accordion :global(.project-card) {
-      display: flex;
-      flex-direction: column;
       height: 100%;
-    }
-
-    .selected-work__accordion :global(.project-card__frame) {
-      flex: 1 1 auto;
       aspect-ratio: auto;
-    }
-
-    /* Collapsed (rest) state: a panel this narrow has no room for a
-                                                                                 horizontal title/tag/year row, so the title runs vertically along
-                                                                                 the panel instead (the classic accordion-gallery "spine label"),
-                                                                                 and the tag/year/dashed-stub - which would just wrap illegibly at
-                                                                                 this width - are hidden rather than shrunk into something
-                                                                                 unreadable. The number badge and arrow badge stay put; both are
-                                                                                 already small, self-contained, and legible at any panel width. */
-    /* A fixed height (not flex: 0 0 auto driven by content) - real titles
-                                                                 vary a lot in length ("Plan A" vs "A Space Journey through
-                                                                 Screentime"), and letting the body size itself to whichever title
-                                                                 happens to be longest would squeeze the frame above it down to
-                                                                 almost nothing on that one card, throwing off every card's frame/
-                                                                 body proportion inconsistently. Fixing the height means every
-                                                                 collapsed panel keeps the same frame/body split regardless of its
-                                                                 own title length - the title wraps into more (narrower) columns
-                                                                 instead of growing the body taller. */
-    .selected-work__accordion :global(.project-card__body) {
-      flex: 0 0 10.5rem;
-      display: flex;
-      align-items: center;
-      padding: var(--space-16);
-      /* No overflow: hidden here anymore - a real bug, caught from a
-                 screenshot showing collapsed titles missing their own opening
-                 characters ("Miles and Meals" rendering as "ND MEALS"). The
-                 fixed 9rem/7rem (body/title) budget this used before was tuned
-                 against short test titles and turned out not to be generous
-                 enough for some of the real ones - clipping the *title itself*
-                 at this element's own edge is the wrong place for that to fail
-                 silently. The outer <li> above still has its own
-                 `overflow: hidden`, which remains the real edge of the visible
-                 panel, so a title that still needs more room than the taller
-                 10.5rem/8.5rem budget below now spills into the card's own
-                 (normally empty during collapse) frame area above it instead of
-                 being cut - reads as "a bit tall," not "unreadable." */
-    }
-
-    .selected-work__accordion :global(.project-card__stub),
-    .selected-work__accordion :global(.project-card__meta) {
-      display: none;
-    }
-
-    /* white-space: normal (not nowrap) matters once titles are real,
-                                                                 supplied names instead of a short "Project N" placeholder - in
-                                                                 vertical-rl, wrapping stacks a new column to the left instead of
-                                                                 breaking the line downward. `height` here maps to the *inline*
-                                                                 size in vertical-rl (block flows horizontally), so setting an
-                                                                 explicit one is what actually forces that wrap to happen at all -
-                                                                 without it the browser lets the column run as tall as the text
-                                                                 needs, which is what let one long title's body swallow the whole
-                                                                 card in an earlier version of this. 8.5rem = the body's own
-                                                                 10.5rem minus its 2 x space-16 padding - bumped up from a
-                                                                 tighter 7rem/9rem pair that was clipping real titles (see the
-                                                                 body rule's own comment above for the bug this fixes). */
-    .selected-work__accordion :global(.project-card__title) {
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
-      white-space: normal;
-      height: 8.5rem;
-      font-size: 0.9rem;
-      line-height: 1.3;
-      letter-spacing: 0;
-    }
-
-    /* Expanded state: the panel is wide enough again for the card's
-                                                                                 normal upright reading layout, so everything reverts - the title
-                                                                                 un-rotates, the tag/year/stub reappear, the body padding grows
-                                                                                 back to the card's usual space-24 inset. */
-    .selected-work__accordion > li:hover :global(.project-card__body),
-    .selected-work__accordion > li:focus-within :global(.project-card__body) {
-      flex-basis: auto;
-      align-items: flex-start;
-      padding: var(--space-24);
-      overflow: visible;
-    }
-
-    .selected-work__accordion > li:hover :global(.project-card__stub),
-    .selected-work__accordion > li:focus-within :global(.project-card__stub) {
-      display: block;
-    }
-
-    .selected-work__accordion > li:hover :global(.project-card__meta),
-    .selected-work__accordion > li:focus-within :global(.project-card__meta) {
-      display: flex;
-    }
-
-    .selected-work__accordion > li:hover :global(.project-card__title),
-    .selected-work__accordion > li:focus-within :global(.project-card__title) {
-      writing-mode: horizontal-tb;
-      transform: none;
-      height: auto;
-      font-size: 1.5rem;
-      line-height: 1.1;
-      letter-spacing: -0.01em;
     }
   }
 

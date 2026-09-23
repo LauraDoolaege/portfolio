@@ -4,57 +4,53 @@
 // appears (homepage Selected Work now, Work index later). Content-agnostic
 // via props, so it lives in ui/ rather than sections/.
 //
-// "Ticket" isn't just a name: the rule between image and info block is a
-// literal stub tear-line (solid, not dashed - see its own comment below
-// for that change), and the corner number is a plate/ticket numeral —
-// small, load-bearing details rather than decoration for its own sake.
-//
 // href defaults to "#" — case-study pages are PROPOSED, not built yet
 // (PROJECT_BRIEF.md Section 5), same placeholder-link pattern already used
 // by the header CV button until a real destination exists.
 //
-// Card-hierarchy pass (explicit request, "make them feel more like
-// cards"): the image/stub/info used to sit loose in the anchor with no
-// unifying edge, reading as three stacked parts rather than one object.
-// A real card shell now wraps all three — hairline border, background,
-// one shared radius, overflow: hidden so the image's top corners inherit
-// it for free instead of needing their own. The old fade-in text link
-// ("[ view project -> ]") is gone: the arrow (below) is the card's one
-// "go" affordance now, so keeping both would have meant two competing
-// calls to action doing the same job.
+// Rebuilt around a full-bleed image with a hover-reveal info panel — per
+// direct request ("the image to fill the entire card at first, numbers in
+// the left corners can stay, and then it reveals the part with the info
+// while hovering"). This directly reverses an earlier direct request that
+// the full title stay visible at all times - a live instruction always
+// supersedes an earlier one when they conflict, and this one was explicit
+// about the mechanism (image first, info on hover), not just a copy tweak.
 //
-// The arrow moved from a circular badge floating over the image to a
-// plain inline icon sitting next to the title, on the same line - per
-// direct request, and only shown there on devices where hover doesn't
-// apply (`(hover: none)`); on a fine pointer it's hidden outright in
-// favor of the arrow appearing as the cursor itself while hovering a
-// card (implemented per-section, e.g. SelectedWork.astro, since it's a
-// section-level interaction like Gallery's own custom cursor, not
-// something this generic card component owns).
+// This replaces the previous image-frame/info-body split (a fixed aspect
+// ratio frame stacked over a separate padded body holding stub/tag/year/
+// title/arrow) with one element: the whole card *is* the image, and
+// `.project-card__overlay` is an absolutely-positioned panel sitting at
+// its bottom edge, translated fully out of view (`translateY(100%)`) at
+// rest and sliding up into view on `:hover`/`:focus-visible`. This isn't
+// just a visual change - it's what actually fixes the collapsed-accordion
+// clipping bug that kept resurfacing (see AGENTS.md for the three earlier
+// attempts, each just enlarging a fixed writing-mode budget). That bug's
+// entire root cause - a spine title rotated into `writing-mode:
+// vertical-rl` inside a fixed-height column budget - no longer exists:
+// there's no separate "collapsed" visual state to maintain at all now.
+// SelectedWork.astro's accordion just resizes this same card via
+// flex-grow; the card's own :hover already fires the moment the mouse is
+// over it (which is also when the panel is mid-expansion), so the overlay
+// and the accordion's width change happen together with no extra wiring.
+//
+// Touch has no hover to reveal the overlay with, so under `(hover: none)`
+// the card drops out of the overlay pattern entirely: the image gets a
+// fixed aspect-ratio and sits in normal flow above a permanently-visible,
+// non-overlapping overlay (`position: static`) - functionally the same
+// "always show the facts, no gesture required" fallback this project
+// already uses for the arrow-vs-cursor split, just applied to the whole
+// info panel instead of one icon.
 //
 // Deliberately no layout-mode props (an earlier `featured` prop, for a
 // now-abandoned bento layout, was removed rather than left unused) - any
 // layout-specific presentation (SelectedWork's accordion strip included)
 // is applied from outside via `:global()` overrides scoped to that
 // section's own class, not by teaching this component about every
-// section that might reuse it. Keeps this file focused on the one card
-// shape the brief actually specifies.
+// section that might reuse it.
 //
-// Hover motion softened, drop shadow removed - per direct feedback that
-// the hover lift read as "very harsh." The lift/border-color/arrow/title
-// transitions now use the new `--motion-easing-soft` token (global.css)
-// instead of the plain ease-out `--motion-easing` - a gradual glide
-// instead of an even mechanical deceleration - and the box-shadow that
-// used to accompany the lift is gone outright, per the same feedback;
-// the lift and the border darkening to ink already carry the "this one's
-// active" read without it.
-//
-// `fullTitle`: the real project name, shown at all times (including
-// SelectedWork's accordion collapsed/rotated spine state) - an earlier
-// version only revealed it on hover, generic "Project N" the rest of the
-// time; direct follow-up asked for the real name to be visible always
-// instead. Falls back to `title` alone when `fullTitle` isn't supplied
-// (a still-placeholder project with no real name yet).
+// `fullTitle`: the real project name. Falls back to `title` alone when
+// `fullTitle` isn't supplied (a still-placeholder project with no real
+// name yet).
 import Tag from './Tag.astro';
 
 interface Props {
@@ -81,38 +77,33 @@ const displayTitle = fullTitle ?? title;
 ---
 
 <a href={href} class:list={['project-card', className]} aria-label={`${displayTitle} — ${roleTag}`}>
-  <span class="project-card__frame">
-    <span class="project-card__image">
-      <!-- TODO: replace with a real project image once photography exists (PROJECT_BRIEF.md Section 6) -->
-    </span>
-    <span class="project-card__number" aria-hidden="true">
-      {number}
-    </span>
+  <span class="project-card__image">
+    <!-- TODO: replace with a real project image once photography exists (PROJECT_BRIEF.md Section 6) -->
   </span>
 
-  <span class="project-card__body">
-    <span class="project-card__stub" aria-hidden="true"></span>
+  <span class="project-card__number" aria-hidden="true">
+    {number}
+  </span>
 
-    <span class="project-card__info">
-      <span class="project-card__meta">
-        <Tag>{roleTag}</Tag>
-        <span class="project-card__year" aria-hidden="true">
-          {year}
-        </span>
+  <span class="project-card__overlay">
+    <span class="project-card__meta">
+      <Tag>{roleTag}</Tag>
+      <span class="project-card__year" aria-hidden="true">
+        {year}
       </span>
-      <span class="project-card__title-row">
-        <span class="project-card__title">{displayTitle}</span>
-        <span class="project-card__arrow" aria-hidden="true">
-          <svg viewBox="0 0 16 16" fill="none">
-            <path
-              d="M4.5 11.5L11.5 4.5M11.5 4.5H5.5M11.5 4.5V10.5"
-              stroke="currentColor"
-              stroke-width="1.3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </span>
+    </span>
+    <span class="project-card__title-row">
+      <span class="project-card__title">{displayTitle}</span>
+      <span class="project-card__arrow" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none">
+          <path
+            d="M4.5 11.5L11.5 4.5M11.5 4.5H5.5M11.5 4.5V10.5"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
       </span>
     </span>
   </span>
@@ -122,7 +113,7 @@ const displayTitle = fullTitle ?? title;
   // Mouse-magnetic image shift, per direct request ("like a lot of
   // Awwwards type websites, the images kind of shift to the mouse
   // position") - the image drifts a few px toward wherever the cursor
-  // sits within the frame, on top of the existing scale-up. Gated on
+  // sits within the card, on top of the existing scale-up. Gated on
   // `pointer: fine` as well as reduced motion, same as the Gallery
   // cursor/spotlight - this is a continuous mouse-follow effect, not
   // something touch has an equivalent of. The CSS `:hover { transform:
@@ -130,25 +121,20 @@ const displayTitle = fullTitle ?? title;
   // no-JS fallback: GSAP's inline `transform` always wins over it once
   // this script runs, but when it doesn't (reduced motion, or JS never
   // loads), the plain CSS hover state still gives a functional response,
-  // just without the mouse-follow. The card's own lift/shadow/border/
-  // arrow-fill/title-color hover states are plain CSS on `.project-card`
-  // itself, untouched by this script - it only ever writes to the image
-  // layer, so there's no risk of the two systems fighting over the same
-  // property.
+  // just without the mouse-follow.
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
   if (!prefersReducedMotion() && window.matchMedia('(pointer: fine)').matches) {
     // Total px range the image can travel corner-to-corner within the
-    // frame - modest on purpose (the frame clips via overflow: hidden,
-    // and the hover scale-up is what gives the image the few px of
-    // buffer to shift within without revealing the frame's own
-    // background at an edge).
+    // card - modest on purpose (the card clips via overflow: hidden, and
+    // the hover scale-up is what gives the image the few px of buffer to
+    // shift within without revealing the card's own background at an
+    // edge).
     const SHIFT_RANGE = 20;
 
     document.querySelectorAll<HTMLAnchorElement>('.project-card').forEach((card) => {
-      const frame = card.querySelector<HTMLElement>('.project-card__frame');
       const image = card.querySelector<HTMLElement>('.project-card__image');
-      if (!frame || !image) return;
+      if (!image) return;
 
       const moveX = gsap.quickTo(image, 'x', { duration: 0.5, ease: 'power3.out' });
       const moveY = gsap.quickTo(image, 'y', { duration: 0.5, ease: 'power3.out' });
@@ -158,7 +144,7 @@ const displayTitle = fullTitle ?? title;
       });
 
       card.addEventListener('pointermove', (event) => {
-        const rect = frame.getBoundingClientRect();
+        const rect = card.getBoundingClientRect();
         const relX = (event.clientX - rect.left) / rect.width - 0.5;
         const relY = (event.clientY - rect.top) / rect.height - 0.5;
         moveX(relX * SHIFT_RANGE);
@@ -175,29 +161,26 @@ const displayTitle = fullTitle ?? title;
 <style>
   .project-card {
     display: block;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
     background: var(--color-bg-primary);
     border: var(--border-hairline) solid var(--color-text-secondary);
     border-radius: var(--radius-image);
-    overflow: hidden;
-    /* --motion-easing-soft (not the plain --motion-easing/ease-out this
-                                                                             used before), and a touch longer than --motion-duration-slow - per
-                                                                             direct feedback that the card's hover movement read as "very
-                                                                             harsh." Plain ease-out decelerates evenly the whole way, which
-                                                                             reads mechanical on a 6px lift; the soft cubic-bezier eases in
-                                                                             more gradually, closer to a physical glide. */
+    /* --motion-easing-soft, not the plain --motion-easing/ease-out this
+         used before, per direct feedback that the card's hover movement
+         read as "very harsh." */
     transition:
       transform 0.55s var(--motion-easing-soft),
       border-color var(--motion-duration) var(--motion-easing-soft);
   }
 
-  /* The lift reads as the card physically rising off the page - a
-     bigger, slower move than the image's own scale/shift, so the two
-     don't compete for attention. Kept as a plain CSS transition (not
-     GSAP) since it's a simple two-state toggle on the card itself, an
-     element the mouse-shift script above never touches. The drop shadow
-     this used to gain on hover is gone per direct request - the lift and
-     the border darkening to ink already carry the "this one's active"
-     read on their own. */
+  /* The lift reads as the card physically rising off the page - kept as a
+     plain CSS transition (not GSAP) since it's a simple two-state toggle
+     on the card itself, an element the mouse-shift script above never
+     touches. No drop shadow (removed per earlier direct feedback) - the
+     lift, the border darkening to ink, and the overlay sliding into view
+     together already carry the "this one's active" read. */
   .project-card:hover,
   .project-card:focus-visible {
     transform: translateY(-6px);
@@ -209,22 +192,17 @@ const displayTitle = fullTitle ?? title;
     outline-offset: 4px;
   }
 
-  .project-card__frame {
-    display: block;
-    position: relative;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-  }
-
   .project-card__image {
-    display: block;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    inset: 0;
     background: var(--color-bg-secondary);
     transition: transform var(--motion-duration-slow) var(--motion-easing-soft);
   }
 
-  /* Reduced-motion/no-JS fallback only - the script above takes over transform entirely (scale + mouse-follow shift) once it runs, and GSAP's inline transform always wins over this rule regardless of source order, so there's no double-scaling risk between the two. */
+  /* Reduced-motion/no-JS fallback only - the script above takes over
+     transform entirely (scale + mouse-follow shift) once it runs, and
+     GSAP's inline transform always wins over this rule regardless of
+     source order, so there's no double-scaling risk between the two. */
   .project-card:hover .project-card__image,
   .project-card:focus-visible .project-card__image {
     transform: scale(1.03);
@@ -234,6 +212,7 @@ const displayTitle = fullTitle ?? title;
     position: absolute;
     top: 0.85rem;
     left: 0.85rem;
+    z-index: 2;
     padding: 0.3em 0.55em;
     background: var(--color-bg-primary);
     font-family: var(--font-mono);
@@ -242,25 +221,31 @@ const displayTitle = fullTitle ?? title;
     color: var(--color-text-secondary);
   }
 
-  .project-card__body {
-    padding: var(--space-24);
-  }
-
-  .project-card__stub {
-    display: block;
-    margin-bottom: var(--space-16);
-    /* Solid, not the dashed "tear-line" this used before - per direct
-                       request ("use solid lines instead of a dashed line"), applied
-                       here and to Gallery's matching tile-footer rule together so the
-                       two stay consistent. */
-    border-top: var(--border-hairline) solid var(--color-text-secondary);
-  }
-
-  .project-card__info {
+  /* The info panel - hidden entirely below the card's own bottom edge at
+     rest (translateY(100%) moves it a full panel-height down, not just
+     opacity: 0, so it can never be read as a sliver or catch a stray
+     click while "closed"), sliding up to cover the card's own bottom
+     portion on hover/focus. Solid porcelain (not a dark scrim over the
+     image) so it reads consistently with the rest of the site's palette
+     regardless of what the image underneath eventually is. */
+  .project-card__overlay {
+    position: absolute;
+    z-index: 2;
+    inset-inline: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 0.6rem;
+    padding: var(--space-16) var(--space-24);
+    background: var(--color-bg-primary);
+    border-top: var(--border-hairline) solid var(--color-text-secondary);
+    transform: translateY(100%);
+    transition: transform 0.5s var(--motion-easing-soft);
+  }
+
+  .project-card:hover .project-card__overlay,
+  .project-card:focus-visible .project-card__overlay {
+    transform: translateY(0);
   }
 
   .project-card__meta {
@@ -276,9 +261,6 @@ const displayTitle = fullTitle ?? title;
     color: var(--color-text-secondary);
   }
 
-  /* Title and arrow share one row now, per direct request ("the arrow...
-     on the same line as the title") - the title takes the remaining
-     space, the arrow sits at the row's end. */
   .project-card__title-row {
     display: flex;
     align-items: center;
@@ -290,17 +272,11 @@ const displayTitle = fullTitle ?? title;
   .project-card__title {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     text-transform: uppercase;
     letter-spacing: -0.01em;
     line-height: 1.1;
     color: var(--color-ink);
-    transition: color var(--motion-duration) var(--motion-easing-soft);
-  }
-
-  .project-card:hover .project-card__title,
-  .project-card:focus-visible .project-card__title {
-    color: var(--color-accent);
   }
 
   /* A plain icon, not the circular badge this used to be - it only ever
@@ -321,6 +297,31 @@ const displayTitle = fullTitle ?? title;
   @media (hover: hover) and (pointer: fine) {
     .project-card__arrow {
       display: none;
+    }
+  }
+
+  /* Touch has no hover to reveal the overlay with - drops out of the
+     overlay pattern entirely rather than leaving the info permanently
+     unreachable. The image gets its own aspect-ratio and returns to
+     normal flow above the panel, which becomes a plain, always-visible,
+     non-overlapping block below it - the same "always show the facts, no
+     gesture required" fallback already used for the arrow icon, just
+     covering the whole panel instead of one glyph. */
+  @media (hover: none) {
+    .project-card {
+      display: flex;
+      flex-direction: column;
+      aspect-ratio: auto;
+    }
+
+    .project-card__image {
+      position: relative;
+      aspect-ratio: 4 / 3;
+    }
+
+    .project-card__overlay {
+      position: static;
+      transform: none;
     }
   }
 </style>

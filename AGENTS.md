@@ -2717,6 +2717,77 @@ toggling `.is-hovering` on the section took the _active_ step's own
 images from `opacity: 0` to ~1 and back; and `about-process`,
 `about-story`, `about-drives` all measured `border-top-width: 0px`.
 
+**A large multi-part pass: real new personal copy on About, a homepage
+section swap, and the Hero CTA relocated to Principles.**
+
+**AboutIntro gained a second, real paragraph, and lost its terracotta
+footnote card.** Direct request: "as a second paragraph underneath
+about, write from my perspective that outside of school, I have a soft
+spot for animals..." (a chocolate lab walked daily, student jobs in
+customer-service environments - the local supermarket, a museum - and
+that everyday moments like these are where inspiration strikes most).
+Added near-verbatim as a second `.about-intro__text` paragraph (light
+typo/grammar cleanup only - "costumer" → "customer," "who'm I walk" →
+"I walk," sentence-case fixes - the same "light tightening, not a
+rewrite" standard already applied to every other supplied paragraph on
+this page). The old placeholder footnote card ("You knew that already
+by now. Let me use this opportunity to tell you a little more about
+me.") is removed outright - "remove the card with \* but you knew that
+already," literally quoting the card's own copy back. It was this
+page's one terracotta "wink"; that's not re-homed elsewhere; once real
+personal content carries the personality, a decorative placeholder note
+doing the same job would be redundant. `.about-intro__text` and
+`.about-intro__aside` (now just the portrait, no more overlapping
+footnote) were re-parented under a new `.about-intro__text-col` wrapper
+so the grid-column/max-width for two paragraphs only needs declaring
+once.
+
+Beat 05 of AboutStory ("Still noticing") lost its closing sentence -
+"Working at a grocery store has unexpectedly become one of my favourite
+places to observe human behaviour" - per direct follow-up ("you can
+therefore remove the last sentence of 05 still noticing"), once it
+became redundant with the new AboutIntro paragraph covering the same
+ground (customer-service jobs, everyday moments as inspiration).
+
+**Homepage section order swapped again: Principles now leads, Selected
+Work second.** Direct request, "change the order between selected
+works and design principles." `index.astro`'s render order is now
+Hero → Principles → Selected Work → Currently Working On → Gallery →
+ContactCTA/Footer - Currently Working On keeps its existing "directly
+below Selected Work" placement rule regardless of Selected Work's own
+numbered position. SectionMarker indexes swapped to match: Principles
+"01" (was "02"), Selected Work "02" (was "01"), Gallery unchanged at
+"03."
+
+**The Hero "Get to know me" CTA moved to sit underneath Principles.**
+Direct request, "remove the cta from the hero at the top and place it
+underneath the design principles." `Hero.astro`'s `.hero__cta-row` no
+longer holds a `<Button>` - just the "(Scroll)" cue, which isn't a
+call-to-action and wasn't part of the request, now right-aligned via
+`justify-content: flex-end` instead of `space-between` (nothing left to
+space between). The now-unused `Button`/`withBase` imports and the
+dead `:global(.hero__cta)` rules (base styles plus a mobile-only
+min-height override) are removed rather than left orphaned. The same
+button (same label, same `/about` destination, same arrow icon) now
+renders in a new `.principles__cta` block under the principles list,
+with its own scroll-triggered fade/rise matching every other entrance
+on this page.
+
+A Selected Work "contact me" CTA was requested too, but explicitly
+flagged for discussion first ("if you think this is a bad idea tell me
+before implementing and ask me with alternatives") rather than
+implemented - see the conversation for the question asked and the
+option chosen, since this file doesn't track conversational back-and-
+forth, only the resulting decision once made.
+
+Verified in the browser: the homepage's section order and
+`.section-marker__index` sequence (`01`/`02`/`03`) both matched the new
+layout; `.hero .btn` no longer exists while `.hero__scroll` still reads
+"(Scroll)"; `.principles__cta .btn` renders "Get to know me" linking to
+`/portfolio/about`; AboutIntro shows exactly two `.about-intro__text`
+paragraphs with no `.about-intro__footnote` in the DOM; and AboutStory's
+last beat has exactly one paragraph, the grocery-store sentence gone.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

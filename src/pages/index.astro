@@ -1,13 +1,19 @@
 ---
 // Homepage. Section order and content per PROJECT_BRIEF.md Section 4
 // "Homepage structure (LOCKED)" / Section 5 "Homepage — LOCKED" — with
-// one deliberate departure from that original order, per direct request:
-// Selected Work now leads (01), Currently Working On sits directly below
-// it, then Principles (02) and Gallery (03), into ContactCTA/Footer.
+// deliberate departures from that original order, per direct request.
 // "How I think" is gone outright (its 3 principle titles were folded
 // into Principles.astro first - see that file's own comment - then this
 // import/usage was deleted, not just skipped, since nothing else needs
 // HowIThink.astro any more).
+//
+// Order swapped again, direct follow-up ("change the order between
+// selected works and design principles"): Principles now leads (01),
+// then Selected Work (02) - Currently Working On stays directly below
+// Selected Work regardless of which position that is, per its own
+// existing "directly below Selected Work" placement rule - then Gallery
+// (03, unchanged), into ContactCTA/Footer. See Principles.astro and
+// SelectedWork.astro for their own renumbered SectionMarker indexes.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
@@ -24,9 +30,9 @@ import ContactCTA from '../components/sections/ContactCTA.astro';
     <Header />
     <Hero />
   </div>
+  <Principles />
   <SelectedWork />
   <CurrentlyWorkingOn />
-  <Principles />
   <Gallery />
   <ContactCTA />
   <Footer />

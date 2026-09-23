@@ -34,12 +34,18 @@
 //
 // Open decisions this component had to fill in (not locked anywhere —
 // see CLAUDE.md "Open decisions"):
-// - "Get to know me" target: linked to /about (no target was specified).
 // - No real photo exists yet (PROJECT_BRIEF.md Section 6) — the image
 //   slot is a placeholder block with a TODO showing the exact swap-in
 //   markup once one exists.
-import { withBase } from '../../utils/url';
-import Button from '../ui/Button.astro';
+//
+// The "Get to know me" CTA that used to live here is gone - direct
+// request ("remove the cta from the hero at the top and place it
+// underneath the design principles"), relocated to Principles.astro (see
+// that file's own comment) rather than duplicated. The "(Scroll)" cue
+// stays - it's a scroll hint, not a call-to-action, and wasn't part of
+// the request. It no longer needs its own row wrapper to share a line
+// with a button that's gone; it's just a right-aligned line on its own
+// now.
 import Tag from '../ui/Tag.astro';
 
 const titleWord = 'Portfolio';
@@ -159,22 +165,14 @@ const letters = titleWord.split('');
       </div>
 
       <!--
-        Button and scroll cue share one row now, per direct request ("the
-        (scroll) should be on the same line as the get to know me button,
-        still on the right") - a single flex wrapper (button at its own
-        content width, scroll pushed to the far end via
-        justify-content: space-between) rather than each keeping its own
-        separate grid placement, so "same line, still on the right" holds
-        at every viewport without needing a per-breakpoint override -
-        this used to need one for the grid columns changing between
-        desktop/tablet, and a completely different mobile layout (its own
-        line below the button) below 640px.
+        Used to also hold the "Get to know me" button, sharing this row
+        via justify-content: space-between (button left, scroll cue
+        pushed right). That button is gone now (relocated to
+        Principles.astro - see this file's header comment), so the row
+        keeps only the scroll cue, right-aligned via justify-content:
+        flex-end instead.
       -->
       <div class="hero__cta-row">
-        <Button href={withBase('/about')} variant="primary" icon="arrow" class="hero__cta">
-          Get to know me
-        </Button>
-
         <span class="hero__scroll">(Scroll)</span>
       </div>
     </div>
@@ -518,26 +516,16 @@ const letters = titleWord.split('');
     border-radius: var(--radius-image);
   }
 
-  /* Full-width row so the flex children below (button, scroll cue) can
-     spread across the whole grid - button at its natural width on the
-     left, scroll cue pushed to the far right via
-     justify-content: space-between. Spans every column at every width
-     (desktop's 12-col grid, tablet's 7-col one, mobile's plain block
-     flow), so nothing here needs its own per-breakpoint override the way
-     the button and scroll cue each used to. */
+  /* Full-width row, per-breakpoint override no longer needed (unlike
+     when it also held the CTA button) - just the scroll cue, pushed to
+     the right via justify-content: flex-end. */
   .hero__cta-row {
     grid-column: 1 / -1;
     grid-row: 5;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-24);
+    justify-content: flex-end;
     margin-top: var(--space-48);
-  }
-
-  /* :global() is required — Button.astro renders its own <a>, which carries Button's own Astro scope hash, not Hero's, so an unscoped ".hero__cta" rule would silently never match it. No grid/margin placement needed anymore - it's a plain flex child of .hero__cta-row now. */
-  :global(.hero__cta) {
-    flex-shrink: 0;
   }
 
   .hero__scroll {
@@ -559,9 +547,9 @@ const letters = titleWord.split('');
     }
 
     /* Hidden below desktop rather than repositioned - the collage overlap
-                                                                             is tuned to the desktop image's own 5/9 column range; keeping it in
-                                                                             sync with every other width's own image position isn't worth the
-                                                                             complexity for a decorative secondary chip. */
+                                                                               is tuned to the desktop image's own 5/9 column range; keeping it in
+                                                                               sync with every other width's own image position isn't worth the
+                                                                               complexity for a decorative secondary chip. */
     .hero__image-chip {
       display: none;
     }
@@ -575,10 +563,10 @@ const letters = titleWord.split('');
     }
 
     /* Same role -> status -> intro -> tools -> CTA row order as the base
-                                                   rule (unchanged here, just a wider column span) - only the column
-                                                   range needs overriding for the narrower 7-column grid.
-                                                   .hero__cta-row already spans 1 / -1 at every width, so it needs
-                                                   no override here. */
+                                                     rule (unchanged here, just a wider column span) - only the column
+                                                     range needs overriding for the narrower 7-column grid.
+                                                     .hero__cta-row already spans 1 / -1 at every width, so it needs
+                                                     no override here. */
     .hero__role,
     .hero__status,
     .hero__intro,
@@ -606,7 +594,7 @@ const letters = titleWord.split('');
     }
 
     /* Same reasoning as the tablet range - hidden rather than
-                                                                             repositioned for a decorative secondary chip. */
+                                                                               repositioned for a decorative secondary chip. */
     .hero__image-chip {
       display: none;
     }
@@ -647,11 +635,11 @@ const letters = titleWord.split('');
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                 markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                                                                                                 which is already the same role -> location -> paragraph -> tools
-                                                                                                 order the base rule's explicit grid-rows give every wider
-                                                                                                 breakpoint, so nothing here needs to re-specify row/column
-                                                                                                 placement the way it used to. */
+                                                                                                     markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                                                                                                     which is already the same role -> location -> paragraph -> tools
+                                                                                                     order the base rule's explicit grid-rows give every wider
+                                                                                                     breakpoint, so nothing here needs to re-specify row/column
+                                                                                                     placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }
@@ -666,11 +654,6 @@ const letters = titleWord.split('');
 
     .hero__intro {
       max-width: none;
-    }
-
-    :global(.hero__cta) {
-      /* 44px+ touch target, per WCAG target-size guidance. */
-      min-height: 44px;
     }
   }
 </style>

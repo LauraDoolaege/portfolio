@@ -10,12 +10,21 @@
 // scoped to the homepage hero as a signature move; repeating it here would
 // dilute it into a template trick instead of a one-time moment.
 //
-// The footnote card is this page's one terracotta "wink" (Section 3
-// palette table - locked per-composition, not per-site: the homepage
-// already spent its own wink on the "Currently working on" asterisk, but
-// this is a different composition and gets its own). It reuses the user's
-// own aside almost verbatim - a small rotated note sitting beside the
-// intro paragraph, styled like something actually pinned there.
+// The footnote card that used to sit here ("You knew that already by
+// now...") is gone per direct request ("remove the card with * but you
+// knew that already" - literally quoting the card's own placeholder
+// copy back). A second, real paragraph now sits under the intro text
+// instead - supplied directly, kept close to verbatim (a couple of
+// typos fixed, same "light tightening, not a rewrite" standard as every
+// other supplied paragraph on this page): what she's like outside
+// school (a soft spot for animals, a chocolate lab she walks daily) and
+// what her student jobs have in common (customer service environments -
+// the local supermarket, a museum), landing on the actual observation
+// that this real paragraph is standing in for now instead of a
+// placeholder aside. This replaces the page's one terracotta "wink"
+// outright rather than re-homing it elsewhere - once the content itself
+// carries the personality, a decorative pinned note doing the same job
+// would be redundant.
 //
 // Brutalist-structure pass (explicit request, About-only scope - see
 // AGENTS.md "About page" section): the "( 01 )" plate mark, sharp card
@@ -62,24 +71,25 @@ const cvHref = '#';
     <h1 class="about-intro__headline">About</h1>
 
     <div class="about-intro__row">
-      <p class="about-intro__text">
-        I'm Laura, a digital development &amp; design student with a background in marketing
-        communication. I'm currently specialising in UX and experience design, while continuing to
-        explore web and motion design.
-      </p>
+      <div class="about-intro__text-col">
+        <p class="about-intro__text">
+          I'm Laura, a digital development &amp; design student with a background in marketing
+          communication. I'm currently specialising in UX and experience design, while continuing to
+          explore web and motion design.
+        </p>
+
+        <p class="about-intro__text">
+          Outside of school, I have a soft spot for animals. I have a big chocolate lab I walk every
+          day. For my student jobs, I've so far always thrived in customer service environments,
+          like the local supermarket or a museum. It's during these everyday moments that
+          inspiration strikes most often.
+        </p>
+      </div>
 
       <div class="about-intro__aside">
         <span class="about-intro__portrait" aria-hidden="true">
           <!-- TODO: replace with a real portrait once photography exists (PROJECT_BRIEF.md Section 6) -->
         </span>
-
-        <aside class="about-intro__footnote">
-          <span class="about-intro__footnote-mark" aria-hidden="true">
-            *
-          </span>
-          You knew that already by now. Let me use this opportunity to tell you a little more about
-          me.
-        </aside>
       </div>
     </div>
 
@@ -209,34 +219,37 @@ const cvHref = '#';
     align-items: start;
   }
 
+  /* Wraps both paragraphs so the grid-column/max-width only needs
+     declaring once, now that there are two. */
+  .about-intro__text-col {
+    grid-column: 1 / 8;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+    max-width: 65ch;
+  }
+
   /* This page's closest equivalent to Hero's subtitle paragraph
      (.hero__intro, directly under its own title) - matched to the same
      size/line-height/color per direct request, in place of this page's
      previous bespoke values (a slightly larger clamp, ink instead of
      text-secondary). */
   .about-intro__text {
-    grid-column: 1 / 8;
-    max-width: 65ch;
     font-family: var(--font-body);
     font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
     line-height: 1.5;
     color: var(--color-text-secondary);
   }
 
-  /* Holds the new portrait placeholder and the existing footnote card as
-     one small collage, the footnote overlapping the image's lower-right
-     corner - a print-and-a-pinned-note arrangement, not two unrelated
-     elements sharing a column. */
+  /* Just the portrait now - the footnote card that used to overlap its
+     corner is gone (see the file header comment). */
   .about-intro__aside {
-    position: relative;
     grid-column: 9 / 13;
     align-self: start;
   }
 
-  /* A second image placeholder on this page (the first is Hero's own
-     portrait slot) - same flat-gray, no-real-photo language, tilted the
-     opposite way from the footnote so the two don't read as parallel
-     duplicates of the same gesture. */
+  /* Second image placeholder on this page (the first is Hero's own
+     portrait slot) - same flat-gray, no-real-photo language. */
   .about-intro__portrait {
     display: block;
     aspect-ratio: 3 / 4;
@@ -245,51 +258,12 @@ const cvHref = '#';
     transform: rotate(2deg);
   }
 
-  /* The page's one terracotta wink - a small pinned note, not a banner.
-     Kept off the grid's straight edges on purpose (a slight rotation, an
-     asymmetric self-position) so it reads as placed by hand rather than
-     laid out. Sharp corners (no radius token) rather than the sitewide
-     hairline-rounded default - reads more like a cut paper scrap than a
-     soft printed card, which suits "pinned by hand" better. Now
-     overlapping the portrait's own corner (a negative margin pulling it
-     up and left) instead of sitting in its own clear column - the two
-     read as one small collage rather than a stacked pair. */
-  .about-intro__footnote {
-    position: relative;
-    z-index: 1;
-    width: 80%;
-    margin-top: -2.5rem;
-    margin-left: auto;
-    margin-right: -1rem;
-    padding: var(--space-16);
-    background: var(--color-bg-primary);
-    border: var(--border-hairline) solid var(--color-text-secondary);
-    box-shadow: 0 8px 20px -12px rgb(23 21 15 / 0.28);
-    transform: rotate(-3.5deg);
-    font-family: var(--font-body);
-    font-size: var(--text-caption);
-    font-style: italic;
-    line-height: 1.5;
-    color: var(--color-text-secondary);
-  }
-
-  .about-intro__footnote-mark {
-    display: inline-block;
-    margin-right: 0.3em;
-    font-family: var(--font-display);
-    font-style: normal;
-    font-size: 1.25rem;
-    line-height: 0.6;
-    vertical-align: -0.1em;
-    color: var(--color-accent-signal);
-  }
-
   :global(.about-intro__cta) {
     margin-top: var(--space-48);
   }
 
   @media (max-width: 1023px) {
-    .about-intro__text {
+    .about-intro__text-col {
       grid-column: 1 / 13;
     }
 

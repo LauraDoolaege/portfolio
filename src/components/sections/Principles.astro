@@ -20,12 +20,23 @@
 // "stay quiet" intent from the first version is retired in favor of
 // site-wide consistency, which is what was actually asked for this time.
 //
-// Numbering: Selected Work "01", this "02", Gallery "03" - Currently
-// Working On sits physically between Selected Work and this section but
-// carries no number of its own again, demoted back to a small aside per
-// a later direct request ("should not be a major section... rather a
-// little sneak peek") - see that file's own comment.
+// Numbering: this "01", Selected Work "02", Gallery "03" - swapped per
+// direct follow-up request ("change the order between selected works
+// and design principles"); this section now leads the homepage.
+// Currently Working On sits physically below Selected Work (unnumbered,
+// demoted back to a small aside per a still-earlier direct request
+// "should not be a major section... rather a little sneak peek" - see
+// that file's own comment) regardless of Selected Work's own position
+// in the page.
+//
+// A "Get to know me" CTA now sits underneath this section's own content
+// - direct follow-up, "remove the cta from the hero at the top and
+// place it underneath the design principles." Same destination/label/
+// icon as the one it replaced in Hero.astro (see that file's own
+// comment) - relocated, not duplicated.
+import { withBase } from '../../utils/url';
 import SectionMarker from '../ui/SectionMarker.astro';
+import Button from '../ui/Button.astro';
 
 const principles = [
   {
@@ -45,7 +56,7 @@ const principles = [
 
 <section class="principles">
   <div class="principles__inner">
-    <SectionMarker index="02" label="My design principles" />
+    <SectionMarker index="01" label="My design principles" />
 
     <ul class="principles__list">
       {principles.map((item, index) => (
@@ -58,6 +69,12 @@ const principles = [
         </li>
       ))}
     </ul>
+
+    <div class="principles__cta">
+      <Button href={withBase('/about')} variant="primary" icon="arrow">
+        Get to know me
+      </Button>
+    </div>
   </div>
 </section>
 
@@ -74,6 +91,18 @@ const principles = [
       ease: 'power2.out',
       stagger: 0.1,
       scrollTrigger: { trigger: '.principles__list', start: 'top 85%' },
+    });
+  }
+
+  const cta = document.querySelector<HTMLElement>('.principles__cta');
+  if (cta && !prefersReducedMotion()) {
+    gsap.set(cta, { autoAlpha: 0, y: 16 });
+    gsap.to(cta, {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.6,
+      ease: 'power2.out',
+      scrollTrigger: { trigger: cta, start: 'top 92%' },
     });
   }
 </script>
@@ -96,11 +125,17 @@ const principles = [
     gap: var(--space-32);
   }
 
+  /* Relocated from Hero's own bottom block, per direct request - same
+     button, same destination, just living here instead. */
+  .principles__cta {
+    margin-top: var(--space-48);
+  }
+
   .principles__item {
     padding-left: var(--space-24);
     /* A hairline divider between columns, not a border/background per
-                                                                             item. Only items after the first get one, so the row doesn't open
-                                                                             with a stray rule before any content. */
+                                                                               item. Only items after the first get one, so the row doesn't open
+                                                                               with a stray rule before any content. */
     border-left: var(--border-hairline) solid var(--color-text-secondary);
   }
 
@@ -147,8 +182,8 @@ const principles = [
     }
 
     /* Horizontal dividers instead of vertical ones once the columns
-                                                                             stack - the same device rotated 90 degrees rather than a
-                                                                             different one. */
+                                                                               stack - the same device rotated 90 degrees rather than a
+                                                                               different one. */
     .principles__item {
       padding-left: 0;
       padding-top: var(--space-24);

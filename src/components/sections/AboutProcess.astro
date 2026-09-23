@@ -367,12 +367,12 @@ const steps = [
 
   @media (max-width: 880px) {
     /* Three positioned slots plus scattered images need real width -
-         below this, every step drops out of the ring entirely into a
-         plain stacked list (matching the pre-rotation fallback this
-         section has used at narrow widths since its first pass). Images
-         already hidden outright on any non-hover device via
-         .about-process--no-images above; a touch tablet in this range
-         still gets the plain stack, just without images. */
+           below this, every step drops out of the ring entirely into a
+           plain stacked list (matching the pre-rotation fallback this
+           section has used at narrow widths since its first pass). Images
+           already hidden outright on any non-hover device via
+           .about-process--no-images above; a touch tablet in this range
+           still gets the plain stack, just without images. */
     .about-process__ring {
       display: none;
     }
@@ -390,12 +390,12 @@ const steps = [
     }
 
     /* !important only on the two properties the script ever writes an
-         inline style for (transform via xPercent, textAlign) - inline
-         styles otherwise always beat an external stylesheet rule
-         regardless of selector specificity, !important is the one thing
-         that outranks them. `position`/`width` have no such inline
-         competitor, so a plain cascade override (this rule simply comes
-         later in the file) is enough for those. */
+           inline style for (transform via xPercent, textAlign) - inline
+           styles otherwise always beat an external stylesheet rule
+           regardless of selector specificity, !important is the one thing
+           that outranks them. `position`/`width` have no such inline
+           competitor, so a plain cascade override (this rule simply comes
+           later in the file) is enough for those. */
     .about-process__step {
       position: static;
       width: 100%;
@@ -419,8 +419,8 @@ const steps = [
     }
 
     /* Phone-only horizontal scroll-snap strip, regardless of motion
-         preference or hover support (native overflow-x/scroll-snap needs
-         no reduced-motion gate of its own). */
+           preference or hover support (native overflow-x/scroll-snap needs
+           no reduced-motion gate of its own). */
     .about-process__track {
       flex-direction: row;
       gap: 0;

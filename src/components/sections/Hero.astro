@@ -158,11 +158,25 @@ const letters = titleWord.split('');
         </ul>
       </div>
 
-      <Button href={withBase('/about')} variant="primary" icon="arrow" class="hero__cta">
-        Get to know me
-      </Button>
+      <!--
+        Button and scroll cue share one row now, per direct request ("the
+        (scroll) should be on the same line as the get to know me button,
+        still on the right") - a single flex wrapper (button at its own
+        content width, scroll pushed to the far end via
+        justify-content: space-between) rather than each keeping its own
+        separate grid placement, so "same line, still on the right" holds
+        at every viewport without needing a per-breakpoint override -
+        this used to need one for the grid columns changing between
+        desktop/tablet, and a completely different mobile layout (its own
+        line below the button) below 640px.
+      -->
+      <div class="hero__cta-row">
+        <Button href={withBase('/about')} variant="primary" icon="arrow" class="hero__cta">
+          Get to know me
+        </Button>
 
-      <span class="hero__scroll">(Scroll)</span>
+        <span class="hero__scroll">(Scroll)</span>
+      </div>
     </div>
   </div>
 </section>
@@ -504,22 +518,30 @@ const letters = titleWord.split('');
     border-radius: var(--radius-image);
   }
 
-  /* :global() is required — Button.astro renders its own <a>, which carries Button's own Astro scope hash, not Hero's, so an unscoped ".hero__cta" rule would silently never match it. */
-  :global(.hero__cta) {
-    grid-column: 1 / 6;
+  /* Full-width row so the flex children below (button, scroll cue) can
+     spread across the whole grid - button at its natural width on the
+     left, scroll cue pushed to the far right via
+     justify-content: space-between. Spans every column at every width
+     (desktop's 12-col grid, tablet's 7-col one, mobile's plain block
+     flow), so nothing here needs its own per-breakpoint override the way
+     the button and scroll cue each used to. */
+  .hero__cta-row {
+    grid-column: 1 / -1;
     grid-row: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-24);
     margin-top: var(--space-48);
-    justify-self: start;
   }
 
-  /* Spans every row this block generates and aligns to the bottom, so it
-     stays pinned bottom-right regardless of how many rows the
-     role/status/intro/tools/CTA stack above it now occupies. */
+  /* :global() is required — Button.astro renders its own <a>, which carries Button's own Astro scope hash, not Hero's, so an unscoped ".hero__cta" rule would silently never match it. No grid/margin placement needed anymore - it's a plain flex child of .hero__cta-row now. */
+  :global(.hero__cta) {
+    flex-shrink: 0;
+  }
+
   .hero__scroll {
-    grid-column: 12 / 13;
-    grid-row: 1 / -1;
-    align-self: end;
-    justify-self: end;
+    flex-shrink: 0;
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
@@ -537,9 +559,9 @@ const letters = titleWord.split('');
     }
 
     /* Hidden below desktop rather than repositioned - the collage overlap
-                                     is tuned to the desktop image's own 5/9 column range; keeping it in
-                                     sync with every other width's own image position isn't worth the
-                                     complexity for a decorative secondary chip. */
+                                         is tuned to the desktop image's own 5/9 column range; keeping it in
+                                         sync with every other width's own image position isn't worth the
+                                         complexity for a decorative secondary chip. */
     .hero__image-chip {
       display: none;
     }
@@ -553,13 +575,14 @@ const letters = titleWord.split('');
     }
 
     /* Same role -> status -> intro -> tools -> CTA row order as the base
-           rule (unchanged here, just a wider column span) - only the column
-           range needs overriding for the narrower 7-column grid. */
+               rule (unchanged here, just a wider column span) - only the column
+               range needs overriding for the narrower 7-column grid.
+               .hero__cta-row already spans 1 / -1 at every width, so it needs
+               no override here. */
     .hero__role,
     .hero__status,
     .hero__intro,
-    .hero__tools,
-    :global(.hero__cta) {
+    .hero__tools {
       grid-column: 1 / 8;
     }
   }
@@ -583,7 +606,7 @@ const letters = titleWord.split('');
     }
 
     /* Same reasoning as the tablet range - hidden rather than
-                                     repositioned for a decorative secondary chip. */
+                                         repositioned for a decorative secondary chip. */
     .hero__image-chip {
       display: none;
     }
@@ -624,11 +647,11 @@ const letters = titleWord.split('');
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                 markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                 which is already the same role -> location -> paragraph -> tools
-                 order the base rule's explicit grid-rows give every wider
-                 breakpoint, so nothing here needs to re-specify row/column
-                 placement the way it used to. */
+                         markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                         which is already the same role -> location -> paragraph -> tools
+                         order the base rule's explicit grid-rows give every wider
+                         breakpoint, so nothing here needs to re-specify row/column
+                         placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }
@@ -648,12 +671,6 @@ const letters = titleWord.split('');
     :global(.hero__cta) {
       /* 44px+ touch target, per WCAG target-size guidance. */
       min-height: 44px;
-    }
-
-    .hero__scroll {
-      display: block;
-      margin-top: var(--space-24);
-      text-align: right;
     }
   }
 </style>

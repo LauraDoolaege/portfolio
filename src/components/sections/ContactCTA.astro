@@ -1,57 +1,105 @@
 ---
-// Homepage contact CTA (PROJECT_BRIEF.md Section 4, item 6). Copy is exact,
-// final text from the brief. Uses dark-field — locked as "footer / at most
-// one controlled CTA band" (CLAUDE.md Design system, Section 3 palette
-// table) — as the one sanctioned dark moment leading straight into the
-// (also dark-field) Footer, so the two read as one deliberate closing
+// Homepage/About contact CTA (PROJECT_BRIEF.md Section 4, item 6). Copy is
+// exact, final text from the brief. Uses dark-field — locked as "footer /
+// at most one controlled CTA band" (CLAUDE.md Design system, Section 3
+// palette table) — as the one sanctioned dark moment leading straight into
+// the (also dark-field) Footer, so the two read as one deliberate closing
 // zone rather than two unrelated dark patches.
 //
-// The CTA button is a local, dark-context copy of Button.astro's primary
-// style rather than a reuse of that component: Button hardcodes ink/
-// porcelain colors, which would go invisible (ink-on-near-black) on this
-// background. Duplicating the small hairline/fill-sweep pattern here is
-// simpler than threading color overrides through a shared component for
-// what is currently a single use. Its hover transitions were softened to
-// match Button.astro's own `--motion-easing-soft` fix (see that file).
+// id="contact" now lives here (moved off Footer.astro - see that file's
+// own comment) since this is the section that actually carries the
+// contact methods now; Header.astro's "Contact" nav item points at a bare
+// `#contact` from any page.
 //
-// A porcelain-to-transparent gradient wash briefly sat over this
-// section's own top edge (an attempt at "a smooth transition... between
-// the design principles, gallery and contact me/footer") - removed again
-// per direct follow-up ("remove the awful fade at the bottom of the
-// page"). The underlying ask (the sections should read as flowing into
-// each other, not cutting) is still open; explicitly deferred rather
-// than immediately re-attempted with a different technique.
-import { withBase } from '../../utils/url';
-
-// TODO: point at a real destination once the Contact page (PROJECT_BRIEF.md
-// Section 5, PROPOSED) is approved and built, or a real email is supplied.
-const contactHref = withBase('/contact');
+// Structure pass - "the cta just needs to be a lot clearer," plus a
+// reference image (a blue closing section: an outlined setup line + a
+// huge solid payoff word, then a numbered link list, then an
+// availability/copyright row) used for layout inspiration only, not
+// copied - explicit instruction not to reuse its literal look, just its
+// structure. What actually changed:
+//
+// The old version was a centered headline over one small boxed "Get in
+// touch" button linking to /contact, a page that doesn't exist yet
+// (PROJECT_BRIEF.md Section 5 - Contact is PROPOSED, unapproved) - a weak,
+// somewhat dead-ended CTA. PROJECT_BRIEF.md Section 5's own draft layout
+// for the (still unbuilt) full Contact page already sketches almost
+// exactly what "a lot clearer" calls for here: the same "Enough about
+// me... Let's hear your side of the story." copy as two headline lines,
+// a large tappable email link, and a compact "Email · LinkedIn · CV" link
+// row - so this borrows that already-approved-in-spirit structure for the
+// homepage/About *teaser* block specifically (not the full unbuilt page,
+// which stays out of scope), scaled down: the brief's two separate
+// buttons ("[Get in touch]" / "[Download my CV]") would have duplicated
+// the big email link and the link row below it for no real benefit at
+// this block's smaller scale, so they're left out here rather than
+// carried over just because the draft has them.
+//
+// Left-aligned now, not centered - three stacked pieces of unequal
+// visual weight (two-line headline, one big email link, a small link
+// row) read as a considered hierarchy left-aligned; centered, the same
+// pieces stack without one clear "start here."
+// TODO: replace with the real email/LinkedIn/CV destinations once
+// supplied (same open item as Header.astro's own CV button and
+// Footer.astro's former email/LinkedIn row, moved here) - href="#" for
+// LinkedIn/CV matches Header.astro's own placeholder convention exactly.
+const email = 'hello@example.com';
+const linkedinHref = '#';
+const cvHref = '#';
 ---
 
-<section class="contact-cta">
+<section class="contact-cta" id="contact">
   <div class="contact-cta__inner">
-    <h2 class="contact-cta__headline">Enough about me. Let's hear your side of the story.</h2>
-    <a href={contactHref} class="contact-cta__button">
-      <span class="contact-cta__button-label">Get in touch</span>
+    <h2 class="contact-cta__headline">
+      <span class="contact-cta__headline-line contact-cta__headline-line--soft">
+        Enough about me.
+      </span>
+      <span class="contact-cta__headline-line contact-cta__headline-line--bold">
+        Let's hear your side of the story.
+      </span>
+    </h2>
+
+    <a href={`mailto:${email}`} class="contact-cta__email">
+      {email}
     </a>
+
+    <ul class="contact-cta__links">
+      <li>
+        <a href={`mailto:${email}`} class="contact-cta__link">
+          Email
+        </a>
+      </li>
+      <li>
+        <a href={linkedinHref} class="contact-cta__link">
+          LinkedIn
+        </a>
+      </li>
+      <li>
+        <a href={cvHref} class="contact-cta__link">
+          CV
+        </a>
+      </li>
+    </ul>
   </div>
 </section>
 
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const headline = document.querySelector<HTMLElement>('.contact-cta__headline');
-  const button = document.querySelector<HTMLElement>('.contact-cta__button');
-  if (headline && button && !prefersReducedMotion()) {
-    // This section had no motion at all before - a plain, calm fade/rise,
-    // headline first then the button a beat later. Reused across both
-    // pages (About also renders this component unmodified), so it needed
-    // to be simple and content-agnostic, not a bespoke sequence.
-    gsap.set([headline, button], { autoAlpha: 0, y: 20 });
+  const headlineLines = document.querySelectorAll<HTMLElement>('.contact-cta__headline-line');
+  const email = document.querySelector<HTMLElement>('.contact-cta__email');
+  const links = document.querySelector<HTMLElement>('.contact-cta__links');
+  if (headlineLines.length && email && links && !prefersReducedMotion()) {
+    // A calm fade/rise, three beats instead of the previous two (headline,
+    // then button) - the headline's own two lines stagger in together,
+    // then the big email link, then the compact link row a beat after
+    // that, so the eye is guided down the new hierarchy in order rather
+    // than everything arriving at once.
+    gsap.set([...headlineLines, email, links], { autoAlpha: 0, y: 20 });
     gsap
-      .timeline({ scrollTrigger: { trigger: headline, start: 'top 85%' } })
-      .to(headline, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' })
-      .to(button, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.15);
+      .timeline({ scrollTrigger: { trigger: headlineLines[0], start: 'top 85%' } })
+      .to(headlineLines, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out', stagger: 0.08 })
+      .to(email, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.35)
+      .to(links, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.5);
   }
 </script>
 
@@ -66,74 +114,117 @@ const contactHref = withBase('/contact');
     max-width: var(--content-max-width);
     margin-inline: auto;
     padding-inline: var(--space-outer);
-    text-align: center;
   }
 
   .contact-cta__headline {
-    max-width: 20ch;
-    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    /* Wide enough that the bold line's six words wrap into two lines, not
+           one-or-two words per line - --text-h1's own 96px ceiling (below)
+           is tuned for a single short word (Hero's "PORTFOLIO"), not a full
+           sentence, so this needs real width to go with it or it reads as
+           broken instead of bold. */
+    max-width: 42ch;
+  }
+
+  /* The setup line - smaller, lighter weight, on-dark secondary color -
+     against the payoff line's full display treatment below. Same two
+     sentences the old single-line version already used (PROJECT_BRIEF.md
+     Section 4, item 6, and the same copy Section 5's own Contact-page
+     draft breaks into these exact two lines) - split for hierarchy here,
+     not rewritten. */
+  .contact-cta__headline-line--soft {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: clamp(1.1rem, 1vw + 0.9rem, 1.375rem);
+    color: var(--color-text-secondary-on-dark);
+  }
+
+  .contact-cta__headline-line--bold {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(2rem, 3.5vw + 1rem, var(--text-h2));
-    line-height: var(--text-h2-leading);
+    /* A smaller ceiling than --text-h1 (96px, tuned for Hero's single
+           short word) - at that size, six words wrapped one-or-two per line
+           instead of reading as a bold sentence. */
+    font-size: clamp(2.25rem, 3vw + 1.25rem, 4.25rem);
+    line-height: var(--text-h1-leading);
     text-transform: uppercase;
     letter-spacing: -0.01em;
   }
 
-  .contact-cta__button {
-    position: relative;
-    z-index: 0;
-    overflow: hidden;
-    display: inline-block;
-    margin-top: 2.5rem;
-    padding: 0.9em 1.6em;
+  /* The large tappable link PROJECT_BRIEF.md Section 5's own Contact-page
+     draft calls for - reusing the exact display-email treatment
+     Footer.astro's old contact row used to carry (font-display, bold,
+     lowercase), just relocated here since this is now the section that
+     actually needs to read as "the" primary contact method. */
+  .contact-cta__email {
+    display: block;
+    margin-top: var(--space-48);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 3.5vw + 1rem, 3.5rem);
+    text-transform: lowercase;
+    letter-spacing: -0.01em;
+    transition: color var(--motion-duration) var(--motion-easing-soft);
+  }
+
+  .contact-cta__email:hover,
+  .contact-cta__email:focus-visible {
+    /* var(--color-accent) drops to 3.49:1 on dark-field - the on-dark tint (global.css) keeps the same hue at a legible weight here. */
+    color: var(--color-accent-on-dark);
+  }
+
+  /* The brief's own "Email · LinkedIn · CV" compact row - a quick-scan
+     alternative to the big email link above it, not a duplicate of it:
+     the big link is the one obvious tap target, this is the fine-print
+     fallback for someone who wants LinkedIn or the CV specifically. */
+  .contact-cta__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-16);
+    margin-top: var(--space-32);
+    padding-top: var(--space-24);
+    border-top: var(--border-hairline) solid rgb(248 246 241 / 0.2);
+  }
+
+  .contact-cta__links li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
+  }
+
+  /* A plain middot between items instead of a border/divider, matching
+     the brief's own "Email · LinkedIn · CV" punctuation exactly - only
+     items after the first get one, so the row doesn't open with a stray
+     mark before any content. */
+  .contact-cta__links li:not(:first-child)::before {
+    content: '·';
+    color: var(--color-text-secondary-on-dark);
+  }
+
+  .contact-cta__link {
     font-family: var(--font-mono);
     font-size: var(--text-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
     color: var(--color-bg-primary);
-    border: var(--border-hairline) solid var(--color-bg-primary);
-    /* --motion-easing-soft, matching Button.astro's own primary variant
-                                               (this is a local dark-context copy of it) - same "tactile glide"
-                                               fix applied there per direct feedback. */
-    transition:
-      color var(--motion-duration) var(--motion-easing-soft),
-      transform var(--motion-duration) var(--motion-easing-soft);
+    transition: color var(--motion-duration) var(--motion-easing-soft);
   }
 
-  .contact-cta__button-label {
-    position: relative;
-    z-index: 1;
-  }
-
-  .contact-cta__button::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--color-bg-primary);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--motion-duration-slow) var(--motion-easing-soft);
-  }
-
-  .contact-cta__button:hover,
-  .contact-cta__button:focus-visible {
-    color: var(--color-dark-field);
-  }
-
-  .contact-cta__button:hover::before,
-  .contact-cta__button:focus-visible::before {
-    transform: scaleX(1);
-  }
-
-  .contact-cta__button:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
+  .contact-cta__link:hover,
+  .contact-cta__link:focus-visible {
+    color: var(--color-accent-on-dark);
   }
 
   @media (max-width: 640px) {
     .contact-cta__inner {
       padding-inline: 1.5rem;
+    }
+
+    .contact-cta__headline {
+      max-width: none;
     }
   }
 </style>

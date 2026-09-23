@@ -1828,6 +1828,105 @@ icon") - solid `--color-ink` circle, `--color-bg-primary` icon, the
 inverse of what this cursor used before, so the site's two custom
 cursors now share one visual language instead of each having its own.
 
+**Five more direct follow-ups in one message: Hero's scroll cue, a
+touch-only tap affordance for Gallery, the progress bar's number labels,
+and a full restructure of ContactCTA/Footer around a reference image.**
+
+Hero's `(Scroll)` cue now sits on the same line as the "Get to know me"
+button, still right-aligned, at every viewport - per direct request. The
+button and the scroll cue used to each have their own grid placement
+(button at `grid-column: 1 / 6`, scroll cue pinned to the grid's own far
+right column, `grid-row: 1 / -1` so it stayed bottom-aligned regardless
+of how many rows the block above it had), which needed its own
+per-breakpoint handling for tablet's narrower grid and a completely
+separate stacked line on mobile. Replaced with one `.hero__cta-row` flex
+wrapper (`grid-column: 1 / -1`, `justify-content: space-between`)
+holding both - the button sits at its own content width on the left, the
+scroll cue gets pushed to the far right by the same flex rule at every
+width, including mobile's plain block flow (a flex container's own
+`display: flex` doesn't care what `.hero__bottom` around it is doing).
+Deleted the button's and scroll cue's now-redundant individual grid/
+margin rules, including a whole mobile-only block that used to give the
+scroll cue its own stacked line.
+
+**Gallery tiles gained a persistent touch-only tap affordance** - per
+direct request ("for screens where hover functions do not apply, make
+it clear you can tap the images to enlarge"). The previous pass moved
+the tile's own expand icon into the custom cursor, which is itself
+gated on `pointer: fine` - a real regression for touch specifically,
+since a touch device now had no "this opens" cue left at all (the old
+icon never showed on touch either, since it only ever faded in on
+`:hover`, which touch doesn't fire). Fixed with a new
+`.gallery__tap-hint`: the same corner-arrows icon, same ink-circle/
+porcelain-icon styling as the cursor, but always visible under
+`@media (hover: none)` rather than hover-triggered - `display: none`
+outside that query so it never doubles up with the cursor on a device
+that has both. Verified via `window.matchMedia('(hover: none)')` in a
+mobile-emulated tab: the hint renders `display: flex` and is visible in
+each tile's bottom-right corner, matching where the old hover-only icon
+used to fade in from.
+
+The Gallery progress bar's flanking `1`/`{TOTAL}` number labels switched
+from `--color-text-secondary` to `--color-ink` - per direct follow-up
+("make the progress indicator on the progress bar black as well"); the
+bar and thumb underneath them were already ink from an earlier pass, so
+this was the one piece of the indicator still gray.
+
+**ContactCTA.astro and Footer.astro were restructured together, using a
+reference image's _structure_ only (an outlined setup line + a huge
+solid payoff word, a numbered link list, an availability/copyright
+row), not its literal look** - per direct request ("the cta just needs
+to be a lot clearer... look at the layout in the example to modify the
+footer, still in my style of course, just look at how it's
+structured"). Worth noting: PROJECT_BRIEF.md Section 5's own draft
+layout for the still-unbuilt Contact page already sketches almost
+exactly this - the same "Enough about me... Let's hear your side of the
+story." copy as two headline lines, a large tappable email link, and a
+compact "Email · LinkedIn · CV" row - so this borrows that
+already-drafted structure for the homepage/About _teaser_ block
+specifically, scaled down (the brief's own two extra buttons, "[Get in
+touch]" / "[Download my CV]", would have duplicated the big email link
+and the row below it at this block's smaller scale, so they're left
+out rather than carried over just because the draft has them). The
+still-unbuilt full Contact page itself stays out of scope.
+
+`ContactCTA.astro`: the old centered headline over one small boxed "Get
+in touch" button (linking to the unbuilt `/contact`, a dead-ended CTA)
+is gone. The exact same locked sentence splits into two visual-weight
+lines ("Enough about me." small/soft, "Let's hear your side of the
+story." huge/bold Barlow Condensed - not new copy, just the brief's own
+sentence broken where Section 5's draft already breaks it), followed by
+a large tappable `mailto:` link, then a compact "Email · LinkedIn · CV"
+row with plain middot separators. Left-aligned now, not centered - three
+pieces of unequal visual weight read as a considered hierarchy
+left-aligned; centered, they just stack without one clear "start here."
+`id="contact"` moved here from Footer.astro, since this is now the
+section that actually carries the contact methods (Header.astro's
+`#contact` nav link needed no change - a bare hash still resolves to
+whichever page's own ContactCTA is present). A real sizing bug surfaced
+immediately: the bold line's `font-size` ceiling was `--text-h1` (96px,
+tuned for Hero's single short word "PORTFOLIO"), which wrapped a
+six-word sentence one-or-two words per line inside the headline's
+original 22ch `max-width` - fixed with a smaller ceiling (4.25rem) and a
+wider column (42ch) together, not either alone, so the sentence now
+wraps into two clean lines instead of reading as broken.
+
+`Footer.astro` shrank to the reference's own minimal two-item row -
+an availability line (left) and copyright (right), nothing else. The
+old name+nav row and the separate email/LinkedIn contact row are gone,
+not because the reference demanded it but because ContactCTA directly
+above now carries email/LinkedIn/CV as its own real, clear CTA - keeping
+a second copy of either in Footer would just be the same links shown
+twice in a row. "Back to top" is gone for the same reason - not in the
+reference, and a two-line footer doesn't need its own scroll
+affordance. The availability line itself reuses the exact copy/icon
+already established in Header.astro/Hero.astro (`Belgium | Available
+Feb 2027`, location-pin icon) rather than the reference's own wording or
+its green accent dot - one fact, stated in this project's own
+established visual language, not a new accent color the locked palette
+doesn't have. Header.astro's nav still gets full site nav on every
+page, so removing Footer's own copy of it doesn't reduce reachability.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

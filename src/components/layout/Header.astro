@@ -32,9 +32,10 @@ const navItems = [
   // status" — Work index/Contact layouts are still proposed, unbuilt), so
   // these point at same-page anchors instead of 404ing: Work always jumps
   // to the homepage's own #work section (SelectedWork.astro), Contact to
-  // #contact in the footer, which every page shares (Footer.astro) — a
-  // bare hash works from any page since the id it targets is already on
-  // that page's own footer.
+  // #contact, which now lives on ContactCTA.astro (moved off Footer.astro
+  // during that component's own restructure - see its file header) - a
+  // bare hash still works from any page since both homepage and About
+  // render their own ContactCTA with that id.
   { href: `${withBase('/')}#work`, label: 'Work' },
   { href: withBase('/about'), label: 'About' },
   { href: '#contact', label: 'Contact' },

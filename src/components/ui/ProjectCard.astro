@@ -19,9 +19,18 @@
 // A real card shell now wraps all three — hairline border, background,
 // one shared radius, overflow: hidden so the image's top corners inherit
 // it for free instead of needing their own. The old fade-in text link
-// ("[ view project -> ]") is gone: the new arrow badge (below) is the
-// card's one "go" affordance now, so keeping both would have meant two
-// competing calls to action doing the same job.
+// ("[ view project -> ]") is gone: the arrow (below) is the card's one
+// "go" affordance now, so keeping both would have meant two competing
+// calls to action doing the same job.
+//
+// The arrow moved from a circular badge floating over the image to a
+// plain inline icon sitting next to the title, on the same line - per
+// direct request, and only shown there on devices where hover doesn't
+// apply (`(hover: none)`); on a fine pointer it's hidden outright in
+// favor of the arrow appearing as the cursor itself while hovering a
+// card (implemented per-section, e.g. SelectedWork.astro, since it's a
+// section-level interaction like Gallery's own custom cursor, not
+// something this generic card component owns).
 //
 // Deliberately no layout-mode props (an earlier `featured` prop, for a
 // now-abandoned bento layout, was removed rather than left unused) - any
@@ -79,17 +88,6 @@ const displayTitle = fullTitle ?? title;
     <span class="project-card__number" aria-hidden="true">
       {number}
     </span>
-    <span class="project-card__arrow" aria-hidden="true">
-      <svg viewBox="0 0 16 16" fill="none">
-        <path
-          d="M4.5 11.5L11.5 4.5M11.5 4.5H5.5M11.5 4.5V10.5"
-          stroke="currentColor"
-          stroke-width="1.3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </span>
   </span>
 
   <span class="project-card__body">
@@ -102,7 +100,20 @@ const displayTitle = fullTitle ?? title;
           {year}
         </span>
       </span>
-      <span class="project-card__title">{displayTitle}</span>
+      <span class="project-card__title-row">
+        <span class="project-card__title">{displayTitle}</span>
+        <span class="project-card__arrow" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path
+              d="M4.5 11.5L11.5 4.5M11.5 4.5H5.5M11.5 4.5V10.5"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+      </span>
     </span>
   </span>
 </a>
@@ -169,11 +180,11 @@ const displayTitle = fullTitle ?? title;
     border-radius: var(--radius-image);
     overflow: hidden;
     /* --motion-easing-soft (not the plain --motion-easing/ease-out this
-                         used before), and a touch longer than --motion-duration-slow - per
-                         direct feedback that the card's hover movement read as "very
-                         harsh." Plain ease-out decelerates evenly the whole way, which
-                         reads mechanical on a 6px lift; the soft cubic-bezier eases in
-                         more gradually, closer to a physical glide. */
+                               used before), and a touch longer than --motion-duration-slow - per
+                               direct feedback that the card's hover movement read as "very
+                               harsh." Plain ease-out decelerates evenly the whole way, which
+                               reads mechanical on a 6px lift; the soft cubic-bezier eases in
+                               more gradually, closer to a physical glide. */
     transition:
       transform 0.55s var(--motion-easing-soft),
       border-color var(--motion-duration) var(--motion-easing-soft);
@@ -231,44 +242,6 @@ const displayTitle = fullTitle ?? title;
     color: var(--color-text-secondary);
   }
 
-  /* The card's one "go" affordance, replacing the old fade-in text link -
-     a circular badge in the Awwwards-card mold, hairline at rest so it
-     doesn't compete with the number chip, filling solid ink (with the
-     arrow flipping to the porcelain background color via currentColor)
-     on hover/focus - same fill-sweep language Button.astro's primary
-     variant already uses elsewhere on this page, just circular instead
-     of a box. */
-  .project-card__arrow {
-    position: absolute;
-    right: 0.85rem;
-    bottom: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    background: var(--color-bg-primary);
-    border: var(--border-hairline) solid var(--color-ink);
-    border-radius: var(--radius-pill);
-    color: var(--color-ink);
-    transition:
-      background var(--motion-duration) var(--motion-easing-soft),
-      color var(--motion-duration) var(--motion-easing-soft),
-      transform var(--motion-duration) var(--motion-easing-soft);
-  }
-
-  .project-card__arrow svg {
-    width: 1rem;
-    height: 1rem;
-  }
-
-  .project-card:hover .project-card__arrow,
-  .project-card:focus-visible .project-card__arrow {
-    background: var(--color-ink);
-    color: var(--color-bg-primary);
-    transform: scale(1.08);
-  }
-
   .project-card__body {
     padding: var(--space-24);
   }
@@ -299,6 +272,17 @@ const displayTitle = fullTitle ?? title;
     color: var(--color-text-secondary);
   }
 
+  /* Title and arrow share one row now, per direct request ("the arrow...
+     on the same line as the title") - the title takes the remaining
+     space, the arrow sits at the row's end. */
+  .project-card__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-16);
+    width: 100%;
+  }
+
   .project-card__title {
     font-family: var(--font-display);
     font-weight: 700;
@@ -313,5 +297,26 @@ const displayTitle = fullTitle ?? title;
   .project-card:hover .project-card__title,
   .project-card:focus-visible .project-card__title {
     color: var(--color-accent);
+  }
+
+  /* A plain icon, not the circular badge this used to be - it only ever
+     shows on a device with no hover to reach the cursor-based version
+     with (see the media query below), so it doesn't need its own
+     hover/fill treatment of its own. */
+  .project-card__arrow {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-ink);
+  }
+
+  /* On a fine pointer, the arrow appears as the cursor itself while
+     hovering (per-section script, e.g. SelectedWork.astro) - this static
+     inline one would be redundant there, so it's hidden outright rather
+     than shown alongside a second arrow. */
+  @media (hover: hover) and (pointer: fine) {
+    .project-card__arrow {
+      display: none;
+    }
   }
 </style>

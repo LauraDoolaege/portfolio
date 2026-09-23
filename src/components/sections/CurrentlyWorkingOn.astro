@@ -12,21 +12,20 @@
 // the heading, the exact example the brief itself gives for this color.
 // It appears nowhere else on the homepage — don't add a second one.
 //
-// Sits directly below Selected Work, per direct request, and carries its
-// own number again ("02" - Selected Work is "01", Principles "03",
-// Gallery "04") - per a later direct request that every section's
-// subtitle stay consistent (small index + bold title, the same device
-// used everywhere else), this went back to using SectionMarker's index
-// rather than staying the one deliberately unnumbered aside.
-//
-// Redesign pass (explicit feedback that this section "felt too stale or
-// too condensed"): each item gained an image placeholder - a flat gray
-// div, same placeholder language as ProjectCard's, not invented imagery -
-// so two lines of text no longer sit alone in a wide empty row, and a
-// settle-in entrance reveal (this section had no motion of its own at
-// all before).
-import SectionMarker from '../ui/SectionMarker.astro';
-
+// Demoted back down to a small, unnumbered aside - per direct request,
+// "the currently working on should not be a major section as it is now,
+// rather a little sneak peek to what I'm up to." A previous pass had
+// promoted it to a full numbered section (its own SectionMarker, a
+// two-item image grid, --space-section padding) for site-wide subtitle
+// consistency; that reasoning only held while it was meant to carry the
+// same weight as Selected Work/Principles/Gallery. Once it's explicitly
+// meant to read as lighter than those, it drops out of the numbered
+// sequence again (Selected Work "01", Principles "02", Gallery "03" -
+// Gallery.astro and Principles.astro both had their own index adjusted
+// back down to close the gap) the same way Principles itself was once
+// the deliberately-unnumbered one. No images, no big display title - a
+// single compact line: the wink line, then the two items as a plain
+// inline list.
 const items = [
   {
     title: 'Blender',
@@ -41,23 +40,18 @@ const items = [
 
 <section class="currently">
   <div class="currently__inner">
-    <SectionMarker index="02" label="Currently working on">
-      <span class="currently__wink" aria-hidden="true" slot="suffix">
+    <p class="currently__label">
+      Currently working on
+      <span class="currently__wink" aria-hidden="true">
         *
       </span>
-    </SectionMarker>
+    </p>
 
     <ul class="currently__list">
       {items.map((item) => (
         <li class="currently__item">
-          <span class="currently__image" aria-hidden="true">
-            <!-- TODO: replace with a real process/progress image once photography exists (PROJECT_BRIEF.md Section 6) -->
-          </span>
-          <span class="currently__tag" aria-hidden="true">
-            [ in progress ]
-          </span>
-          <h3 class="currently__title">{item.title}</h3>
-          <p class="currently__description">{item.description}</p>
+          <span class="currently__title">{item.title}</span>
+          <span class="currently__description">{item.description}</span>
         </li>
       ))}
     </ul>
@@ -67,27 +61,28 @@ const items = [
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const items = document.querySelectorAll<HTMLElement>('.currently__item');
-  if (items.length && !prefersReducedMotion()) {
-    // A plain staggered settle - this section had no entrance motion at
-    // all before the redesign pass; one quiet, shared reveal per item is
-    // enough here, the image placeholders are the visual interest, not
-    // the motion.
-    gsap.set(items, { autoAlpha: 0, y: 24 });
-    gsap.to(items, {
+  const section = document.querySelector<HTMLElement>('.currently');
+  if (section && !prefersReducedMotion()) {
+    // One quiet, shared fade/rise - a sneak peek shouldn't announce
+    // itself with its own choreographed entrance.
+    gsap.set(section, { autoAlpha: 0, y: 16 });
+    gsap.to(section, {
       autoAlpha: 1,
       y: 0,
-      duration: 0.7,
+      duration: 0.6,
       ease: 'power2.out',
-      stagger: 0.12,
-      scrollTrigger: { trigger: '.currently__list', start: 'top 85%' },
+      scrollTrigger: { trigger: section, start: 'top 92%' },
     });
   }
 </script>
 
 <style>
+  /* A fraction of the sitewide --space-section - a small aside reads as
+     one if it visibly takes up less room than the numbered sections
+     around it, same principle Principles.astro's own first version
+     (before it was promoted) already established. */
   .currently {
-    padding-block: var(--space-section);
+    padding-block: clamp(2.5rem, 5vw, 3.5rem);
   }
 
   .currently__inner {
@@ -96,63 +91,55 @@ const items = [
     padding-inline: var(--space-outer);
   }
 
+  .currently__label {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
   .currently__wink {
     display: inline-block;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
     color: var(--color-accent-signal);
     transform: rotate(-8deg);
   }
 
   .currently__list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: var(--space-48) var(--space-32);
-    margin-top: var(--space-48);
+    margin-top: var(--space-16);
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-32);
+    row-gap: var(--space-8);
   }
 
   .currently__item {
     display: flex;
-    flex-direction: column;
-  }
-
-  .currently__image {
-    display: block;
-    aspect-ratio: 16 / 10;
-    background: var(--color-bg-secondary);
-    border: var(--border-hairline) solid var(--color-text-secondary);
-    border-radius: var(--radius-image);
-  }
-
-  .currently__tag {
-    margin-top: var(--space-24);
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-ink);
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    color: var(--color-text-secondary);
   }
 
   .currently__title {
-    margin-top: 0.75rem;
-    font-family: var(--font-display);
     font-weight: 700;
-    font-size: 2.25rem;
-    text-transform: uppercase;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
-  }
-
-  .currently__description {
-    margin-top: 0.6rem;
-    max-width: 38ch;
-    font-family: var(--font-body);
-    font-size: var(--text-body);
-    line-height: var(--text-body-leading);
-    color: var(--color-text-secondary);
+    color: var(--color-ink);
   }
 
   @media (max-width: 640px) {
     .currently__inner {
       padding-inline: 1.5rem;
+    }
+
+    .currently__list {
+      flex-direction: column;
     }
   }
 </style>

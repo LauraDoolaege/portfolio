@@ -20,8 +20,11 @@
 // "stay quiet" intent from the first version is retired in favor of
 // site-wide consistency, which is what was actually asked for this time.
 //
-// Numbering: Selected Work "01", Currently Working On "02", this "03",
-// Gallery "04" - a clean ascending sequence matching physical page order.
+// Numbering: Selected Work "01", this "02", Gallery "03" - Currently
+// Working On sits physically between Selected Work and this section but
+// carries no number of its own again, demoted back to a small aside per
+// a later direct request ("should not be a major section... rather a
+// little sneak peek") - see that file's own comment.
 import SectionMarker from '../ui/SectionMarker.astro';
 
 const principles = [
@@ -42,7 +45,7 @@ const principles = [
 
 <section class="principles">
   <div class="principles__inner">
-    <SectionMarker index="03" label="My design principles" />
+    <SectionMarker index="02" label="My design principles" />
 
     <ul class="principles__list">
       {principles.map((item, index) => (
@@ -96,8 +99,8 @@ const principles = [
   .principles__item {
     padding-left: var(--space-24);
     /* A hairline divider between columns, not a border/background per
-               item. Only items after the first get one, so the row doesn't open
-               with a stray rule before any content. */
+                     item. Only items after the first get one, so the row doesn't open
+                     with a stray rule before any content. */
     border-left: var(--border-hairline) solid var(--color-text-secondary);
   }
 
@@ -144,8 +147,8 @@ const principles = [
     }
 
     /* Horizontal dividers instead of vertical ones once the columns
-               stack - the same device rotated 90 degrees rather than a
-               different one. */
+                     stack - the same device rotated 90 degrees rather than a
+                     different one. */
     .principles__item {
       padding-left: 0;
       padding-top: var(--space-24);

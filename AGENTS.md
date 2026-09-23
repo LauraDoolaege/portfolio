@@ -69,8 +69,10 @@ our actual tools.
 The full homepage and the full About page are built: Header/nav, Hero,
 SelectedWork, CurrentlyWorkingOn, Principles, Gallery, ContactCTA,
 Footer (in that page order), and (About) AboutIntro, AboutStory,
-AboutProcess, AboutTools, AboutDrives (in that page order).
-`HowIThink.astro` was built and later removed outright per direct
+AboutProcess, AboutDrives (in that page order). `AboutTools.astro` was
+built and later removed outright once Tools moved to the homepage's own
+Hero instead - see this file's later history for why. `HowIThink.astro`
+was, separately, also built and removed outright per direct
 request — see this file's own history below for why. Every other
 page is **not built yet** — Work index, case study, and Contact layouts
 are still PROPOSED and unapproved. Don't build page content without
@@ -1608,6 +1610,87 @@ clearly-placeholder `Tag.astro` chips (`[ Tool ]`, repeated), the same
 applies to project titles/images (CLAUDE.md "Content"). A code comment
 marks exactly where to swap in the real list; the layout doesn't need to
 change when that happens.
+
+**Another large follow-up pass on Selected Work, the homepage's section
+weight, and Tools' final home** - several distinct direct requests in
+one message, plus a reference screenshot (a friend's site: name/intro on
+the left, a small icon row labeled "Tools:" and a career timeline on the
+right) used for inspiration on the icon treatment and placement, not
+copied wholesale.
+
+**The accordion's expansion is less dramatic now** - "I don't like how
+dramatically the project cards stretch, my images will not be that big."
+The hovered/focused panel's `flex-grow` dropped from 6 to 3 (roughly 3/5
+of the row instead of 6/8), a smaller, more proportionate reveal that
+still reads as an accordion without ballooning as far.
+
+**The arrow moved off the image and became the cursor** - "the arrow
+should appear as the cursor upon hovering a project. For screens where
+hover states do not apply, add it at the bottom right of the card, on
+the same line as the title." `ProjectCard.astro`'s old circular badge
+(floating over the image, filling solid on hover) is gone; the arrow now
+sits inline at the end of `.project-card__title-row`, next to the title
+text, and is hidden outright under `(hover: hover) and (pointer: fine)`
+
+- on a device with real hover, `SelectedWork.astro` gained its own
+  cursor + spotlight, adapted directly from Gallery.astro's already-proven
+  version (same two-element cursor split so GSAP's x/y positioning and the
+  CSS scale/opacity toggle never fight over one element's `transform`;
+  same box-shadow-cutout spotlight, reused per direct request - "the same
+  fading effect you applied to the gallery on hover, should be applied to
+  the project cards"). Both live in `SelectedWork.astro` itself, not
+  `ProjectCard.astro`, matching this project's established pattern of
+  keeping section-specific interaction out of the generic, reusable card
+  component.
+
+**Each group label gained a fine line beside it** - "make... look more
+delicate with a little fine line next to it" - `.selected-work__group-label`
+is now a flex row (label text + a thin, low-opacity rule filling the
+remaining width) rather than plain standalone text.
+
+**Design: individual work / Experience design: group projects now sit
+behind a real pop-open disclosure** - "so the user doesn't feel like
+they have to scroll endlessly at once." Each group's label became a
+button (a plus that rotates into a minus) toggling a height-animated
+panel below it. Renders fully open in plain HTML/CSS - `aria-expanded="true"`,
+no inline hidden styling - so the projects stay reachable if this script
+never runs (the same "if JS fails, everything still renders in its
+final, reachable position" principle Hero's own entrance animation
+already documents); the script collapses both panels once it runs,
+using GSAP's native support for animating to `height: 'auto'` (it
+measures the natural height, then tweens toward it) rather than a
+hand-guessed max-height.
+
+**Currently Working On demoted back to a small, unnumbered aside** - "the
+currently working on should not be a major section as it is now, rather
+a little sneak peek to what I'm up to." Its own recent promotion to a
+full numbered section (image grid, `--space-section` padding, its own
+`SectionMarker`) is reverted - no images, no big title, just the wink
+line and the two items as a plain inline list, back to
+`clamp(2.5rem, 5vw, 3.5rem)` padding. This reopened the same numbering
+question its own earlier promotion had closed: with it unnumbered again,
+`Principles.astro` and `Gallery.astro` both had their own `index` moved
+back down (03→02, 04→03) to close the gap, so the visible numbered
+sequence (Selected Work "01," Principles "02," Gallery "03") still reads
+as a clean ascending sequence with no unnumbered section awkwardly
+sitting mid-sequence.
+
+**Tools moved off the About page entirely, onto the homepage, as a
+plain icon row** - "the tools can be just icons like in this example...
+I think I should include them at the top of the page close to the
+experience designer to-be paragraph." `AboutTools.astro` (the bracket-tag
+chip version from the previous pass) is deleted outright, not just
+unrouted - About's own numbering closed back up (Process "03," Drives
+"04," was "05"). A new `.hero__tools` block landed in `Hero.astro`
+instead, sharing row 1 with `.hero__role` via the grid's own row-sparse
+auto-placement (`.hero__role` only claims columns 1/6, leaving 8/13 open
+in that same row for `.hero__tools` to land in without an explicit
+`grid-row`). Still placeholder - five plain gray squares, no real tool
+icons or confirmed toolkit yet, same "real placeholder, not invented
+content" rule as before, just restyled to plain icons instead of
+bracket-tag chips per the reference image's own visual language (no real
+brand logos used - we don't have those assets, and the reference was for
+layout/style inspiration, not literal tool confirmation).
 
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 

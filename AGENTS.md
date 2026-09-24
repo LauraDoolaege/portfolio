@@ -2817,6 +2817,14 @@ pair together, `.selected-work` bottom padding dropped to 1.5rem and
 below the accordions. The trailing asterisk on Selected Work's
 description is still in place, pending confirmation.
 
+**Motion design group removed; open/hovered category turns black.**
+Direct request: Motion design (Kickstarter: Izumi) is "not relevant for
+my portfolio," so `SelectedWork.astro` is back to two groups (Experience
+design, Digital design), five projects. The open group's label, fine
+line and plus/minus icon now switch to `--color-ink` (from
+`--color-text-secondary`), and the same on hover, so the active category
+is clearer. The `motion` array, markup and its numbering (06) are gone.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

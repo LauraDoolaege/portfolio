@@ -2798,6 +2798,25 @@ layout; `.hero .btn` no longer exists while `.hero__scroll` still reads
 paragraphs with no `.about-intro__footnote` in the DOM; and AboutStory's
 last beat has exactly one paragraph, the grocery-store sentence gone.
 
+**Two small direct follow-ups on the new Selected Work wink, mid-turn
+corrections rather than a separate pass.**
+
+Both winks now lead their line instead of trailing it - "the asterix
+should be before currently working on and like what you see."
+`CurrentlyWorkingOn.astro`'s `.currently__wink` moved before "Currently
+working on" (was after), and `SelectedWork.astro`'s own
+`.selected-work__cta-wink` was already written leading "Like what you
+see?" once this was raised, so only Currently Working On's markup order
+needed changing.
+
+The CTA was briefly moved under SectionMarker, then put back after the
+last project group once it turned out "close together" meant the CTA and
+"Currently working on", not the CTA and the description. To bring that
+pair together, `.selected-work` bottom padding dropped to 1.5rem and
+`.currently` lost its top padding; the CTA keeps `margin-top: 3rem`
+below the accordions. The trailing asterisk on Selected Work's
+description is still in place, pending confirmation.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

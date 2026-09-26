@@ -2851,6 +2851,26 @@ it). Next phases: the thread itself (proposal first), the process story
 on About, and project framing (brief, interpretation, inspiration,
 concept, style) plus Digital design projects reframed as concept work.
 
+**Red thread, phase 2: the hero knot and the tail (Approach A).**
+New `components/ui/Thread.astro`, rendered inside a `.thread-wrap`
+(relative, `isolation: isolate`) around the intro, Principles, Selected
+Work and Currently Working On in `index.astro`. One absolutely
+positioned SVG behind content (`z-index: -1`, `pointer-events: none`)
+with two terracotta (`--color-accent-signal`) paths: a hand-drawn knot
+that draws once on load, placed in the empty right side of the hero's
+bottom block, and a tail that leaves the knot, crosses to the left
+gutter and runs down to the contact section, drawn on scroll (scrub
+0.6) with GSAP's DrawSVGPlugin (now registered in `utils/motion.ts`).
+Geometry is built in JS from real anchors (`.hero__bottom`, `#contact`)
+and rebuilt on resize/load, so it follows layout changes. The knot is a
+scaled group, so its stroke width is divided by the scale to match the
+tail's 2.5px. Reduced motion shows the finished line with no drawing.
+Verified at 1400px and 375px: no horizontal overflow, the tail's
+dash-offset changes with scroll, and the knot clears the tools row on
+mobile. Open: the tail currently swoops behind the gallery tiles on
+its way to the gutter; later phases will make it pass through the
+process story on About and arrive at each project.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

@@ -1,0 +1,139 @@
+---
+// The "red thread": one continuous terracotta line that starts as a knot
+// in the hero and unfolds down the page as you scroll, mirroring the
+// process it stands for (a brief lands as a tangle, one thread loosens
+// it). Drawn in --color-accent-signal, the site's existing terracotta
+// (no new hue - decided with the user).
+//
+// Renders only an <svg>; the script builds its geometry from real
+// anchors (the hero's bottom block, the contact section) so it can't
+// drift if layouts change, and rebuilds on resize.
+//
+// Placement: absolutely positioned inside .thread-wrap (index.astro),
+// behind content (z-index -1 inside an isolated wrapper) with
+// pointer-events: none, so it never blocks a click. The tail runs in the
+// left margin gutter so it doesn't cross text.
+//
+// Motion: the knot draws once on load; the tail draws on scroll (scrub).
+// Under prefers-reduced-motion the finished line is shown, nothing draws.
+---
+
+<svg class="thread" aria-hidden="true" focusable="false">
+  <path class="thread__knot" fill="none"></path>
+  <path class="thread__tail" fill="none"></path>
+</svg>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  const svg = document.querySelector<SVGSVGElement>('.thread');
+  const wrap = svg?.parentElement;
+  const knot = svg?.querySelector<SVGPathElement>('.thread__knot');
+  const tail = svg?.querySelector<SVGPathElement>('.thread__tail');
+  const anchor = document.querySelector<HTMLElement>('.hero__bottom');
+  const end = document.querySelector<HTMLElement>('#contact');
+
+  if (svg && wrap && knot && tail && anchor && end) {
+    // A hand-tuned tangle in a 320 x 220 box. It ends at its lower-left
+    // corner, which is where the tail picks up.
+    const KNOT_W = 320;
+    const KNOT_H = 220;
+    const KNOT =
+      'M 20 170 C 80 20, 300 40, 240 120 C 190 190, 60 150, 110 80 ' +
+      'C 150 25, 280 100, 200 170 C 150 205, 90 190, 120 140 ' +
+      'C 140 105, 60 110, 50 175 C 46 200, 30 210, 8 206';
+
+    let knotTween: gsap.core.Tween | undefined;
+    let tailTween: gsap.core.Tween | undefined;
+
+    const build = () => {
+      knotTween?.scrollTrigger?.kill();
+      knotTween?.kill();
+      tailTween?.scrollTrigger?.kill();
+      tailTween?.kill();
+
+      const wrapRect = wrap.getBoundingClientRect();
+      const top = wrapRect.top + window.scrollY;
+      const a = anchor.getBoundingClientRect();
+      const e = end.getBoundingClientRect();
+      const width = wrapRect.width;
+      const height = end.getBoundingClientRect().top + window.scrollY - top;
+
+      svg.setAttribute('width', String(width));
+      svg.setAttribute('height', String(height));
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+      // Knot sits in the empty right side of the hero's bottom block.
+      const scale = Math.min(1, (width * 0.34) / KNOT_W);
+      const kx = a.right - KNOT_W * scale - 8;
+      const ky = a.top + window.scrollY - top + (a.height - KNOT_H * scale) / 2;
+      knot.setAttribute('transform', `translate(${kx} ${ky}) scale(${scale})`);
+      knot.setAttribute('d', KNOT);
+      // The knot is scaled as a group transform, so widen its stroke to
+      // compensate and keep both paths the same visual weight.
+      knot.style.strokeWidth = String(2.5 / scale);
+
+      // The tail starts where the knot ends (its lower-left corner) and
+      // runs into the left gutter, then down to the contact section.
+      const sx = kx + 8 * scale;
+      const sy = ky + 206 * scale;
+      const gutter = Math.max(10, Math.min(28, a.left * 0.4));
+      const ey = e.top + window.scrollY - top;
+      const mid = (sy + ey) / 2;
+      const d =
+        `M ${sx} ${sy} ` +
+        `C ${sx - 160} ${sy + 60}, ${gutter + 70} ${sy - 10}, ${gutter} ${sy + 90} ` +
+        `C ${gutter - 10} ${sy + 220}, ${gutter + 14} ${mid - 200}, ${gutter} ${mid} ` +
+        `S ${gutter - 8} ${ey - 200}, ${gutter} ${ey}`;
+      tail.setAttribute('d', d);
+
+      if (prefersReducedMotion()) return;
+
+      gsap.set(knot, { drawSVG: '0% 0%' });
+      gsap.set(tail, { drawSVG: '0% 0%' });
+      knotTween = gsap.to(knot, { drawSVG: '0% 100%', duration: 1.8, ease: 'power2.inOut', delay: 0.4 });
+      tailTween = gsap.to(tail, {
+        drawSVG: '0% 100%',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: wrap,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.6,
+        },
+      });
+    };
+
+    build();
+    let timer: number | undefined;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        build();
+        ScrollTrigger.refresh();
+      }, 200);
+    });
+    window.addEventListener('load', () => {
+      build();
+      ScrollTrigger.refresh();
+    });
+  }
+</script>
+
+<style>
+  .thread {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .thread path {
+    stroke: var(--color-accent-signal);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

@@ -21,10 +21,13 @@ import Hero from '../components/sections/Hero.astro';
 import SelectedWork from '../components/sections/SelectedWork.astro';
 import CurrentlyWorkingOn from '../components/sections/CurrentlyWorkingOn.astro';
 import Principles from '../components/sections/Principles.astro';
+import Thread from '../components/ui/Thread.astro';
 import ContactCTA from '../components/sections/ContactCTA.astro';
 ---
 
 <BaseLayout title="Laura Doolaege | Portfolio">
+  <div class="thread-wrap">
+    <Thread />
   <div class="intro">
     <Header />
     <Hero />
@@ -32,6 +35,7 @@ import ContactCTA from '../components/sections/ContactCTA.astro';
   <Principles />
   <SelectedWork />
   <CurrentlyWorkingOn />
+  </div>
   <ContactCTA />
   <Footer />
 </BaseLayout>
@@ -42,6 +46,11 @@ import ContactCTA from '../components/sections/ContactCTA.astro';
      it, min-height rather than height so content is never forced to
      overflow/clip on a short viewport. Hero.astro's own `flex: 1` is what
      lets it absorb the remaining space and center its content within it. */
+  .thread-wrap {
+    position: relative;
+    isolation: isolate;
+  }
+
   .intro {
     display: flex;
     flex-direction: column;

@@ -46,7 +46,7 @@
 // the request. It no longer needs its own row wrapper to share a line
 // with a button that's gone; it's just a right-aligned line on its own
 // now.
-import Tag from '../ui/Tag.astro';
+import Gallery from './Gallery.astro';
 
 const titleWord = 'Portfolio';
 const letters = titleWord.split('');
@@ -55,45 +55,6 @@ const letters = titleWord.split('');
 <section class="hero">
   <div class="hero__inner">
     <div class="hero__visual">
-      <div class="hero__meta">
-        <span class="hero__year" aria-label="2026">
-          <span aria-hidden="true">20</span>
-          <span aria-hidden="true">26</span>
-        </span>
-
-        <ul class="hero__tags">
-          <li>
-            <Tag>UX / Experience Design</Tag>
-          </li>
-          <li>
-            <Tag>Digital Design</Tag>
-          </li>
-        </ul>
-      </div>
-
-      <span class="hero__image" aria-hidden="true">
-        <!--
-          TODO: swap for a real photo once one exists (PROJECT_BRIEF.md
-          Section 6 — no photography yet). Replace this span's content with:
-          <img src={yourImportedImage} alt="Laura Doolaege" class="hero__image-img" />
-          — .hero__image-img is already styled (width/height/object-fit)
-          and ready for it.
-        -->
-      </span>
-
-      <!--
-        A second image placeholder, per direct request ("maybe just think
-        to add more images... to the current image") - a smaller chip
-        peeking from behind the main portrait's lower-left corner, the
-        same "pinned collage" language the About page's redesign now uses
-        too. Grid-placed (overlapping the main image's own column range,
-        layered via z-index), not absolutely positioned - simpler to keep
-        in sync with the responsive grid than computing an offset by hand.
-      -->
-      <span class="hero__image-chip" aria-hidden="true">
-        <!-- TODO: replace with a second real photo once photography exists (PROJECT_BRIEF.md Section 6) -->
-      </span>
-
       <h1 class="hero__title" aria-label={titleWord}>
         <span class="hero__title-visual" aria-hidden="true">
           {letters.map((letter) => (
@@ -106,9 +67,7 @@ const letters = titleWord.split('');
     </div>
 
     <div class="hero__bottom">
-      <p class="hero__role">
-        Experience designer <span class="hero__role-soft">to-be</span>
-      </p>
+      <p class="hero__role">Experience designer</p>
 
       <!--
         Echoes Header's own location/availability line
@@ -132,8 +91,8 @@ const letters = titleWord.split('');
       </p>
 
       <p class="hero__intro">
-        I'm Laura, a digital development &amp; design student with a background in marketing
-        communication, currently specialising in user experience design.
+        I find ideas in the knot, and the solution usually somewhere that isn't design. Currently in
+        my 3rd year at Devine.
       </p>
 
       <!--
@@ -176,41 +135,35 @@ const letters = titleWord.split('');
         <span class="hero__scroll">(Scroll)</span>
       </div>
     </div>
+
+    <!--
+      The Gallery strip lives here now, replacing the old portrait and
+      floating chip - per feedback that the two random floating images
+      said nothing, and the gallery is proof of work.
+    -->
+    <div class="hero__gallery">
+      <Gallery embedded />
+    </div>
   </div>
 </section>
 
 <script>
-  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
 
   const hero = document.querySelector('.hero');
   if (hero) {
-    const image = hero.querySelector<HTMLElement>('.hero__image');
-    const chip = hero.querySelector<HTMLElement>('.hero__image-chip');
     const letters = hero.querySelectorAll<HTMLElement>('.hero__letter');
-    const meta = hero.querySelector<HTMLElement>('.hero__meta');
+    const gallery = hero.querySelector<HTMLElement>('.hero__gallery');
     const bottom = hero.querySelector<HTMLElement>('.hero__bottom');
 
-    if (!prefersReducedMotion() && image && letters.length && meta && bottom) {
-      // Initial states live here, not in CSS — if this script never runs,
-      // the hero renders fully visible in its final layout, not stuck
-      // mid-animation.
-      gsap.set(image, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1.05 });
+    if (!prefersReducedMotion() && letters.length && gallery && bottom) {
+      // Initial states live here, not in CSS, so if this script never runs
+      // the hero renders fully visible in its final layout.
       gsap.set(letters, { yPercent: 115 });
-      gsap.set([meta, bottom], { autoAlpha: 0, y: 24 });
-      if (chip) gsap.set(chip, { autoAlpha: 0, y: 16 });
+      gsap.set([gallery, bottom], { autoAlpha: 0, y: 24 });
 
-      // Each element gets its own weight and character rather than one
-      // eased curve applied uniformly to everything — that uniformity is
-      // what reads as mechanical. Groups overlap instead of running
-      // strictly one-after-another, which is what actually reads as
-      // fluid rather than a checklist of steps.
       gsap
         .timeline()
-        .to(
-          image,
-          { clipPath: 'inset(0% 0% 0% 0%)', scale: 1, duration: 1.1, ease: 'power3.out' },
-          0,
-        )
         .to(
           letters,
           {
@@ -219,51 +172,10 @@ const letters = titleWord.split('');
             ease: 'back.out(1.5)',
             stagger: { each: 0.045, from: 'start', ease: 'sine.inOut' },
           },
-          0.35,
+          0.15,
         )
-        .to(meta, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 0.65)
+        .to(gallery, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power2.out' }, 0.55)
         .to(bottom, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 0.8);
-
-      if (chip) {
-        gsap.to(chip, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.5 });
-        // A slow, continuous idle float once the entrance settles - per
-        // direct request to add "some animation... to the current
-        // image." Small amplitude (8px) and a long, gentle duration (4s
-        // each way) so it reads as ambient life, not a distracting loop -
-        // same "locked-rule exception for a genuine ambient loop" pattern
-        // already used for the Gallery tiles' own continuous bob (see
-        // AGENTS.md), gated behind prefers-reduced-motion the same way.
-        gsap.to(chip, {
-          y: '+=8',
-          duration: 4,
-          ease: 'sine.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: 1.3,
-        });
-      }
-
-      // Gentle scroll parallax on the image, capped at +/-40px. scrub: 1
-      // (a one-second smoothing lag) rather than scrub: true (1:1 instant
-      // tracking) — the image eases toward the scroll position instead of
-      // snapping to it every frame, which is what actually reads as
-      // smooth rather than mechanically glued to the scrollbar.
-      gsap.fromTo(
-        image,
-        { y: -40 },
-        {
-          y: 40,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: hero,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1,
-          },
-        },
-      );
-
-      ScrollTrigger.refresh();
     }
   }
 </script>
@@ -296,79 +208,10 @@ const letters = titleWord.split('');
     row-gap: var(--space-16);
   }
 
-  /* Right-aligned year + tags, sitting above the word beside the image. */
-  .hero__meta {
-    grid-column: 9 / 13;
-    grid-row: 1;
-    align-self: start;
-    justify-self: end;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--space-16);
-    text-align: right;
-  }
-
-  .hero__year {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-wide);
-    line-height: 1.3;
-    color: var(--color-text-secondary);
-  }
-
-  .hero__tags {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--space-8);
-  }
-
-  /* Image slot — replaces the earlier blob placeholder. Row 1 only; its own aspect-ratio (not a grid-row span) determines its height, so the title below can pull up into it by a font-size-relative amount instead of a row-sizing trick that turned out not to place things where it looked like it should. */
-  .hero__image {
-    grid-column: 5 / 9;
-    grid-row: 1;
-    align-self: start;
-    aspect-ratio: 5 / 7;
-    /* Caps how tall the image gets on short/laptop viewports so the hero actually fits 100dvh instead of pushing the bottom block below the fold — without this, a full 5:7 box at this column's width is taller than the viewport at common 900-ish px heights. Width stays grid-determined, so past this cap the box is wider than 5:7 rather than shrinking sideways too; an acceptable trade for a placeholder, worth revisiting once a real photo (with its own crop) is in. */
-    max-height: 36dvh;
-    overflow: hidden;
-    background: var(--color-bg-secondary);
-    border: var(--border-hairline) solid var(--color-text-secondary);
-  }
-
-  .hero__image :global(.hero__image-img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Overlaps the main image's own grid range (column 5/9) on its left
-     edge, aligned to the bottom of row 1 and nudged further down/left -
-     a grid-item overlap (z-index alone, no absolute positioning) so it
-     tracks the responsive column widths automatically instead of a
-     hand-computed offset. */
-  .hero__image-chip {
-    grid-column: 3 / 6;
-    grid-row: 1;
-    align-self: end;
-    z-index: 1;
-    width: 55%;
-    aspect-ratio: 4 / 5;
-    justify-self: end;
-    transform: translateY(28%) rotate(-4deg);
-    background: var(--color-bg-secondary);
-    border: var(--border-hairline) solid var(--color-text-secondary);
-    box-shadow: 0 16px 28px -18px rgb(23 21 15 / 0.32);
-  }
-
   /* Full-width, edge-to-edge title. container-type turns on cqw sizing for .hero__title-visual below — the word's font-size tracks this element's own rendered width, not the viewport, so it fills the grid at any width from 320px to well past 2560px without a hand-tuned breakpoint ladder. The negative margin-top is in em (title's own font-size), not px or %, so the overlap into the image's lower third scales with the word instead of drifting at other viewports. */
   .hero__title {
     grid-column: 1 / -1;
-    grid-row: 2;
+    grid-row: 1;
     container-type: inline-size;
     /* Without this, the negative margin-top below collapses straight through the h1 (standard block margin-collapsing), leaving the h1 measuring 0 height and the word floating detached from the grid's own row-sizing. flow-root opts out of collapsing without clipping the intentional overflow into the row above. */
     display: flow-root;
@@ -377,7 +220,6 @@ const letters = titleWord.split('');
 
   .hero__title-visual {
     display: flex;
-    margin-top: -0.55em;
     font-family: var(--font-display);
     font-weight: 800;
     line-height: 0.8;
@@ -393,16 +235,7 @@ const letters = titleWord.split('');
 
   .hero__letter {
     display: inline-block;
-    color: var(--color-bg-primary);
-    mix-blend-mode: difference;
-  }
-
-  /* Fallback for browsers without mix-blend-mode: plain ink text stays legible instead of rendering invisible cream-on-cream. */
-  @supports not (mix-blend-mode: difference) {
-    .hero__letter {
-      color: var(--color-ink);
-      mix-blend-mode: normal;
-    }
+    color: var(--color-ink);
   }
 
   /* Fallback for browsers without container query units: a viewport-based clamp() curve, same floor/ceiling as the cqw version above. */
@@ -410,6 +243,10 @@ const letters = titleWord.split('');
     .hero__title-visual {
       font-size: clamp(2.5rem, 11vw + 1rem, 26rem);
     }
+  }
+
+  .hero__gallery {
+    min-width: 0;
   }
 
   .hero__bottom {
@@ -542,31 +379,15 @@ const letters = titleWord.split('');
       justify-content: flex-start;
     }
 
-    .hero__image {
-      grid-column: 4 / 9;
-    }
-
-    /* Hidden below desktop rather than repositioned - the collage overlap
-                                                                                       is tuned to the desktop image's own 5/9 column range; keeping it in
-                                                                                       sync with every other width's own image position isn't worth the
-                                                                                       complexity for a decorative secondary chip. */
-    .hero__image-chip {
-      display: none;
-    }
-
-    .hero__meta {
-      grid-column: 9 / 13;
-    }
-
     .hero__bottom {
       grid-template-columns: repeat(7, 1fr);
     }
 
     /* Same role -> status -> intro -> tools -> CTA row order as the base
-                                                             rule (unchanged here, just a wider column span) - only the column
-                                                             range needs overriding for the narrower 7-column grid.
-                                                             .hero__cta-row already spans 1 / -1 at every width, so it needs
-                                                             no override here. */
+                                                                 rule (unchanged here, just a wider column span) - only the column
+                                                                 range needs overriding for the narrower 7-column grid.
+                                                                 .hero__cta-row already spans 1 / -1 at every width, so it needs
+                                                                 no override here. */
     .hero__role,
     .hero__status,
     .hero__intro,
@@ -575,10 +396,8 @@ const letters = titleWord.split('');
     }
   }
 
-  /* Mobile redesign (taste-skill pass): the old layout put the meta cluster (year + tags) in flow above the image, which collided with "PORTFOLIO" rising up into it — the title's overlap has to land on the element directly before it, and that needs to be the image, not the tags. Fix is a real flex order, not a visual patch: image, then title overlapping it, then the (now-smaller) meta row underneath — "tags under the header image," per direct request, plus year moved down with them rather than left stranded on its own above. */
   @media (max-width: 639px) {
     .hero__inner {
-      /* The 100dvh-filling space-between from the base rule is a desktop-only ask (the wireframe spec only calls out 100svh "on desktop") — at mobile it just stretched a short stack of content across the full viewport, leaving a dead gap before the bottom block. Flow naturally instead. */
       justify-content: flex-start;
     }
 
@@ -587,69 +406,15 @@ const letters = titleWord.split('');
       flex-direction: column;
     }
 
-    .hero__image {
-      order: 1;
-      align-self: center;
-      width: 50%;
-    }
-
-    /* Same reasoning as the tablet range - hidden rather than
-                                                                                       repositioned for a decorative secondary chip. */
-    .hero__image-chip {
-      display: none;
-    }
-
-    .hero__title {
-      order: 2;
-    }
-
-    .hero__meta {
-      order: 3;
-      align-self: stretch;
-      flex-direction: row;
-      align-items: baseline;
-      justify-content: flex-start;
-      gap: var(--space-24);
-      margin-top: var(--space-16);
-    }
-
-    .hero__year {
-      flex-direction: row;
-      gap: 0.4em;
-    }
-
-    .hero__tags {
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      /* Pushes the whole tag block to the row's right edge (matching the title's own right edge) while year stays left; justify-content then right-aligns the tags themselves once they wrap to a second line. */
-      justify-content: flex-end;
-      margin-left: auto;
-      gap: var(--space-8);
-    }
-
-    /* Smaller, per direct request — a deliberate step below the locked 11-12px tag type-scale (PROJECT_BRIEF.md Section 3), mobile only. :global() because Tag.astro renders its own scoped element. */
-    .hero__tags :global(.tag) {
-      font-size: 10px;
-    }
-
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                                     markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                                                                                                                     which is already the same role -> location -> paragraph -> tools
-                                                                                                                     order the base rule's explicit grid-rows give every wider
-                                                                                                                     breakpoint, so nothing here needs to re-specify row/column
-                                                                                                                     placement the way it used to. */
+                                                                                                                             markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                                                                                                                             which is already the same role -> location -> paragraph -> tools
+                                                                                                                             order the base rule's explicit grid-rows give every wider
+                                                                                                                             breakpoint, so nothing here needs to re-specify row/column
+                                                                                                                             placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
-    }
-
-    /* Forces "to-be" onto its own line (display: block after inline text breaks the line, same as the nav "/" separator elsewhere in this project) instead of letting it wrap mid-word wherever the viewport happens to cut it off, and de-emphasizes it slightly against "Experience designer." */
-    .hero__role-soft {
-      display: block;
-      margin-top: 0.15em;
-      font-weight: 500;
-      color: var(--color-text-secondary);
     }
 
     .hero__intro {

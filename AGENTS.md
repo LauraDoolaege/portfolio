@@ -2825,6 +2825,32 @@ line and plus/minus icon now switch to `--color-ink` (from
 `--color-text-secondary`), and the same on hover, so the active category
 is clearer. The `motion` array, markup and its numbering (06) are gone.
 
+**Hero reworked around the "red thread" feedback (phase 1 of 4).**
+Feedback from a portfolio reviewer: the site is too basic and doesn't
+show personality, "experience designer to-be" sounds insecure, the tags
+are awful, and the two floating hero images say nothing (the gallery
+should live in the hero instead). The new creative direction is a
+single "red thread" that starts as a knot and unfolds through the site,
+mirroring Laura's process (sparks, mapping, overwhelm, detangling, one
+thread that loosens it, usually found outside design). Decisions made
+with the user: the thread is drawn in the existing terracotta
+`--color-accent-signal` (no new hue, mauve stays for links/hovers), and
+the process story replaces About's "How I work" section only (the
+homepage Principles stay).
+
+Phase 1 (this entry): role line is now plain "Experience designer"; the
+intro is "I find ideas in the knot, and the solution usually somewhere
+that isn't design. Currently in my 3rd year at Devine." (a line from the
+user's own supplied options); the year/tags cluster, portrait image and
+floating chip are removed; the Gallery strip renders inside the hero
+(`<Gallery embedded />`, which hides its own SectionMarker and shrinks
+tiles) below the role/intro block, and the standalone Gallery section is
+gone from `index.astro`. The giant "PORTFOLIO" word is kept but is now
+plain ink (its mix-blend-mode letterform device needed the image behind
+it). Next phases: the thread itself (proposal first), the process story
+on About, and project framing (brief, interpretation, inspiration,
+concept, style) plus Digital design projects reframed as concept work.
+
 ## Design system (LOCKED — see `src/styles/global.css` for the actual tokens)
 
 **Color** — value contrast, not hue. `bg-primary` (#F8F6F1 porcelain) and

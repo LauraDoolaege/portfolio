@@ -60,9 +60,16 @@
 import SectionMarker from '../ui/SectionMarker.astro';
 import Tag from '../ui/Tag.astro';
 
-const { embedded = false } = Astro.props;
+// `count` (default 15) lets a caller render a shorter strip - the hero's
+// own embedded gallery uses 5, per direct request ("the gallery should
+// only be around 5 images"). `floating` (embedded-only) makes those 5
+// tiles start scattered loosely around the hero title instead of in
+// their normal strip position, settling into that normal position - the
+// strip's own existing layout, unchanged - as the page scrolls past the
+// hero (see the script's own comment on this below).
+const { embedded = false, count = 15, floating = false } = Astro.props;
 
-const TOTAL = 15;
+const TOTAL = count;
 const ASPECTS = ['wide', 'tall', 'square'] as const;
 const TAGS = ['Process', 'Detail', 'Concept'] as const;
 
@@ -73,7 +80,10 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 }));
 ---
 
-<section class:list={['gallery', { 'gallery--embedded': embedded }]}>
+<section
+  class:list={['gallery', { 'gallery--embedded': embedded }]}
+  data-floating={embedded && floating ? 'true' : undefined}
+>
   {!embedded && (
     <div class="gallery__inner">
       <SectionMarker index="03" label="Gallery" />
@@ -341,6 +351,101 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       viewport.addEventListener('pointerleave', () => tween?.resume());
     }
 
+    // --- Floating scatter, settling on scroll (embedded + floating only) ---
+    // "The gallery should only be around 5 images. They should be
+    // floating around the title, but on scroll fall nicely into the old
+    // gallery layout." The tiles' "landed" position is just their normal,
+    // already-correct position in the strip - nothing about that layout
+    // changes. What's new is a *starting* state: each real tile (the
+    // clone set is decorative only, see the file header comment, so it's
+    // excluded) is placed on load with a transform that scatters it
+    // loosely around the hero's title word, measured against the title's
+    // own live rect rather than guessed - the title's rendered size/
+    // position depends on cqw sizing and viewport width, so a hardcoded
+    // offset would only work at one width. A ScrollTrigger scrub then
+    // eases each tile's transform back to identity (its natural landed
+    // position) over the page's first ~500px of scroll - short enough
+    // that it plays out while the hero (and the gallery inside it) is
+    // still on screen, not after it's already scrolled past.
+    const gallerySection = document.querySelector<HTMLElement>('.gallery[data-floating]');
+    if (gallerySection && !reduceMotion) {
+      const titleEl = document.querySelector<HTMLElement>('.hero__title');
+      const realTiles = Array.from(
+        gallerySection.querySelectorAll<HTMLElement>('.gallery__tile:not(.gallery__tile--clone)'),
+      );
+
+      if (titleEl && realTiles.length) {
+        // Deterministic per-tile scatter geometry (not re-randomized on
+        // every rebuild, so a resize doesn't reshuffle which tile sits
+        // where) - spread around the title's center at varying angles/
+        // radii/tilts so the tiles read as loosely scattered, not a neat
+        // ring.
+        const scatterConfig = realTiles.map((_, i) => ({
+          angle: (i / realTiles.length) * Math.PI * 2 + (i % 2 === 0 ? 0.35 : -0.5),
+          radiusX: 70 + ((i * 37) % 60),
+          radiusY: 50 + ((i * 53) % 70),
+          rotation: (i % 2 === 0 ? 1 : -1) * (7 + ((i * 5) % 14)),
+        }));
+
+        let scrollTween: gsap.core.Tween | undefined;
+
+        const applyScatter = () => {
+          scrollTween?.scrollTrigger?.kill();
+          scrollTween?.kill();
+
+          // Identity first, so the rects measured next are each tile's
+          // real, untransformed position - not whatever the previous
+          // scatter/settle state happened to leave it at.
+          gsap.set(realTiles, { x: 0, y: 0, rotation: 0, scale: 1 });
+
+          const titleRect = titleEl.getBoundingClientRect();
+          const titleCenterX = titleRect.left + titleRect.width / 2;
+          const titleCenterY = titleRect.top + titleRect.height / 2;
+
+          realTiles.forEach((tile, i) => {
+            const cfg = scatterConfig[i];
+            const tileRect = tile.getBoundingClientRect();
+            const tileCenterX = tileRect.left + tileRect.width / 2;
+            const tileCenterY = tileRect.top + tileRect.height / 2;
+
+            const targetX = titleCenterX + Math.cos(cfg.angle) * cfg.radiusX;
+            const targetY = titleCenterY + Math.sin(cfg.angle) * cfg.radiusY;
+
+            gsap.set(tile, {
+              x: targetX - tileCenterX,
+              y: targetY - tileCenterY,
+              rotation: cfg.rotation,
+              scale: 0.82,
+              transformOrigin: '50% 50%',
+            });
+          });
+
+          scrollTween = gsap.to(realTiles, {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            scale: 1,
+            ease: 'none',
+            stagger: 0.03,
+            scrollTrigger: {
+              trigger: document.body,
+              start: 'top top',
+              end: '+=500',
+              scrub: 0.5,
+            },
+          });
+        };
+
+        applyScatter();
+
+        let scatterResizeTimer: number | undefined;
+        window.addEventListener('resize', () => {
+          window.clearTimeout(scatterResizeTimer);
+          scatterResizeTimer = window.setTimeout(applyScatter, 200);
+        });
+      }
+    }
+
     // Continuous "breathing" bob: every real tile's trigger (not the
     // tile itself, which the flex track bottom-aligns via layout, not a
     // transform - but keeping the bob off the tile and on a child
@@ -601,7 +706,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery {
     padding-block: clamp(3rem, 6vw, 4.5rem);
     /* No background fill (per earlier direct request) - the section sits
-                                                     directly on the page's own bg-primary. */
+                                                       directly on the page's own bg-primary. */
     overflow-x: hidden;
   }
 
@@ -666,17 +771,17 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     z-index: 1;
     overflow: hidden;
     /* Vertical room for the hover bob, magnetic shift, and hover scale so
-                                   nothing clips - bumped up from 2.5rem after a direct report that
-                                   hovered tiles were getting cut off. Measured directly, not just
-                                   guessed: the tallest tile (20rem at a wide viewport) only had
-                                   ~40px of headroom above the row at the old 2.5rem padding, which
-                                   the hover scale (1.05x) and the magnetic shift (up to 16px) alone
-                                   could already come close to using entirely - stacking the
-                                   continuous breathing bob's own motion on top of that (mid-cycle,
-                                   right as a hover begins and before it's had time to pause) was
-                                   enough to occasionally push a tile's edge past that budget.
-                                   Negative margin cancels the padding's footprint on
-                                   .gallery__stage's own auto height. */
+                                     nothing clips - bumped up from 2.5rem after a direct report that
+                                     hovered tiles were getting cut off. Measured directly, not just
+                                     guessed: the tallest tile (20rem at a wide viewport) only had
+                                     ~40px of headroom above the row at the old 2.5rem padding, which
+                                     the hover scale (1.05x) and the magnetic shift (up to 16px) alone
+                                     could already come close to using entirely - stacking the
+                                     continuous breathing bob's own motion on top of that (mid-cycle,
+                                     right as a hover begins and before it's had time to pause) was
+                                     enough to occasionally push a tile's edge past that budget.
+                                     Negative margin cancels the padding's footprint on
+                                     .gallery__stage's own auto height. */
     padding-block: 4rem;
     margin-block: -4rem;
   }
@@ -705,17 +810,17 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery__track {
     display: flex;
     /* Bottom-aligned, not top - per direct request ("align gallery
-                                       items at the bottom"). Tiles vary in height (three aspect
-                                       ratios), so this is what actually gives the strip one shared
-                                       baseline instead of each tile hanging from an arbitrary top edge.
-                                       A real bug, caught from a screenshot with a straightedge across
-                                       the captions: the per-tile up/down "float" transform (removed
-                                       below) used to nudge each *whole* tile - image and caption
-                                       together - a further ±28px off whatever baseline flex-end had
-                                       just established, which directly undid this alignment for
-                                       exactly the tiles it was applied to. Flex alignment happens
-                                       before a transform is ever painted, so there was no way for the
-                                       two to coexist - the float had to go, not the alignment. */
+                                         items at the bottom"). Tiles vary in height (three aspect
+                                         ratios), so this is what actually gives the strip one shared
+                                         baseline instead of each tile hanging from an arbitrary top edge.
+                                         A real bug, caught from a screenshot with a straightedge across
+                                         the captions: the per-tile up/down "float" transform (removed
+                                         below) used to nudge each *whole* tile - image and caption
+                                         together - a further ±28px off whatever baseline flex-end had
+                                         just established, which directly undid this alignment for
+                                         exactly the tiles it was applied to. Flex alignment happens
+                                         before a transform is ever painted, so there was no way for the
+                                         two to coexist - the float had to go, not the alignment. */
     align-items: flex-end;
     gap: 1.5rem;
     width: max-content;

@@ -91,7 +91,12 @@
 
       gsap.set(knot, { drawSVG: '0% 0%' });
       gsap.set(tail, { drawSVG: '0% 0%' });
-      knotTween = gsap.to(knot, { drawSVG: '0% 100%', duration: 1.8, ease: 'power2.inOut', delay: 0.4 });
+      knotTween = gsap.to(knot, {
+        drawSVG: '0% 100%',
+        duration: 1.8,
+        ease: 'power2.inOut',
+        delay: 0.4,
+      });
       tailTween = gsap.to(tail, {
         drawSVG: '0% 100%',
         ease: 'none',

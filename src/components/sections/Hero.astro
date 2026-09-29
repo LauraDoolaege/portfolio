@@ -47,35 +47,46 @@
 // with a button that's gone; it's just a right-aligned line on its own
 // now.
 import Gallery from './Gallery.astro';
+import Tag from '../ui/Tag.astro';
+import Button from '../ui/Button.astro';
 
-const titleWord = 'Portfolio';
-const letters = titleWord.split('');
+// The giant word changed from "Portfolio" to "Experience designer" per
+// direct request - two words now, not one, so it's set on two lines
+// instead of one (each still sized to fill the container edge-to-edge,
+// same device as before, just per-line). The per-line cqw multiplier is
+// measured, not guessed, same as the original "27cqw" comment already
+// documented for "Portfolio": rendering each word off-screen at a known
+// font-size and reading back its width gives the exact ratio - 24.18 for
+// "Experience", 30.43 for "Designer" in this font/weight/tracking,
+// confirmed directly in the browser before writing these numbers in.
+const titleLines = [
+  { word: 'Experience', cqw: 24 },
+  { word: 'Designer', cqw: 30 },
+];
 ---
 
 <section class="hero">
   <div class="hero__inner">
     <div class="hero__visual">
-      <h1 class="hero__title" aria-label={titleWord}>
-        <span class="hero__title-visual" aria-hidden="true">
-          {letters.map((letter) => (
-            <span class="hero__letter-mask">
-              <span class="hero__letter">{letter}</span>
-            </span>
-          ))}
-        </span>
+      <h1 class="hero__title" aria-label="Experience designer">
+        {titleLines.map(({ word, cqw }) => (
+          <span class:list={['hero__title-line', `hero__title-line--cqw${cqw}`]} aria-hidden="true">
+            {word.split('').map((letter) => (
+              <span class="hero__letter-mask">
+                <span class="hero__letter">{letter}</span>
+              </span>
+            ))}
+          </span>
+        ))}
       </h1>
     </div>
 
     <div class="hero__bottom">
-      <p class="hero__role">Experience designer</p>
+      <p class="hero__role">UX &amp; Visual Designer</p>
 
       <!--
         Echoes Header's own location/availability line
-        (Header.astro's .site-header__status). Per direct request the
-        reading order here is now role -> location -> paragraph -> tools
-        on every screen size, not just mobile (this used to be
-        mobile-only, hidden on desktop/tablet in favor of the header's
-        own copy) - it now always shows, right under the role line.
+        (Header.astro's .site-header__status).
       -->
       <p class="hero__status">
         <svg class="hero__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -90,25 +101,31 @@ const letters = titleWord.split('');
         Belgium <span aria-hidden="true">|</span> Available Feb 2027
       </p>
 
+      <!-- content.md "Hero" intro, verbatim. -->
       <p class="hero__intro">
-        I find ideas in the knot, and the solution usually somewhere that isn't design. Currently in
-        my 3rd year at Devine.
+        Hi, I'm Laura! I detangle briefs into creative concepts that are feasible and grounded in
+        marketing. Online and offline.
       </p>
 
+      <!-- content.md "Hero" tags, verbatim (bracketed labels via Tag.astro). -->
+      <ul class="hero__tags">
+        <li>
+          <Tag>UX &amp; visual design</Tag>
+        </li>
+        <li>
+          <Tag>Devine, 3rd year</Tag>
+        </li>
+        <li>
+          <Tag>Internship, Feb to May 2027</Tag>
+        </li>
+      </ul>
+
       <!--
-        Moved here from About's own dedicated Tools section, per direct
-        request ("I think I should include them at the top of the page
-        close to the experience designer to-be paragraph") - a plain row
-        of icons rather than the bracket-tag chips the About version
-        used ("the tools can be just icons like in this example"), still
-        placeholder (no real toolkit confirmed yet - see the removed
-        AboutTools.astro's own history in AGENTS.md for why). Per a later
-        direct request it no longer sits beside the role line on desktop
-        (grid_column 8/13, sharing row 1) - it now sits in the same
-        column as the role/status/intro above it, after the paragraph,
-        so the reading order (role, location, paragraph, tools) is
-        identical at every viewport width instead of desktop having its
-        own separate order.
+        Placeholder tool icons - no real toolkit confirmed yet (see the
+        removed AboutTools.astro's own history in AGENTS.md for why this
+        lives here rather than on About). Not part of content.md, kept
+        rather than dropped since it's still-real site content, just not
+        part of this content update.
       -->
       <div class="hero__tools">
         <p class="hero__tools-label">Tools</p>
@@ -123,26 +140,31 @@ const letters = titleWord.split('');
         </ul>
       </div>
 
-      <!--
-        Used to also hold the "Get to know me" button, sharing this row
-        via justify-content: space-between (button left, scroll cue
-        pushed right). That button is gone now (relocated to
-        Principles.astro - see this file's header comment), so the row
-        keeps only the scroll cue, right-aligned via justify-content:
-        flex-end instead.
-      -->
+      <!-- content.md "Hero" buttons + scroll cue, verbatim. CV href is a
+           placeholder until a real PDF is supplied (content.md "CV: [CV PDF]"). -->
       <div class="hero__cta-row">
-        <span class="hero__scroll">(Scroll)</span>
+        <div class="hero__actions">
+          <Button href="#work" variant="primary">
+            See my work
+          </Button>
+          <Button href="#" variant="secondary" icon="download">
+            Download CV
+          </Button>
+        </div>
+        <span class="hero__scroll">
+          Follow the thread <span aria-hidden="true">↓</span>
+        </span>
       </div>
     </div>
 
     <!--
-      The Gallery strip lives here now, replacing the old portrait and
-      floating chip - per feedback that the two random floating images
-      said nothing, and the gallery is proof of work.
+      content.md: "the gallery should only be around 5 images. they
+      should be floating around the title, but on scroll fall nicely
+      into the old gallery layout" - count=5, floating - see
+      Gallery.astro's own script comment for how the settle works.
     -->
     <div class="hero__gallery">
-      <Gallery embedded />
+      <Gallery embedded count={5} floating />
     </div>
   </div>
 </section>
@@ -218,15 +240,26 @@ const letters = titleWord.split('');
     /* Deliberately no position/z-index here: either one establishes a new stacking context, which would isolate .hero__letter's mix-blend-mode from the image and page background behind it (it would only blend against other things inside .hero__title, which is nothing) — paint order alone (title comes after image in the markup) already puts it on top. */
   }
 
-  .hero__title-visual {
+  /* Two lines now ("Experience" / "Designer"), each its own flex row
+     sized by its own cqw multiplier (see the frontmatter comment for how
+     each was measured) so both fill the container edge-to-edge, same
+     "PORTFOLIO" device as before, just per-word instead of one long
+     string. */
+  .hero__title-line {
     display: flex;
     font-family: var(--font-display);
     font-weight: 800;
-    line-height: 0.8;
+    line-height: 0.86;
     letter-spacing: -0.03em;
     text-transform: uppercase;
-    /* 27cqw is measured, not guessed: at a given font-size, "PORTFOLIO" in this display font/weight/tracking renders to ~3.71x that font-size in width, so 100 / 3.71 ~= 27 is the cqw value that makes the rendered word width match the container width (edge to edge). The clamp() bounds are a floor/ceiling safety net, not the fallback — that's @supports below. */
-    font-size: clamp(2.5rem, 27cqw, 26rem);
+  }
+
+  .hero__title-line--cqw24 {
+    font-size: clamp(2.25rem, 24cqw, 23rem);
+  }
+
+  .hero__title-line--cqw30 {
+    font-size: clamp(2.25rem, 30cqw, 29rem);
   }
 
   .hero__letter-mask {
@@ -238,10 +271,14 @@ const letters = titleWord.split('');
     color: var(--color-ink);
   }
 
-  /* Fallback for browsers without container query units: a viewport-based clamp() curve, same floor/ceiling as the cqw version above. */
+  /* Fallback for browsers without container query units: viewport-based clamp() curves, same floor/ceiling logic as the cqw versions above. */
   @supports not (container-type: inline-size) {
-    .hero__title-visual {
-      font-size: clamp(2.5rem, 11vw + 1rem, 26rem);
+    .hero__title-line--cqw24 {
+      font-size: clamp(2.25rem, 10vw + 1rem, 23rem);
+    }
+
+    .hero__title-line--cqw30 {
+      font-size: clamp(2.25rem, 12.5vw + 1rem, 29rem);
     }
   }
 
@@ -321,12 +358,21 @@ const letters = titleWord.split('');
     color: var(--color-text-secondary);
   }
 
-  /* Now stacked below the paragraph (same 1/6 column, row 4), not beside
-     the role line - per direct request that it "not be on the right
-     like that" on desktop. */
-  .hero__tools {
+  .hero__tags {
     grid-column: 1 / 6;
     grid-row: 4;
+    margin-top: var(--space-16);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8) var(--space-16);
+  }
+
+  /* Now stacked below the tags (same 1/6 column, row 5), not beside
+     the role line - per earlier direct request that it "not be on the
+     right like that" on desktop. */
+  .hero__tools {
+    grid-column: 1 / 6;
+    grid-row: 5;
     margin-top: var(--space-24);
   }
 
@@ -353,20 +399,30 @@ const letters = titleWord.split('');
     border-radius: var(--radius-image);
   }
 
-  /* Full-width row, per-breakpoint override no longer needed (unlike
-     when it also held the CTA button) - just the scroll cue, pushed to
-     the right via justify-content: flex-end. */
+  /* content.md's two buttons on the left, the scroll cue pushed to the
+     far right via justify-content: space-between. */
   .hero__cta-row {
     grid-column: 1 / -1;
-    grid-row: 5;
+    grid-row: 6;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-16);
+    justify-content: space-between;
     margin-top: var(--space-48);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-16);
   }
 
   .hero__scroll {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
@@ -384,13 +440,14 @@ const letters = titleWord.split('');
     }
 
     /* Same role -> status -> intro -> tools -> CTA row order as the base
-                                                                 rule (unchanged here, just a wider column span) - only the column
-                                                                 range needs overriding for the narrower 7-column grid.
-                                                                 .hero__cta-row already spans 1 / -1 at every width, so it needs
-                                                                 no override here. */
+                                                                   rule (unchanged here, just a wider column span) - only the column
+                                                                   range needs overriding for the narrower 7-column grid.
+                                                                   .hero__cta-row already spans 1 / -1 at every width, so it needs
+                                                                   no override here. */
     .hero__role,
     .hero__status,
     .hero__intro,
+    .hero__tags,
     .hero__tools {
       grid-column: 1 / 8;
     }
@@ -408,11 +465,11 @@ const letters = titleWord.split('');
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                                             markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                                                                                                                             which is already the same role -> location -> paragraph -> tools
-                                                                                                                             order the base rule's explicit grid-rows give every wider
-                                                                                                                             breakpoint, so nothing here needs to re-specify row/column
-                                                                                                                             placement the way it used to. */
+                                                                                                                                 markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                                                                                                                                 which is already the same role -> location -> paragraph -> tools
+                                                                                                                                 order the base rule's explicit grid-rows give every wider
+                                                                                                                                 breakpoint, so nothing here needs to re-specify row/column
+                                                                                                                                 placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }

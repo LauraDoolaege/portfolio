@@ -1,0 +1,70 @@
+{
+  "projects": [
+    {
+      "id": "plan-a",
+      "order": 1,
+      "title": "Plan A",
+      "tag": "UX",
+      "oneLiner": "An app that helps visitors plan their trip to Antwerp.",
+      "team": "Team of 4, started as 6 with [other school]",
+      "role": "User testing, UI design, pitching",
+      "thumbnail": "[image]",
+      "detailPage": false
+    },
+    {
+      "id": "thrive",
+      "order": 2,
+      "title": "Thrive",
+      "tag": "Visual",
+      "oneLiner": "A campaign website with a style as distinct as the beer.",
+      "team": "[Solo or team]",
+      "role": "[Your role]",
+      "thumbnail": "[image]",
+      "detailPage": false
+    },
+    {
+      "id": "international-spaceship",
+      "order": 3,
+      "title": "International Spaceship",
+      "tag": "UX",
+      "oneLiner": "A safety app for [who it is for].",
+      "team": "Team of 3",
+      "role": "Insight gathering, wireframing, paper and digital prototypes",
+      "thumbnail": "[image]",
+      "detailPage": false
+    },
+    {
+      "id": "izumi",
+      "order": 4,
+      "title": "Izumi",
+      "tag": "Visual",
+      "oneLiner": "A Kickstarter video that [makes people feel X / want to do Y].",
+      "team": "[Solo or team]",
+      "role": "[Your role]",
+      "thumbnail": "[image]",
+      "detailPage": false
+    },
+    {
+      "id": "miss-conceptions-courtroom",
+      "order": 5,
+      "title": "Miss Conceptions Courtroom",
+      "tag": "Visual",
+      "oneLiner": "You're the lawyer. Chocolate is on trial for acne. Prove its innocence.",
+      "team": "[Solo or team]",
+      "role": "[Your role]",
+      "thumbnail": "[best illustration or asset, not the website]",
+      "detailPage": false
+    },
+    {
+      "id": "screentime-research",
+      "order": 6,
+      "title": "Screentime research",
+      "tag": "UX",
+      "oneLiner": "Research into how young children use screens.",
+      "team": "Team of 3",
+      "role": "Interviews, data analysis in SPSS, creative data visualisation",
+      "thumbnail": "[image]",
+      "detailPage": false
+    }
+  ]
+}

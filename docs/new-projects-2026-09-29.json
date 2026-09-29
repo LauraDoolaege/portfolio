@@ -1,0 +1,62 @@
+[
+  {
+    "order": 1,
+    "tag": "UX",
+    "title": "[Project title]",
+    "team": "[Team / Solo]",
+    "oneLiner": "[One-line summary of the project]",
+    "role": "[My role]",
+    "thumbnail": "[Thumbnail image]",
+    "slug": "[project-slug-1]"
+  },
+  {
+    "order": 2,
+    "tag": "UX",
+    "title": "[Project title]",
+    "team": "[Team / Solo]",
+    "oneLiner": "[One-line summary of the project]",
+    "role": "[My role]",
+    "thumbnail": "[Thumbnail image]",
+    "slug": "[project-slug-2]"
+  },
+  {
+    "order": 3,
+    "tag": "UX",
+    "title": "[Project title]",
+    "team": "[Team / Solo]",
+    "oneLiner": "[One-line summary of the project]",
+    "role": "[My role]",
+    "thumbnail": "[Thumbnail image]",
+    "slug": "[project-slug-3]"
+  },
+  {
+    "order": 4,
+    "tag": "Visual",
+    "title": "[Project title]",
+    "team": "[Team / Solo]",
+    "oneLiner": "[One-line summary of the project]",
+    "role": "[My role]",
+    "thumbnail": "[Thumbnail image]",
+    "slug": "[project-slug-4]"
+  },
+  {
+    "order": 5,
+    "tag": "Visual",
+    "title": "[Project title]",
+    "team": "[Team / Solo]",
+    "oneLiner": "[One-line summary of the project]",
+    "role": "[My role]",
+    "thumbnail": "[Thumbnail image]",
+    "slug": "[project-slug-5]"
+  },
+  {
+    "order": 6,
+    "tag": "Visual",
+    "title": "[Project title]",
+    "team": "[Team / Solo]",
+    "oneLiner": "[One-line summary of the project]",
+    "role": "[My role]",
+    "thumbnail": "[Thumbnail image]",
+    "slug": "[project-slug-6]"
+  }
+]

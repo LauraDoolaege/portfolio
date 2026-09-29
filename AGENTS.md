@@ -3166,3 +3166,50 @@ footer opacity reads 0 and `is-landed` is absent; scrolling to 150px
 settles the tile to an identity transform, footer opacity 1, and
 `is-landed` present; scrolling back to 0 leaves it landed (not
 re-scattered).
+
+**Three more direct follow-ups on the floating gallery: hover effects
+gated to landed tiles only, and the title becomes a real "photoshop
+mask" against the images.**
+
+The spotlight/cursor/magnetic-shift reading as misaligned, and a dark
+overlay appearing in places it shouldn't, both traced back to the same
+cause: those hover effects were still wired to fire on a tile whether it
+was floating (still scattered or idly drifting) or landed - per direct
+follow-up ("that is for when they are in the gallery"), they're now
+gated behind a tile's own `.is-landed` class (added once its fall
+completes), so hovering a still-floating tile does nothing until it's
+actually landed in the strip. The non-floating (standalone) gallery is
+unaffected - the gate only checks landed-state when `data-floating` is
+present at all.
+
+**The "photoshop mask" text effect** - direct request that the title
+text hidden behind the floating images "be in a different color on top
+of the image like a photoshop mask" - reintroduces this project's own
+original object-in-letterform device (mix-blend-mode: difference on the
+letters, the same trick the homepage's very first "PORTFOLIO" wordmark
+used before an earlier pass simplified it away for a plain color once
+the image behind it was removed - see this file's much earlier
+"Header/Hero rebuild v2" entry). Since the floating images now need to
+sit _behind_ the title for the blend to have something to read against,
+and this project's own documented stacking bug says a numeric z-index on
+either side would isolate the blend from reaching across, the images
+were moved to render _first_ in the DOM (paint order, not z-index,
+decides who's "on top") with `order` used to keep the _visual_ layout
+unchanged - title first, then the text block, then the gallery. A
+second attempt was needed: `.hero__visual` still had a bare
+`position: relative` (no z-index) left over from an earlier pass, and
+that alone was enough to isolate the blend too, not just numeric
+z-index - the letters rendered fully invisible (not just failing to
+blend against the images, but against the plain porcelain background as
+well) until that was removed. The letters also gained
+`pointer-events: none`, so a click always reaches the image trigger
+underneath rather than a decorative glyph sitting visually above it.
+
+Verified in the browser: DOM order is now gallery, then visual (title),
+then bottom text, with computed `order` 3/1/2 respectively preserving
+the original visual stacking; a hover on a still-floating tile leaves
+`.gallery__spotlight`/`.gallery__cursor` both inactive, the same hover
+on a landed tile activates both; a screenshot confirms the title reads
+as solid black cutting through the floating image placeholders,
+legible both over and off the images, with no horizontal overflow at
+either 1100px or 375px.

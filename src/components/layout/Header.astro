@@ -59,8 +59,16 @@ const isHome = currentPath === withBase('/');
 <header class="site-header">
   <div class="site-header__inner">
     <div class="site-header__identity">
+      <!--
+        Restyled to the same bracketed-mono-label device Tag.astro/the
+        hero's own tags used to use - per direct request ("make my name
+        at the top have the layout of the current tags instead"), once
+        those hero tags were removed (see Hero.astro's own comment).
+      -->
       <a href={withBase('/')} class="site-header__name">
+        <span aria-hidden="true">[</span>
         Laura Doolaege
+        <span aria-hidden="true">]</span>
       </a>
 
       <!--
@@ -251,10 +259,13 @@ const isHome = currentPath === withBase('/');
 
   /* Small corner mark, not a masthead — see the file header comment. */
   .site-header__name {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(0.95rem, 0.3vw + 0.85rem, 1.1rem);
-    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
     color: var(--color-ink);
     white-space: nowrap;
@@ -335,6 +346,17 @@ const isHome = currentPath === withBase('/');
     flex-wrap: wrap;
     align-items: center;
     gap: 0.6rem;
+  }
+
+  /* A touch bigger than Button.astro's own default primary size - per
+     direct request ("bring back the previous menu on desktop with a
+     slightly bigger cv cta"). !important for the same specificity-tie
+     reason the mobile z-index override below already documents:
+     Button.astro's own .btn--primary rule (class + Astro's scope-hash)
+     outranks a plain global class regardless of source order. */
+  :global(.site-header__cv) {
+    font-size: 0.8rem !important;
+    padding: 0.85em 1.3em !important;
   }
 
   /* Editorial "/" rhythm between nav items, in place of pure whitespace

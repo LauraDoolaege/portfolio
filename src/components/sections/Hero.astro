@@ -47,7 +47,6 @@
 // with a button that's gone; it's just a right-aligned line on its own
 // now.
 import Gallery from './Gallery.astro';
-import Tag from '../ui/Tag.astro';
 import Button from '../ui/Button.astro';
 
 // The giant word changed from "Portfolio" to "Experience designer" per
@@ -82,13 +81,18 @@ const titleLines = [
     </div>
 
     <div class="hero__bottom">
-      <p class="hero__role">UX &amp; Visual Designer</p>
-
       <!--
-        Echoes Header's own location/availability line
-        (Header.astro's .site-header__status).
+        Role + location + availability, merged onto one line - per direct
+        follow-up request ("the current ux and visual designer, located
+        in belgium and internship should still be on one line... make the
+        structure => 3rd year devine student | (location icon) belgium |
+        interning"). Replaces the previous two-line role/status pair and
+        the three bracketed tags below it (their content - "3rd year"
+        and "internship" - now lives in this one line instead).
       -->
       <p class="hero__status">
+        3rd year Devine student
+        <span aria-hidden="true">|</span>
         <svg class="hero__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path
             d="M8 14.2C8 14.2 12.5 9.8 12.5 6.3C12.5 3.8 10.5 1.8 8 1.8C5.5 1.8 3.5 3.8 3.5 6.3C3.5 9.8 8 14.2 8 14.2Z"
@@ -98,7 +102,9 @@ const titleLines = [
           />
           <circle cx="8" cy="6.3" r="1.6" stroke="currentColor" stroke-width="1.2" />
         </svg>
-        Belgium <span aria-hidden="true">|</span> Available Feb 2027
+        Belgium
+        <span aria-hidden="true">|</span>
+        Interning from Feb 2027
       </p>
 
       <!-- content.md "Hero" intro, verbatim. -->
@@ -106,19 +112,6 @@ const titleLines = [
         Hi, I'm Laura! I detangle briefs into creative concepts that are feasible and grounded in
         marketing. Online and offline.
       </p>
-
-      <!-- content.md "Hero" tags, verbatim (bracketed labels via Tag.astro). -->
-      <ul class="hero__tags">
-        <li>
-          <Tag>UX &amp; visual design</Tag>
-        </li>
-        <li>
-          <Tag>Devine, 3rd year</Tag>
-        </li>
-        <li>
-          <Tag>Internship, Feb to May 2027</Tag>
-        </li>
-      </ul>
 
       <!--
         Placeholder tool icons - no real toolkit confirmed yet (see the
@@ -224,6 +217,7 @@ const titleLines = [
 
   .hero__visual {
     position: relative;
+    z-index: 0;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     column-gap: var(--intro-gutter);
@@ -249,17 +243,29 @@ const titleLines = [
     display: flex;
     font-family: var(--font-display);
     font-weight: 800;
-    line-height: 0.86;
+    /* Was 0.86 - too tight, read as the glyphs getting cut off at the
+           top/bottom rather than a deliberate edge-to-edge fill (per direct
+           report, with a screenshot). More breathing room, and the two
+           lines are no longer flush against each other either (see
+           margin-top below). */
+    line-height: 1.02;
     letter-spacing: -0.03em;
     text-transform: uppercase;
   }
 
+  .hero__title-line + .hero__title-line {
+    margin-top: 0.03em;
+  }
+
+  /* Both cqw multipliers pulled in from a true edge-to-edge fill (24/30)
+     to ~90% of it (21.5/27) - same direct report: filling the container
+     exactly left no side margin, reading as cropped rather than bold. */
   .hero__title-line--cqw24 {
-    font-size: clamp(2.25rem, 24cqw, 23rem);
+    font-size: clamp(2.25rem, 21.5cqw, 21rem);
   }
 
   .hero__title-line--cqw30 {
-    font-size: clamp(2.25rem, 30cqw, 29rem);
+    font-size: clamp(2.25rem, 27cqw, 26rem);
   }
 
   .hero__letter-mask {
@@ -274,67 +280,64 @@ const titleLines = [
   /* Fallback for browsers without container query units: viewport-based clamp() curves, same floor/ceiling logic as the cqw versions above. */
   @supports not (container-type: inline-size) {
     .hero__title-line--cqw24 {
-      font-size: clamp(2.25rem, 10vw + 1rem, 23rem);
+      font-size: clamp(2.25rem, 9vw + 1rem, 21rem);
     }
 
     .hero__title-line--cqw30 {
-      font-size: clamp(2.25rem, 12.5vw + 1rem, 29rem);
+      font-size: clamp(2.25rem, 11.25vw + 1rem, 26rem);
     }
   }
 
+  /* A real bug, caught by report and confirmed via elementFromPoint, not
+     assumed: the floating tiles were rendering *behind* the title's
+     letters, not in front of them as intended. Every `.hero__letter`
+     carries a GSAP-written inline `transform` (even the identity matrix,
+     once the entrance settles) - the same "any element with an active
+     transform, even a static one, establishes its own stacking context"
+     family of bug already documented elsewhere in this project (see
+     AGENTS.md). `.hero__gallery`'s own tiles get their own transform
+     too (the scatter), but with no explicit z-index of its own,
+     `.hero__gallery` wasn't reliably winning that comparison. An
+     explicit z-index removes the ambiguity outright. */
   .hero__gallery {
+    position: relative;
+    z-index: 2;
     min-width: 0;
   }
 
+  /* Explicit, unambiguous stacking order for .hero__inner's three
+     children - the letters inside .hero__visual and the entrance-tween's
+     own y-transform on .hero__bottom both establish their own local
+     stacking contexts (any active transform does, identity included -
+     see the .hero__gallery comment above for the full explanation), so
+     leaving this at z-index:auto left the actual paint order down to
+     browser-specific tie-breaking rather than a real rule. 1, below the
+     gallery's 2, above .hero__visual's implicit 0. */
   .hero__bottom {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     column-gap: var(--intro-gutter);
   }
 
-  .hero__role {
-    grid-column: 1 / 6;
-    grid-row: 1;
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--color-ink);
-  }
-
-  /* role -> location -> paragraph -> tools, in that order on every
-     screen width (explicit grid-row per element rather than relying on
-     DOM order + auto-placement, so the sequence can't silently drift if
-     a future edit reorders the markup). Used to sit beside .hero__role
-     in its own column (8/13, sharing row 1) and only show on mobile at
-     all - per direct request it's now always visible, directly under
-     the role line, matching Header's own .site-header__status copy. */
+  /* Role, location and availability merged onto one line - per direct
+     request. Was two separate lines (a bold role line, then a smaller
+     mono location/status line below it); now one mono line, three
+     "|"-separated segments, since the role text itself became a fact
+     ("3rd year Devine student") rather than a job title, reading fine
+     at the same small weight as the rest of the line. */
   .hero__status {
     grid-column: 1 / 6;
-    grid-row: 2;
-    position: relative;
+    grid-row: 1;
     display: flex;
-    width: fit-content;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.4em;
-    margin-top: var(--space-16);
-    padding-left: 0.85rem;
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
     color: var(--color-text-secondary);
-    white-space: nowrap;
-  }
-
-  .hero__status::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.2em;
-    bottom: 0.2em;
-    width: var(--border-hairline);
-    background: var(--color-text-secondary);
   }
 
   .hero__status-icon {
@@ -343,13 +346,9 @@ const titleLines = [
     flex-shrink: 0;
   }
 
-  .hero__status span {
-    margin-inline: 0.15em;
-  }
-
   .hero__intro {
     grid-column: 1 / 6;
-    grid-row: 3;
+    grid-row: 2;
     margin-top: var(--space-16);
     max-width: 38ch;
     font-family: var(--font-body);
@@ -358,21 +357,9 @@ const titleLines = [
     color: var(--color-text-secondary);
   }
 
-  .hero__tags {
-    grid-column: 1 / 6;
-    grid-row: 4;
-    margin-top: var(--space-16);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-8) var(--space-16);
-  }
-
-  /* Now stacked below the tags (same 1/6 column, row 5), not beside
-     the role line - per earlier direct request that it "not be on the
-     right like that" on desktop. */
   .hero__tools {
     grid-column: 1 / 6;
-    grid-row: 5;
+    grid-row: 3;
     margin-top: var(--space-24);
   }
 
@@ -403,7 +390,7 @@ const titleLines = [
      far right via justify-content: space-between. */
   .hero__cta-row {
     grid-column: 1 / -1;
-    grid-row: 6;
+    grid-row: 4;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -439,15 +426,13 @@ const titleLines = [
       grid-template-columns: repeat(7, 1fr);
     }
 
-    /* Same role -> status -> intro -> tools -> CTA row order as the base
-                                                                   rule (unchanged here, just a wider column span) - only the column
-                                                                   range needs overriding for the narrower 7-column grid.
-                                                                   .hero__cta-row already spans 1 / -1 at every width, so it needs
-                                                                   no override here. */
-    .hero__role,
+    /* Same status -> intro -> tools -> CTA row order as the base rule
+           (unchanged here, just a wider column span) - only the column
+           range needs overriding for the narrower 7-column grid.
+           .hero__cta-row already spans 1 / -1 at every width, so it needs
+           no override here. */
     .hero__status,
     .hero__intro,
-    .hero__tags,
     .hero__tools {
       grid-column: 1 / 8;
     }
@@ -465,11 +450,11 @@ const titleLines = [
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                                                 markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                                                                                                                                 which is already the same role -> location -> paragraph -> tools
-                                                                                                                                 order the base rule's explicit grid-rows give every wider
-                                                                                                                                 breakpoint, so nothing here needs to re-specify row/column
-                                                                                                                                 placement the way it used to. */
+                                                                                                                                         markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                                                                                                                                         which is already the same role -> location -> paragraph -> tools
+                                                                                                                                         order the base rule's explicit grid-rows give every wider
+                                                                                                                                         breakpoint, so nothing here needs to re-specify row/column
+                                                                                                                                         placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }

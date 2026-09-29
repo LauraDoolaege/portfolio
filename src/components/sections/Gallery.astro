@@ -259,6 +259,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
+  const section = document.querySelector<HTMLElement>('.gallery');
   const viewport = document.querySelector<HTMLElement>('.gallery__viewport');
   const track = document.querySelector<HTMLElement>('.gallery__track');
   const cursor = document.querySelector<HTMLElement>('.gallery__cursor');
@@ -299,6 +300,12 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       viewport.querySelectorAll<HTMLButtonElement>('.gallery__trigger'),
     ).slice(0, total);
 
+    // Hoisted out of the `else` block below so the floating-scatter code
+    // further down (a sibling block, not nested inside it) can call this
+    // itself once the scatter settles - see that block's own comment.
+    let startMarquee: (() => void) | undefined;
+    const isFloating = section?.dataset.floating === 'true';
+
     if (reduceMotion) {
       // No auto-scroll, no scroll-hijack of any kind - a plain native
       // horizontal strip instead, so every tile stays reachable with
@@ -317,7 +324,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
       let tween: gsap.core.Tween | null = null;
       let resizeTimer: number | undefined;
 
-      const startMarquee = () => {
+      startMarquee = () => {
         tween?.kill();
         gsap.set(track, { xPercent: 0 });
         const setWidth = track.scrollWidth / 2;
@@ -329,14 +336,29 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
         });
       };
 
-      startMarquee();
+      // A real, confirmed bug caught while testing "floating around the
+      // title": this marquee's own continuous track motion doesn't wait
+      // for anything - it was carrying the scattered tiles away from the
+      // title within a couple of seconds of page load, well before the
+      // user ever scrolled, which is exactly why "the images are not
+      // floating in front of the title" (by the time anyone looked, the
+      // marquee had already dragged them off). Confirmed by measuring a
+      // tile's on-screen x-position drifting steadily over a few seconds
+      // at a fixed scroll position, matching this tween's own px/second
+      // rate. For the floating variant, the marquee now starts only once
+      // the scatter has fully settled (see the scroll-driven scatter
+      // block below, which calls this itself on completion) - it stays
+      // still "around the title" until the reader actually scrolls, per
+      // direct request, instead of drifting immediately regardless of
+      // scroll.
+      if (!isFloating) startMarquee?.();
 
       // Re-measure on resize (tile widths are viewport-relative via
       // clamp()) - debounced so a drag-resize doesn't restart the tween
       // dozens of times a second.
       window.addEventListener('resize', () => {
         window.clearTimeout(resizeTimer);
-        resizeTimer = window.setTimeout(startMarquee, 200);
+        if (!isFloating || tween) resizeTimer = window.setTimeout(() => startMarquee?.(), 200);
       });
 
       // Pausing at the viewport level, not per-tile - per direct request
@@ -432,6 +454,15 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
               start: 'top top',
               end: '+=500',
               scrub: 0.5,
+              // The marquee only starts once the tiles have actually
+              // landed - see the marquee setup's own comment on why
+              // starting it immediately was the real bug behind "not
+              // floating in front of the title". onLeave fires once
+              // (scroll passes the end point going forward); onEnterBack
+              // doesn't stop it again on scrolling back up - once landed
+              // and looping, it keeps looping, same as the non-floating
+              // variant always has.
+              onLeave: () => startMarquee?.(),
             },
           });
         };
@@ -706,7 +737,7 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery {
     padding-block: clamp(3rem, 6vw, 4.5rem);
     /* No background fill (per earlier direct request) - the section sits
-                                                       directly on the page's own bg-primary. */
+                                                           directly on the page's own bg-primary. */
     overflow-x: hidden;
   }
 
@@ -771,19 +802,50 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
     z-index: 1;
     overflow: hidden;
     /* Vertical room for the hover bob, magnetic shift, and hover scale so
-                                     nothing clips - bumped up from 2.5rem after a direct report that
-                                     hovered tiles were getting cut off. Measured directly, not just
-                                     guessed: the tallest tile (20rem at a wide viewport) only had
-                                     ~40px of headroom above the row at the old 2.5rem padding, which
-                                     the hover scale (1.05x) and the magnetic shift (up to 16px) alone
-                                     could already come close to using entirely - stacking the
-                                     continuous breathing bob's own motion on top of that (mid-cycle,
-                                     right as a hover begins and before it's had time to pause) was
-                                     enough to occasionally push a tile's edge past that budget.
-                                     Negative margin cancels the padding's footprint on
-                                     .gallery__stage's own auto height. */
+                                         nothing clips - bumped up from 2.5rem after a direct report that
+                                         hovered tiles were getting cut off. Measured directly, not just
+                                         guessed: the tallest tile (20rem at a wide viewport) only had
+                                         ~40px of headroom above the row at the old 2.5rem padding, which
+                                         the hover scale (1.05x) and the magnetic shift (up to 16px) alone
+                                         could already come close to using entirely - stacking the
+                                         continuous breathing bob's own motion on top of that (mid-cycle,
+                                         right as a hover begins and before it's had time to pause) was
+                                         enough to occasionally push a tile's edge past that budget.
+                                         Negative margin cancels the padding's footprint on
+                                         .gallery__stage's own auto height. */
     padding-block: 4rem;
     margin-block: -4rem;
+  }
+
+  /* Root cause of the floating tiles not appearing "in front of the
+     title" - not a stacking bug after all (confirmed by DOM measurement:
+     document.elementsFromPoint() at a scattered tile's own reported
+     position never included the tile itself, meaning it was being
+     clipped, not painted underneath something). The scatter travels
+     hundreds of px above the strip (toward the hero title), far past
+     .gallery__viewport's own `overflow: hidden` - a budget sized for the
+     hover bob's few px, not this. Splitting the axes (clip, not hidden,
+     on x - see .gallery__stage's own comment elsewhere in this file for
+     why `clip` specifically, not `hidden`, is what lets the other axis
+     actually compute as `visible` instead of the spec's forced `auto`)
+     keeps the strip's horizontal windowing while letting the floating
+     state render fully. Two ancestors needed the same fix, not one -
+     `.gallery` itself (the outer section, plain `overflow-x: hidden` in
+     its base rule below) was *also* forcing its own overflow-y to `auto`
+     the same way, still clipping the scattered tiles even after
+     `.gallery__viewport` was fixed - caught by re-checking the full
+     ancestor chain's computed overflow, not assumed fixed after the
+     first attempt. Both scoped to the floating variant only via the
+     data-floating attribute - the standalone (non-embedded) gallery's
+     own hover-bob clipping budget is unrelated and untouched. */
+  .gallery[data-floating] {
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+
+  .gallery[data-floating] .gallery__viewport {
+    overflow-x: clip;
+    overflow-y: visible;
   }
 
   /* Custom cursor replaces the system pointer only where it's shown -
@@ -810,17 +872,17 @@ const tiles = Array.from({ length: TOTAL }, (_, i) => ({
   .gallery__track {
     display: flex;
     /* Bottom-aligned, not top - per direct request ("align gallery
-                                         items at the bottom"). Tiles vary in height (three aspect
-                                         ratios), so this is what actually gives the strip one shared
-                                         baseline instead of each tile hanging from an arbitrary top edge.
-                                         A real bug, caught from a screenshot with a straightedge across
-                                         the captions: the per-tile up/down "float" transform (removed
-                                         below) used to nudge each *whole* tile - image and caption
-                                         together - a further ±28px off whatever baseline flex-end had
-                                         just established, which directly undid this alignment for
-                                         exactly the tiles it was applied to. Flex alignment happens
-                                         before a transform is ever painted, so there was no way for the
-                                         two to coexist - the float had to go, not the alignment. */
+                                             items at the bottom"). Tiles vary in height (three aspect
+                                             ratios), so this is what actually gives the strip one shared
+                                             baseline instead of each tile hanging from an arbitrary top edge.
+                                             A real bug, caught from a screenshot with a straightedge across
+                                             the captions: the per-tile up/down "float" transform (removed
+                                             below) used to nudge each *whole* tile - image and caption
+                                             together - a further ±28px off whatever baseline flex-end had
+                                             just established, which directly undid this alignment for
+                                             exactly the tiles it was applied to. Flex alignment happens
+                                             before a transform is ever painted, so there was no way for the
+                                             two to coexist - the float had to go, not the alignment. */
     align-items: flex-end;
     gap: 1.5rem;
     width: max-content;

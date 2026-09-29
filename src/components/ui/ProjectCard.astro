@@ -48,37 +48,42 @@
 // section's own class, not by teaching this component about every
 // section that might reuse it.
 //
-// `fullTitle`: the real project name. Falls back to `title` alone when
-// `fullTitle` isn't supplied (a still-placeholder project with no real
-// name yet).
+// Data contract rebuilt around projects.json (see SelectedWork.astro's
+// own comment): `tag` is "UX" or "Visual" (the site's new filter
+// categories, replacing the old free-text `roleTag`), plus `oneLiner`,
+// `team` and `role` - all rendered verbatim, brackets included, since
+// several of projects.json's own values are still literal placeholders
+// like "[Solo or team]" (content.md's own rule: "Anything in [brackets]
+// is still missing and should stay visible as a placeholder" - plain
+// text already does that with no extra styling needed). `thumbnail` is
+// still a flat placeholder box, not a visible label - this project's
+// own locked convention for missing photography.
 import Tag from './Tag.astro';
 
 interface Props {
-  number: string;
+  order: number;
   title: string;
-  fullTitle?: string;
-  roleTag: string;
-  year?: string;
+  tag: string;
+  oneLiner: string;
+  team: string;
+  role: string;
   href?: string;
   class?: string;
 }
 
-const {
-  number,
-  title,
-  fullTitle,
-  roleTag,
-  year = 'TBD',
-  href = '#',
-  class: className,
-} = Astro.props;
+const { order, title, tag, oneLiner, team, role, href = '#', class: className } = Astro.props;
 
-const displayTitle = fullTitle ?? title;
+const number = String(order).padStart(2, '0');
 ---
 
-<a href={href} class:list={['project-card', className]} aria-label={`${displayTitle} — ${roleTag}`}>
+<a
+  href={href}
+  class:list={['project-card', className]}
+  data-tag={tag}
+  aria-label={`${title}: ${oneLiner}`}
+>
   <span class="project-card__image">
-    <!-- TODO: replace with a real project image once photography exists (PROJECT_BRIEF.md Section 6) -->
+    <!-- TODO: replace with a real project image once photography exists (thumbnail: "[image]" in projects.json). -->
   </span>
 
   <span class="project-card__number" aria-hidden="true">
@@ -87,13 +92,13 @@ const displayTitle = fullTitle ?? title;
 
   <span class="project-card__overlay">
     <span class="project-card__meta">
-      <Tag>{roleTag}</Tag>
-      <span class="project-card__year" aria-hidden="true">
-        {year}
+      <Tag>{tag}</Tag>
+      <span class="project-card__team" aria-hidden="true">
+        {team}
       </span>
     </span>
     <span class="project-card__title-row">
-      <span class="project-card__title">{displayTitle}</span>
+      <span class="project-card__title">{title}</span>
       <span class="project-card__arrow" aria-hidden="true">
         <svg viewBox="0 0 16 16" fill="none">
           <path
@@ -106,6 +111,8 @@ const displayTitle = fullTitle ?? title;
         </svg>
       </span>
     </span>
+    <span class="project-card__line">{oneLiner}</span>
+    <span class="project-card__role">{role}</span>
   </span>
 </a>
 
@@ -168,8 +175,8 @@ const displayTitle = fullTitle ?? title;
     border: var(--border-hairline) solid var(--color-text-secondary);
     border-radius: var(--radius-image);
     /* --motion-easing-soft, not the plain --motion-easing/ease-out this
-                             used before, per direct feedback that the card's hover movement
-                             read as "very harsh." */
+                                 used before, per direct feedback that the card's hover movement
+                                 read as "very harsh." */
     transition:
       transform 0.55s var(--motion-easing-soft),
       border-color var(--motion-duration) var(--motion-easing-soft);
@@ -254,7 +261,7 @@ const displayTitle = fullTitle ?? title;
     gap: 0.75rem;
   }
 
-  .project-card__year {
+  .project-card__team {
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
@@ -277,6 +284,24 @@ const displayTitle = fullTitle ?? title;
     letter-spacing: -0.01em;
     line-height: 1.1;
     color: var(--color-ink);
+  }
+
+  /* content.md's own "one-liner" - a real sentence, not a label, so it
+     gets the body font at a small size rather than the mono/uppercase
+     treatment the rest of the overlay uses. */
+  .project-card__line {
+    font-family: var(--font-body);
+    font-size: var(--text-caption);
+    line-height: 1.4;
+    color: var(--color-text-secondary);
+  }
+
+  .project-card__role {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+    opacity: 0.85;
   }
 
   /* A plain icon, not the circular badge this used to be - it only ever

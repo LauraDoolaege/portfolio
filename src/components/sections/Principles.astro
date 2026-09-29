@@ -1,74 +1,65 @@
 ---
-// Homepage "3 design principles," between Currently Working On and
-// Gallery. Body copy is the same three sentences as About's own "How I
-// work" section (AboutProcess.astro) - reused verbatim rather than
-// rewritten, per this project's own "no fabricated copy" rule. Each
-// item's short title is reused too, from the homepage's former "How I
-// think" section (HowIThink.astro, now removed per direct request) -
-// "Understand before designing" / "Creative, but defendable" / "Make it
-// make sense", paired in order with the three process sentences rather
-// than re-authored.
+// Homepage process section, rebuilt around content.md's "How I detangle
+// (process)" - replaces the previous "3 design principles" (3 short
+// items, reused verbatim from About's old "How I work" section) with the
+// new 7-step process content.md supplies directly, word for word. Same
+// SectionMarker device every other numbered homepage section uses,
+// index "02" (Selected Work is "01" - see that file's own comment).
 //
-// First shipped as a deliberately unnumbered, small mono "( 02 ) My
-// design principles" kicker (a quiet aside, not a peer to the numbered
-// sections). Per a later direct request ("make subtitles... consistent
-// across all pages... small number indication and bigger bolder font for
-// the title, like it already is on the homepage for selected work and
-// gallery"), it now uses the real `SectionMarker` component instead -
-// same index+label device every other section uses, standard
-// `--space-section` padding instead of its own smaller clamp() - the
-// "stay quiet" intent from the first version is retired in favor of
-// site-wide consistency, which is what was actually asked for this time.
-//
-// Numbering: this "01", Selected Work "02", Gallery "03" - swapped per
-// direct follow-up request ("change the order between selected works
-// and design principles"); this section now leads the homepage.
-// Currently Working On sits physically below Selected Work (unnumbered,
-// demoted back to a small aside per a still-earlier direct request
-// "should not be a major section... rather a little sneak peek" - see
-// that file's own comment) regardless of Selected Work's own position
-// in the page.
-//
-// A "Get to know me" CTA now sits underneath this section's own content
-// - direct follow-up, "remove the cta from the hero at the top and
-// place it underneath the design principles." Same destination/label/
-// icon as the one it replaced in Hero.astro (see that file's own
-// comment) - relocated, not duplicated.
+// The "Get to know me" CTA that used to sit under the 3-item list stays
+// - not part of content.md, but nothing asked for it to go, and it's
+// still a reasonable link into the About page from here.
 import { withBase } from '../../utils/url';
 import SectionMarker from '../ui/SectionMarker.astro';
 import Button from '../ui/Button.astro';
 
-const principles = [
+const steps = [
   {
-    title: 'Understand before designing',
-    text: 'Paper, whiteboards, sticky notes, messy diagrams: anything that lets ideas move faster than my concern for how they look.',
+    title: 'Sparks',
+    text: 'The brief is barely out and tiny ideas are already popping up. I write them all down, even the weird ones.',
   },
   {
-    title: 'Creative, but defendable',
-    text: "I especially enjoy collaborative ideation: getting different perspectives in the room, throwing ideas around, combining them and challenging each other's assumptions.",
+    title: 'Mapping',
+    text: 'Little mind maps everywhere. Everything connects to everything.',
   },
   {
-    title: 'Make it make sense',
-    text: 'Once the messy thinking starts to make sense, I move into digital tools and prototypes.',
+    title: 'The knot',
+    text: "And then it gets messy. Too many ideas, too many angles. That's fine. That's where it gets fun.",
+  },
+  {
+    title: 'Detangling',
+    text: 'I gather as much info as I can about the brand, the people, and the market. The base keeps getting bigger.',
+  },
+  {
+    title: 'Looking away',
+    text: "The answer rarely comes from staring at a screen. It comes during a long drive home, a walk with my dog, a game of pool I'm probably losing, or a venting session at the dinner table. Saying things out loud to a sparring partner is often where the knot starts to loosen.",
+  },
+  {
+    title: 'The string',
+    text: 'Somewhere in there is one loose string. Pull it and the whole knot comes undone.',
+  },
+  {
+    title: 'Then I build',
+    text: 'First my assumption, then the creative direction, then the technical part. In that order.',
   },
 ];
 ---
 
-<section class="principles">
+<section class="principles" id="process">
   <div class="principles__inner">
-    <SectionMarker index="01" label="My design principles" />
+    <SectionMarker index="02" label="How I detangle" />
 
-    <ul class="principles__list">
-      {principles.map((item, index) => (
+    <ol class="principles__list">
+      {steps.map((step, index) => (
         <li class="principles__item">
           <span class="principles__number" aria-hidden="true">
             {String(index + 1).padStart(2, '0')}
           </span>
-          <h3 class="principles__title">{item.title}</h3>
-          <p class="principles__text">{item.text}</p>
+          <h3 class="principles__title">{step.title}</h3>
+          <p class="principles__text">{step.text}</p>
         </li>
       ))}
-    </ul>
+    </ol>
 
     <div class="principles__cta">
       <Button href={withBase('/about')} variant="primary" icon="arrow">
@@ -87,10 +78,10 @@ const principles = [
     gsap.to(items, {
       autoAlpha: 1,
       y: 0,
-      duration: 0.65,
+      duration: 0.6,
       ease: 'power2.out',
-      stagger: 0.1,
-      scrollTrigger: { trigger: '.principles__list', start: 'top 85%' },
+      stagger: 0.06,
+      scrollTrigger: { trigger: '.principles__list', start: 'top 88%' },
     });
   }
 
@@ -120,46 +111,36 @@ const principles = [
 
   .principles__list {
     margin-top: var(--space-48);
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-32);
-  }
-
-  /* Relocated from Hero's own bottom block, per direct request - same
-     button, same destination, just living here instead. */
-  .principles__cta {
-    margin-top: var(--space-48);
+    display: flex;
+    flex-direction: column;
   }
 
   .principles__item {
-    padding-left: var(--space-24);
-    /* A hairline divider between columns, not a border/background per
-                                                                                         item. Only items after the first get one, so the row doesn't open
-                                                                                         with a stray rule before any content. */
-    border-left: var(--border-hairline) solid var(--color-text-secondary);
+    display: grid;
+    grid-template-columns: minmax(0, 6rem) 1fr;
+    align-items: baseline;
+    gap: var(--space-24);
+    padding-block: var(--space-24);
+    border-top: var(--border-hairline) solid var(--color-text-secondary);
   }
 
-  .principles__item:first-child {
-    padding-left: 0;
-    border-left: none;
+  .principles__item:last-child {
+    border-bottom: var(--border-hairline) solid var(--color-text-secondary);
   }
 
   .principles__number {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
-  }
-
-  /* Bigger, bolder, display-font titles - matching the weight Selected
-     Work/Gallery's own SectionMarker labels carry, per direct request,
-     rather than the small mono item-title the first version used. */
-  .principles__title {
-    margin-top: var(--space-8);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.75rem;
+    font-size: clamp(2.25rem, 1.75rem + 2vw, 3.5rem);
+    line-height: 1;
+    color: var(--color-text-secondary);
+    opacity: 0.5;
+  }
+
+  .principles__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
     text-transform: uppercase;
     letter-spacing: -0.01em;
     line-height: 1.1;
@@ -167,39 +148,26 @@ const principles = [
   }
 
   .principles__text {
-    margin-top: var(--space-16);
-    max-width: 32ch;
+    margin-top: var(--space-8);
+    max-width: 60ch;
     font-family: var(--font-body);
     font-size: var(--text-body);
     line-height: var(--text-body-leading);
     color: var(--color-text-secondary);
   }
 
-  @media (max-width: 900px) {
-    .principles__list {
-      grid-template-columns: 1fr;
-      gap: var(--space-32);
-    }
-
-    /* Horizontal dividers instead of vertical ones once the columns
-                                                                                         stack - the same device rotated 90 degrees rather than a
-                                                                                         different one. */
-    .principles__item {
-      padding-left: 0;
-      padding-top: var(--space-24);
-      border-left: none;
-      border-top: var(--border-hairline) solid var(--color-text-secondary);
-    }
-
-    .principles__item:first-child {
-      padding-top: 0;
-      border-top: none;
-    }
+  .principles__cta {
+    margin-top: var(--space-48);
   }
 
   @media (max-width: 640px) {
     .principles__inner {
       padding-inline: 1.5rem;
+    }
+
+    .principles__item {
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
     }
   }
 </style>

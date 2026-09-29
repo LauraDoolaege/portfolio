@@ -3048,3 +3048,64 @@ pages get built:
 - No em-dashes in copy, no fabricated stats/names, no decorative status
   dots, ration "eyebrow" labels, one consistent accent color site-wide
   (mauve — terracotta stays a rare single-use wink, not a second accent).
+
+**Hero follow-ups: merged status line, bracket-styled name, bigger CV
+button, title sizing fixed, and a real clipping bug behind the floating
+gallery.** Several direct follow-ups on the redesign work above.
+
+Role and location merged onto one line - "3rd year Devine student |
+[location icon] Belgium | Interning from Feb 2027" - replacing the
+previous two-line role/status pair and the three bracketed hero tags
+(their content, "3rd year" and "internship," now lives in this line
+instead). Header's own wordmark ("Laura Doolaege") is now styled like a
+tag/label (`[ LAURA DOOLAEGE ]`, mono, bracketed) instead of the display
+font - per direct request ("make my name at the top have the layout of
+the current tags instead"), once those hero tags were removed. The CV
+button in the header nav is a touch bigger than Button.astro's own
+default primary size - per direct request.
+
+The hero title ("Experience designer," two lines) was filling its
+container exactly edge-to-edge with a tight 0.86 line-height - read as
+the letters being cut off rather than a bold fill, per direct report
+with a screenshot. Pulled in to ~90% of a true edge-to-edge fill and
+loosened the line-height to 1.02 with a small gap between the two lines.
+
+**A real bug, the reason the floating gallery images weren't visible "in
+front of the title" at all** - diagnosed properly rather than guessed at
+twice: the first attempt (giving `.hero__gallery`/`.hero__bottom`/
+`.hero__visual` explicit z-index) was based on a real phenomenon in this
+project (any active transform, even identity, promotes an element to its
+own stacking context) but turned out not to be the actual cause here -
+confirmed by `document.elementsFromPoint()` at a scattered tile's own
+reported position never including the tile at all, which means clipping,
+not paint order. The real cause: `.gallery__viewport`'s `overflow: hidden`
+(sized for the hover bob's few px) and `.gallery`'s own `overflow-x: hidden`
+(which per the CSS spec forces the other axis to compute as `auto`, still
+clipping - the same quirk `.gallery__stage` already documents elsewhere in
+this file) were both clipping the scatter's much larger travel toward the
+title. Fixed by splitting both axes (`overflow-x: clip; overflow-y: visible`)
+scoped to `.gallery[data-floating]` only, so the standalone gallery's own
+clipping budget is untouched. The z-index additions stayed in as
+reasonable defensive CSS, just weren't the fix.
+
+**A second real bug, found while verifying the first fix:** even once
+visible, the tiles didn't stay "around the title" for more than a couple
+of seconds - the gallery's pre-existing continuous marquee auto-scroll
+started immediately on load regardless of scroll position, dragging the
+whole track (and the scattered tiles with it) away within a few seconds,
+confirmed by sampling a tile's transform at a fixed scroll position over
+time and watching it drift at the marquee's own px/second rate. For the
+floating variant, `startMarquee` is now hoisted out of the marquee
+setup's own block and called from the scatter's own ScrollTrigger
+`onLeave` callback instead of immediately - the strip stays still until
+the reader actually scrolls it into its landed position, exactly once,
+then loops normally from there on, matching "on scroll fall nicely into
+the old gallery layout" rather than drifting before any scroll happens.
+
+Verified in the browser at 1100px, scroll position 0: all 5 tiles'
+computed transforms are stable over several seconds (no drift),
+`document.elementFromPoint()` at each tile's own center now resolves to
+the tile itself for all 5 (was 0 of 5 before the overflow fix), and a
+screenshot confirms two tilted image placeholders genuinely overlapping
+the "EXPERIENCE"/"DESIGNER" letters. Scrolling 600px settles all tiles to
+identity transform and the track's own marquee motion only then starts.

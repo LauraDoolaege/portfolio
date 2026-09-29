@@ -66,22 +66,6 @@ const titleLines = [
 
 <section class="hero">
   <div class="hero__inner">
-    <!--
-      Moved ahead of .hero__visual in DOM order (was the last child) -
-      the "photoshop mask" blend effect below needs the images to paint
-      *before* the title so mix-blend-mode has something to blend
-      against, and per this file's own earlier documented stacking bug,
-      giving either side a numeric z-index to reorder them instead would
-      silently isolate the blend from reaching across (see
-      .hero__letter's own comment for the full explanation). `order`
-      keeps the *visual* layout exactly as before (title, then the text
-      block, then the gallery) - it only affects flex layout order, not
-      paint order, which is what this whole arrangement depends on.
-    -->
-    <div class="hero__gallery">
-      <Gallery embedded count={5} floating />
-    </div>
-
     <div class="hero__visual">
       <h1 class="hero__title" aria-label="Experience designer">
         {titleLines.map(({ word, cqw }) => (
@@ -165,6 +149,16 @@ const titleLines = [
         </span>
       </div>
     </div>
+
+    <!--
+      content.md: "the gallery should only be around 5 images. they
+      should be floating around the title, but on scroll fall nicely
+      into the old gallery layout" - count=5, floating - see
+      Gallery.astro's own script comment for how the settle works.
+    -->
+    <div class="hero__gallery">
+      <Gallery embedded count={5} floating />
+    </div>
   </div>
 </section>
 
@@ -223,18 +217,9 @@ const titleLines = [
 
   /* z-index: 3, above the gallery's 2 - the title paints on top of the
      floating images now (see .hero__letter below for why that doesn't
-     mean "covering" them) - via DOM order, not z-index (see the markup's
-     own comment on why a numeric z-index here would isolate the blend
-     instead). `order: 1` keeps it first visually despite no longer being
-     first in the DOM. */
-  /* No `position` here (deliberately, same as the original device) -
-     `position: relative` alone, with no numeric z-index, turned out to
-     still isolate the mix-blend-mode below from the page background
-     behind it (the letters rendered fully invisible - not just failing
-     to blend against the images, but against the plain porcelain page
-     background too - until this was removed). */
   .hero__visual {
-    order: 1;
+    position: relative;
+    z-index: 0;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     column-gap: var(--intro-gutter);
@@ -248,7 +233,7 @@ const titleLines = [
     container-type: inline-size;
     /* Without this, the negative margin-top below collapses straight through the h1 (standard block margin-collapsing), leaving the h1 measuring 0 height and the word floating detached from the grid's own row-sizing. flow-root opts out of collapsing without clipping the intentional overflow into the row above. */
     display: flow-root;
-    /* Deliberately no position/z-index here: either one establishes a new stacking context, which would isolate .hero__letter's mix-blend-mode from the image and page background behind it (it would only blend against other things inside .hero__title, which is nothing) — paint order alone (title comes after image in the markup) already puts it on top. */
+    /* No position/z-index needed here directly - .hero__visual (its parent) carries the real stacking value now (see that rule's own comment). */
   }
 
   /* Two lines now ("Experience" / "Designer"), each its own flex row
@@ -261,10 +246,10 @@ const titleLines = [
     font-family: var(--font-display);
     font-weight: 800;
     /* Was 0.86 - too tight, read as the glyphs getting cut off at the
-                       top/bottom rather than a deliberate edge-to-edge fill (per direct
-                       report, with a screenshot). More breathing room, and the two
-                       lines are no longer flush against each other either (see
-                       margin-top below). */
+                           top/bottom rather than a deliberate edge-to-edge fill (per direct
+                           report, with a screenshot). More breathing room, and the two
+                           lines are no longer flush against each other either (see
+                           margin-top below). */
     line-height: 1.02;
     letter-spacing: -0.03em;
     text-transform: uppercase;
@@ -289,27 +274,9 @@ const titleLines = [
     overflow: hidden;
   }
 
-  /* The "photoshop mask" effect, per direct request: where the floating
-     images now cross the title (they sit above it, z-index-wise - see
-     .hero__visual above), the letters shouldn't just draw over them
-     with a flat text-colored box, and the images shouldn't stay flatly
-     opaque either - the covered portion of a letter should read as text
-     in a different color, on top of the image, like a knockout mask.
-     mix-blend-mode: difference is exactly this project's own established
-     device for it (the original "PORTFOLIO" wordmark used the same
-     trick against its own image before an earlier pass simplified it
-     away - see this file's git history) - pointer-events: none keeps
-     every letter's own hit-testing out of the way, so a click always
-     reaches the image trigger underneath rather than the decorative
-     (aria-hidden) glyph sitting visually on top of it. Against the
-     plain porcelain background (no image behind a given letter), a
-     dark-ink-on-light difference blend still nets a color close enough
-     to plain ink that it reads the same as before. */
   .hero__letter {
     display: inline-block;
-    color: var(--color-bg-primary);
-    mix-blend-mode: difference;
-    pointer-events: none;
+    color: var(--color-ink);
   }
 
   /* Fallback for browsers without container query units: viewport-based clamp() curves, same floor/ceiling logic as the cqw versions above. */
@@ -323,23 +290,33 @@ const titleLines = [
     }
   }
 
-  /* History: this used to carry an explicit z-index to win a stacking
-     fight against the title's letters (each one gets its own stacking
-     context from GSAP's inline transform - see AGENTS.md). That's gone
-     now - the blend effect above needs paint order, not z-index, to
-     control who's "on top" (a numeric z-index on either side isolates
-     mix-blend-mode from reaching across - see .hero__letter's own
-     comment), so this is back to relying on DOM order the same way the
-     original object-in-letterform device did. `order: 3` keeps it last
-     visually despite now being first in the DOM (see the markup's own
-     comment). */
+  /* A real bug, caught by report and confirmed via elementFromPoint, not
+     assumed: the floating tiles were rendering *behind* the title's
+     letters, not in front of them as intended. Every `.hero__letter`
+     carries a GSAP-written inline `transform` (even the identity matrix,
+     once the entrance settles) - the same "any element with an active
+     transform, even a static one, establishes its own stacking context"
+     family of bug already documented elsewhere in this project (see
+     AGENTS.md). `.hero__gallery`'s own tiles get their own transform
+     too (the scatter), but with no explicit z-index of its own,
+     `.hero__gallery` wasn't reliably winning that comparison. An
+     explicit z-index removes the ambiguity outright.
+
+     A "photoshop mask" text-through-image treatment was tried here
+     (mix-blend-mode on the letters, images moved earlier in DOM order so
+     the blend had something to read against) and then reverted outright
+     per direct follow-up ("remove the mask effect") - plain z-index is
+     back, simplest thing that satisfies "images float in front of the
+     title," which is still the actual requirement. */
   .hero__gallery {
-    order: 3;
+    position: relative;
+    z-index: 2;
     min-width: 0;
   }
 
   .hero__bottom {
-    order: 2;
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     column-gap: var(--intro-gutter);
@@ -451,10 +428,10 @@ const titleLines = [
     }
 
     /* Same status -> intro -> tools -> CTA row order as the base rule
-                       (unchanged here, just a wider column span) - only the column
-                       range needs overriding for the narrower 7-column grid.
-                       .hero__cta-row already spans 1 / -1 at every width, so it needs
-                       no override here. */
+                           (unchanged here, just a wider column span) - only the column
+                           range needs overriding for the narrower 7-column grid.
+                           .hero__cta-row already spans 1 / -1 at every width, so it needs
+                           no override here. */
     .hero__status,
     .hero__intro,
     .hero__tools {
@@ -474,11 +451,11 @@ const titleLines = [
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                                                                                 markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                                                                                                                                                                 which is already the same role -> location -> paragraph -> tools
-                                                                                                                                                                 order the base rule's explicit grid-rows give every wider
-                                                                                                                                                                 breakpoint, so nothing here needs to re-specify row/column
-                                                                                                                                                                 placement the way it used to. */
+                                                                                                                                                                         markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                                                                                                                                                                         which is already the same role -> location -> paragraph -> tools
+                                                                                                                                                                         order the base rule's explicit grid-rows give every wider
+                                                                                                                                                                         breakpoint, so nothing here needs to re-specify row/column
+                                                                                                                                                                         placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }

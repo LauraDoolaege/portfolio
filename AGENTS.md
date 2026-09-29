@@ -3213,3 +3213,18 @@ on a landed tile activates both; a screenshot confirms the title reads
 as solid black cutting through the floating image placeholders,
 legible both over and off the images, with no horizontal overflow at
 either 1100px or 375px.
+
+**The "photoshop mask" text effect is removed again, per direct
+follow-up** ("No remove the mask effect"). Reverted to the plain,
+simpler version that was already working before it: letters are plain
+ink again (no mix-blend-mode, no `color: bg-primary`, no
+`pointer-events: none`), the gallery moved back to its original DOM
+position (last child, after `.hero__bottom`), and the z-index-based
+stacking from the earlier "images float in front of the title" fix is
+back (`.hero__visual` z-index 0, `.hero__bottom` 1, `.hero__gallery` 2)
+instead of the DOM-order/`order`-property arrangement the mask needed.
+Verified in the browser: `.hero__letter` computed style is back to
+`mix-blend-mode: normal`, `color: rgb(23, 21, 15)` (ink),
+`pointer-events: auto`; a hit-test at a floating tile's own center still
+resolves to that tile (images still render in front of the title, the
+original fix this was layered on top of); no horizontal overflow.

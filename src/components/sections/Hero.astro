@@ -73,7 +73,20 @@ const titleLines = [
 <section class="hero">
   <div class="hero__inner">
     <div class="hero__visual">
-      <h1 class="hero__title" aria-label="Experience designer">
+      <!--
+        The decorative per-letter spans below are aria-hidden (each word
+        on its own line, with no real space between them in the visible
+        DOM) - a screen reader gets the right name from this real,
+        visually-hidden text node instead (.sr-only, global.css), but
+        that alone didn't fix the same gap for anything that reads
+        visible/indexed text rather than the accessible-name tree
+        (search engine crawlers, copy-paste) - they'd have seen
+        "ExperienceDesigner" mashed together. A real sr-only text node
+        fixes both at once, so this replaces the h1's own aria-label
+        rather than keeping both in parallel.
+      -->
+      <h1 class="hero__title">
+        <span class="sr-only">Experience designer</span>
         {titleLines.map(({ word, cqw }) => (
           <span class:list={['hero__title-line', `hero__title-line--cqw${cqw}`]} aria-hidden="true">
             {word.split('').map((letter) => (
@@ -102,26 +115,6 @@ const titleLines = [
         Hi, I'm Laura! I detangle briefs into creative concepts that are feasible and grounded in
         marketing. Online and offline.
       </p>
-
-      <!--
-        Placeholder tool icons - no real toolkit confirmed yet (see the
-        removed AboutTools.astro's own history in AGENTS.md for why this
-        lives here rather than on About). Not part of content.md, kept
-        rather than dropped since it's still-real site content, just not
-        part of this content update.
-      -->
-      <div class="hero__tools">
-        <p class="hero__tools-label">Tools</p>
-        <ul class="hero__tools-list">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <li>
-              <span class="hero__tools-icon" aria-label={`Tool ${i + 1}`}>
-                <!-- TODO: replace with a real tool icon once the toolkit is supplied -->
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
 
       <!-- content.md "Hero" buttons + scroll cue, verbatim. CV href is a
            placeholder until a real PDF is supplied (content.md "CV: [CV PDF]"). -->
@@ -236,10 +229,10 @@ const titleLines = [
     font-family: var(--font-display);
     font-weight: 800;
     /* Was 0.86 - too tight, read as the glyphs getting cut off at the
-                             top/bottom rather than a deliberate edge-to-edge fill (per direct
-                             report, with a screenshot). More breathing room, and the two
-                             lines are no longer flush against each other either (see
-                             margin-top below). */
+                               top/bottom rather than a deliberate edge-to-edge fill (per direct
+                               report, with a screenshot). More breathing room, and the two
+                               lines are no longer flush against each other either (see
+                               margin-top below). */
     line-height: 1.02;
     letter-spacing: -0.03em;
     text-transform: uppercase;
@@ -334,40 +327,13 @@ const titleLines = [
     color: var(--color-text-secondary);
   }
 
-  .hero__tools {
-    grid-column: 1 / 6;
-    grid-row: 3;
-    margin-top: var(--space-24);
-  }
-
-  .hero__tools-label {
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
-  }
-
-  .hero__tools-list {
-    margin-top: var(--space-8);
-    display: flex;
-    gap: var(--space-8);
-  }
-
-  .hero__tools-icon {
-    display: block;
-    width: 2.25rem;
-    height: 2.25rem;
-    background: var(--color-bg-secondary);
-    border: var(--border-hairline) solid var(--color-text-secondary);
-    border-radius: var(--radius-image);
-  }
-
   /* content.md's two buttons on the left, the scroll cue pushed to the
-     far right via justify-content: space-between. */
+     far right via justify-content: space-between. Row 3, not 4 - the
+     Tools block that used to sit in row 3 moved to About (content.md
+     never puts Tools in the Hero at all; see AGENTS.md's item 8). */
   .hero__cta-row {
     grid-column: 1 / -1;
-    grid-row: 4;
+    grid-row: 3;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -403,14 +369,12 @@ const titleLines = [
       grid-template-columns: repeat(7, 1fr);
     }
 
-    /* Same tags -> intro -> tools -> CTA row order as the base rule
-                             (unchanged here, just a wider column span) - only the column
-                             range needs overriding for the narrower 7-column grid.
-                             .hero__cta-row already spans 1 / -1 at every width, so it needs
-                             no override here. */
+    /* Same tags -> intro -> CTA row order as the base rule (unchanged
+         here, just a wider column span) - only the column range needs
+         overriding for the narrower 7-column grid. .hero__cta-row already
+         spans 1 / -1 at every width, so it needs no override here. */
     .hero__tags,
-    .hero__intro,
-    .hero__tools {
+    .hero__intro {
       grid-column: 1 / 8;
     }
   }
@@ -427,11 +391,10 @@ const titleLines = [
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                                                                                             markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                                                                                                                                                                             which is already the same role -> location -> paragraph -> tools
-                                                                                                                                                                             order the base rule's explicit grid-rows give every wider
-                                                                                                                                                                             breakpoint, so nothing here needs to re-specify row/column
-                                                                                                                                                                             placement the way it used to. */
+                                                                                                                                                                                 markup's own DOM order (tags, intro, CTA), which is already the
+                                                                                                                                                                                 same order the base rule's explicit grid-rows give every wider
+                                                                                                                                                                                 breakpoint, so nothing here needs to re-specify row/column
+                                                                                                                                                                                 placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }

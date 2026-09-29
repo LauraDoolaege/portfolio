@@ -1,8 +1,14 @@
 ---
-// Site-wide header/navigation. Nav items per PROJECT_BRIEF.md Section 4
-// (LOCKED): Laura Doolaege | Work | About | CV | Contact. The wordmark is
-// small — a quiet corner mark rather than a masthead statement, since the
-// Hero carries its own big headline moment (see Hero.astro).
+// Site-wide header/navigation. Nav per content.md's own "Navigation"
+// list: Work / Process / About / Let's talk (a button, linking to
+// contact) - supersedes the brief's earlier Work/About/CV/Contact list.
+// "Let's talk" renders as a Button (secondary, quiet underline) rather
+// than a plain nav link, matching content.md's own "(button)" note, and
+// sits next to CV rather than inside the collapsing nav list - same
+// "always-reachable primary action" treatment CV already had. The
+// wordmark is small — a quiet corner mark rather than a masthead
+// statement, since the Hero carries its own big headline moment (see
+// Hero.astro).
 //
 // Header and Hero now share one alignment system: --intro-max-width /
 // --intro-margin (global.css), not the sitewide --content-max-width /
@@ -17,9 +23,9 @@
 // - Mobile nav pattern: plain inline text nav from desktop (1024px) up.
 //   Below that — tablet and phone both — a hamburger opens a full-screen
 //   panel (per direct request: "the menu on tablet and mobile screens
-//   should fill the entire screen"), not a small dropdown. The CV button
-//   stays visible at every width, painted above the panel via z-index —
-//   only Work/About/Contact collapse into it.
+//   should fill the entire screen"), not a small dropdown. CV and "Let's
+//   talk" both stay visible at every width, painted above the panel via
+//   z-index — only Work/Process/About collapse into it.
 // - Sticky vs. static: static (scrolls with the page).
 // - No border under the header, per explicit request — the header and
 //   Hero now read as one continuous opening screen (see index.astro),
@@ -28,17 +34,17 @@ import { withBase } from '../../utils/url';
 import Button from '../ui/Button.astro';
 
 const navItems = [
-  // Work and Contact aren't their own pages yet (see CLAUDE.md "Current
-  // status" — Work index/Contact layouts are still proposed, unbuilt), so
-  // these point at same-page anchors instead of 404ing: Work always jumps
-  // to the homepage's own #work section (SelectedWork.astro), Contact to
-  // #contact, which now lives on ContactCTA.astro (moved off Footer.astro
-  // during that component's own restructure - see its file header) - a
-  // bare hash still works from any page since both homepage and About
-  // render their own ContactCTA with that id.
+  // Work and Process aren't their own pages (see CLAUDE.md "Current
+  // status" — Work index is still proposed, unbuilt), so these point at
+  // same-page anchors instead of 404ing: Work jumps to the homepage's
+  // own #work section (SelectedWork.astro), Process to #process
+  // (Principles.astro, "How I detangle") - a bare hash still works from
+  // any page since both live on the homepage. "Let's talk" (content.md's
+  // 4th nav item, a button linking to contact) renders separately below,
+  // not as a plain link in this list.
   { href: `${withBase('/')}#work`, label: 'Work' },
+  { href: `${withBase('/')}#process`, label: 'Process' },
   { href: withBase('/about'), label: 'About' },
-  { href: '#contact', label: 'Contact' },
 ];
 
 // trailingSlash: 'never' (astro.config.mjs) means Astro.url.pathname never
@@ -124,6 +130,16 @@ const isHome = currentPath === withBase('/');
               </a>
             </li>
           ))}
+          <!-- content.md nav: "Let's talk (button, links to contact)" -
+               a real list item (not a header-level always-visible action
+               like CV below) so it collapses into the full-screen mobile
+               panel along with Work/Process/About instead of fighting
+               them for space on the tight mobile top row. -->
+          <li class="site-header__talk-item">
+            <Button href="#contact" variant="secondary" class="site-header__talk">
+              Let's talk
+            </Button>
+          </li>
         </ul>
       </nav>
 
@@ -361,11 +377,19 @@ const isHome = currentPath === withBase('/');
 
   /* Editorial "/" rhythm between nav items, in place of pure whitespace
      — decorative punctuation, not content, so it's CSS-generated rather
-     than markup. */
-  .site-header__links li:not(:first-child)::before {
+     than markup. Skipped before "Let's talk" - a boxed button reads as
+     its own distinct element, not another item in the plain-link rhythm
+     a "/" implies. */
+  .site-header__links li:not(:first-child):not(.site-header__talk-item)::before {
     content: '/';
     margin-inline-end: 0.6rem;
     color: var(--color-text-secondary);
+  }
+
+  /* A little extra breathing room before the button, since it no longer
+     gets the "/" separator's own margin-inline-end to do that job. */
+  .site-header__talk-item {
+    margin-left: 0.6rem;
   }
 
   /* Mono "Label" style, per explicit request — matches tags/year/buttons
@@ -462,7 +486,7 @@ const isHome = currentPath === withBase('/');
     outline-offset: 4px;
   }
 
-  /* Below desktop (tablet and phone both): Work/About/Contact collapse into a full-screen panel, not a small dropdown — per direct request ("the menu on tablet and mobile screens should fill the entire screen"). CV stays visible outside it, painted above the panel via z-index — an always-reachable primary action, not buried behind a menu tap. 1024px matches this project's own established tablet/desktop split (see Hero's tablet range, AboutIntro/AboutStory's breakpoints) rather than the narrower 768px this used before, when tablet still got the plain inline nav. */
+  /* Below desktop (tablet and phone both): Work/Process/About/Let's talk collapse into a full-screen panel, not a small dropdown — per direct request ("the menu on tablet and mobile screens should fill the entire screen"). CV stays visible outside it, painted above the panel via z-index — an always-reachable primary action, not buried behind a menu tap. 1024px matches this project's own established tablet/desktop split (see Hero's tablet range, AboutIntro/AboutStory's breakpoints) rather than the narrower 768px this used before, when tablet still got the plain inline nav. */
   @media (max-width: 1023px) {
     .site-header__inner {
       /* Guarantees CV + the toggle stay on the name's row instead of wrapping underneath it — the base rule's flex-wrap: wrap exists for genuinely narrow content, but here the right-hand group should never drop to its own line. */
@@ -525,6 +549,36 @@ const isHome = currentPath === withBase('/');
       text-align: center;
       padding-block: 0.7em;
       font-size: clamp(1.75rem, 5vw, 2.5rem);
+    }
+
+    /* Real contrast failure, not just a style preference: mauve
+         (--color-accent) on chalk (--color-bg-secondary, this panel's own
+         background) measures 4.04:1, under the 4.5:1 minimum for normal
+         text - it only passes on porcelain (4.58:1), which is what this
+         link's other context (the desktop inline nav) actually sits on.
+         Ink instead, scoped to this one background. */
+    .site-header__link:hover,
+    .site-header__link:focus-visible {
+      color: var(--color-ink);
+    }
+
+    /* Same failure, same fix, for "Let's talk" (Button.astro's
+         .btn--secondary:hover rule) now that it renders inside this panel
+         too. */
+    :global(.site-header__talk:hover) {
+      color: var(--color-ink) !important;
+    }
+
+    /* Resets the desktop-row-only left margin (see the base rule) - in
+         the centered mobile column it just needs the same breathing room
+         every other stacked item gets. */
+    .site-header__talk-item {
+      margin-left: 0;
+      margin-top: var(--space-24);
+    }
+
+    :global(.site-header__talk) {
+      font-size: 1.1rem !important;
     }
   }
 </style>

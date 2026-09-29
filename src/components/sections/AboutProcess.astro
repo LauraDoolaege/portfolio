@@ -42,6 +42,21 @@
 // step per "slide," images never shown there either (no hover on
 // phone).
 import SectionMarker from '../ui/SectionMarker.astro';
+import Tag from '../ui/Tag.astro';
+
+// content.md's own "### Tools" list, verbatim - moved here from Hero
+// (see AGENTS.md's item 8: "remove the Tools block from the hero, move
+// the tools to the about page, and give each icon an accessible name").
+// Hero's old version was five anonymous gray squares each aria-labeled
+// "Tool 1"/"Tool 2" etc - no real toolkit had been confirmed yet at the
+// time. content.md now gives the real list, and there's still no
+// confirmed icon graphic per tool (no icon assets exist), so these
+// render as plain bracket-tag chips (Tag.astro, this site's own device
+// for exactly this kind of thing) with the real tool name as real
+// visible text, rather than an anonymous icon shape carrying only an
+// aria-label - simpler, and it doesn't invent an icon appearance the
+// project has no asset for.
+const tools = ['Figma', 'Photoshop', 'Illustrator', 'After Effects', 'Blender', 'SPSS', 'VS Code'];
 
 const steps = [
   {
@@ -75,12 +90,12 @@ const steps = [
         <div class="about-process__track">
           {steps.map((step, i) => (
             <div class="about-process__step" data-step={i}>
-              <p class="about-process__step-heading">
+              <h3 class="about-process__step-heading">
                 <span class="about-process__step-number" aria-hidden="true">
                   {step.number}
                 </span>
                 <span class="about-process__step-label">{step.label}</span>
-              </p>
+              </h3>
               <p class="about-process__step-text">{step.text}</p>
 
               <div class="about-process__images" aria-hidden="true">
@@ -92,6 +107,17 @@ const steps = [
           ))}
         </div>
       </div>
+    </div>
+
+    <div class="about-process__tools">
+      <p class="about-process__tools-label">Tools</p>
+      <ul class="about-process__tools-list">
+        {tools.map((tool) => (
+          <li>
+            <Tag>{tool}</Tag>
+          </li>
+        ))}
+      </ul>
     </div>
   </div>
 </section>
@@ -212,6 +238,32 @@ const steps = [
 
   .about-process__stage {
     margin-top: var(--space-64);
+  }
+
+  /* content.md's real tool list - plain bracket-tag chips (see the
+     frontmatter comment for why, not an icon grid). Sits right after the
+     process diagram, per the same "recruiter reading how she works is
+     already the right moment to see what she works with" placement an
+     earlier, now-removed AboutTools.astro used. */
+  .about-process__tools {
+    margin-top: var(--space-64);
+    text-align: center;
+  }
+
+  .about-process__tools-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-secondary);
+  }
+
+  .about-process__tools-list {
+    margin-top: var(--space-16);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-8) var(--space-16);
   }
 
   .about-process__diagram {
@@ -367,12 +419,12 @@ const steps = [
 
   @media (max-width: 880px) {
     /* Three positioned slots plus scattered images need real width -
-                                           below this, every step drops out of the ring entirely into a
-                                           plain stacked list (matching the pre-rotation fallback this
-                                           section has used at narrow widths since its first pass). Images
-                                           already hidden outright on any non-hover device via
-                                           .about-process--no-images above; a touch tablet in this range
-                                           still gets the plain stack, just without images. */
+                                             below this, every step drops out of the ring entirely into a
+                                             plain stacked list (matching the pre-rotation fallback this
+                                             section has used at narrow widths since its first pass). Images
+                                             already hidden outright on any non-hover device via
+                                             .about-process--no-images above; a touch tablet in this range
+                                             still gets the plain stack, just without images. */
     .about-process__ring {
       display: none;
     }
@@ -390,12 +442,12 @@ const steps = [
     }
 
     /* !important only on the two properties the script ever writes an
-                                           inline style for (transform via xPercent, textAlign) - inline
-                                           styles otherwise always beat an external stylesheet rule
-                                           regardless of selector specificity, !important is the one thing
-                                           that outranks them. `position`/`width` have no such inline
-                                           competitor, so a plain cascade override (this rule simply comes
-                                           later in the file) is enough for those. */
+                                             inline style for (transform via xPercent, textAlign) - inline
+                                             styles otherwise always beat an external stylesheet rule
+                                             regardless of selector specificity, !important is the one thing
+                                             that outranks them. `position`/`width` have no such inline
+                                             competitor, so a plain cascade override (this rule simply comes
+                                             later in the file) is enough for those. */
     .about-process__step {
       position: static;
       width: 100%;
@@ -419,8 +471,8 @@ const steps = [
     }
 
     /* Phone-only horizontal scroll-snap strip, regardless of motion
-                                           preference or hover support (native overflow-x/scroll-snap needs
-                                           no reduced-motion gate of its own). */
+                                             preference or hover support (native overflow-x/scroll-snap needs
+                                             no reduced-motion gate of its own). */
     .about-process__track {
       flex-direction: row;
       gap: 0;

@@ -4,9 +4,9 @@
 // appears (homepage Selected Work now, Work index later). Content-agnostic
 // via props, so it lives in ui/ rather than sections/.
 //
-// href defaults to "#" — case-study pages are PROPOSED, not built yet
-// (PROJECT_BRIEF.md Section 5), same placeholder-link pattern already used
-// by the header CV button until a real destination exists.
+// Case-study pages are PROPOSED, not built yet (PROJECT_BRIEF.md Section
+// 5) - see the accessibility-rebuild comment below for why this no
+// longer takes an `href` at all.
 //
 // Rebuilt around a full-bleed image with a hover-reveal info panel — per
 // direct request ("the image to fill the entire card at first, numbers in
@@ -21,7 +21,9 @@
 // title/arrow) with one element: the whole card *is* the image, and
 // `.project-card__overlay` is an absolutely-positioned panel sitting at
 // its bottom edge, translated fully out of view (`translateY(100%)`) at
-// rest and sliding up into view on `:hover`/`:focus-visible`. This isn't
+// rest and sliding up into view on `:hover` (see the accessibility-
+// rebuild comment below for why this is hover-only now, not
+// `:focus-visible` too). This isn't
 // just a visual change - it's what actually fixes the collapsed-accordion
 // clipping bug that kept resurfacing (see AGENTS.md for the three earlier
 // attempts, each just enlarging a fixed writing-mode budget). That bug's
@@ -58,6 +60,24 @@
 // text already does that with no extra styling needed). `thumbnail` is
 // still a flat placeholder box, not a visible label - this project's
 // own locked convention for missing photography.
+//
+// Accessibility rebuild: this used to be one giant `<a>` wrapping every
+// field as plain `<span>`s with a single `aria-label` summarizing only
+// the title+oneLiner - a screen reader read the whole card as one
+// run-on ("Plan AAn app that...") with team/role never announced at all
+// (they were aria-hidden, redundant with an aria-label that didn't
+// mention them). Case-study detail pages don't exist yet (`href` always
+// resolved to "#", which goes nowhere), so the card is no longer a link
+// at all - a plain `<article>`, title as a real `<h3>`, and every field
+// its own element with normal spacing, so it reads the way it looks.
+// The hairline structure (class names, data-tag, the overlay markup)
+// stays exactly as it was so re-enabling the link later, once detail
+// pages exist, is a one-line change: swap the root tag back to `<a
+// href={href}>`. The old circular "go" arrow is removed for now too -
+// it signaled a click affordance a non-clickable card no longer has;
+// SelectedWork.astro's own custom cursor (unaffected by this change)
+// already carries that same "go" meaning while the section as a whole
+// is being previewed.
 import Tag from './Tag.astro';
 
 interface Props {
@@ -67,21 +87,15 @@ interface Props {
   oneLiner: string;
   team: string;
   role: string;
-  href?: string;
   class?: string;
 }
 
-const { order, title, tag, oneLiner, team, role, href = '#', class: className } = Astro.props;
+const { order, title, tag, oneLiner, team, role, class: className } = Astro.props;
 
 const number = String(order).padStart(2, '0');
 ---
 
-<a
-  href={href}
-  class:list={['project-card', className]}
-  data-tag={tag}
-  aria-label={`${title}: ${oneLiner}`}
->
+<article class:list={['project-card', className]} data-tag={tag}>
   <span class="project-card__image">
     <!-- TODO: replace with a real project image once photography exists (thumbnail: "[image]" in projects.json). -->
   </span>
@@ -90,31 +104,16 @@ const number = String(order).padStart(2, '0');
     {number}
   </span>
 
-  <span class="project-card__overlay">
-    <span class="project-card__meta">
+  <div class="project-card__overlay">
+    <div class="project-card__meta">
       <Tag>{tag}</Tag>
-      <span class="project-card__team" aria-hidden="true">
-        {team}
-      </span>
-    </span>
-    <span class="project-card__title-row">
-      <span class="project-card__title">{title}</span>
-      <span class="project-card__arrow" aria-hidden="true">
-        <svg viewBox="0 0 16 16" fill="none">
-          <path
-            d="M4.5 11.5L11.5 4.5M11.5 4.5H5.5M11.5 4.5V10.5"
-            stroke="currentColor"
-            stroke-width="1.3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </span>
-    </span>
-    <span class="project-card__line">{oneLiner}</span>
-    <span class="project-card__role">{role}</span>
-  </span>
-</a>
+      <span class="project-card__team">{team}</span>
+    </div>
+    <h3 class="project-card__title">{title}</h3>
+    <p class="project-card__line">{oneLiner}</p>
+    <p class="project-card__role">{role}</p>
+  </div>
+</article>
 
 <script>
   // Mouse-magnetic image shift, per direct request ("like a lot of
@@ -139,7 +138,7 @@ const number = String(order).padStart(2, '0');
     // edge).
     const SHIFT_RANGE = 20;
 
-    document.querySelectorAll<HTMLAnchorElement>('.project-card').forEach((card) => {
+    document.querySelectorAll<HTMLElement>('.project-card').forEach((card) => {
       const image = card.querySelector<HTMLElement>('.project-card__image');
       if (!image) return;
 
@@ -175,8 +174,8 @@ const number = String(order).padStart(2, '0');
     border: var(--border-hairline) solid var(--color-text-secondary);
     border-radius: var(--radius-image);
     /* --motion-easing-soft, not the plain --motion-easing/ease-out this
-                                                   used before, per direct feedback that the card's hover movement
-                                                   read as "very harsh." */
+                                                     used before, per direct feedback that the card's hover movement
+                                                     read as "very harsh." */
     transition:
       transform 0.55s var(--motion-easing-soft),
       border-color var(--motion-duration) var(--motion-easing-soft);
@@ -187,16 +186,13 @@ const number = String(order).padStart(2, '0');
      on the card itself, an element the mouse-shift script above never
      touches. No drop shadow (removed per earlier direct feedback) - the
      lift, the border darkening to ink, and the overlay sliding into view
-     together already carry the "this one's active" read. */
-  .project-card:hover,
-  .project-card:focus-visible {
+     together already carry the "this one's active" read. Hover only, not
+     focus-visible - the card is a plain <article> now (see the file
+     header comment), not a focusable link, so there's no keyboard focus
+     state to style. */
+  .project-card:hover {
     transform: translateY(-6px);
     border-color: var(--color-ink);
-  }
-
-  .project-card:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 4px;
   }
 
   .project-card__image {
@@ -210,8 +206,7 @@ const number = String(order).padStart(2, '0');
      transform entirely (scale + mouse-follow shift) once it runs, and
      GSAP's inline transform always wins over this rule regardless of
      source order, so there's no double-scaling risk between the two. */
-  .project-card:hover .project-card__image,
-  .project-card:focus-visible .project-card__image {
+  .project-card:hover .project-card__image {
     transform: scale(1.03);
   }
 
@@ -250,8 +245,7 @@ const number = String(order).padStart(2, '0');
     transition: transform 0.5s var(--motion-easing-soft);
   }
 
-  .project-card:hover .project-card__overlay,
-  .project-card:focus-visible .project-card__overlay {
+  .project-card:hover .project-card__overlay {
     transform: translateY(0);
   }
 
@@ -266,14 +260,6 @@ const number = String(order).padStart(2, '0');
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
     color: var(--color-text-secondary);
-  }
-
-  .project-card__title-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-16);
-    width: 100%;
   }
 
   .project-card__title {
@@ -302,27 +288,6 @@ const number = String(order).padStart(2, '0');
     letter-spacing: var(--tracking-wide);
     color: var(--color-text-secondary);
     opacity: 0.85;
-  }
-
-  /* A plain icon, not the circular badge this used to be - it only ever
-     shows on a device with no hover to reach the cursor-based version
-     with (see the media query below), so it doesn't need its own
-     hover/fill treatment of its own. */
-  .project-card__arrow {
-    flex-shrink: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--color-ink);
-  }
-
-  /* On a fine pointer, the arrow appears as the cursor itself while
-     hovering (per-section script, e.g. SelectedWork.astro) - this static
-     inline one would be redundant there, so it's hidden outright rather
-     than shown alongside a second arrow. */
-  @media (hover: hover) and (pointer: fine) {
-    .project-card__arrow {
-      display: none;
-    }
   }
 
   /* Touch has no hover to reveal the overlay with - drops out of the

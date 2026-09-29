@@ -142,7 +142,10 @@ const filters = ['All', 'UX', 'Visual'] as const;
   const reduceMotion = prefersReducedMotion();
   if (!reduceMotion && window.matchMedia('(pointer: fine)').matches) {
     const cursor = document.querySelector<HTMLElement>('.selected-work__cursor');
-    const cards = document.querySelectorAll<HTMLAnchorElement>('.selected-work .project-card');
+    // .project-card is a plain <article> now, not a link (see
+    // ProjectCard.astro's own comment) - the cursor still tracks
+    // pointer position over it the same way regardless of element type.
+    const cards = document.querySelectorAll<HTMLElement>('.selected-work .project-card');
 
     if (cursor && cards.length) {
       document.querySelector('.selected-work')?.classList.add('selected-work--custom-cursor');

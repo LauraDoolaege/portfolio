@@ -1,0 +1,103 @@
+---
+// Homepage "About teaser," content.md verbatim - new section, sitting
+// between How I detangle and the closing ContactCTA/Footer per
+// content.md's own homepage order. A quiet, unnumbered aside (same
+// register as CurrentlyWorkingOn - see that file's own comment on why
+// small asides don't claim a SectionMarker slot), not a full numbered
+// section - it's two sentences and a link, not a body of content.
+import { withBase } from '../../utils/url';
+---
+
+<section class="about-teaser">
+  <div class="about-teaser__inner">
+    <div class="about-teaser__image" aria-hidden="true">
+      <!-- TODO: replace with a real photo once one exists (content.md "Image: [Photo of me]"). -->
+    </div>
+
+    <div class="about-teaser__copy">
+      <p class="about-teaser__text">
+        Marketer turned designer. Storyteller since the playground. In a team, I'm the one holding
+        the thread.
+      </p>
+      <a href={withBase('/about')} class="about-teaser__link">
+        More about me
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const section = document.querySelector<HTMLElement>('.about-teaser');
+  if (section && !prefersReducedMotion()) {
+    gsap.set(section, { autoAlpha: 0, y: 16 });
+    gsap.to(section, {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.6,
+      ease: 'power2.out',
+      scrollTrigger: { trigger: section, start: 'top 92%' },
+    });
+  }
+</script>
+
+<style>
+  .about-teaser {
+    padding-block: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .about-teaser__inner {
+    max-width: var(--intro-max-width);
+    margin-inline: auto;
+    padding-inline: var(--intro-margin);
+    display: grid;
+    grid-template-columns: minmax(0, 10rem) 1fr;
+    align-items: center;
+    gap: var(--space-32);
+  }
+
+  .about-teaser__image {
+    aspect-ratio: 4 / 5;
+    background: var(--color-bg-secondary);
+    border: var(--border-hairline) solid var(--color-text-secondary);
+    border-radius: var(--radius-image);
+  }
+
+  .about-teaser__text {
+    max-width: 46ch;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  .about-teaser__link {
+    display: inline-block;
+    margin-top: var(--space-16);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-accent);
+    border-bottom: var(--border-hairline) solid currentColor;
+    transition: color var(--motion-duration) var(--motion-easing-soft);
+  }
+
+  .about-teaser__link:hover,
+  .about-teaser__link:focus-visible {
+    color: var(--color-ink);
+  }
+
+  @media (max-width: 640px) {
+    .about-teaser__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .about-teaser__image {
+      max-width: 10rem;
+    }
+  }
+</style>

@@ -42,6 +42,12 @@
 // supplied (same open item as Header.astro's own CV button and
 // Footer.astro's former email/LinkedIn row, moved here) - href="#" for
 // LinkedIn/CV matches Header.astro's own placeholder convention exactly.
+//
+// Copy swapped to content.md's own Contact section: "Got a tangled
+// brief?" as the single bold headline (was the two-line "Enough about
+// me... Let's hear your side of the story." above), with content.md's
+// own supporting sentence below it. The "CV" link label is now "Download
+// CV," matching content.md's own wording.
 const email = 'hello@example.com';
 const linkedinHref = '#';
 const cvHref = '#';
@@ -50,13 +56,14 @@ const cvHref = '#';
 <section class="contact-cta" id="contact">
   <div class="contact-cta__inner">
     <h2 class="contact-cta__headline">
-      <span class="contact-cta__headline-line contact-cta__headline-line--soft">
-        Enough about me.
-      </span>
       <span class="contact-cta__headline-line contact-cta__headline-line--bold">
-        Let's hear your side of the story.
+        Got a tangled brief?
       </span>
     </h2>
+
+    <p class="contact-cta__text">
+      Send it my way. I'm looking for a 12 to 14 week internship from February to May 2027.
+    </p>
 
     <a href={`mailto:${email}`} class="contact-cta__email">
       {email}
@@ -75,7 +82,7 @@ const cvHref = '#';
       </li>
       <li>
         <a href={cvHref} class="contact-cta__link">
-          CV
+          Download CV
         </a>
       </li>
     </ul>
@@ -85,21 +92,22 @@ const cvHref = '#';
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const headlineLines = document.querySelectorAll<HTMLElement>('.contact-cta__headline-line');
+  const headline = document.querySelector<HTMLElement>('.contact-cta__headline-line');
+  const text = document.querySelector<HTMLElement>('.contact-cta__text');
   const email = document.querySelector<HTMLElement>('.contact-cta__email');
   const links = document.querySelector<HTMLElement>('.contact-cta__links');
-  if (headlineLines.length && email && links && !prefersReducedMotion()) {
-    // A calm fade/rise, three beats instead of the previous two (headline,
-    // then button) - the headline's own two lines stagger in together,
-    // then the big email link, then the compact link row a beat after
-    // that, so the eye is guided down the new hierarchy in order rather
-    // than everything arriving at once.
-    gsap.set([...headlineLines, email, links], { autoAlpha: 0, y: 20 });
+  if (headline && text && email && links && !prefersReducedMotion()) {
+    // A calm fade/rise, four beats - headline, then the supporting
+    // sentence, then the big email link, then the compact link row - so
+    // the eye is guided down the hierarchy in order rather than
+    // everything arriving at once.
+    gsap.set([headline, text, email, links], { autoAlpha: 0, y: 20 });
     gsap
-      .timeline({ scrollTrigger: { trigger: headlineLines[0], start: 'top 85%' } })
-      .to(headlineLines, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out', stagger: 0.08 })
-      .to(email, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.35)
-      .to(links, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.5);
+      .timeline({ scrollTrigger: { trigger: headline, start: 'top 85%' } })
+      .to(headline, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' })
+      .to(text, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.2)
+      .to(email, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.4)
+      .to(links, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.55);
   }
 </script>
 
@@ -121,23 +129,25 @@ const cvHref = '#';
     flex-direction: column;
     gap: var(--space-8);
     /* Wide enough that the bold line's six words wrap into two lines, not
-                                                               one-or-two words per line - --text-h1's own 96px ceiling (below)
-                                                               is tuned for a single short word (Hero's "PORTFOLIO"), not a full
-                                                               sentence, so this needs real width to go with it or it reads as
-                                                               broken instead of bold. */
+                                                                   one-or-two words per line - --text-h1's own 96px ceiling (below)
+                                                                   is tuned for a single short word (Hero's "PORTFOLIO"), not a full
+                                                                   sentence, so this needs real width to go with it or it reads as
+                                                                   broken instead of bold. */
     max-width: 42ch;
   }
 
-  /* The setup line - smaller, lighter weight, on-dark secondary color -
-     against the payoff line's full display treatment below. Same two
-     sentences the old single-line version already used (PROJECT_BRIEF.md
-     Section 4, item 6, and the same copy Section 5's own Contact-page
-     draft breaks into these exact two lines) - split for hierarchy here,
-     not rewritten. */
-  .contact-cta__headline-line--soft {
+  /* content.md's own supporting sentence ("Text: Send it my way...") -
+     smaller, lighter weight, on-dark secondary color, same register the
+     old two-line headline's own soft setup line used, now a real
+     paragraph under the single-line headline instead of a second
+     headline span. */
+  .contact-cta__text {
+    margin-top: var(--space-16);
+    max-width: 42ch;
     font-family: var(--font-body);
     font-weight: 500;
     font-size: clamp(1.1rem, 1vw + 0.9rem, 1.375rem);
+    line-height: var(--text-body-leading);
     color: var(--color-text-secondary-on-dark);
   }
 
@@ -145,8 +155,8 @@ const cvHref = '#';
     font-family: var(--font-display);
     font-weight: 700;
     /* A smaller ceiling than --text-h1 (96px, tuned for Hero's single
-                                                               short word) - at that size, six words wrapped one-or-two per line
-                                                               instead of reading as a bold sentence. */
+                                                                   short word) - at that size, six words wrapped one-or-two per line
+                                                                   instead of reading as a bold sentence. */
     font-size: clamp(2.25rem, 3vw + 1.25rem, 4.25rem);
     line-height: var(--text-h1-leading);
     text-transform: uppercase;

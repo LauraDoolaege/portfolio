@@ -1,19 +1,12 @@
 ---
-// Homepage. Section order and content per PROJECT_BRIEF.md Section 4
-// "Homepage structure (LOCKED)" / Section 5 "Homepage — LOCKED" — with
-// deliberate departures from that original order, per direct request.
-// "How I think" is gone outright (its 3 principle titles were folded
-// into Principles.astro first - see that file's own comment - then this
-// import/usage was deleted, not just skipped, since nothing else needs
-// HowIThink.astro any more).
-//
-// Order swapped again, direct follow-up ("change the order between
-// selected works and design principles"): Principles now leads (01),
-// then Selected Work (02) - Currently Working On stays directly below
-// Selected Work regardless of which position that is, per its own
-// existing "directly below Selected Work" placement rule - then Gallery
-// (03, unchanged), into ContactCTA/Footer. See Principles.astro and
-// SelectedWork.astro for their own renumbered SectionMarker indexes.
+// Homepage. Section order now follows content.md's own "Navigation"/
+// section list directly: hero, selected work, on my desk right now, how
+// I detangle (process), about teaser, contact footer - Selected Work
+// leads (SectionMarker "01"), Currently Working On stays directly below
+// it, How I detangle ("02") follows, then the new About teaser, into
+// ContactCTA/Footer. Supersedes the previous Principles-leads order (see
+// this file's own git history) now that content.md gives an explicit
+// order to follow.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
@@ -21,20 +14,25 @@ import Hero from '../components/sections/Hero.astro';
 import SelectedWork from '../components/sections/SelectedWork.astro';
 import CurrentlyWorkingOn from '../components/sections/CurrentlyWorkingOn.astro';
 import Principles from '../components/sections/Principles.astro';
+import AboutTeaser from '../components/sections/AboutTeaser.astro';
 import Thread from '../components/ui/Thread.astro';
 import ContactCTA from '../components/sections/ContactCTA.astro';
 ---
 
-<BaseLayout title="Laura Doolaege | Portfolio">
+<BaseLayout
+  title="Laura Doolaege, UX & Visual Designer"
+  description="UX and visual designer with a marketing brain. I detangle briefs into creative concepts that are feasible and grounded in marketing. Looking for an internship, February to May 2027."
+>
   <div class="thread-wrap">
     <Thread />
     <div class="intro">
       <Header />
       <Hero />
     </div>
-    <Principles />
     <SelectedWork />
     <CurrentlyWorkingOn />
+    <Principles />
+    <AboutTeaser />
   </div>
   <ContactCTA />
   <Footer />

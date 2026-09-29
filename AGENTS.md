@@ -3109,3 +3109,27 @@ the tile itself for all 5 (was 0 of 5 before the overflow fix), and a
 screenshot confirms two tilted image placeholders genuinely overlapping
 the "EXPERIENCE"/"DESIGNER" letters. Scrolling 600px settles all tiles to
 identity transform and the track's own marquee motion only then starts.
+
+**Homepage finished: new About teaser section, reordered to match
+content.md, Contact/Footer copy swapped in.** New `AboutTeaser.astro`
+(content.md "About teaser," a quiet unnumbered aside like
+CurrentlyWorkingOn - photo placeholder, the two-sentence line, "More
+about me" link into `/about`). `index.astro`'s section order now follows
+content.md directly - Hero, Selected Work, On my desk (Currently
+Working On), How I detangle (Principles), About teaser, Contact/Footer -
+superseding the earlier Principles-leads order. Page title/meta
+description also now match content.md's "Site info" fields exactly.
+
+`ContactCTA.astro`'s headline changed from the old two-line "Enough
+about me... Let's hear your side of the story." to content.md's own
+"Got a tangled brief?" (single bold line) plus its supporting sentence
+as a real paragraph underneath; the link row's "CV" label is now
+"Download CV." `Footer.astro`'s small print changed from "© {year}
+Laura Doolaege" to content.md's own "Laura Doolaege, {year}" format.
+
+Verified in the browser: homepage renders all 7 sections (hero,
+embedded gallery, selected work, on my desk, how I detangle, about
+teaser, contact) in that order with no horizontal overflow; the
+`<title>` and meta description match content.md verbatim; Contact's
+headline/text/link labels and Footer's credit line all match
+content.md verbatim; no console errors.

@@ -48,6 +48,12 @@
 // now.
 import Gallery from './Gallery.astro';
 import Button from '../ui/Button.astro';
+import Tag from '../ui/Tag.astro';
+
+// content.md "Hero" tags, verbatim — replaces the earlier merged
+// "3rd year Devine student | Belgium | Interning from Feb 2027" status
+// line per direct request ("remove the labels, three literal tags").
+const tags = ['UX & visual design', 'Devine, 3rd year', 'Internship, Feb to May 2027'];
 
 // The giant word changed from "Portfolio" to "Experience designer" per
 // direct request - two words now, not one, so it's set on two lines
@@ -81,31 +87,15 @@ const titleLines = [
     </div>
 
     <div class="hero__bottom">
-      <!--
-        Role + location + availability, merged onto one line - per direct
-        follow-up request ("the current ux and visual designer, located
-        in belgium and internship should still be on one line... make the
-        structure => 3rd year devine student | (location icon) belgium |
-        interning"). Replaces the previous two-line role/status pair and
-        the three bracketed tags below it (their content - "3rd year"
-        and "internship" - now lives in this one line instead).
-      -->
-      <p class="hero__status">
-        3rd year Devine student
-        <span aria-hidden="true">|</span>
-        <svg class="hero__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M8 14.2C8 14.2 12.5 9.8 12.5 6.3C12.5 3.8 10.5 1.8 8 1.8C5.5 1.8 3.5 3.8 3.5 6.3C3.5 9.8 8 14.2 8 14.2Z"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linejoin="round"
-          />
-          <circle cx="8" cy="6.3" r="1.6" stroke="currentColor" stroke-width="1.2" />
-        </svg>
-        Belgium
-        <span aria-hidden="true">|</span>
-        Interning from Feb 2027
-      </p>
+      <!-- content.md "Hero" tags, verbatim - three literal bracket tags,
+           not a paraphrased status line. -->
+      <ul class="hero__tags">
+        {tags.map((tag) => (
+          <li>
+            <Tag>{tag}</Tag>
+          </li>
+        ))}
+      </ul>
 
       <!-- content.md "Hero" intro, verbatim. -->
       <p class="hero__intro">
@@ -246,10 +236,10 @@ const titleLines = [
     font-family: var(--font-display);
     font-weight: 800;
     /* Was 0.86 - too tight, read as the glyphs getting cut off at the
-                           top/bottom rather than a deliberate edge-to-edge fill (per direct
-                           report, with a screenshot). More breathing room, and the two
-                           lines are no longer flush against each other either (see
-                           margin-top below). */
+                             top/bottom rather than a deliberate edge-to-edge fill (per direct
+                             report, with a screenshot). More breathing room, and the two
+                             lines are no longer flush against each other either (see
+                             margin-top below). */
     line-height: 1.02;
     letter-spacing: -0.03em;
     text-transform: uppercase;
@@ -322,29 +312,15 @@ const titleLines = [
     column-gap: var(--intro-gutter);
   }
 
-  /* Role, location and availability merged onto one line - per direct
-     request. Was two separate lines (a bold role line, then a smaller
-     mono location/status line below it); now one mono line, three
-     "|"-separated segments, since the role text itself became a fact
-     ("3rd year Devine student") rather than a job title, reading fine
-     at the same small weight as the rest of the line. */
-  .hero__status {
+  /* content.md's three literal bracket tags - replaces the earlier
+     merged role/location/availability status line (see git history).
+     Plain Tag.astro instances in a wrapping row. */
+  .hero__tags {
     grid-column: 1 / 6;
     grid-row: 1;
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4em;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
-  }
-
-  .hero__status-icon {
-    width: 0.9em;
-    height: 0.9em;
-    flex-shrink: 0;
+    gap: var(--space-8) var(--space-16);
   }
 
   .hero__intro {
@@ -427,12 +403,12 @@ const titleLines = [
       grid-template-columns: repeat(7, 1fr);
     }
 
-    /* Same status -> intro -> tools -> CTA row order as the base rule
-                           (unchanged here, just a wider column span) - only the column
-                           range needs overriding for the narrower 7-column grid.
-                           .hero__cta-row already spans 1 / -1 at every width, so it needs
-                           no override here. */
-    .hero__status,
+    /* Same tags -> intro -> tools -> CTA row order as the base rule
+                             (unchanged here, just a wider column span) - only the column
+                             range needs overriding for the narrower 7-column grid.
+                             .hero__cta-row already spans 1 / -1 at every width, so it needs
+                             no override here. */
+    .hero__tags,
     .hero__intro,
     .hero__tools {
       grid-column: 1 / 8;
@@ -451,11 +427,11 @@ const titleLines = [
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                                                                                         markup's own DOM order (role, status, intro, tools, CTA, scroll),
-                                                                                                                                                                         which is already the same role -> location -> paragraph -> tools
-                                                                                                                                                                         order the base rule's explicit grid-rows give every wider
-                                                                                                                                                                         breakpoint, so nothing here needs to re-specify row/column
-                                                                                                                                                                         placement the way it used to. */
+                                                                                                                                                                             markup's own DOM order (role, status, intro, tools, CTA, scroll),
+                                                                                                                                                                             which is already the same role -> location -> paragraph -> tools
+                                                                                                                                                                             order the base rule's explicit grid-rows give every wider
+                                                                                                                                                                             breakpoint, so nothing here needs to re-specify row/column
+                                                                                                                                                                             placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }

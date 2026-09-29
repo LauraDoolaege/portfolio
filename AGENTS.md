@@ -3133,3 +3133,36 @@ teaser, contact) in that order with no horizontal overflow; the
 `<title>` and meta description match content.md verbatim; Contact's
 headline/text/link labels and Footer's credit line all match
 content.md verbatim; no console errors.
+
+**Floating gallery: settle changed from scroll-scrubbed to a one-time
+"fall," idle float added, tile footer text gated to landed-only.** Direct
+follow-up correction: "they should stay in place and just float in
+place, not also scroll, that is for when they are in the gallery... it's
+like they fall into their place in the gallery."
+
+The previous pass tied the scatter-to-landed transition to a scrubbed
+ScrollTrigger (move the page a little, the tiles move a little) - read
+as the tiles "scrolling," which is what the landed strip's own marquee
+is for, not the floating state. Replaced with `ScrollTrigger.create({
+once: true })`: the tiles now sit at their scattered rest point (with a
+small continuous idle drift of their own - "float in place," not dead
+still, looping from each tile's own rest point rather than 0/0 so it
+doesn't fight the scatter) until the reader scrolls past a small
+threshold, at which point every tile falls into its landed position
+together in one bouncy (`back.out`), staggered motion, and stays landed
+even if the reader scrolls back up - not scroll-position-reversible.
+
+Each tile's `.gallery__tile-footer` (tag + caption) is hidden
+(`autoAlpha: 0`) for the whole floating state and fades in only as that
+tile lands, per direct request that the caption text "should also only
+be in the gallery" - gated in JS (matching the rest of this mechanism),
+not CSS, so the reduced-motion fallback (which skips this block
+entirely) still shows captions immediately, same "no gesture/animation
+required for the content itself" principle used throughout this file.
+
+Verified in the browser: at scroll 0, a tile's computed transform
+changes slightly between two 1.5s-apart samples (idle drift) while its
+footer opacity reads 0 and `is-landed` is absent; scrolling to 150px
+settles the tile to an identity transform, footer opacity 1, and
+`is-landed` present; scrolling back to 0 leaves it landed (not
+re-scattered).

@@ -36,7 +36,8 @@ const email = 'laura.doolaege@student.howest.be';
 
 <style>
   .footer {
-    padding-block: clamp(2.5rem, 1.5rem + 3vw, 5rem) clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    /* Bottom padding leaves room for the fixed theme toggle (bottom-right) so it never sits on the legal line */
+    padding-block: clamp(2.5rem, 1.5rem + 3vw, 5rem) 5rem;
   }
 
   /* The line is ~7.5em wide, so size it from its own container (cqw) to fill exactly the container width at any viewport. */

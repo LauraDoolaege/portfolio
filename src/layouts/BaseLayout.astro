@@ -30,6 +30,19 @@ const { title, description = "Laura's portfolio: digital development & design." 
     <meta property="og:description" content={description} />
     <meta name="theme-color" content="#f3f2ee" />
     <title>{title}</title>
+    <!-- Set the theme before first paint so a stored dark choice never flashes light -->
+    <script is:inline>
+      (function () {
+        var t = null;
+        try {
+          t = localStorage.getItem('theme');
+        } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
     <style is:inline set:html={fontFaces}></style>
   </head>
   <body id="top">
@@ -79,8 +92,13 @@ const { title, description = "Laura's portfolio: digital development & design." 
     </a>
     <slot />
     <div class="grain" aria-hidden="true"></div>
+    <button class="theme-toggle" type="button" aria-label="Switch to dark mode">
+      <span class="theme-toggle__icon" aria-hidden="true"></span>
+      <span class="theme-toggle__label">Dark</span>
+    </button>
     <script>
       import '../scripts/tactile';
+      import '../scripts/theme';
     </script>
   </body>
 </html>

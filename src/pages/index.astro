@@ -1,57 +1,13 @@
 ---
-// Homepage. Section order now follows content.md's own "Navigation"/
-// section list directly: hero, selected work, on my desk right now, how
-// I detangle (process), about teaser, contact footer - Selected Work
-// leads (SectionMarker "01"), Currently Working On stays directly below
-// it, How I detangle ("02") follows, then the new About teaser, into
-// ContactCTA/Footer. Supersedes the previous Principles-leads order (see
-// this file's own git history) now that content.md gives an explicit
-// order to follow.
+// Homepage - reset to a blank slate for a fresh direction. Every section
+// component that used to render here (Hero, SelectedWork,
+// CurrentlyWorkingOn, Principles, AboutTeaser, ContactCTA, Thread,
+// Footer) is kept in src/components/ in case it's reused, just not
+// imported here. Header (the nav) is the only thing still on the page.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
-import Footer from '../components/layout/Footer.astro';
-import Hero from '../components/sections/Hero.astro';
-import SelectedWork from '../components/sections/SelectedWork.astro';
-import CurrentlyWorkingOn from '../components/sections/CurrentlyWorkingOn.astro';
-import Principles from '../components/sections/Principles.astro';
-import AboutTeaser from '../components/sections/AboutTeaser.astro';
-import Thread from '../components/ui/Thread.astro';
-import ContactCTA from '../components/sections/ContactCTA.astro';
 ---
 
-<BaseLayout
-  title="Laura Doolaege, UX & Visual Designer"
-  description="UX and visual designer with a marketing brain. I detangle briefs into creative concepts that are feasible and grounded in marketing. Looking for an internship, February to May 2027."
->
-  <div class="thread-wrap">
-    <Thread />
-    <div class="intro">
-      <Header />
-      <Hero />
-    </div>
-    <SelectedWork />
-    <CurrentlyWorkingOn />
-    <Principles />
-    <AboutTeaser />
-  </div>
-  <ContactCTA />
-  <Footer />
+<BaseLayout title="Laura Doolaege" description="Laura's portfolio: digital development & design.">
+  <Header />
 </BaseLayout>
-
-<style>
-  /* Header + Hero fill the opening viewport as one screen, per explicit
-     request — dvh rather than vh so mobile browser chrome doesn't clip
-     it, min-height rather than height so content is never forced to
-     overflow/clip on a short viewport. Hero.astro's own `flex: 1` is what
-     lets it absorb the remaining space and center its content within it. */
-  .thread-wrap {
-    position: relative;
-    isolation: isolate;
-  }
-
-  .intro {
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
-  }
-</style>

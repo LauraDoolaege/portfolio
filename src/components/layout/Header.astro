@@ -552,26 +552,26 @@ const isHome = currentPath === withBase('/');
     }
 
     /* Real contrast failure, not just a style preference: mauve
-         (--color-accent) on chalk (--color-bg-secondary, this panel's own
-         background) measures 4.04:1, under the 4.5:1 minimum for normal
-         text - it only passes on porcelain (4.58:1), which is what this
-         link's other context (the desktop inline nav) actually sits on.
-         Ink instead, scoped to this one background. */
+           (--color-accent) on chalk (--color-bg-secondary, this panel's own
+           background) measures 4.04:1, under the 4.5:1 minimum for normal
+           text - it only passes on porcelain (4.58:1), which is what this
+           link's other context (the desktop inline nav) actually sits on.
+           Ink instead, scoped to this one background. */
     .site-header__link:hover,
     .site-header__link:focus-visible {
       color: var(--color-ink);
     }
 
     /* Same failure, same fix, for "Let's talk" (Button.astro's
-         .btn--secondary:hover rule) now that it renders inside this panel
-         too. */
+           .btn--secondary:hover rule) now that it renders inside this panel
+           too. */
     :global(.site-header__talk:hover) {
       color: var(--color-ink) !important;
     }
 
     /* Resets the desktop-row-only left margin (see the base rule) - in
-         the centered mobile column it just needs the same breathing room
-         every other stacked item gets. */
+           the centered mobile column it just needs the same breathing room
+           every other stacked item gets. */
     .site-header__talk-item {
       margin-left: 0;
       margin-top: var(--space-24);

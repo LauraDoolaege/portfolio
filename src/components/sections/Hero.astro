@@ -229,10 +229,10 @@ const titleLines = [
     font-family: var(--font-display);
     font-weight: 800;
     /* Was 0.86 - too tight, read as the glyphs getting cut off at the
-                               top/bottom rather than a deliberate edge-to-edge fill (per direct
-                               report, with a screenshot). More breathing room, and the two
-                               lines are no longer flush against each other either (see
-                               margin-top below). */
+                                 top/bottom rather than a deliberate edge-to-edge fill (per direct
+                                 report, with a screenshot). More breathing room, and the two
+                                 lines are no longer flush against each other either (see
+                                 margin-top below). */
     line-height: 1.02;
     letter-spacing: -0.03em;
     text-transform: uppercase;
@@ -370,9 +370,9 @@ const titleLines = [
     }
 
     /* Same tags -> intro -> CTA row order as the base rule (unchanged
-         here, just a wider column span) - only the column range needs
-         overriding for the narrower 7-column grid. .hero__cta-row already
-         spans 1 / -1 at every width, so it needs no override here. */
+           here, just a wider column span) - only the column range needs
+           overriding for the narrower 7-column grid. .hero__cta-row already
+           spans 1 / -1 at every width, so it needs no override here. */
     .hero__tags,
     .hero__intro {
       grid-column: 1 / 8;
@@ -391,10 +391,10 @@ const titleLines = [
 
     .hero__bottom {
       /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                                                                                                 markup's own DOM order (tags, intro, CTA), which is already the
-                                                                                                                                                                                 same order the base rule's explicit grid-rows give every wider
-                                                                                                                                                                                 breakpoint, so nothing here needs to re-specify row/column
-                                                                                                                                                                                 placement the way it used to. */
+                                                                                                                                                                                     markup's own DOM order (tags, intro, CTA), which is already the
+                                                                                                                                                                                     same order the base rule's explicit grid-rows give every wider
+                                                                                                                                                                                     breakpoint, so nothing here needs to re-specify row/column
+                                                                                                                                                                                     placement the way it used to. */
       display: block;
       margin-top: var(--space-32);
     }

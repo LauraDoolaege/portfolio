@@ -59,21 +59,29 @@ const meta = [
 
         <header class="hero">
           <h1 class="hero__title">{title}</h1>
-          <p class="hero__description">{description}</p>
+          <p class="hero__description subtitle">{description}</p>
         </header>
 
         <dl class="meta">
           {meta.map((m) => (
             <div class="meta__row">
-              <dt class="meta__label">{m.label}</dt>
+              <dt class="meta__label tag">{m.label}</dt>
               <dd class="meta__value">{m.value}</dd>
             </div>
           ))}
         </dl>
 
         {behanceUrl && (
-          <a class="behance-btn" href={behanceUrl} target="_blank" rel="noopener noreferrer">
-            [ View full Behance case study ↗ ]
+          <a class="behance-btn btn" href={behanceUrl} target="_blank" rel="noopener noreferrer">
+            View full Behance case study
+            <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path
+                d="M3 9L9 3M4 3h5v5"
+                stroke="currentColor"
+                stroke-width="1.2"
+                stroke-linecap="square"
+              />
+            </svg>
           </a>
         )}
       </div>
@@ -96,8 +104,8 @@ const meta = [
       )}
 
       <section class="more container" aria-labelledby="more-label">
-        <h2 id="more-label" class="more__label">
-          [ More Work ]
+        <h2 id="more-label" class="more__label tag">
+          More Work
         </h2>
         <ul class="more__grid">
           {more.map((w) => (
@@ -112,7 +120,7 @@ const meta = [
                   />
                 </div>
                 <h3 class="more__title">{w.data.title}</h3>
-                <p class="more__type">
+                <p class="more__type tag">
                   {w.data.type === 'ux' ? 'UX Strategy' : 'Visual Exploration'}
                 </p>
               </a>
@@ -184,11 +192,6 @@ const meta = [
   .hero__description {
     max-width: 50ch;
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
-    font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
-    font-weight: var(--weight-light);
-    line-height: 1.5;
-    letter-spacing: -0.005em;
-    text-wrap: pretty;
   }
 
   /* Meta grid: horizontal rules only, no vertical boxing */
@@ -206,11 +209,8 @@ const meta = [
   }
 
   .meta__label {
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    line-height: 1.6;
-    color: var(--text-muted);
+    justify-self: start;
+    align-self: start;
   }
 
   .meta__value {
@@ -228,7 +228,7 @@ const meta = [
     padding-block: clamp(4rem, 2rem + 8vw, 9rem);
   }
 
-  .prose :global(h2) {
+  .prose :global(h2:not(.tag)) {
     margin-top: clamp(2rem, 1rem + 5vw, 6rem);
     font-size: var(--text-h2);
   }
@@ -309,21 +309,9 @@ const meta = [
     }
   }
 
-  /* Behance button under the meta grid: colour swap only, same as the footer links */
+  /* Behance button under the meta grid: the shared .btn, just spaced from the meta rules */
   .behance-btn {
-    display: inline-block;
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
-    padding-block: 0.95em;
-    font-size: var(--text-small);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    line-height: 1;
-    transition: color 0.5s var(--ease-out);
-  }
-
-  .behance-btn:hover,
-  .behance-btn:focus-visible {
-    color: var(--accent-text);
   }
 
   .cta__arrow {
@@ -369,11 +357,6 @@ const meta = [
 
   .more__label {
     margin-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
-    font-size: var(--text-small);
-    font-weight: var(--weight-bold);
-    letter-spacing: 0.05em;
-    line-height: 1.3;
-    text-transform: uppercase;
   }
 
   .more__grid {
@@ -397,11 +380,7 @@ const meta = [
   }
 
   .more__type {
-    margin-top: 0.4rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    margin-top: 0.6rem;
   }
 
   @media (min-width: 900px) {

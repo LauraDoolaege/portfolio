@@ -66,8 +66,8 @@ function cursor() {
   gsap.set(disc, { scale: 0 });
 
   // Position: quickTo on x/y writes translate3d on the fixed, pointer-events-none anchor.
-  // A short duration keeps it feeling attached to the hand while still smoothing jitter.
-  const follow = reduceMotion ? 0 : 0.16;
+  // Kept very short so the dot stays on the pointer tip, where the sand effect is centred.
+  const follow = reduceMotion ? 0 : 0.05;
   const x = gsap.quickTo(root, 'x', { duration: follow, ease: 'power3.out' });
   const y = gsap.quickTo(root, 'y', { duration: follow, ease: 'power3.out' });
 
@@ -135,7 +135,7 @@ function cursor() {
   });
 }
 
-/* ---------- Analog darkroom: physical pan inside project image frames ---------- */
+/* ---------- Project image frames: physical pan, plus the spotlight in the soft mask ---------- */
 
 function pan(frame: HTMLElement) {
   const img = frame.querySelector<HTMLElement>('.card__img, .media-frame__img');
@@ -160,8 +160,45 @@ function pan(frame: HTMLElement) {
   });
 }
 
+// The overlay in global.css (.is-sanded::before) reads --x/--y/--spot. --x/--y are the pointer's
+// position inside the frame (never the window) and follow it with a short lag; --spot is the
+// overlay's radius, opened on enter and closed on leave, after which the overlay is hidden again.
+function spotlight(frame: HTMLElement) {
+  const REST = 0.01;
+  const OPEN = 120;
+  // The pointer's position inside the frame, written straight to the CSS variables with no
+  // smoothing, so the sand sits exactly under the cursor tip.
+  const place = (e: MouseEvent) => {
+    const r = frame.getBoundingClientRect();
+    frame.style.setProperty('--x', `${e.clientX - r.left}px`);
+    frame.style.setProperty('--y', `${e.clientY - r.top}px`);
+  };
+  const radius = { v: REST };
+  const to = (v: number, done?: () => void) =>
+    gsap.to(radius, {
+      v,
+      duration: reduceMotion ? 0 : 0.6,
+      ease: 'power3.out',
+      overwrite: true,
+      onUpdate: () => frame.style.setProperty('--spot', `${radius.v}px`),
+      onComplete: done,
+    });
+
+  frame.addEventListener('mouseenter', (e) => {
+    place(e);
+    frame.classList.add('is-sanded', 'is-hover');
+    to(OPEN);
+  });
+  frame.addEventListener('mousemove', place, { passive: true });
+  frame.addEventListener('mouseleave', () => {
+    frame.classList.remove('is-hover');
+    to(REST, () => frame.classList.remove('is-sanded'));
+  });
+}
+
 if (finePointer) {
   cursor();
+  document.querySelectorAll<HTMLElement>('.card__media, .media-frame').forEach(spotlight);
   if (!reduceMotion) {
     document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => magnetic(el));
     document.querySelectorAll<HTMLElement>('.card__media, .media-frame').forEach(pan);

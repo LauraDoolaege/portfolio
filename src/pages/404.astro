@@ -9,9 +9,17 @@ import { withBase } from '../utils/url';
     <Header />
     <main id="main" class="container not-found">
       <h1>Page not found</h1>
-      <p>This page doesn't exist or has moved.</p>
-      <a href={withBase('/')} class="not-found__link">
+      <p class="subtitle">This page doesn't exist or has moved.</p>
+      <a href={withBase('/')} class="btn">
         Back to the homepage
+        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path
+            d="M3 9L9 3M4 3h5v5"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="square"
+          />
+        </svg>
       </a>
     </main>
   </div>
@@ -32,21 +40,5 @@ import { withBase } from '../utils/url';
     align-items: flex-start;
     gap: 1.5rem;
     padding-block: var(--space-section);
-  }
-
-  .not-found p {
-    font-weight: var(--weight-light);
-    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
-  }
-
-  .not-found__link {
-    text-decoration: underline;
-    text-decoration-color: var(--border-color);
-    text-underline-offset: 0.3em;
-    transition: color var(--duration) var(--ease-out);
-  }
-
-  .not-found__link:hover {
-    color: var(--accent-text);
   }
 </style>

@@ -39,7 +39,7 @@ const { label, text, images, cta, id } = Astro.props;
     <p class="manifesto__label">{label}</p>
     <p class="manifesto__text">{text}</p>
     {cta && (
-      <a class="manifesto__btn" href={cta.href}>
+      <a class="manifesto__btn" href={cta.href} data-magnetic>
         {cta.label}
       </a>
     )}
@@ -58,9 +58,17 @@ const { label, text, images, cta, id } = Astro.props;
   .manifesto__inner {
     position: relative;
     z-index: 2;
+    /* Let the pointer reach the floating images under the text layer; the text and button opt back in */
+    pointer-events: none;
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  .manifesto__label,
+  .manifesto__text,
+  .manifesto__btn {
+    pointer-events: auto;
   }
 
   .manifesto__label {

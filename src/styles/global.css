@@ -166,3 +166,62 @@ button:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Tactile layer ---------- */
+
+/* Paper grain: a static, very faint noise tile over everything. Never intercepts input. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  opacity: 0.045;
+}
+
+/* Custom cursor: only enabled by script for fine pointers, so touch and no-JS keep the native one */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 60px;
+  height: 60px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.cursor__ball {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  will-change: transform;
+}
+
+.cursor__label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--bg-primary);
+  font-size: var(--text-small);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+  opacity: 0;
+}
+
+[data-magnetic] {
+  display: inline-block;
+}
+
+.magnetic__inner {
+  display: inline-block;
+  will-change: transform;
+}

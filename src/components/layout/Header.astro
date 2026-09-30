@@ -19,7 +19,11 @@ const currentPath = Astro.url.pathname;
       <ul class="site-header__links">
         {links.map((l) => (
           <li>
-            <a href={l.href} aria-current={l.href === currentPath ? 'page' : undefined}>
+            <a
+              href={l.href}
+              data-magnetic
+              aria-current={l.href === currentPath ? 'page' : undefined}
+            >
               {l.label}
             </a>
           </li>

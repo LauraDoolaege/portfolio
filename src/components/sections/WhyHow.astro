@@ -1,0 +1,142 @@
+---
+// Section 1: two questions, two approaches. Header row, then a 2-column
+// architectural grid split by a vertical hairline (horizontal on mobile).
+const columns = [
+  {
+    label: 'The Why',
+    question: 'How do we design an experience people actually need, love, and connect with?',
+    approach: 'Devine (UX Major)',
+    value:
+      'Human-centered research, mapping user journeys, and prototyping interactions across physical and digital touchpoints.',
+  },
+  {
+    label: 'The How',
+    question: 'How do we make sure people discover it and engage with it?',
+    approach: 'Bachelor in Marketing Communication (Cum Laude)',
+    value:
+      'Content strategy, persuasion, nudging, and understanding human behavior to bridge user needs with business goals.',
+  },
+];
+---
+
+<section class="why-how" aria-labelledby="why-how-title">
+  <div class="container">
+    <h2 id="why-how-title" class="why-how__title">2 Questions Every Product Needs to Answer</h2>
+
+    <div class="why-how__grid">
+      {
+        columns.map((c) => (
+          <article class="why-how__cell">
+            <p class="why-how__label">{c.label}</p>
+            <h3 class="why-how__question">{c.question}</h3>
+            <p class="why-how__approach">{c.approach}</p>
+            <p class="why-how__value">{c.value}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .why-how {
+    padding-top: var(--space-section);
+  }
+
+  .why-how__title {
+    font-size: clamp(1.75rem, 1rem + 3vw, 3.5rem);
+    line-height: 1.05;
+    padding-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
+    border-bottom: var(--hairline);
+  }
+
+  .why-how__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    border-bottom: var(--hairline);
+  }
+
+  .why-how__cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-block: clamp(2rem, 1rem + 4vw, 5rem);
+  }
+
+  /* Mobile: cells stack, separated by a horizontal hairline */
+  .why-how__cell + .why-how__cell {
+    border-top: var(--hairline);
+  }
+
+  .why-how__label {
+    font-size: var(--text-small);
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  .why-how__question {
+    max-width: 22ch;
+    font-size: clamp(1.75rem, 1.1rem + 2.2vw, 3rem);
+    line-height: 1.05;
+    margin-bottom: clamp(1rem, 0.5rem + 3vw, 4rem);
+  }
+
+  .why-how__approach {
+    align-self: flex-start;
+    padding: 0.4em 0.9em;
+    border: var(--hairline);
+    border-radius: 999px;
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+
+  .why-how__value {
+    max-width: 44ch;
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.25rem);
+    font-weight: var(--weight-light);
+    line-height: var(--leading-body);
+  }
+
+  @media (min-width: 800px) {
+    .why-how__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Vertical hairline sits on the shared edge; padding keeps text off the line */
+    .why-how__cell + .why-how__cell {
+      border-top: 0;
+      border-left: var(--hairline);
+      padding-left: clamp(1.5rem, 0.5rem + 3vw, 4rem);
+    }
+
+    .why-how__cell:first-child {
+      padding-right: clamp(1.5rem, 0.5rem + 3vw, 4rem);
+    }
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  const section = document.querySelector<HTMLElement>('.why-how');
+  const title = section?.querySelector<HTMLElement>('.why-how__title');
+  const cells = gsap.utils.toArray<HTMLElement>('.why-how__cell');
+
+  if (section && title && !prefersReducedMotion()) {
+    // Start states set in JS so no-JS visitors still see the content.
+    gsap.set(title, { y: 20, opacity: 0 });
+    gsap.set(cells, { y: 30, opacity: 0 });
+
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => {
+        gsap
+          .timeline({ defaults: { duration: 1, ease: 'power3.out', y: 0, opacity: 1 } })
+          .to(title, {})
+          .to(cells, { stagger: 0.15 }, '-=0.7');
+      },
+    });
+  }
+</script>

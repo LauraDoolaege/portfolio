@@ -1,5 +1,5 @@
 ---
-// Section 2: Selected work. Two categories separated by a hairline:
+// Section 2: Selected work. Two categories separated by whitespace:
 // UX strategy (2 large cards) and visual explorations (tighter 3-column gallery).
 // Projects are placeholders until real case studies exist.
 const uxProjects = [
@@ -48,7 +48,7 @@ const visualProjects = [
             <h4 class="card__title">{p.title}</h4>
             <ul class="card__tags" aria-label="Skills">
               {p.tags.map((t) => (
-                <li>{t}</li>
+                <li class="tag">{t}</li>
               ))}
             </ul>
           </li>
@@ -76,7 +76,7 @@ const visualProjects = [
             <h4 class="card__title">{p.title}</h4>
             <ul class="card__tags" aria-label="Skills">
               {p.tags.map((t) => (
-                <li>{t}</li>
+                <li class="tag">{t}</li>
               ))}
             </ul>
           </li>
@@ -92,8 +92,7 @@ const visualProjects = [
   }
 
   .work__header {
-    padding-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
-    border-bottom: var(--hairline);
+    padding-bottom: clamp(2rem, 1rem + 3vw, 5rem);
   }
 
   .work__label {
@@ -112,16 +111,13 @@ const visualProjects = [
     padding-block: clamp(2.5rem, 1.5rem + 4vw, 6rem);
   }
 
-  /* Hairline between the two categories */
-  .work__group--divided {
-    border-top: var(--hairline);
-  }
-
   .work__group:first-of-type {
     padding-bottom: clamp(2.5rem, 1.5rem + 4vw, 6rem);
   }
 
+  /* Categories are separated by space alone */
   .work__group--divided {
+    padding-top: clamp(5rem, 3rem + 8vw, 11rem);
     padding-bottom: 0;
   }
 
@@ -203,14 +199,6 @@ const visualProjects = [
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    font-size: var(--text-small);
-  }
-
-  .card__tags li {
-    padding: 0.3em 0.8em;
-    border: var(--hairline);
-    border-radius: 999px;
-    color: var(--text-muted);
   }
 
   .work__grid--visual .card__title {
@@ -239,6 +227,11 @@ const visualProjects = [
 
     .work__grid--ux {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Offset the second card so the pair isn't a flat row */
+    .work__grid--ux .card:nth-child(2) {
+      margin-top: clamp(3rem, 1rem + 7vw, 8rem);
     }
 
     .work__grid--visual {

@@ -6,7 +6,7 @@
 <section class="hero" aria-label="Introduction">
   <div class="container hero__inner">
     <div class="hero__top mask">
-      <p class="hero__pill reveal">
+      <p class="hero__pill tag reveal">
         <span class="hero__dot" aria-hidden="true"></span>
         Seeking UX &amp; Experience Design Internship (Feb – May 2027)
       </p>
@@ -36,15 +36,16 @@
       </div>
 
       <ul class="hero__tags reveal--tags" aria-label="Focus">
-        <li>UX Design</li>
+        <li class="tag">UX Design</li>
         <li>
           <a
+            class="link"
             href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
             target="_blank"
             rel="noopener"
           >
-            Devine 3rd Year
-            <svg class="hero__arrow" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            Devine 3rd Year{' '}
+            <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path
                 d="M3 9L9 3M4 3h5v5"
                 stroke="currentColor"
@@ -85,23 +86,15 @@
   }
 
   .hero__top {
-    /* Room for the pill's border so the mask doesn't clip it */
-    padding: 1px;
-    margin: -1px;
     width: fit-content;
     max-width: 100%;
   }
 
+  /* A status label: the .tag look with a leading terracotta dot */
   .hero__pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.6em;
-    padding: 0.5em 1em;
-    border: var(--hairline);
-    border-radius: 999px;
-    font-size: var(--text-small);
-    color: var(--text-muted);
-    line-height: 1.3;
+    gap: 0.7em;
   }
 
   .hero__dot {
@@ -140,39 +133,10 @@
   .hero__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    padding-top: clamp(1rem, 0.75rem + 1vw, 1.5rem);
-    border-top: var(--hairline);
-    font-size: var(--text-small);
-  }
-
-  .hero__tags li,
-  .hero__tags a {
-    display: inline-flex;
     align-items: center;
-    gap: 0.4em;
-    padding: 0.4em 0.9em;
-    border: var(--hairline);
-    border-radius: 999px;
-    color: var(--text-muted);
-    transition:
-      color var(--duration) var(--ease-out),
-      border-color var(--duration) var(--ease-out);
-  }
-
-  .hero__tags li:has(a) {
-    padding: 0;
-    border: 0;
-  }
-
-  .hero__tags a:hover {
-    color: var(--accent-text);
-    border-color: var(--accent);
-  }
-
-  .hero__arrow {
-    width: 0.75em;
-    height: 0.75em;
+    gap: 0.75rem 1.5rem;
+    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
+    font-size: var(--text-small);
   }
 
   /* Side-by-side only once the H1 is capped at its max size and "Designer" leaves the right quarter open */

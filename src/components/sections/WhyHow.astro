@@ -1,6 +1,6 @@
 ---
-// Section 1: two questions, two approaches. Header row, then a 2-column
-// architectural grid split by a vertical hairline (horizontal on mobile).
+// Section 1: two questions, two approaches. A massive black heading, then two light-weight
+// questions in an offset (not boxed) two-column layout. Structure comes from whitespace, not lines.
 const columns = [
   {
     question: 'How do we design an experience people actually need, love, and connect with?',
@@ -24,13 +24,10 @@ const columns = [
     </h2>
 
     <div class="why-how__grid">
-      <span class="why-how__rule" aria-hidden="true">
-        <span class="why-how__dot"></span>
-      </span>
       {columns.map((c) => (
         <article class="why-how__cell">
           <h3 class="why-how__question">{c.question}</h3>
-          <p class="why-how__approach">{c.approach}</p>
+          <p class="why-how__approach tag">{c.approach}</p>
           <p class="why-how__value">{c.value}</p>
         </article>
       ))}
@@ -44,93 +41,56 @@ const columns = [
   }
 
   .why-how__title {
-    font-size: clamp(1.75rem, 1rem + 3vw, 3.5rem);
-    line-height: 1.05;
-    padding-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
-    border-bottom: var(--hairline);
+    max-width: 13ch;
+    font-size: clamp(2.75rem, 1rem + 8vw, 9rem);
+    line-height: 0.95;
+    margin-bottom: clamp(3rem, 2rem + 6vw, 8rem);
   }
 
   .why-how__grid {
-    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    border-bottom: var(--hairline);
+    gap: clamp(3.5rem, 2rem + 6vw, 7rem) var(--grid-gutter);
   }
 
   .why-how__cell {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
-    padding-block: clamp(2rem, 1rem + 4vw, 5rem);
-  }
-
-  /* Mobile: cells stack, separated by a horizontal hairline */
-  .why-how__cell + .why-how__cell {
-    border-top: var(--hairline);
+    align-items: flex-start;
+    gap: 1.5rem;
   }
 
   .why-how__question {
-    max-width: 26ch;
-    font-size: clamp(1.75rem, 1.1rem + 2.2vw, 3rem);
-    line-height: 1.05;
-    margin-bottom: clamp(1rem, 0.5rem + 3vw, 4rem);
-  }
-
-  .why-how__approach {
-    align-self: flex-start;
-    padding: 0.4em 0.9em;
-    border: var(--hairline);
-    border-radius: 999px;
-    font-size: var(--text-small);
-    color: var(--text-muted);
+    max-width: 20ch;
+    font-size: clamp(1.75rem, 1rem + 2.4vw, 3.25rem);
+    font-weight: var(--weight-light);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
   }
 
   .why-how__value {
-    max-width: 44ch;
+    max-width: 38ch;
     font-size: clamp(1rem, 0.95rem + 0.3vw, 1.25rem);
     font-weight: var(--weight-light);
     line-height: var(--leading-body);
+    text-wrap: pretty;
   }
 
-  .why-how__rule {
-    display: none;
-  }
-
-  @media (min-width: 800px) {
-    .why-how__rule {
-      display: block;
-      position: absolute;
-      inset-block: 0;
-      left: 50%;
-      width: 1px;
-      background: var(--border-color);
-      transform-origin: top;
-    }
-
-    /* The page's one accent "wink", echoing the status dot in the hero: a terracotta point where the divider meets the header line */
-    .why-how__dot {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0.5rem;
-      height: 0.5rem;
-      border-radius: 50%;
-      background: var(--accent);
-      margin: -0.25rem 0 0 -0.25rem;
-    }
-
+  @media (min-width: 900px) {
     .why-how__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    /* The divider is the .why-how__rule element (drawn in by the script); padding keeps text off it */
-    .why-how__cell + .why-how__cell {
-      border-top: 0;
-      padding-left: clamp(1.5rem, 0.5rem + 3vw, 4rem);
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
     }
 
     .why-how__cell:first-child {
-      padding-right: clamp(1.5rem, 0.5rem + 3vw, 4rem);
+      grid-column: 1 / span 5;
+    }
+
+    /* The second column sits lower and further right, so the pair reads as a staggered pair, not a table */
+    .why-how__cell:last-child {
+      grid-column: 7 / span 5;
+      margin-top: clamp(4rem, 2rem + 8vw, 10rem);
     }
   }
 </style>
@@ -141,27 +101,21 @@ const columns = [
   const section = document.querySelector<HTMLElement>('.why-how');
   const title = section?.querySelector<HTMLElement>('.why-how__title');
   const cells = gsap.utils.toArray<HTMLElement>('.why-how__cell');
-  const rule = section?.querySelector<HTMLElement>('.why-how__rule');
-  const dot = section?.querySelector<HTMLElement>('.why-how__dot');
 
-  if (section && title && rule && dot && !prefersReducedMotion()) {
+  if (section && title && !prefersReducedMotion()) {
     // Start states set in JS so no-JS visitors still see the content.
-    gsap.set(title, { y: 20, opacity: 0 });
+    gsap.set(title, { y: 24, opacity: 0 });
     gsap.set(cells, { y: 30, opacity: 0 });
-    gsap.set(rule, { scaleY: 0 });
-    gsap.set(dot, { scale: 0 });
 
     ScrollTrigger.create({
       trigger: section,
-      start: 'top 80%',
+      start: 'top 75%',
       once: true,
       onEnter: () => {
         gsap
           .timeline({ defaults: { duration: 1, ease: 'power3.out', y: 0, opacity: 1 } })
           .to(title, {})
-          .to(cells, { stagger: 0.15 }, '-=0.7')
-          .to(rule, { scaleY: 1, y: 0, opacity: 1, duration: 1.4, ease: 'expo.inOut' }, '-=1.2')
-          .to(dot, { scale: 1, y: 0, opacity: 1, duration: 0.6, ease: 'back.out(2)' }, '-=0.4');
+          .to(cells, { stagger: 0.18 }, '-=0.6');
       },
     });
   }

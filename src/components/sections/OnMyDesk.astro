@@ -1,5 +1,5 @@
 ---
-// Section 3: what's on the desk right now, as a hairline-separated list (not cards).
+// Section 3: what's on the desk right now, as a plain list separated by space (no lines, no cards).
 const items = [
   {
     title: 'Ray Skincare',
@@ -26,7 +26,7 @@ const items = [
       {items.map((item) => (
         <li class="desk__row">
           <h3 class="desk__name">{item.title}</h3>
-          <p class="desk__focus">{item.focus}</p>
+          <p class="desk__focus tag">{item.focus}</p>
           <p class="desk__description">{item.description}</p>
         </li>
       ))}
@@ -40,13 +40,12 @@ const items = [
   }
 
   .desk__title {
-    font-size: clamp(1.75rem, 1rem + 3vw, 3.5rem);
+    font-size: clamp(2.25rem, 1rem + 5vw, 6rem);
     line-height: 1.05;
-    padding-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
+    padding-bottom: clamp(2rem, 1rem + 3vw, 5rem);
   }
 
   .desk__list {
-    border-bottom: var(--hairline);
   }
 
   .desk__row {
@@ -55,8 +54,7 @@ const items = [
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0.5rem;
-    padding-block: clamp(1.5rem, 1rem + 2vw, 2.5rem);
-    border-top: var(--hairline);
+    padding-block: clamp(2rem, 1rem + 3vw, 3.5rem);
   }
 
   /* Hover wash extends past the text edges so the text itself never shifts */
@@ -77,9 +75,8 @@ const items = [
   }
 
   .desk__focus {
-    font-size: var(--text-small);
-    color: var(--text-muted);
-    padding-top: 0.35em;
+    justify-self: start;
+    align-self: start;
   }
 
   .desk__description {

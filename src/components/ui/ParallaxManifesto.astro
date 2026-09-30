@@ -39,8 +39,16 @@ const { label, text, images, cta, id } = Astro.props;
     <p class="manifesto__label">{label}</p>
     <p class="manifesto__text">{text}</p>
     {cta && (
-      <a class="manifesto__btn" href={cta.href} data-magnetic>
+      <a class="manifesto__btn btn" href={cta.href} data-magnetic>
         {cta.label}
+        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path
+            d="M3 9L9 3M4 3h5v5"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="square"
+          />
+        </svg>
       </a>
     )}
   </div>
@@ -68,44 +76,7 @@ const { label, text, images, cta, id } = Astro.props;
   .manifesto__label,
   .manifesto__text,
   .manifesto__btn {
-    pointer-events: auto;
-  }
-
-  .manifesto__label {
-    margin-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
-    font-size: var(--text-small);
-    color: var(--text-muted);
-  }
-
-  .manifesto__text {
-    max-width: 20em;
-    font-size: clamp(1.75rem, 1rem + 3.9vw, 5.25rem);
-    font-weight: var(--weight-heavy);
-    letter-spacing: var(--tracking-display);
-    line-height: 1.05;
-    text-wrap: balance;
-    will-change: transform;
-  }
-
-  .manifesto__btn {
     margin-top: clamp(2rem, 1.5rem + 2.5vw, 4rem);
-    padding: 0.85em 1.6em;
-    border: 1px solid var(--text-main);
-    border-radius: 999px;
-    font-size: var(--text-body);
-    font-weight: var(--weight-bold);
-    transition:
-      background-color 0.5s var(--ease-out),
-      border-color 0.5s var(--ease-out),
-      color 0.5s var(--ease-out);
-  }
-
-  /* Fills with the darker terracotta so the label keeps 4.5:1 contrast (see --accent-text) */
-  .manifesto__btn:hover,
-  .manifesto__btn:focus-visible {
-    background: var(--accent-text);
-    border-color: var(--accent-text);
-    color: var(--bg-primary);
   }
 
   /* Placeholder photos: warm grayscale, sitting behind the text and overlapping its edges */

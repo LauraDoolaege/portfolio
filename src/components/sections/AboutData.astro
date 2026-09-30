@@ -100,12 +100,7 @@ const experience = {
 
   .data__row {
     row-gap: 1rem;
-    padding-block: clamp(1.5rem, 1rem + 2vw, 3rem);
-    border-top: var(--hairline);
-  }
-
-  .data__row:last-child {
-    border-bottom: var(--hairline);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 6rem);
   }
 
   .data__label,
@@ -120,25 +115,17 @@ const experience = {
     text-transform: uppercase;
   }
 
-  /* Cells: lines are borders (top/left on the group, right/bottom on each cell) so an unused slot stays empty instead of showing a filled block. Odd leftovers span the row. */
+  /* Entries sit in an open grid: gaps do the separating, there are no lines */
   .data__cells {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    gap: clamp(1.75rem, 1rem + 2vw, 3rem) clamp(1.5rem, 1rem + 2vw, 3rem);
     margin: 0;
-    border-top: var(--hairline);
-    border-left: var(--hairline);
+    padding: 0;
   }
 
   .data__cell {
     margin: 0;
-    padding: clamp(1rem, 0.75rem + 1vw, 1.75rem);
-    border-right: var(--hairline);
-    border-bottom: var(--hairline);
-  }
-
-  .data__cells--skills .data__cell:last-child:nth-child(odd),
-  .data__cells--tools .data__cell:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
   }
 
   dt,
@@ -194,15 +181,6 @@ const experience = {
 
     .data__cells--tools {
       grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    /* Seven tools in four columns: the last one fills the remaining two slots */
-    .data__cells--tools .data__cell:last-child:nth-child(odd) {
-      grid-column: auto;
-    }
-
-    .data__cells--tools .data__cell:last-child:nth-child(4n + 3) {
-      grid-column: span 2;
     }
   }
 

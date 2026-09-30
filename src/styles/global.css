@@ -75,6 +75,7 @@ h1 {
 }
 
 h2 {
+  font-weight: var(--weight-heavy);
   font-size: var(--text-h2);
   line-height: 1;
 }
@@ -165,6 +166,84 @@ button:focus-visible {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------- UI element system ---------- */
+
+/* Buttons: sharp, one thin border, "[Text] ↗". Hover fills with the text color and inverts. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.95em 1.3em;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: 1;
+  color: var(--text-main);
+  transition:
+    background-color 0.5s var(--ease-out),
+    border-color 0.5s var(--ease-out),
+    color 0.5s var(--ease-out);
+}
+
+.btn svg {
+  width: 0.8em;
+  height: 0.8em;
+  flex-shrink: 0;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.btn:hover,
+.btn:focus-visible {
+  background: var(--text-main);
+  border-color: var(--text-main);
+  color: var(--bg-primary);
+}
+
+.btn:hover svg,
+.btn:focus-visible svg {
+  transform: translate(2px, -2px);
+}
+
+/* Tags: labels, not controls. Uppercase, tracked, faint fill, no border. */
+.tag {
+  display: inline-block;
+  padding: 0.4em 0.7em;
+  background: rgba(26, 26, 26, 0.05);
+  border-radius: 0;
+  font-size: 0.75rem;
+  font-weight: var(--weight-regular);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--text-main);
+}
+
+/* Links: plain text with an underline that draws in on hover */
+.link {
+  display: inline;
+  padding-bottom: 0.15em;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition:
+    background-size 0.5s var(--ease-out),
+    color 0.5s var(--ease-out);
+}
+
+.link:hover,
+.link:focus-visible {
+  background-size: 100% 1px;
+}
+
+.link svg {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: 0.25em;
 }
 
 /* ---------- Tactile layer ---------- */

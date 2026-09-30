@@ -11,6 +11,7 @@
   --font-sans: 'Switzer', system-ui, sans-serif;
   --weight-light: 300;
   --weight-regular: 400;
+  --weight-medium: 500;
   --weight-bold: 700;
   --weight-heavy: 800;
 
@@ -19,6 +20,11 @@
   --text-h3: clamp(1.25rem, 1rem + 1vw, 1.75rem);
   --text-body: 1rem;
   --text-small: 0.8125rem;
+  /* Regular paragraph baseline, taken from the "On My Desk" descriptions */
+  --text-paragraph: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+  --leading-paragraph: 1.5;
+  /* Item titles (desk rows, work-group headings): between h3 and h2 */
+  --text-title: clamp(1.5rem, 1rem + 2vw, 2.75rem);
   --tracking-display: -0.02em;
   --leading-display: 0.95;
   --leading-body: 1.5;
@@ -89,6 +95,12 @@ h3 {
 p,
 figure {
   margin: 0;
+}
+
+/* Element-level default, so any paragraph without its own class follows the baseline */
+p {
+  font-size: var(--text-paragraph);
+  line-height: var(--leading-paragraph);
 }
 
 ul,
@@ -249,18 +261,39 @@ button:focus-visible {
 }
 
 /* Tags: the one label style. Phase markers, section labels, meta labels, categories and pills all
-   use it. Uppercase, generously tracked, faint fill, no border. */
+   use it. Uppercase, generously tracked, a defined fill with a hairline inset ring, sharp corners. */
 .tag {
   display: inline-block;
-  padding: 0.35em 0.6em;
-  background: rgba(0, 0, 0, 0.05);
+  /* In a grid cell, hug the text instead of stretching to the column */
+  justify-self: start;
+  align-self: start;
+  padding: 0.45em 0.75em;
+  background: rgba(26, 26, 26, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(26, 26, 26, 0.16);
   border-radius: 0;
   font-size: 0.75rem;
-  font-weight: var(--weight-regular);
+  font-weight: var(--weight-medium);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1.3;
   color: var(--text-main);
+}
+
+/* Regular text: the one paragraph style (size and leading from the baseline tokens, light weight) */
+.text {
+  font-size: var(--text-paragraph);
+  font-weight: var(--weight-light);
+  line-height: var(--leading-paragraph);
+  text-wrap: pretty;
+}
+
+/* Item titles: one size for every row/group heading below the section title */
+.title {
+  font-size: var(--text-title);
+  font-weight: var(--weight-bold);
+  line-height: 1.05;
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
 }
 
 /* Subtitles / TL;DRs under the display headings: light weight against the 800 headers */
@@ -364,12 +397,18 @@ button:focus-visible {
   opacity: 0;
 }
 
-[data-magnetic] {
+/* .btn is inline-flex already; forcing inline-block on it let the arrow wrap to a second line */
+[data-magnetic]:not(.btn) {
   display: inline-block;
 }
 
+/* JS wraps a magnetic element's children in this. It must keep the parent's row layout, or a
+   .btn's arrow (display: block, from the svg reset) drops under the label. */
 .magnetic__inner {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  white-space: inherit;
   will-change: transform;
 }
 

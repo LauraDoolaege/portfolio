@@ -61,7 +61,7 @@ const groups = [
           {g.rows.map((r) => (
             <li class="toolkit__row">
               <h3 class="toolkit__label">{r.label}</h3>
-              <p class="toolkit__items">{r.items}</p>
+              <p class="toolkit__items text">{r.items}</p>
             </li>
           ))}
         </ul>
@@ -106,10 +106,6 @@ const groups = [
 
   .toolkit__items {
     max-width: 52ch;
-    font-size: var(--text-body);
-    font-weight: var(--weight-light);
-    line-height: var(--leading-body);
-    text-wrap: pretty;
   }
 
   @media (min-width: 900px) {

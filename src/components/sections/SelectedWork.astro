@@ -3,6 +3,8 @@
 // UX strategy (2 large cards) and visual explorations (tighter 3-column gallery).
 // Cards come from the `works` content collection and link to /works/[slug].
 const works = (await getCollection('works')).sort((a, b) => a.id.localeCompare(b.id));
+// The two kinds of work, named on every card as well as in the group headings
+const TYPE_LABEL = { ux: 'UX Strategy', visual: 'Visual Exploration' } as const;
 const uxProjects = works.filter((w) => w.data.type === 'ux');
 // Placeholder aspect ratios for the visual gallery, until real images set their own
 const ratios = ['4 / 5', '1 / 1', '3 / 4'];
@@ -27,10 +29,10 @@ import { withBase } from '../../utils/url';
 
     <div class="work__group">
       <div class="work__intro-row">
-        <h3 class="work__group-title" data-reveal>
+        <h3 class="work__group-title title" data-reveal>
           UX Strategy
         </h3>
-        <p class="work__intro" data-reveal>
+        <p class="work__intro text" data-reveal>
           In these latest group projects, I got to dive deep into human needs through user
           interviews, insight gathering, wireframing, and validating solutions as a team.
         </p>
@@ -53,6 +55,7 @@ import { withBase } from '../../utils/url';
                   <div class="card__img" />
                 )}
               </div>
+              <p class="card__type tag">{TYPE_LABEL[p.data.type]}</p>
               <h4 class="card__title">{p.data.title}</h4>
               <ul class="card__tags" aria-label="Tools">
                 {p.data.tools.slice(0, 2).map((t) => (
@@ -67,10 +70,10 @@ import { withBase } from '../../utils/url';
 
     <div class="work__group work__group--divided">
       <div class="work__intro-row">
-        <h3 class="work__group-title" data-reveal>
+        <h3 class="work__group-title title" data-reveal>
           Visual &amp; Concept Explorations
         </h3>
-        <p class="work__intro" data-reveal>
+        <p class="work__intro text" data-reveal>
           Same brain, different canvas. Even when there's no app to test, I'm still asking the UX
           questions: who is this for, what should they feel, and does it make sense?
         </p>
@@ -96,6 +99,7 @@ import { withBase } from '../../utils/url';
                   <div class="card__img" />
                 )}
               </div>
+              <p class="card__type tag">{TYPE_LABEL[p.data.type]}</p>
               <h4 class="card__title">{p.data.title}</h4>
               <ul class="card__tags" aria-label="Tools">
                 {p.data.tools.slice(0, 2).map((t) => (
@@ -141,19 +145,8 @@ import { withBase } from '../../utils/url';
     margin-bottom: clamp(2rem, 1rem + 3vw, 4.5rem);
   }
 
-  .work__group-title {
-    font-size: var(--text-small);
-    font-weight: var(--weight-bold);
-    letter-spacing: 0;
-  }
-
   .work__intro {
-    max-width: 40ch;
-    font-size: clamp(1.375rem, 1rem + 1.6vw, 2.25rem);
-    font-weight: var(--weight-light);
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-    text-wrap: pretty;
+    max-width: 52ch;
   }
 
   .work__grid {
@@ -193,6 +186,10 @@ import { withBase } from '../../utils/url';
 
   .card__link {
     display: block;
+  }
+
+  .card__type {
+    margin-bottom: 0.6rem;
   }
 
   .card__title {

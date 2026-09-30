@@ -30,7 +30,7 @@ import SectionLabel from '../ui/SectionLabel.astro';
         <article class="why-how__cell">
           <h3 class="why-how__question">{c.question}</h3>
           <p class="why-how__approach tag">{c.approach}</p>
-          <p class="why-how__value">{c.value}</p>
+          <p class="why-how__value text">{c.value}</p>
         </article>
       ))}
     </div>
@@ -66,10 +66,6 @@ import SectionLabel from '../ui/SectionLabel.astro';
 
   .why-how__value {
     max-width: 38ch;
-    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.25rem);
-    font-weight: var(--weight-light);
-    line-height: var(--leading-body);
-    text-wrap: pretty;
   }
 
   @media (min-width: 900px) {

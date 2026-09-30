@@ -1,5 +1,5 @@
 ---
-// Footer: double rule, one-line massive greeting sized to the container, the ask, and a links row.
+// Footer: one-line massive greeting sized to the container, the ask, and a links row.
 // TODO: replace the "#" hrefs with the real LinkedIn URL and CV PDF path.
 const email = 'laura.doolaege@student.howest.be';
 ---
@@ -14,7 +14,9 @@ const email = 'laura.doolaege@student.howest.be';
       </p>
     </div>
 
-    <p class="footer__ask">Looking for a 12 to 14 week internship from February to May 2027.</p>
+    <p class="footer__ask subtitle">
+      Looking for a 12 to 14 week internship from February to May 2027.
+    </p>
 
     <div class="footer__links">
       <a href={`mailto:${email}`} class="footer__link link">
@@ -42,10 +44,6 @@ const email = 'laura.doolaege@student.howest.be';
 <style>
   .footer {
     padding-block: clamp(2.5rem, 1.5rem + 3vw, 5rem) clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
-    /* Double rule: two 1px lines in full ink, 4px apart */
-    background:
-      linear-gradient(var(--text-main), var(--text-main)) top / 100% 1px no-repeat,
-      linear-gradient(var(--text-main), var(--text-main)) 0 5px / 100% 1px no-repeat;
   }
 
   /* The line is ~7.5em wide, so size it from its own container (cqw) to fill exactly the container width at any viewport. */
@@ -75,10 +73,6 @@ const email = 'laura.doolaege@student.howest.be';
   .footer__ask {
     max-width: 36ch;
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
-    font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem);
-    font-weight: var(--weight-light);
-    line-height: 1.25;
-    text-wrap: balance;
   }
 
   .footer__links {

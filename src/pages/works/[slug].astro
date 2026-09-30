@@ -66,7 +66,7 @@ const meta = [
           {meta.map((m) => (
             <div class="meta__row">
               <dt class="meta__label tag">{m.label}</dt>
-              <dd class="meta__value">{m.value}</dd>
+              <dd class="meta__value text">{m.value}</dd>
             </div>
           ))}
         </dl>
@@ -216,8 +216,6 @@ const meta = [
   .meta__value {
     margin: 0;
     max-width: 50ch;
-    font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
-    line-height: 1.4;
   }
 
   /* Body: a flex column so every block sets its own width and alignment */

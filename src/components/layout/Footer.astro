@@ -1,0 +1,128 @@
+---
+// Footer: double rule, one-line massive greeting sized to the container, the ask, and a links row.
+// TODO: replace the "#" hrefs with the real LinkedIn URL and CV PDF path.
+const email = 'laura.doolaege@student.howest.be';
+---
+
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="footer__fit">
+      <p class="footer__greeting" aria-label="Nice 2 meet you!">
+        <span class="footer__mask">
+          <span class="footer__line">Nice 2 meet you!</span>
+        </span>
+      </p>
+    </div>
+
+    <p class="footer__ask">Looking for a 12 to 14 week internship from February to May 2027.</p>
+
+    <div class="footer__links">
+      <a href={`mailto:${email}`} class="footer__link">
+        {email}
+      </a>
+      <a href="#" class="footer__link" target="_blank" rel="noopener">
+        LinkedIn
+      </a>
+      <a href="#" class="footer__link footer__link--cv">
+        [ Download CV ]
+      </a>
+      <p class="footer__legal">© Laura Doolaege, 2026</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: clamp(2.5rem, 1.5rem + 3vw, 5rem) clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    /* Double rule: two 1px lines in full ink, 4px apart */
+    background:
+      linear-gradient(var(--text-main), var(--text-main)) top / 100% 1px no-repeat,
+      linear-gradient(var(--text-main), var(--text-main)) 0 5px / 100% 1px no-repeat;
+  }
+
+  /* The line is ~7.5em wide, so size it from its own container (cqw) to fill exactly the container width at any viewport. */
+  .footer__fit {
+    container-type: inline-size;
+  }
+
+  .footer__greeting {
+    font-size: 13.3cqw;
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .footer__mask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
+
+  .footer__line {
+    display: block;
+  }
+
+  .footer__ask {
+    max-width: 36ch;
+    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
+    font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem);
+    font-weight: var(--weight-light);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem clamp(1.5rem, 1rem + 2vw, 3rem);
+    margin-top: clamp(3rem, 2rem + 5vw, 7rem);
+    padding-top: 1.25rem;
+    border-top: var(--hairline);
+    font-size: var(--text-small);
+  }
+
+  .footer__link {
+    text-decoration: underline;
+    text-decoration-color: var(--border-color);
+    text-underline-offset: 0.3em;
+    transition:
+      color var(--duration) var(--ease-out),
+      text-decoration-color var(--duration) var(--ease-out);
+  }
+
+  .footer__link:hover {
+    color: var(--accent-text);
+    text-decoration-color: var(--accent);
+  }
+
+  .footer__link--cv {
+    text-decoration: none;
+    font-weight: var(--weight-bold);
+  }
+
+  .footer__legal {
+    margin-left: auto;
+    color: var(--text-muted);
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  const line = document.querySelector<HTMLElement>('.footer__line');
+
+  if (line && !prefersReducedMotion()) {
+    // Set in JS so no-JS visitors still see the greeting.
+    gsap.set(line, { yPercent: 105 });
+
+    ScrollTrigger.create({
+      trigger: '.footer__greeting',
+      start: 'top 98%',
+      once: true,
+      onEnter: () => gsap.to(line, { yPercent: 0, duration: 1.4, ease: 'expo.out' }),
+    });
+  }
+</script>

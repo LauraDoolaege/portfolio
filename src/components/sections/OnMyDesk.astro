@@ -1,0 +1,139 @@
+---
+// Section 3: what's on the desk right now, as a hairline-separated list (not cards).
+const items = [
+  {
+    title: 'Ray Skincare',
+    focus: '3D / Blender',
+    description:
+      'Translating a brand aesthetic into a 3D animated header. Exploring shading, texturing, and compositions in Blender.',
+  },
+  {
+    title: 'Designing for Hedgehogs',
+    focus: 'Non-human UX',
+    description:
+      'Researching non-human centric design. Mapping behaviors of actors you cannot communicate with directly to design beyond the human experience.',
+  },
+];
+---
+
+<section class="desk" aria-labelledby="desk-title">
+  <div class="container">
+    <h2 id="desk-title" class="desk__title">
+      On My Desk Right Now
+    </h2>
+
+    <ul class="desk__list">
+      {items.map((item) => (
+        <li class="desk__row">
+          <h3 class="desk__name">{item.title}</h3>
+          <p class="desk__focus">{item.focus}</p>
+          <p class="desk__description">{item.description}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .desk {
+    padding-bottom: var(--space-section);
+  }
+
+  .desk__title {
+    font-size: clamp(1.75rem, 1rem + 3vw, 3.5rem);
+    line-height: 1.05;
+    padding-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
+  }
+
+  .desk__list {
+    border-bottom: var(--hairline);
+  }
+
+  .desk__row {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+    padding-block: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    border-top: var(--hairline);
+  }
+
+  /* Hover wash extends past the text edges so the text itself never shifts */
+  .desk__row::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(var(--grid-gutter) * -1);
+    z-index: -1;
+    background: rgba(26, 26, 26, 0.04);
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
+  }
+
+  .desk__name {
+    font-size: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+    line-height: 1.05;
+    transition: color 0.5s var(--ease-out);
+  }
+
+  .desk__focus {
+    font-size: var(--text-small);
+    color: var(--text-muted);
+    padding-top: 0.35em;
+  }
+
+  .desk__description {
+    max-width: 52ch;
+    font-weight: var(--weight-light);
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+    text-wrap: pretty;
+  }
+
+  @media (hover: hover) {
+    .desk__row:hover::before {
+      opacity: 1;
+    }
+
+    .desk__row:hover .desk__name {
+      color: var(--accent-text);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .desk__row {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+      align-items: start;
+    }
+
+    .desk__name {
+      grid-column: 1 / span 5;
+    }
+
+    .desk__focus {
+      grid-column: 6 / span 2;
+    }
+
+    .desk__description {
+      grid-column: 8 / -1;
+      padding-top: 0.35em;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  const rows = gsap.utils.toArray<HTMLElement>('.desk__row');
+
+  if (rows.length && !prefersReducedMotion()) {
+    gsap.set(rows, { y: 20, opacity: 0 });
+
+    ScrollTrigger.batch(rows, {
+      start: 'top 90%',
+      once: true,
+      onEnter: (batch) =>
+        gsap.to(batch, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: 0.15 }),
+    });
+  }
+</script>

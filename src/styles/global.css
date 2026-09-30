@@ -369,7 +369,7 @@ button:focus-visible {
 
 /* ---------- Project media (Analog Darkroom) ---------- */
 
-/* Every project image sits in a .media-frame. Warm muted "print" by default, full color on hover;
+/* Every project image sits in a .media-frame. Full color by default, warm muted "print" on hover;
    the pan and resting 1.05 scale come from GSAP in src/scripts/tactile.ts (same as .card__media). */
 .media-frame {
   overflow: hidden;
@@ -381,7 +381,7 @@ button:focus-visible {
   height: 100%;
   object-fit: cover;
   background: linear-gradient(150deg, #c98f78, #a86a55);
-  filter: grayscale(80%) sepia(20%) contrast(1.1);
+  filter: grayscale(0%) sepia(0%) contrast(1);
   transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
 }
@@ -401,6 +401,6 @@ button:focus-visible {
 
 @media (hover: hover) {
   .media-frame:hover .media-frame__img {
-    filter: grayscale(0%) sepia(0%) contrast(1);
+    filter: grayscale(80%) sepia(20%) contrast(1.1);
   }
 }

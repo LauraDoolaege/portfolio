@@ -1,8 +1,9 @@
 ---
 import Button from './Button.astro';
-// Centered label + massive statement, with floating placeholder images that overlap the text
+// Centered section label, big title, statement and button, stacked in one flex column, with
+// floating placeholder images behind. (Was a left-aligned label + statement, with floating placeholder images that overlap the text
 // edges and drift at different speeds as the section scrolls (scrub parallax).
-// Reused by the homepage About teaser and the About page Inspiration block.
+// Only the homepage About teaser uses it.)
 interface Image {
   /** Which edge the horizontal offset is measured from, and the offset itself */
   side: 'left' | 'right';
@@ -16,16 +17,19 @@ interface Image {
 }
 
 interface Props {
+  /** Accessible name for the section */
   label: string;
+  /** Big heading under the section number */
+  title: string;
   /** Section number shown in the shared label, e.g. "04" */
-  num?: string;
+  num: string;
   text: string;
   images: Image[];
   cta?: { href: string; label: string };
   id?: string;
 }
 
-const { label, num, text, images, cta, id } = Astro.props;
+const { label, title, num, text, images, cta, id } = Astro.props;
 import SectionLabel from './SectionLabel.astro';
 ---
 
@@ -40,7 +44,8 @@ import SectionLabel from './SectionLabel.astro';
   ))}
 
   <div class="container manifesto__inner">
-    {num ? <SectionLabel num={num} text={label} /> : <p class="manifesto__label">{label}</p>}
+    <SectionLabel num={num} />
+    <h2 class="section-title manifesto__title">{title}</h2>
     <p class="manifesto__text">{text}</p>
     {cta && (
       <Button class="manifesto__btn" href={cta.href} data-magnetic>
@@ -54,7 +59,7 @@ import SectionLabel from './SectionLabel.astro';
   .manifesto {
     position: relative;
     padding-block: var(--space-section);
-    text-align: left;
+    text-align: center;
     /* Images drift within the section instead of spilling over neighbouring content */
     overflow: clip;
   }
@@ -66,11 +71,26 @@ import SectionLabel from './SectionLabel.astro';
     pointer-events: none;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 
-  .manifesto__label,
-  .manifesto__text,
+  /* .tag pins itself to the start of a flex/grid cell; in this centred column it must centre */
+  .manifesto__inner :global(.section-label) {
+    align-self: center;
+  }
+
+  /* The shared section-title is left-aligned with its own bottom margin; centre it here */
+  .manifesto__title {
+    margin-block: clamp(1rem, 0.75rem + 1vw, 2rem) clamp(1.5rem, 1rem + 2vw, 3rem);
+    max-width: none;
+  }
+
+  /* Centred text needs a short measure to stay readable */
+  .manifesto__text {
+    max-width: 52ch;
+    text-wrap: balance;
+  }
+
   :global(.manifesto__btn) {
     margin-top: clamp(2rem, 1.5rem + 2.5vw, 4rem);
   }

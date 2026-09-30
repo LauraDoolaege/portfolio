@@ -3,7 +3,7 @@
 // so every label is identical; extra attributes (e.g. data-reveal) pass through.
 interface Props {
   num: string;
-  text: string;
+  text?: string;
   [attr: string]: unknown;
 }
 
@@ -11,5 +11,5 @@ const { num, text, ...rest } = Astro.props;
 ---
 
 <p class="section-label tag" {...rest}>
-  [ {num} ] {text}
+  [ {num} ]{text && ` ${text}`}
 </p>

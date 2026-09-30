@@ -25,10 +25,36 @@ const { title, description = "Laura's portfolio: digital development & design." 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta name="theme-color" content="#f3f2ee" />
     <title>{title}</title>
     <style is:inline set:html={fontFaces}></style>
   </head>
   <body id="top">
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
     <slot />
   </body>
 </html>
+
+<style is:global>
+  .skip-link {
+    position: absolute;
+    left: var(--page-margin);
+    top: 0;
+    z-index: 100;
+    padding: 0.6em 1em;
+    background: var(--text-main);
+    color: var(--bg-primary);
+    font-size: var(--text-small);
+    transform: translateY(-120%);
+    transition: transform 0.3s var(--ease-out);
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+</style>

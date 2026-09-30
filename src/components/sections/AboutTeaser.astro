@@ -1,0 +1,36 @@
+---
+import ParallaxManifesto from '../ui/ParallaxManifesto.astro';
+import { withBase } from '../../utils/url';
+---
+
+<ParallaxManifesto
+  label="Who am I?"
+  text="A marketer turned experience designer. A storyteller since the playground. I bridge human needs with smart strategy to create concepts that actually reach people."
+  cta={{ href: withBase('/about'), label: 'Get to know me better' }}
+  images={[
+    {
+      side: 'left',
+      x: '6%',
+      top: '12%',
+      width: 'clamp(90px, 15vw, 240px)',
+      ratio: '4 / 5',
+      speed: 0.9,
+    },
+    {
+      side: 'right',
+      x: '8%',
+      top: '34%',
+      width: 'clamp(110px, 19vw, 300px)',
+      ratio: '4 / 3',
+      speed: 0.5,
+    },
+    {
+      side: 'left',
+      x: '22%',
+      top: '64%',
+      width: 'clamp(70px, 10vw, 160px)',
+      ratio: '1 / 1',
+      speed: 1.3,
+    },
+  ]}
+/>

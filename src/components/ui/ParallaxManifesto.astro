@@ -1,0 +1,148 @@
+---
+// Centered label + massive statement, with floating placeholder images that overlap the text
+// edges and drift at different speeds as the section scrolls (scrub parallax).
+// Reused by the homepage About teaser and the About page Inspiration block.
+interface Image {
+  /** Which edge the horizontal offset is measured from, and the offset itself */
+  side: 'left' | 'right';
+  x: string;
+  /** Top offset within the section, width and aspect ratio */
+  top: string;
+  width: string;
+  ratio: string;
+  /** Parallax speed multiplier: higher moves more */
+  speed: number;
+}
+
+interface Props {
+  label: string;
+  text: string;
+  images: Image[];
+  cta?: { href: string; label: string };
+  id?: string;
+}
+
+const { label, text, images, cta, id } = Astro.props;
+---
+
+<section class="manifesto" id={id} aria-label={label}>
+  {images.map((img) => (
+    <div
+      class="manifesto__img"
+      data-speed={img.speed}
+      style={`${img.side}: ${img.x}; top: ${img.top}; width: ${img.width}; aspect-ratio: ${img.ratio};`}
+      aria-hidden="true"
+    />
+  ))}
+
+  <div class="container manifesto__inner">
+    <p class="manifesto__label">{label}</p>
+    <p class="manifesto__text">{text}</p>
+    {cta && (
+      <a class="manifesto__btn" href={cta.href}>
+        {cta.label}
+      </a>
+    )}
+  </div>
+</section>
+
+<style>
+  .manifesto {
+    position: relative;
+    padding-block: var(--space-section);
+    text-align: center;
+    /* Images drift within the section instead of spilling over neighbouring content */
+    overflow: clip;
+  }
+
+  .manifesto__inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .manifesto__label {
+    margin-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+
+  .manifesto__text {
+    max-width: 20em;
+    font-size: clamp(1.75rem, 1rem + 3.9vw, 5.25rem);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.05;
+    text-wrap: balance;
+    will-change: transform;
+  }
+
+  .manifesto__btn {
+    margin-top: clamp(2rem, 1.5rem + 2.5vw, 4rem);
+    padding: 0.85em 1.6em;
+    border: 1px solid var(--text-main);
+    border-radius: 999px;
+    font-size: var(--text-body);
+    font-weight: var(--weight-bold);
+    transition:
+      background-color 0.5s var(--ease-out),
+      border-color 0.5s var(--ease-out),
+      color 0.5s var(--ease-out);
+  }
+
+  /* Fills with the darker terracotta so the label keeps 4.5:1 contrast (see --accent-text) */
+  .manifesto__btn:hover,
+  .manifesto__btn:focus-visible {
+    background: var(--accent-text);
+    border-color: var(--accent-text);
+    color: var(--bg-primary);
+  }
+
+  /* Placeholder photos: warm grayscale, sitting behind the text and overlapping its edges */
+  .manifesto__img {
+    position: absolute;
+    z-index: 1;
+    background: linear-gradient(150deg, #e0dcd0, #bfb9a8);
+    filter: grayscale(0.7) sepia(0.2);
+    will-change: transform;
+  }
+
+  @media (max-width: 699px) {
+    .manifesto__img {
+      opacity: 0.6;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  if (!prefersReducedMotion()) {
+    gsap.utils.toArray<HTMLElement>('.manifesto').forEach((section) => {
+      const trigger = { trigger: section, start: 'top bottom', end: 'bottom top', scrub: true };
+
+      // Images travel at their own speeds...
+      gsap.utils.toArray<HTMLElement>('.manifesto__img', section).forEach((img) => {
+        const speed = Number(img.dataset.speed ?? 0.5);
+        gsap.fromTo(
+          img,
+          { y: () => window.innerHeight * speed * 0.22 },
+          {
+            y: () => -window.innerHeight * speed * 0.22,
+            ease: 'none',
+            scrollTrigger: { ...trigger, invalidateOnRefresh: true },
+          },
+        );
+      });
+
+      // ...while the statement drifts slower than the page, so the layers separate
+      gsap.fromTo(
+        section.querySelector('.manifesto__text'),
+        { yPercent: 5 },
+        { yPercent: -5, ease: 'none', scrollTrigger: trigger },
+      );
+    });
+  }
+</script>

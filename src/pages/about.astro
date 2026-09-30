@@ -1,9 +1,12 @@
 ---
-// About page, phase 1: hero and the journey. Team, inspiration and skills come later.
+// About page, phases 1-2: hero, journey, team, inspiration and the data.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import AboutHero from '../components/sections/AboutHero.astro';
 import AboutJourney from '../components/sections/AboutJourney.astro';
+import AboutTeam from '../components/sections/AboutTeam.astro';
+import AboutInspiration from '../components/sections/AboutInspiration.astro';
+import AboutData from '../components/sections/AboutData.astro';
 ---
 
 <BaseLayout
@@ -15,6 +18,9 @@ import AboutJourney from '../components/sections/AboutJourney.astro';
     <main id="main">
       <AboutHero />
       <AboutJourney />
+      <AboutTeam />
+      <AboutInspiration />
+      <AboutData />
     </main>
   </div>
 </BaseLayout>

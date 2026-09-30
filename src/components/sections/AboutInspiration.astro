@@ -1,0 +1,42 @@
+---
+import ParallaxManifesto from '../ui/ParallaxManifesto.astro';
+---
+
+<ParallaxManifesto
+  label="Where inspiration strikes"
+  text="Movies. Comedy series. Long drives. Walks with my dog. Losing at pool. Scanning groceries. And anywhere I can just sit on a bench and observe people."
+  images={[
+    {
+      side: 'left',
+      x: '5%',
+      top: '8%',
+      width: 'clamp(90px, 16vw, 250px)',
+      ratio: '3 / 4',
+      speed: 1.0,
+    },
+    {
+      side: 'right',
+      x: '6%',
+      top: '16%',
+      width: 'clamp(100px, 17vw, 270px)',
+      ratio: '4 / 3',
+      speed: 0.6,
+    },
+    {
+      side: 'left',
+      x: '14%',
+      top: '62%',
+      width: 'clamp(90px, 14vw, 220px)',
+      ratio: '4 / 3',
+      speed: 1.4,
+    },
+    {
+      side: 'right',
+      x: '16%',
+      top: '70%',
+      width: 'clamp(70px, 10vw, 160px)',
+      ratio: '1 / 1',
+      speed: 0.8,
+    },
+  ]}
+/>

@@ -1,0 +1,39 @@
+---
+// A key insight in massive type ("We assumed X, but testing proved Y"). Breaks out of the
+// 65ch reading column so it can't be missed while scrolling. Optional source line underneath.
+interface Props {
+  source?: string;
+}
+
+const { source } = Astro.props;
+---
+
+<blockquote class="pullquote">
+  <div class="pullquote__text">
+    <slot />
+  </div>
+  {source && <footer class="pullquote__source">{source}</footer>}
+</blockquote>
+
+<style>
+  .pullquote {
+    margin: clamp(2rem, 1rem + 5vw, 6rem) 0;
+  }
+
+  .pullquote__text {
+    max-width: 18ch;
+    font-size: clamp(2.25rem, 1rem + 6vw, 6.5rem);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 1;
+    text-wrap: balance;
+  }
+
+  .pullquote__source {
+    margin-top: clamp(1rem, 0.75rem + 1vw, 2rem);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+</style>

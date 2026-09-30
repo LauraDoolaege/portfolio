@@ -138,7 +138,7 @@ function cursor() {
 /* ---------- Analog darkroom: physical pan inside project image frames ---------- */
 
 function pan(frame: HTMLElement) {
-  const img = frame.querySelector<HTMLElement>('.card__img');
+  const img = frame.querySelector<HTMLElement>('.card__img, .media-frame__img');
   if (!img) return;
 
   // Resting scale hides the edges while the image shifts (5px travel needs ~2% headroom per side)
@@ -164,6 +164,6 @@ if (finePointer) {
   cursor();
   if (!reduceMotion) {
     document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => magnetic(el));
-    document.querySelectorAll<HTMLElement>('.card__media').forEach(pan);
+    document.querySelectorAll<HTMLElement>('.card__media, .media-frame').forEach(pan);
   }
 }

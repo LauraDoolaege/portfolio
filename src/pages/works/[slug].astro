@@ -1,0 +1,337 @@
+---
+// Project detail page. Two layouts from one template, chosen by the entry's `type`:
+// "ux" = editorial article (65ch reading column, images break out to full width)
+// "visual" = gallery / lookbook (short punchy text column, edge-to-edge images)
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/layout/Header.astro';
+import Footer from '../../components/layout/Footer.astro';
+import ProjectImage from '../../components/ProjectImage.astro';
+import { withBase } from '../../utils/url';
+
+export async function getStaticPaths() {
+  const works = (await getCollection('works')).sort((a, b) => a.id.localeCompare(b.id));
+  return works.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, next: works[(i + 1) % works.length] },
+  }));
+}
+
+const { entry, next } = Astro.props;
+const { Content } = await render(entry);
+const { title, description, type, coverImage, role, timeline, tools, team, tldr } = entry.data;
+
+const meta = [
+  { label: 'Role', value: role },
+  { label: 'Timeline', value: timeline },
+  { label: 'Tools', value: tools.join(', ') },
+  ...(team?.length ? [{ label: 'Team', value: team.join(', ') }] : []),
+];
+---
+
+<BaseLayout title={`${title} | Laura Doolaege`} description={description}>
+  <div class="page">
+    <Header />
+    <main id="main" class={`work-page work-page--${type}`}>
+      <div class="container">
+        <a class="back" href={`${withBase('/')}#work`}>
+          <span class="back__bracket">[</span>
+          <span class="back__arrow" aria-hidden="true">
+            ←
+          </span>{' '}
+          Back to works
+          <span class="back__bracket">]</span>
+        </a>
+
+        <header class="hero">
+          <h1 class="hero__title">{title}</h1>
+          <p class="hero__description">{description}</p>
+        </header>
+
+        <dl class="meta">
+          {meta.map((m) => (
+            <div class="meta__row">
+              <dt class="meta__label">{m.label}</dt>
+              <dd class="meta__value">{m.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {type === 'ux' && tldr && (
+          <div class="tldr">
+            <p class="tldr__label">TL;DR</p>
+            <p class="tldr__text">{tldr}</p>
+          </div>
+        )}
+      </div>
+
+      <div class:list={['container cover', { 'gallery-inset': type === 'visual' }]}>
+        <ProjectImage
+          src={coverImage}
+          alt={`${title}: cover`}
+          ratio={type === 'ux' ? '16 / 9' : '4 / 3'}
+          tone={type === 'ux' ? 1 : 0}
+        />
+      </div>
+
+      <div
+        class:list={['container prose', `prose--${type}`, { 'gallery-inset': type === 'visual' }]}
+      >
+        <Content />
+      </div>
+
+      <div class="container">
+        <a class="next" href={withBase(`/works/${next.id}`)}>
+          <span class="next__label">Up next: {next.data.title}</span>
+          <span class="next__link">
+            Next Project <span class="next__arrow">↗</span>
+          </span>
+        </a>
+      </div>
+    </main>
+    <Footer />
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .work-page {
+    flex: 1;
+  }
+
+  .back {
+    display: inline-block;
+    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
+    font-size: var(--text-small);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.5s var(--ease-out);
+  }
+
+  .back__bracket {
+    color: var(--text-muted);
+  }
+
+  .back__arrow {
+    display: inline-block;
+    margin-left: 0.4em;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .back:hover,
+  .back:focus-visible {
+    color: var(--accent-text);
+  }
+
+  .back:hover .back__arrow,
+  .back:focus-visible .back__arrow {
+    transform: translateX(-4px);
+  }
+
+  /* Hero */
+  .hero {
+    padding-block: clamp(3rem, 1.5rem + 7vw, 9rem) clamp(2.5rem, 1.5rem + 5vw, 6rem);
+  }
+
+  .hero__title {
+    max-width: 12ch;
+    overflow-wrap: break-word;
+  }
+
+  .hero__description {
+    max-width: 30ch;
+    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
+    font-size: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+    font-weight: var(--weight-light);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+
+  /* Meta grid: horizontal rules only, no vertical boxing */
+  .meta {
+    margin: 0;
+    border-bottom: var(--hairline);
+  }
+
+  .meta__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.4rem;
+    padding-block: 1.25rem;
+    border-top: var(--hairline);
+  }
+
+  .meta__label {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .meta__value {
+    margin: 0;
+    max-width: 50ch;
+    font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
+    line-height: 1.4;
+  }
+
+  /* TL;DR: two bold sentences straight after the meta rows */
+  .tldr {
+    padding-top: clamp(2.5rem, 1.5rem + 5vw, 6rem);
+  }
+
+  .tldr__label {
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+
+  .tldr__text {
+    max-width: 32ch;
+    font-size: clamp(1.75rem, 1rem + 3vw, 3.5rem);
+    font-weight: var(--weight-bold);
+    line-height: 1.1;
+    letter-spacing: var(--tracking-display);
+    text-wrap: balance;
+  }
+
+  .cover {
+    padding-top: clamp(3rem, 2rem + 5vw, 7rem);
+  }
+
+  /* Body: a flex column so every block sets its own width and alignment */
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.25rem, 1rem + 1vw, 2rem);
+    padding-block: clamp(4rem, 2rem + 8vw, 9rem);
+  }
+
+  .prose :global(h2) {
+    margin-top: clamp(2rem, 1rem + 5vw, 6rem);
+    font-size: var(--text-h2);
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    text-wrap: pretty;
+  }
+
+  /* Editorial article: one centered reading column (65ch, large type), images and pull quotes break out to the full container */
+  .prose--ux > :global(:not(.project-figure):not(.audit):not(.pullquote)) {
+    width: 100%;
+    max-width: 65ch;
+    margin-inline: auto;
+  }
+
+  .prose--ux > :global(p) {
+    font-size: clamp(1.25rem, 1.05rem + 0.7vw, 1.625rem);
+    font-weight: var(--weight-light);
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+  }
+
+  .prose--ux :global(strong) {
+    font-weight: var(--weight-bold);
+  }
+
+  .prose--ux > :global(.project-figure) {
+    margin-block: clamp(1.5rem, 1rem + 3vw, 4rem);
+  }
+
+  /* Gallery / lookbook: short, light text pushed right; images sit in a contained, padded column.
+     .gallery-inset (below) holds the column to 1200px with generous side room. */
+  .prose--visual {
+    gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+  }
+
+  .prose--visual > :global(:not(.project-figure):not(.image-grid):not(.audit):not(.pullquote)) {
+    max-width: 34ch;
+  }
+
+  .prose--visual > :global(p) {
+    font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    font-weight: var(--weight-light);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .prose--visual > :global(.project-figure),
+  .prose--visual > :global(.image-grid) {
+    margin-block: clamp(1rem, 0.5rem + 2vw, 3rem);
+  }
+
+  .gallery-inset {
+    padding-inline: max(
+      calc(var(--page-margin) + 4vw),
+      calc((min(100vw, var(--page-max)) - 1200px) / 2)
+    );
+  }
+
+  @media (min-width: 900px) {
+    .prose--visual > :global(:not(.project-figure):not(.image-grid):not(.audit):not(.pullquote)) {
+      margin-left: 41.666%;
+    }
+
+    .meta__row {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+    }
+
+    .meta__label {
+      grid-column: 1 / span 3;
+    }
+
+    .meta__value {
+      grid-column: 4 / -1;
+    }
+  }
+
+  /* Next project */
+  .next {
+    display: block;
+    padding-block: clamp(4rem, 2rem + 8vw, 9rem);
+    transition: color 0.5s var(--ease-out);
+  }
+
+  .next__label {
+    display: block;
+    margin-bottom: clamp(1rem, 0.75rem + 1vw, 2rem);
+    font-size: var(--text-small);
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+  }
+
+  .next__link {
+    display: block;
+    font-size: clamp(3rem, 1rem + 10vw, 12rem);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 0.95;
+  }
+
+  .next__arrow {
+    display: inline-block;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .next:hover,
+  .next:focus-visible {
+    color: var(--accent-text);
+  }
+
+  .next:hover .next__arrow,
+  .next:focus-visible .next__arrow {
+    transform: translate(0.05em, -0.05em);
+  }
+</style>

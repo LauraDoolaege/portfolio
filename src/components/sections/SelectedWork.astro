@@ -1,21 +1,15 @@
 ---
 // Section 2: Selected work. Two categories separated by whitespace:
 // UX strategy (2 large cards) and visual explorations (tighter 3-column gallery).
-// Projects are placeholders until real case studies exist.
-const uxProjects = [
-  { title: 'Project title one', tags: ['User Research', 'Wireframing'] },
-  { title: 'Project title two', tags: ['User Interviews', 'Prototyping'] },
-];
-
-const visualProjects = [
-  { title: 'Concept title one', tags: ['Brand Identity', '3D'], ratio: '4 / 5' },
-  { title: 'Concept title two', tags: ['Motion'], ratio: '1 / 1' },
-  { title: 'Concept title three', tags: ['Poster', 'Typography'], ratio: '3 / 4' },
-  { title: 'Concept title four', tags: ['Brand Identity'], ratio: '1 / 1' },
-  { title: 'Concept title five', tags: ['3D', 'Motion'], ratio: '3 / 4' },
-  { title: 'Concept title six', tags: ['Poster'], ratio: '4 / 5' },
-];
+// Cards come from the `works` content collection and link to /works/[slug].
+const works = (await getCollection('works')).sort((a, b) => a.id.localeCompare(b.id));
+const uxProjects = works.filter((w) => w.data.type === 'ux');
+// Placeholder aspect ratios for the visual gallery, until real images set their own
+const ratios = ['4 / 5', '1 / 1', '3 / 4'];
+const visualProjects = works.filter((w) => w.data.type === 'visual');
+import { getCollection } from 'astro:content';
 import SectionLabel from '../ui/SectionLabel.astro';
+import { withBase } from '../../utils/url';
 ---
 
 <section class="work" id="work" aria-labelledby="work-title">
@@ -41,15 +35,17 @@ import SectionLabel from '../ui/SectionLabel.astro';
       <ul class="work__grid work__grid--ux">
         {uxProjects.map((p) => (
           <li class="card" data-card="ux">
-            <div class="card__media" style="aspect-ratio: 4 / 3">
-              <div class="card__img" />
-            </div>
-            <h4 class="card__title">{p.title}</h4>
-            <ul class="card__tags" aria-label="Skills">
-              {p.tags.map((t) => (
-                <li class="tag">{t}</li>
-              ))}
-            </ul>
+            <a class="card__link" href={withBase(`/works/${p.id}`)}>
+              <div class="card__media" style={'aspect-ratio: 4 / 3'}>
+                <div class="card__img" />
+              </div>
+              <h4 class="card__title">{p.data.title}</h4>
+              <ul class="card__tags" aria-label="Tools">
+                {p.data.tools.slice(0, 2).map((t) => (
+                  <li class="tag">{t}</li>
+                ))}
+              </ul>
+            </a>
           </li>
         ))}
       </ul>
@@ -67,17 +63,19 @@ import SectionLabel from '../ui/SectionLabel.astro';
       </div>
 
       <ul class="work__grid work__grid--visual">
-        {visualProjects.map((p) => (
+        {visualProjects.map((p, i) => (
           <li class="card" data-card="visual">
-            <div class="card__media" style={`aspect-ratio: ${p.ratio}`}>
-              <div class="card__img" />
-            </div>
-            <h4 class="card__title">{p.title}</h4>
-            <ul class="card__tags" aria-label="Skills">
-              {p.tags.map((t) => (
-                <li class="tag">{t}</li>
-              ))}
-            </ul>
+            <a class="card__link" href={withBase(`/works/${p.id}`)}>
+              <div class="card__media" style={`aspect-ratio: ${ratios[i % ratios.length]}`}>
+                <div class="card__img" />
+              </div>
+              <h4 class="card__title">{p.data.title}</h4>
+              <ul class="card__tags" aria-label="Tools">
+                {p.data.tools.slice(0, 2).map((t) => (
+                  <li class="tag">{t}</li>
+                ))}
+              </ul>
+            </a>
           </li>
         ))}
       </ul>
@@ -173,6 +171,10 @@ import SectionLabel from '../ui/SectionLabel.astro';
     .card:hover .card__img {
       filter: grayscale(0%) sepia(0%) contrast(1);
     }
+  }
+
+  .card__link {
+    display: block;
   }
 
   .card__title {

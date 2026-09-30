@@ -1,0 +1,39 @@
+---
+// One project image inside the Analog Darkroom frame. Use this (not markdown ![]()) in .mdx files
+// so every image gets the hover/pan interaction. Without `src` it renders the flat placeholder.
+// `fill` makes the frame take its parent's height (used by ImageGrid) instead of an aspect ratio.
+interface Props {
+  src?: string;
+  alt: string;
+  ratio?: string;
+  tone?: 0 | 1 | 2 | 3;
+  caption?: string;
+  fill?: boolean;
+}
+
+const { src, alt, ratio = '16 / 9', tone = 0, caption, fill = false } = Astro.props;
+const frameStyle = fill ? 'height: 100%' : `aspect-ratio: ${ratio}`;
+---
+
+<figure class:list={['project-figure', { 'project-figure--fill': fill }]}>
+  <div class="media-frame" style={frameStyle}>
+    {src ? (
+      <img class="media-frame__img" src={src} alt={alt} loading="lazy" decoding="async" />
+    ) : (
+      <div class="media-frame__img" data-tone={tone} role="img" aria-label={alt} />
+    )}
+  </div>
+  {caption && <figcaption class="project-figure__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .project-figure--fill {
+    height: 100%;
+  }
+
+  .project-figure__caption {
+    margin-top: 0.75rem;
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+</style>

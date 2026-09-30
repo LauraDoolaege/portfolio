@@ -120,20 +120,25 @@ const experience = {
     text-transform: uppercase;
   }
 
-  /* Cells: 1px lines between them, drawn as a grid gap over a line-colored background so both directions line up */
+  /* Cells: lines are borders (top/left on the group, right/bottom on each cell) so an unused slot stays empty instead of showing a filled block. Odd leftovers span the row. */
   .data__cells {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 1px;
     margin: 0;
-    background: var(--border-color);
-    border: var(--hairline);
+    border-top: var(--hairline);
+    border-left: var(--hairline);
   }
 
   .data__cell {
     margin: 0;
     padding: clamp(1rem, 0.75rem + 1vw, 1.75rem);
-    background: var(--bg-primary);
+    border-right: var(--hairline);
+    border-bottom: var(--hairline);
+  }
+
+  .data__cells--skills .data__cell:last-child:nth-child(odd),
+  .data__cells--tools .data__cell:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 
   dt,
@@ -189,6 +194,15 @@ const experience = {
 
     .data__cells--tools {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    /* Seven tools in four columns: the last one fills the remaining two slots */
+    .data__cells--tools .data__cell:last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+
+    .data__cells--tools .data__cell:last-child:nth-child(4n + 3) {
+      grid-column: span 2;
     }
   }
 

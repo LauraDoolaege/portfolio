@@ -5,17 +5,16 @@
 
 <section class="about-hero" aria-labelledby="about-title">
   <div class="container">
-    <h1 id="about-title" class="about-hero__title">
-      <span class="mask">
-        <span class="line">My story</span>
-      </span>
-      <span class="mask">
-        <span class="line">didn't start</span>
-      </span>
-      <span class="mask">
-        <span class="line">at Devine.</span>
-      </span>
-    </h1>
+    <div class="about-hero__fit">
+      <h1 id="about-title" class="about-hero__title">
+        <span class="mask">
+          <span class="line">My story didn't</span>
+        </span>
+        <span class="mask">
+          <span class="line">start at Devine.</span>
+        </span>
+      </h1>
+    </div>
 
     <div class="grid about-hero__row">
       <figure class="about-hero__figure">
@@ -48,11 +47,15 @@
     display: block;
   }
 
-  /* "didn't start" is the widest line (~4.95em): derive the size from the container so it fills it without clipping */
+  /* "start at Devine." is the widest line (~7.2em): size it from the container (cqw) so it fills the column at any viewport, including past the 1600px cap */
+  .about-hero__fit {
+    container-type: inline-size;
+  }
+
   .about-hero__title {
     position: relative;
     z-index: 2;
-    font-size: min(20rem, calc((100vw - 2 * var(--page-margin)) / 5.1));
+    font-size: 14cqw;
     font-weight: var(--weight-heavy);
     line-height: 0.95;
     text-wrap: initial;
@@ -81,7 +84,9 @@
   .about-hero__img {
     width: 100%;
     height: 100%;
-    background: linear-gradient(160deg, #e3dfd3, #bdb7a6 70%, #a9a392);
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      linear-gradient(160deg, #e3dfd3, #bdb7a6 70%, #a9a392);
     filter: sepia(0.25) grayscale(0.5) contrast(0.95);
     will-change: transform;
   }

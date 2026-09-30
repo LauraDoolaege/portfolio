@@ -308,6 +308,20 @@ button:focus-visible {
   --fill: 100%;
 }
 
+/* Touch devices have no hover, so the outline would never fill: they get the solid ink button from the start.
+   Keyed on hover capability, not viewport width, so a narrow desktop window keeps the outline + sand hover.
+   Colours come from the same tokens, so the label and arrow flip correctly in dark mode too. */
+@media (hover: none) {
+  .btn {
+    background: var(--text-main);
+    color: var(--bg-primary);
+  }
+
+  .btn::before {
+    display: none;
+  }
+}
+
 .btn .btn__icon {
   transition: transform 0.4s ease-in-out;
 }

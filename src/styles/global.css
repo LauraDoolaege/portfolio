@@ -181,6 +181,7 @@ button:focus-visible {
   font-size: var(--text-body);
   font-weight: var(--weight-regular);
   line-height: 1;
+  white-space: nowrap;
   color: var(--text-main);
   transition:
     background-color 0.5s var(--ease-out),
@@ -210,12 +211,12 @@ button:focus-visible {
 /* Tags: labels, not controls. Uppercase, tracked, faint fill, no border. */
 .tag {
   display: inline-block;
-  padding: 0.4em 0.7em;
-  background: rgba(26, 26, 26, 0.05);
+  padding: 0.35em 0.6em;
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 0;
   font-size: 0.75rem;
   font-weight: var(--weight-regular);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   line-height: 1.2;
   color: var(--text-main);

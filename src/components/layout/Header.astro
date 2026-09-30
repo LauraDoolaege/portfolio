@@ -35,6 +35,7 @@ const currentPath = Astro.url.pathname;
 
 <style>
   .site-header {
+    border-bottom: var(--hairline);
   }
 
   .site-header__inner {
@@ -55,20 +56,38 @@ const currentPath = Astro.url.pathname;
 
   .site-header__links {
     display: flex;
-    gap: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+    align-items: center;
+    color: var(--text-muted);
+  }
+
+  /* Slashes sit between items only: never before the first one */
+  .site-header__links li + li::before {
+    content: '/';
+    margin-inline: clamp(0.6rem, 0.3rem + 1vw, 1.1rem);
     color: var(--text-muted);
   }
 
   .site-header__links a {
-    transition: color var(--duration) var(--ease-out);
+    padding-bottom: 0.35em;
+    transition:
+      color var(--duration) var(--ease-out),
+      opacity var(--duration) var(--ease-out);
+  }
+
+  /* Hover: the hovered link stays full strength, its siblings dim */
+  .site-header__links:hover a {
+    opacity: 0.5;
   }
 
   .site-header__links a:hover,
-  .site-header__links a[aria-current='page'] {
+  .site-header__links a:focus-visible {
+    opacity: 1;
     color: var(--text-main);
   }
 
-  .site-header__links a:hover {
-    color: var(--accent-text);
+  /* Current page: full ink with a terracotta underline */
+  .site-header__links a[aria-current='page'] {
+    color: var(--text-main);
+    background: linear-gradient(var(--accent), var(--accent)) 0 100% / 100% 2px no-repeat;
   }
 </style>

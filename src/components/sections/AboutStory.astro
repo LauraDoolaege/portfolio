@@ -1,0 +1,126 @@
+---
+// The journey: a tall portrait on the left (sticky on desktop) and the story on the right.
+// The image scales in slowly as it enters, like a print coming up in the tray.
+const paragraphs = [
+  "Before I ever mapped a user journey or opened Figma, I earned a Bachelor's in Marketing Communication (Cum Laude). During my internship at CAW Oost-Vlaanderen, I planned content, wrote nationwide policy letters, and independently led a workshop to restructure their website's content. Looking back, facilitating that workshop was my first UX project—I just didn't know it yet!",
+  "But honestly, it started way earlier. On the playground, I invented storylines where everyone got a part. At home, I wrote stories starring my sister's favourite Nintendo characters to get her excited about reading. (It worked—she now reads more books than I do).",
+  "Now I'm in my third year of Digital Design and Development (Devine), majoring in UX design. I have the same love for stories, just with more tools. Devine has taught me how to research and design experiences a user actually needs. My marketing skills help me position those experiences so they actually reach people.",
+];
+---
+
+<section class="story" aria-label="The journey">
+  <div class="container story__grid">
+    <figure class="story__figure">
+      <div class="story__frame">
+        <div class="story__img" role="img" aria-label="Portrait of Laura (placeholder)"></div>
+      </div>
+    </figure>
+
+    <div class="story__text">
+      {paragraphs.map((p) => (
+        <p class="story__p" data-reveal>
+          {p}
+        </p>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .story {
+    padding-bottom: var(--space-section);
+  }
+
+  .story__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 2rem + 4vw, 6rem) var(--grid-gutter);
+  }
+
+  .story__frame {
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    background: #d9d7d0;
+  }
+
+  /* Placeholder photo: warm print look until a real portrait replaces it */
+  .story__img {
+    width: 100%;
+    height: 100%;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      linear-gradient(160deg, #e3dfd3, #bdb7a6 70%, #a9a392);
+    filter: grayscale(80%) sepia(20%) contrast(1.1);
+    transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+
+  @media (hover: hover) {
+    .story__frame:hover .story__img {
+      filter: grayscale(0%) sepia(0%) contrast(1);
+    }
+  }
+
+  .story__text {
+    display: grid;
+    gap: clamp(1.75rem, 1.25rem + 2vw, 3rem);
+    align-content: start;
+  }
+
+  .story__p {
+    max-width: 34em;
+    font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+    font-weight: var(--weight-regular);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 900px) {
+    .story__grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .story__figure {
+      grid-column: 1 / span 5;
+      position: sticky;
+      top: 2rem;
+    }
+
+    .story__text {
+      grid-column: 7 / span 6;
+      padding-top: clamp(2rem, 1rem + 6vw, 8rem);
+    }
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  const img = document.querySelector<HTMLElement>('.story__img');
+  const frame = document.querySelector<HTMLElement>('.story__frame');
+  const paras = gsap.utils.toArray<HTMLElement>('.story [data-reveal]');
+
+  if (img && frame && !prefersReducedMotion()) {
+    gsap.set(frame, { opacity: 0 });
+    gsap.set(img, { scale: 1.06 });
+    gsap.set(paras, { y: 28, opacity: 0 });
+
+    ScrollTrigger.create({
+      trigger: frame,
+      start: 'top 85%',
+      once: true,
+      onEnter: () => {
+        gsap.to(frame, { opacity: 1, duration: 1.4, ease: 'power2.out' });
+        gsap.to(img, { scale: 1, duration: 1.8, ease: 'power2.out' });
+      },
+    });
+
+    ScrollTrigger.batch(paras, {
+      start: 'top 88%',
+      once: true,
+      onEnter: (batch) =>
+        gsap.to(batch, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: 0.14 }),
+    });
+  }
+</script>

@@ -1,0 +1,47 @@
+---
+// The approach: one massive centered pull-quote to break the reading rhythm.
+---
+
+<section class="approach" aria-label="The approach">
+  <div class="container">
+    <blockquote class="approach__quote" data-reveal>
+      <p>
+        “A good project starts with alignment. I play the role of the grounded researcher—always
+        asking: 'Does this still solve the user's core problem?'”
+      </p>
+    </blockquote>
+  </div>
+</section>
+
+<style>
+  .approach {
+    padding-block: 0 var(--space-section);
+  }
+
+  .approach__quote {
+    margin: 0 auto;
+    max-width: 17em;
+    text-align: center;
+    font-size: clamp(2rem, 1rem + 4.6vw, 6rem);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  const quote = document.querySelector<HTMLElement>('.approach__quote');
+
+  if (quote && !prefersReducedMotion()) {
+    gsap.set(quote, { y: 40, opacity: 0 });
+    ScrollTrigger.create({
+      trigger: quote,
+      start: 'top 85%',
+      once: true,
+      onEnter: () => gsap.to(quote, { y: 0, opacity: 1, duration: 1.3, ease: 'power3.out' }),
+    });
+  }
+</script>

@@ -1,0 +1,68 @@
+---
+// About hero: no boxes, just fluid typography. The first sentence is black and heavy, the second light,
+// so the contrast itself carries the hierarchy.
+---
+
+<section class="manifesto-hero" aria-labelledby="about-title">
+  <div class="container">
+    <h1 id="about-title" class="manifesto-hero__title">
+      <span class="mask">
+        <span class="line line--heavy">My story didn’t start at Devine.</span>
+      </span>
+      <span class="mask">
+        <span class="line line--light">
+          It started with a fascination for why people do what they do.
+        </span>
+      </span>
+    </h1>
+  </div>
+</section>
+
+<style>
+  .manifesto-hero {
+    padding-block: clamp(3rem, 2rem + 6vw, 9rem) var(--space-section);
+  }
+
+  .manifesto-hero__title {
+    max-width: 16em;
+    font-size: clamp(2.75rem, 1rem + 8.4vw, 10.5rem);
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+
+  .mask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
+
+  .mask + .mask {
+    margin-top: 0.15em;
+  }
+
+  .line {
+    display: block;
+  }
+
+  .line--heavy {
+    font-weight: var(--weight-heavy);
+  }
+
+  .line--light {
+    font-weight: var(--weight-light);
+    letter-spacing: -0.03em;
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const lines = gsap.utils.toArray<HTMLElement>('.manifesto-hero .line');
+
+  if (lines.length && !prefersReducedMotion()) {
+    // Start state set in JS so no-JS visitors still see the text.
+    gsap.set(lines, { yPercent: 105 });
+    gsap.to(lines, { yPercent: 0, duration: 1.2, ease: 'power4.out', stagger: 0.16 });
+  }
+</script>

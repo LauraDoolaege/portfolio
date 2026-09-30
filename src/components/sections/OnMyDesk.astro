@@ -1,5 +1,5 @@
 ---
-// Section 3: what's on the desk right now, as a plain list separated by space (no lines, no cards).
+// Section 3: what's on the desk right now, as a stacked list with a line between rows (no cards).
 const items = [
   {
     title: 'Ray Skincare',
@@ -45,7 +45,9 @@ const items = [
     padding-bottom: clamp(2rem, 1rem + 3vw, 5rem);
   }
 
+  /* Stacked rows: a line between each, and one closing the list */
   .desk__list {
+    border-bottom: var(--hairline);
   }
 
   .desk__row {
@@ -55,6 +57,7 @@ const items = [
     grid-template-columns: minmax(0, 1fr);
     gap: 0.5rem;
     padding-block: clamp(2rem, 1rem + 3vw, 3.5rem);
+    border-top: var(--hairline);
   }
 
   /* Hover wash extends past the text edges so the text itself never shifts */

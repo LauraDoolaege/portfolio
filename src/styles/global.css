@@ -1,11 +1,16 @@
 :root {
-  /* Color (light default; a dark mode can override these later) */
+  /* Color (light default; [data-theme='dark'] below overrides the same tokens) */
   --bg-primary: #f3f2ee; /* Warm alabaster / newsprint */
   --text-main: #1a1a1a; /* Deep charcoal */
   --text-muted: #6b6a68; /* Warm grey */
   --border-color: #d1cfc7; /* 1px architectural grid lines */
   --accent: #c25e3e; /* Vintage terracotta: dot, lines, fills (3.8:1, not for small text) */
   --accent-text: #a8492c; /* Darker terracotta for small text/hover (5.2:1 on alabaster) */
+  --tag-fill: rgba(26, 26, 26, 0.08);
+  --tag-ring: rgba(26, 26, 26, 0.16);
+  --accent-wash: rgba(194, 94, 62, 0.07);
+  --frame-bg: #d9d7d0;
+  color-scheme: light;
 
   /* Type */
   --font-sans: 'Switzer', system-ui, sans-serif;
@@ -40,6 +45,21 @@
   /* Motion (easing curves for GSAP live in src/utils/motion.ts) */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --duration: 0.4s;
+}
+
+/* Dark palette: warm charcoal and bone, same terracotta family, lifted for contrast on dark */
+:root[data-theme='dark'] {
+  --bg-primary: #161513;
+  --text-main: #ece9e1;
+  --text-muted: #9b9890;
+  --border-color: #34322e;
+  --accent: #d2694a;
+  --accent-text: #e58d6d;
+  --tag-fill: rgba(236, 233, 225, 0.08);
+  --tag-ring: rgba(236, 233, 225, 0.18);
+  --accent-wash: rgba(210, 105, 74, 0.1);
+  --frame-bg: #262421;
+  color-scheme: dark;
 }
 
 *,
@@ -396,8 +416,8 @@ button:focus-visible {
   justify-self: start;
   align-self: start;
   padding: 0.45em 0.75em;
-  background: rgba(26, 26, 26, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(26, 26, 26, 0.16);
+  background: var(--tag-fill);
+  box-shadow: inset 0 0 0 1px var(--tag-ring);
   border-radius: 0;
   font-size: 0.75rem;
   font-weight: var(--weight-medium);
@@ -597,4 +617,79 @@ button:focus-visible {
 
 .media-frame__img[data-tone='3'] {
   background: linear-gradient(150deg, #9fb0b8, #7a8f99);
+}
+
+/* ---------- Theme toggle ---------- */
+
+/* Quiet text control, fixed bottom-right. Underline draws in on hover like .btn-link. */
+.theme-toggle {
+  position: fixed;
+  right: var(--page-margin);
+  bottom: 2rem;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.4em 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.4s var(--ease-out);
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  color: var(--text-main);
+}
+
+.theme-toggle:hover::after,
+.theme-toggle:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.theme-toggle__icon {
+  width: 0.95em;
+  height: 0.95em;
+  border-radius: 50%;
+  border: 1.2px solid currentColor;
+  /* Half-filled disc: the fill flips side with the theme */
+  background: linear-gradient(to right, currentColor 50%, transparent 50%);
+}
+
+/* The filled half swaps sides with the theme; the spin itself is keyframed in theme.ts */
+:root[data-theme='dark'] .theme-toggle__icon {
+  background: linear-gradient(to left, currentColor 50%, transparent 50%);
+}
+
+/* Grainy sweep: the new theme is revealed by a noise-edged mask (mask built in src/scripts/theme.ts) */
+::view-transition-group(root),
+::view-transition-image-pair(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  mask-repeat: no-repeat;
+  mask-mode: alpha;
 }

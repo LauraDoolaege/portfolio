@@ -20,7 +20,7 @@ export async function getStaticPaths() {
 
 const { entry, more } = Astro.props;
 const { Content } = await render(entry);
-const { title, description, type, coverImage, role, timeline, tools, team, tldr, behanceUrl } =
+const { title, description, type, coverImage, role, timeline, tools, team, behanceUrl } =
   entry.data;
 
 const meta = [
@@ -44,6 +44,17 @@ const meta = [
           Back to works
           <span class="back__bracket">]</span>
         </a>
+      </div>
+
+      <div class="container">
+        <div class="cover">
+          <ProjectImage
+            src={coverImage}
+            alt={`${title}: cover`}
+            ratio={type === 'ux' ? '2 / 1' : '16 / 9'}
+            tone={type === 'ux' ? 1 : 0}
+          />
+        </div>
 
         <header class="hero">
           <h1 class="hero__title">{title}</h1>
@@ -61,25 +72,9 @@ const meta = [
 
         {behanceUrl && (
           <a class="behance-btn" href={behanceUrl} target="_blank" rel="noopener noreferrer">
-            [ View full Behance case study <span class="behance-btn__arrow">↗</span> ]
+            [ View full Behance case study ↗ ]
           </a>
         )}
-
-        {type === 'ux' && tldr && (
-          <div class="tldr">
-            <p class="tldr__label">TL;DR</p>
-            <p class="tldr__text">{tldr}</p>
-          </div>
-        )}
-      </div>
-
-      <div class:list={['container cover', { 'gallery-inset': type === 'visual' }]}>
-        <ProjectImage
-          src={coverImage}
-          alt={`${title}: cover`}
-          ratio={type === 'ux' ? '16 / 9' : '4 / 3'}
-          tone={type === 'ux' ? 1 : 0}
-        />
       </div>
 
       <div
@@ -169,9 +164,15 @@ const meta = [
     transform: translateX(-4px);
   }
 
-  /* Hero */
+  /* The golden frame: left-aligned with the title, capped width */
+  .cover {
+    width: min(1200px, 80vw);
+    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
+  }
+
+  /* Hero: title, then a light, readable intro */
   .hero {
-    padding-block: clamp(3rem, 1.5rem + 7vw, 9rem) clamp(2.5rem, 1.5rem + 5vw, 6rem);
+    padding-block: clamp(2.5rem, 1.5rem + 5vw, 6rem) clamp(2.5rem, 1.5rem + 5vw, 6rem);
   }
 
   .hero__title {
@@ -180,12 +181,12 @@ const meta = [
   }
 
   .hero__description {
-    max-width: 30ch;
+    max-width: 50ch;
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
-    font-size: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+    font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
     font-weight: var(--weight-light);
-    line-height: 1.2;
-    letter-spacing: -0.015em;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
     text-wrap: pretty;
   }
 
@@ -216,32 +217,6 @@ const meta = [
     max-width: 50ch;
     font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
     line-height: 1.4;
-  }
-
-  /* TL;DR: two bold sentences straight after the meta rows */
-  .tldr {
-    padding-top: clamp(2.5rem, 1.5rem + 5vw, 6rem);
-  }
-
-  .tldr__label {
-    margin-bottom: 1rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--accent-text);
-  }
-
-  .tldr__text {
-    max-width: 32ch;
-    font-size: clamp(1.75rem, 1rem + 3vw, 3.5rem);
-    font-weight: var(--weight-bold);
-    line-height: 1.1;
-    letter-spacing: var(--tracking-display);
-    text-wrap: balance;
-  }
-
-  .cover {
-    padding-top: clamp(3rem, 2rem + 5vw, 7rem);
   }
 
   /* Body: a flex column so every block sets its own width and alignment */
@@ -333,37 +308,26 @@ const meta = [
     }
   }
 
-  /* Behance: sharp bracketed button under the meta grid; fills with ink on hover */
+  /* Behance button under the meta grid: colour swap only, same as the footer links */
   .behance-btn {
     display: inline-block;
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
-    padding: 0.95em 1.3em 0.95em 0;
+    padding-block: 0.95em;
     font-size: var(--text-small);
     letter-spacing: 0.05em;
     text-transform: uppercase;
     line-height: 1;
-    transition:
-      background-color 0.5s var(--ease-out),
-      color 0.5s var(--ease-out),
-      padding 0.5s var(--ease-out);
+    transition: color 0.5s var(--ease-out);
   }
 
   .behance-btn:hover,
   .behance-btn:focus-visible {
-    padding-left: 1.3em;
-    background: var(--text-main);
-    color: var(--bg-primary);
+    color: var(--accent-text);
   }
 
-  .behance-btn__arrow,
   .cta__arrow {
     display: inline-block;
     transition: transform 0.5s var(--ease-out);
-  }
-
-  .behance-btn:hover .behance-btn__arrow,
-  .behance-btn:focus-visible .behance-btn__arrow {
-    transform: translate(2px, -2px);
   }
 
   /* Massive bottom CTA */

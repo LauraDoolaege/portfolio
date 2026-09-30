@@ -3,12 +3,14 @@
 // 65ch reading column so it can't be missed while scrolling. Optional source line underneath.
 interface Props {
   source?: string;
+  // "md" for long statements such as How Might We questions
+  size?: 'lg' | 'md';
 }
 
-const { source } = Astro.props;
+const { source, size = 'lg' } = Astro.props;
 ---
 
-<blockquote class="pullquote">
+<blockquote class:list={['pullquote', `pullquote--${size}`]}>
   <div class="pullquote__text">
     <slot />
   </div>
@@ -27,6 +29,12 @@ const { source } = Astro.props;
     letter-spacing: var(--tracking-display);
     line-height: 1;
     text-wrap: balance;
+  }
+
+  .pullquote--md .pullquote__text {
+    max-width: 26ch;
+    font-size: clamp(1.75rem, 1rem + 3.5vw, 4rem);
+    line-height: 1.05;
   }
 
   .pullquote__source {

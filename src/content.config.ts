@@ -8,15 +8,13 @@ const works = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/works' }),
   schema: z.object({
     title: z.string(),
-    // Short hook shown under the title
+    // Intro shown under the title: a short hook, or for UX a two-sentence summary
     description: z.string(),
     // Decides the page layout: editorial article vs. gallery / lookbook
     type: z.enum(['ux', 'visual']),
     // Path under /public (e.g. "/images/plan-a/cover.jpg"). Left out until real photography
     // exists; the page then shows the flat placeholder frame.
     coverImage: z.string().optional(),
-    // UX only: two bold sentences on the impact, shown under the meta grid
-    tldr: z.string().optional(),
     // Full case study on Behance. Adds a top button and the massive bottom CTA when present.
     behanceUrl: z.string().optional(),
     role: z.string(),

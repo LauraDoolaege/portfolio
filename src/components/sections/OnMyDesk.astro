@@ -14,11 +14,13 @@ const items = [
       'Researching non-human centric design. Mapping behaviors of actors you cannot communicate with directly to design beyond the human experience.',
   },
 ];
+import SectionLabel from '../ui/SectionLabel.astro';
 ---
 
 <section class="desk" aria-labelledby="desk-title">
   <div class="container">
-    <h2 id="desk-title" class="desk__title">
+    <SectionLabel num="03" text="On My Desk" />
+    <h2 id="desk-title" class="section-title desk__title">
       On My Desk Right Now
     </h2>
 
@@ -37,12 +39,6 @@ const items = [
 <style>
   .desk {
     padding-bottom: var(--space-section);
-  }
-
-  .desk__title {
-    font-size: clamp(2.25rem, 1rem + 5vw, 6rem);
-    line-height: 1.05;
-    padding-bottom: clamp(2rem, 1rem + 3vw, 5rem);
   }
 
   /* Stacked rows: a line between each, and one closing the list */

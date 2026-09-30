@@ -15,15 +15,14 @@ const visualProjects = [
   { title: 'Concept title five', tags: ['3D', 'Motion'], ratio: '3 / 4' },
   { title: 'Concept title six', tags: ['Poster'], ratio: '4 / 5' },
 ];
+import SectionLabel from '../ui/SectionLabel.astro';
 ---
 
 <section class="work" id="work" aria-labelledby="work-title">
   <div class="container">
     <header class="work__header">
-      <p class="work__label" data-reveal>
-        [ 01 ] The work
-      </p>
-      <h2 id="work-title" class="work__title" data-reveal>
+      <SectionLabel num="02" text="The Work" data-reveal />
+      <h2 id="work-title" class="section-title work__title" data-reveal>
         Selected work
       </h2>
     </header>
@@ -91,20 +90,9 @@ const visualProjects = [
     padding-block: var(--space-section);
   }
 
-  .work__header {
-    padding-bottom: clamp(2rem, 1rem + 3vw, 5rem);
-  }
-
-  .work__label {
-    margin-bottom: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
-    font-size: var(--text-small);
-    color: var(--text-muted);
-  }
-
-  .work__title {
-    font-size: clamp(3rem, 1rem + 10vw, 10rem);
-    font-weight: var(--weight-heavy);
-    line-height: 0.95;
+  /* Title and label spacing come from the shared .section-label / .section-title classes */
+  .work__group:first-of-type {
+    padding-top: 0;
   }
 
   .work__group {

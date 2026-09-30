@@ -15,12 +15,13 @@ const columns = [
       'Content strategy, persuasion, nudging, and understanding human behavior to bridge user needs with business goals.',
   },
 ];
+import SectionLabel from '../ui/SectionLabel.astro';
 ---
 
 <section class="why-how" aria-labelledby="why-how-title">
   <div class="container">
-    <p class="why-how__label tag">Philosophy</p>
-    <h2 id="why-how-title" class="why-how__title">
+    <SectionLabel num="01" text="Philosophy" />
+    <h2 id="why-how-title" class="section-title why-how__title">
       2 Questions Every Product Needs to Answer
     </h2>
 
@@ -39,17 +40,6 @@ const columns = [
 <style>
   .why-how {
     padding-top: var(--space-section);
-  }
-
-  .why-how__label {
-    margin-bottom: clamp(1rem, 0.75rem + 1vw, 2rem);
-  }
-
-  .why-how__title {
-    max-width: 13ch;
-    font-size: clamp(2.75rem, 1rem + 8vw, 9rem);
-    line-height: 0.95;
-    margin-bottom: clamp(3rem, 2rem + 6vw, 8rem);
   }
 
   .why-how__grid {

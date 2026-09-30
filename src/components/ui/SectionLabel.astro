@@ -1,0 +1,15 @@
+---
+// The one section label used across the homepage: "[ 01 ] Philosophy". Styling lives in global.css (.section-label)
+// so every label is identical; extra attributes (e.g. data-reveal) pass through.
+interface Props {
+  num: string;
+  text: string;
+  [attr: string]: unknown;
+}
+
+const { num, text, ...rest } = Astro.props;
+---
+
+<p class="section-label" {...rest}>
+  [ {num} ] {text}
+</p>

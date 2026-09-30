@@ -16,13 +16,16 @@ interface Image {
 
 interface Props {
   label: string;
+  /** Section number shown in the shared label, e.g. "04" */
+  num?: string;
   text: string;
   images: Image[];
   cta?: { href: string; label: string };
   id?: string;
 }
 
-const { label, text, images, cta, id } = Astro.props;
+const { label, num, text, images, cta, id } = Astro.props;
+import SectionLabel from './SectionLabel.astro';
 ---
 
 <section class="manifesto" id={id} aria-label={label}>
@@ -36,7 +39,7 @@ const { label, text, images, cta, id } = Astro.props;
   ))}
 
   <div class="container manifesto__inner">
-    <p class="manifesto__label">{label}</p>
+    {num ? <SectionLabel num={num} text={label} /> : <p class="manifesto__label">{label}</p>}
     <p class="manifesto__text">{text}</p>
     {cta && (
       <a class="manifesto__btn btn" href={cta.href} data-magnetic>
@@ -58,7 +61,7 @@ const { label, text, images, cta, id } = Astro.props;
   .manifesto {
     position: relative;
     padding-block: var(--space-section);
-    text-align: center;
+    text-align: left;
     /* Images drift within the section instead of spilling over neighbouring content */
     overflow: clip;
   }
@@ -70,7 +73,7 @@ const { label, text, images, cta, id } = Astro.props;
     pointer-events: none;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
   }
 
   .manifesto__label,

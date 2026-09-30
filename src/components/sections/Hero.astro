@@ -1,406 +1,193 @@
 ---
-// Homepage hero (PROJECT_BRIEF.md Section 5 "Homepage — LOCKED", item 1).
-// Content is final per the brief (Section 6): role line, intro, CTA, and
-// tags. Rebuilt to a precise 12-column grid spec (a target wireframe the
-// file attached), replacing the earlier freeform version.
-//
-// "Motion Design" was dropped from the tag list per direct request - two
-// tags now, not three. Nothing else in this file assumes a specific tag
-// count (the list wraps via plain flexbox), so removing one needed no
-// layout changes.
-//
-// Grid: shares --intro-max-width / --intro-margin with Header.astro (see
-// global.css) so logo, nav/CV, the title, and the bottom block all sit on
-// the same margin lines — the earlier version's biggest complaint was
-// that these drifted out of alignment with each other.
-//
-// The visual anchor is now a portrait image slot (replacing the earlier
-// organic placeholder blob — a mistake in the sketch this rebuilt from,
-// per direct correction) with "PORTFOLIO" overlapping its lower third,
-// the same locked object-in-letterform device as before, just a
-// different placeholder shape. The word is sized with container query
-// units (cqw) rather than a hand-tuned clamp() curve, so it fills the
-// full grid width edge-to-edge without overflowing or wrapping at any
-// viewport width — a plain-clamp() fallback covers browsers without
-// container query support.
-//
-// Motion: this is the project's first real use of GSAP (previously
-// plumbing-only, see src/utils/motion.ts). Every animated property is
-// transform/opacity/clip-path only (GPU-only, no layout impact). All
-// initial "hidden" states are set imperatively via gsap.set() in the
-// script below, never in static CSS — so if JS fails to load, everything
-// still renders in its normal, final, fully visible position. See the
-// prefersReducedMotion() guard for the reduced-motion path.
-//
-// Open decisions this component had to fill in (not locked anywhere —
-// see CLAUDE.md "Open decisions"):
-// - No real photo exists yet (PROJECT_BRIEF.md Section 6) — the image
-//   slot is a placeholder block with a TODO showing the exact swap-in
-//   markup once one exists.
-//
-// The "Get to know me" CTA that used to live here is gone - direct
-// request ("remove the cta from the hero at the top and place it
-// underneath the design principles"), relocated to Principles.astro (see
-// that file's own comment) rather than duplicated. The "(Scroll)" cue
-// stays - it's a scroll hint, not a call-to-action, and wasn't part of
-// the request. It no longer needs its own row wrapper to share a line
-// with a button that's gone; it's just a right-aligned line on its own
-// now.
-import Gallery from './Gallery.astro';
-import Button from '../ui/Button.astro';
-import Tag from '../ui/Tag.astro';
-
-// content.md "Hero" tags, verbatim — replaces the earlier merged
-// "3rd year Devine student | Belgium | Interning from Feb 2027" status
-// line per direct request ("remove the labels, three literal tags").
-const tags = ['UX & visual design', 'Devine, 3rd year', 'Internship, Feb to May 2027'];
-
-// The giant word changed from "Portfolio" to "Experience designer" per
-// direct request - two words now, not one, so it's set on two lines
-// instead of one (each still sized to fill the container edge-to-edge,
-// same device as before, just per-line). The per-line cqw multiplier is
-// measured, not guessed, same as the original "27cqw" comment already
-// documented for "Portfolio": rendering each word off-screen at a known
-// font-size and reading back its width gives the exact ratio - 24.18 for
-// "Experience", 30.43 for "Designer" in this font/weight/tracking,
-// confirmed directly in the browser before writing these numbers in.
-const titleLines = [
-  { word: 'Experience', cqw: 24 },
-  { word: 'Designer', cqw: 30 },
-];
+// Hero: status pill, massive H1, hook, tags. Each text line sits in an
+// overflow-hidden mask; the script slides the inner element up into view.
 ---
 
-<section class="hero">
-  <div class="hero__inner">
-    <div class="hero__visual">
-      <!--
-        The decorative per-letter spans below are aria-hidden (each word
-        on its own line, with no real space between them in the visible
-        DOM) - a screen reader gets the right name from this real,
-        visually-hidden text node instead (.sr-only, global.css), but
-        that alone didn't fix the same gap for anything that reads
-        visible/indexed text rather than the accessible-name tree
-        (search engine crawlers, copy-paste) - they'd have seen
-        "ExperienceDesigner" mashed together. A real sr-only text node
-        fixes both at once, so this replaces the h1's own aria-label
-        rather than keeping both in parallel.
-      -->
-      <h1 class="hero__title">
-        <span class="sr-only">Experience designer</span>
-        {titleLines.map(({ word, cqw }) => (
-          <span class:list={['hero__title-line', `hero__title-line--cqw${cqw}`]} aria-hidden="true">
-            {word.split('').map((letter) => (
-              <span class="hero__letter-mask">
-                <span class="hero__letter">{letter}</span>
-              </span>
-            ))}
-          </span>
-        ))}
-      </h1>
-    </div>
-
-    <div class="hero__bottom">
-      <!-- content.md "Hero" tags, verbatim - three literal bracket tags,
-           not a paraphrased status line. -->
-      <ul class="hero__tags">
-        {tags.map((tag) => (
-          <li>
-            <Tag>{tag}</Tag>
-          </li>
-        ))}
-      </ul>
-
-      <!-- content.md "Hero" intro, verbatim. -->
-      <p class="hero__intro">
-        Hi, I'm Laura! I detangle briefs into creative concepts that are feasible and grounded in
-        marketing. Online and offline.
+<section class="hero" aria-label="Introduction">
+  <div class="container hero__inner">
+    <div class="hero__top mask">
+      <p class="hero__pill reveal">
+        <span class="hero__dot" aria-hidden="true"></span>
+        Seeking UX &amp; Experience Design Internship (Feb – May 2027)
       </p>
-
-      <!-- content.md "Hero" buttons + scroll cue, verbatim. CV href is a
-           placeholder until a real PDF is supplied (content.md "CV: [CV PDF]"). -->
-      <div class="hero__cta-row">
-        <div class="hero__actions">
-          <Button href="#work" variant="primary">
-            See my work
-          </Button>
-          <Button href="#" variant="secondary" icon="download">
-            Download CV
-          </Button>
-        </div>
-        <span class="hero__scroll">
-          Follow the thread <span aria-hidden="true">↓</span>
-        </span>
-      </div>
     </div>
 
-    <!--
-      content.md: "the gallery should only be around 5 images. they
-      should be floating around the title, but on scroll fall nicely
-      into the old gallery layout" - count=5, floating - see
-      Gallery.astro's own script comment for how the settle works.
-    -->
-    <div class="hero__gallery">
-      <Gallery embedded count={5} floating />
+    <div class="hero__main">
+      <h1 class="hero__title">
+        <span class="mask"><span class="reveal reveal--title">Experience</span></span>
+        <span class="mask"><span class="reveal reveal--title">Designer</span></span>
+      </h1>
+
+      <div class="grid hero__lower">
+        <div class="hero__hook">
+          <p class="mask">
+            <span class="reveal reveal--hook"
+              >I detangle briefs into creative concepts that are feasible and grounded in
+              marketing.</span
+            >
+          </p>
+          <p class="mask">
+            <span class="reveal reveal--hook">Online and offline.</span>
+          </p>
+        </div>
+
+        <ul class="hero__tags reveal--tags" aria-label="Focus">
+          <li>UX Design</li>
+          <li>
+            <a
+              href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
+              target="_blank"
+              rel="noopener"
+            >
+              Devine 3rd Year <span aria-hidden="true">↗</span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
 
-<script>
-  import { gsap, prefersReducedMotion } from '../../utils/motion';
-
-  const hero = document.querySelector('.hero');
-  if (hero) {
-    const letters = hero.querySelectorAll<HTMLElement>('.hero__letter');
-    const gallery = hero.querySelector<HTMLElement>('.hero__gallery');
-    const bottom = hero.querySelector<HTMLElement>('.hero__bottom');
-
-    if (!prefersReducedMotion() && letters.length && gallery && bottom) {
-      // Initial states live here, not in CSS, so if this script never runs
-      // the hero renders fully visible in its final layout.
-      gsap.set(letters, { yPercent: 115 });
-      gsap.set([gallery, bottom], { autoAlpha: 0, y: 24 });
-
-      gsap
-        .timeline()
-        .to(
-          letters,
-          {
-            yPercent: 0,
-            duration: 0.9,
-            ease: 'back.out(1.5)',
-            stagger: { each: 0.045, from: 'start', ease: 'sine.inOut' },
-          },
-          0.15,
-        )
-        .to(gallery, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power2.out' }, 0.55)
-        .to(bottom, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 0.8);
-    }
-  }
-</script>
-
 <style>
   .hero {
+    flex: 1;
     display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
+    padding-block: clamp(2rem, 1rem + 4vw, 5rem) clamp(2rem, 1rem + 3vw, 4rem);
+    min-height: calc(100dvh - 4rem);
   }
 
   .hero__inner {
-    width: 100%;
-    max-width: var(--intro-max-width);
-    margin-inline: auto;
-    padding-inline: var(--intro-margin);
-    padding-block: var(--space-32);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex: 1 1 auto;
-    gap: var(--space-32);
+    gap: var(--space-section);
   }
 
-  /* z-index: 3, above the gallery's 2 - the title paints on top of the
-     floating images now (see .hero__letter below for why that doesn't
-  .hero__visual {
-    position: relative;
-    z-index: 0;
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    column-gap: var(--intro-gutter);
-    row-gap: var(--space-16);
-  }
-
-  /* Full-width, edge-to-edge title. container-type turns on cqw sizing for .hero__title-visual below — the word's font-size tracks this element's own rendered width, not the viewport, so it fills the grid at any width from 320px to well past 2560px without a hand-tuned breakpoint ladder. The negative margin-top is in em (title's own font-size), not px or %, so the overlap into the image's lower third scales with the word instead of drifting at other viewports. */
-  .hero__title {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    container-type: inline-size;
-    /* Without this, the negative margin-top below collapses straight through the h1 (standard block margin-collapsing), leaving the h1 measuring 0 height and the word floating detached from the grid's own row-sizing. flow-root opts out of collapsing without clipping the intentional overflow into the row above. */
-    display: flow-root;
-    /* No position/z-index needed here directly - .hero__visual (its parent) carries the real stacking value now (see that rule's own comment). */
-  }
-
-  /* Two lines now ("Experience" / "Designer"), each its own flex row
-     sized by its own cqw multiplier (see the frontmatter comment for how
-     each was measured) so both fill the container edge-to-edge, same
-     "PORTFOLIO" device as before, just per-word instead of one long
-     string. */
-  .hero__title-line {
-    display: flex;
-    font-family: var(--font-display);
-    font-weight: 800;
-    /* Was 0.86 - too tight, read as the glyphs getting cut off at the
-                                   top/bottom rather than a deliberate edge-to-edge fill (per direct
-                                   report, with a screenshot). More breathing room, and the two
-                                   lines are no longer flush against each other either (see
-                                   margin-top below). */
-    line-height: 1.02;
-    letter-spacing: -0.03em;
-    text-transform: uppercase;
-  }
-
-  .hero__title-line + .hero__title-line {
-    margin-top: 0.03em;
-  }
-
-  /* Both cqw multipliers pulled in from a true edge-to-edge fill (24/30)
-     to ~90% of it (21.5/27) - same direct report: filling the container
-     exactly left no side margin, reading as cropped rather than bold. */
-  .hero__title-line--cqw24 {
-    font-size: clamp(2.25rem, 21.5cqw, 21rem);
-  }
-
-  .hero__title-line--cqw30 {
-    font-size: clamp(2.25rem, 27cqw, 26rem);
-  }
-
-  .hero__letter-mask {
+  /* Clip container for the reveal. Bottom padding + matching negative margin keeps descenders from being cut at line-height < 1. */
+  .mask {
+    display: block;
     overflow: hidden;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
   }
 
-  .hero__letter {
-    display: inline-block;
-    color: var(--color-ink);
+  .reveal {
+    display: block;
   }
 
-  /* Fallback for browsers without container query units: viewport-based clamp() curves, same floor/ceiling logic as the cqw versions above. */
-  @supports not (container-type: inline-size) {
-    .hero__title-line--cqw24 {
-      font-size: clamp(2.25rem, 9vw + 1rem, 21rem);
-    }
-
-    .hero__title-line--cqw30 {
-      font-size: clamp(2.25rem, 11.25vw + 1rem, 26rem);
-    }
+  .hero__top {
+    /* Room for the pill's border so the mask doesn't clip it */
+    padding: 1px;
+    margin: -1px;
+    width: fit-content;
+    max-width: 100%;
   }
 
-  /* A real bug, caught by report and confirmed via elementFromPoint, not
-     assumed: the floating tiles were rendering *behind* the title's
-     letters, not in front of them as intended. Every `.hero__letter`
-     carries a GSAP-written inline `transform` (even the identity matrix,
-     once the entrance settles) - the same "any element with an active
-     transform, even a static one, establishes its own stacking context"
-     family of bug already documented elsewhere in this project (see
-     AGENTS.md). `.hero__gallery`'s own tiles get their own transform
-     too (the scatter), but with no explicit z-index of its own,
-     `.hero__gallery` wasn't reliably winning that comparison. An
-     explicit z-index removes the ambiguity outright.
-
-     A "photoshop mask" text-through-image treatment was tried here
-     (mix-blend-mode on the letters, images moved earlier in DOM order so
-     the blend had something to read against) and then reverted outright
-     per direct follow-up ("remove the mask effect") - plain z-index is
-     back, simplest thing that satisfies "images float in front of the
-     title," which is still the actual requirement. */
-  .hero__gallery {
-    position: relative;
-    z-index: 2;
-    min-width: 0;
-  }
-
-  .hero__bottom {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    column-gap: var(--intro-gutter);
-  }
-
-  /* content.md's three literal bracket tags - replaces the earlier
-     merged role/location/availability status line (see git history).
-     Plain Tag.astro instances in a wrapping row. */
-  .hero__tags {
-    grid-column: 1 / 6;
-    grid-row: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-8) var(--space-16);
-  }
-
-  .hero__intro {
-    grid-column: 1 / 6;
-    grid-row: 2;
-    margin-top: var(--space-16);
-    max-width: 38ch;
-    font-family: var(--font-body);
-    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
-    line-height: 1.5;
-    color: var(--color-text-secondary);
-  }
-
-  /* content.md's two buttons on the left, the scroll cue pushed to the
-     far right via justify-content: space-between. Row 3, not 4 - the
-     Tools block that used to sit in row 3 moved to About (content.md
-     never puts Tools in the Hero at all; see AGENTS.md's item 8). */
-  .hero__cta-row {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    display: flex;
+  .hero__pill {
+    display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-16);
-    justify-content: space-between;
-    margin-top: var(--space-48);
+    gap: 0.6em;
+    padding: 0.5em 1em;
+    border: var(--hairline);
+    border-radius: 999px;
+    font-size: var(--text-small);
+    font-weight: var(--weight-regular);
+    color: var(--text-muted);
+    line-height: 1.3;
   }
 
-  .hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-16);
-  }
-
-  .hero__scroll {
+  .hero__dot {
     flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .hero__title {
+    /* "Experience" is the widest line: sized to span most of the container on desktop */
+    font-size: clamp(3.25rem, 1rem + 13.5vw, 15rem);
+    margin-bottom: clamp(2rem, 1rem + 3vw, 4rem);
+  }
+
+  .hero__lower {
+    align-items: start;
+    row-gap: var(--grid-gutter);
+    border-top: var(--hairline);
+    padding-top: clamp(1.25rem, 1rem + 1vw, 2rem);
+  }
+
+  .hero__hook {
+    grid-column: 1 / -1;
+    max-width: 34ch;
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+    font-weight: var(--weight-light);
+    line-height: var(--leading-body);
+  }
+
+  .hero__tags {
+    grid-column: 1 / -1;
     display: flex;
-    align-items: center;
-    gap: 0.4em;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: var(--text-small);
   }
 
-  @media (min-width: 640px) and (max-width: 1023px) {
-    .hero__inner {
-      /* Same fix as the mobile block below, for the same reason: the base rule's 100dvh space-between is a desktop-only ask (see the mobile comment), but this range never got the override — on a portrait tablet (820x1100 measured) it left a ~265px dead gap between the image/title and the role/intro/CTA block. */
-      justify-content: flex-start;
-    }
-
-    .hero__bottom {
-      grid-template-columns: repeat(7, 1fr);
-    }
-
-    /* Same tags -> intro -> CTA row order as the base rule (unchanged
-             here, just a wider column span) - only the column range needs
-             overriding for the narrower 7-column grid. .hero__cta-row already
-             spans 1 / -1 at every width, so it needs no override here. */
-    .hero__tags,
-    .hero__intro {
-      grid-column: 1 / 8;
-    }
+  .hero__tags li,
+  .hero__tags a {
+    display: inline-block;
+    padding: 0.4em 0.9em;
+    border: var(--hairline);
+    border-radius: 999px;
+    color: var(--text-muted);
+    transition:
+      color var(--duration) var(--ease-out),
+      border-color var(--duration) var(--ease-out);
   }
 
-  @media (max-width: 639px) {
-    .hero__inner {
-      justify-content: flex-start;
+  .hero__tags li:has(a) {
+    padding: 0;
+    border: 0;
+  }
+
+  .hero__tags a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  @media (min-width: 800px) {
+    .hero__hook {
+      grid-column: 1 / span 6;
     }
 
-    .hero__visual {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .hero__bottom {
-      /* Grid becomes irrelevant here - a plain block stack follows the
-                                                                                                                                                                                         markup's own DOM order (tags, intro, CTA), which is already the
-                                                                                                                                                                                         same order the base rule's explicit grid-rows give every wider
-                                                                                                                                                                                         breakpoint, so nothing here needs to re-specify row/column
-                                                                                                                                                                                         placement the way it used to. */
-      display: block;
-      margin-top: var(--space-32);
-    }
-
-    .hero__intro {
-      max-width: none;
+    .hero__tags {
+      grid-column: 9 / -1;
+      justify-content: flex-end;
     }
   }
 </style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const pill = document.querySelector<HTMLElement>('.hero__pill');
+  const title = gsap.utils.toArray<HTMLElement>('.reveal--title');
+  const hook = gsap.utils.toArray<HTMLElement>('.reveal--hook');
+  const tags = document.querySelector<HTMLElement>('.reveal--tags');
+
+  if (!prefersReducedMotion() && pill && tags) {
+    // Start states are set in JS, not CSS, so no-JS visitors still see everything.
+    // The tags aren't masked, so they get a short travel instead of a full-height slide.
+    gsap.set([pill, ...title, ...hook], { yPercent: 100, opacity: 0 });
+    gsap.set(tags, { y: 24, opacity: 0 });
+
+    // Sequence: status pill, then H1 lines, then hook, then tags.
+    const defaults = { duration: 1.2, ease: 'expo.out', opacity: 1 };
+    gsap
+      .timeline()
+      .to(pill, { ...defaults, yPercent: 0 })
+      .to(title, { ...defaults, yPercent: 0, stagger: 0.12 }, '-=0.95')
+      .to(hook, { ...defaults, yPercent: 0, stagger: 0.1 }, '-=0.9')
+      .to(tags, { ...defaults, y: 0 }, '-=1');
+  }
+</script>

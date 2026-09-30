@@ -1,0 +1,32 @@
+---
+// Temporary placeholder for the empty homepage/about page while the new
+// direction is being worked out (see index.astro/about.astro's own
+// comments on the fresh-start reset). Plain, on-brand type - no new
+// design language for something meant to be replaced shortly.
+---
+
+<div class="under-construction">
+  <p class="under-construction__title">Under construction</p>
+</div>
+
+<style>
+  .under-construction {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60dvh;
+    padding-inline: var(--intro-margin);
+    text-align: center;
+  }
+
+  .under-construction__title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    font-size: clamp(2.5rem, 5vw + 1.5rem, var(--text-h1));
+    color: var(--color-ink);
+  }
+</style>

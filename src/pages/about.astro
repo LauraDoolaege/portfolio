@@ -6,11 +6,23 @@
 // (the nav) is the only thing still on the page.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
+import UnderConstruction from '../components/ui/UnderConstruction.astro';
 ---
 
 <BaseLayout
   title="About | Laura Doolaege"
   description="Laura's portfolio: digital development & design."
 >
-  <Header />
+  <div class="page">
+    <Header />
+    <UnderConstruction />
+  </div>
 </BaseLayout>
+
+<style>
+  .page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+</style>

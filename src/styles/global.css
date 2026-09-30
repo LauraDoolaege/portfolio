@@ -1,11 +1,11 @@
-
 :root {
   /* Color (light default; a dark mode can override these later) */
   --bg-primary: #f3f2ee; /* Warm alabaster / newsprint */
   --text-main: #1a1a1a; /* Deep charcoal */
   --text-muted: #6b6a68; /* Warm grey */
   --border-color: #d1cfc7; /* 1px architectural grid lines */
-  --accent: #c25e3e; /* Vintage terracotta, sparingly */
+  --accent: #c25e3e; /* Vintage terracotta: dot, lines, fills (3.8:1, not for small text) */
+  --accent-text: #a8492c; /* Darker terracotta for small text/hover (5.2:1 on alabaster) */
 
   /* Type */
   --font-sans: 'Switzer', system-ui, sans-serif;
@@ -67,6 +67,7 @@ h4 {
 }
 
 h1 {
+  text-wrap: balance;
   font-size: var(--text-hero);
   font-weight: var(--weight-heavy);
   line-height: var(--leading-display);
@@ -78,6 +79,7 @@ h2 {
 }
 
 h3 {
+  text-wrap: balance;
   font-size: var(--text-h3);
   line-height: 1.15;
 }
@@ -114,6 +116,11 @@ select {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg-primary);
 }
 
 a:focus-visible,

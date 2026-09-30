@@ -3,14 +3,12 @@
 // architectural grid split by a vertical hairline (horizontal on mobile).
 const columns = [
   {
-    label: 'The Why',
     question: 'How do we design an experience people actually need, love, and connect with?',
     approach: 'Devine (UX Major)',
     value:
       'Human-centered research, mapping user journeys, and prototyping interactions across physical and digital touchpoints.',
   },
   {
-    label: 'The How',
     question: 'How do we make sure people discover it and engage with it?',
     approach: 'Bachelor in Marketing Communication (Cum Laude)',
     value:
@@ -21,19 +19,21 @@ const columns = [
 
 <section class="why-how" aria-labelledby="why-how-title">
   <div class="container">
-    <h2 id="why-how-title" class="why-how__title">2 Questions Every Product Needs to Answer</h2>
+    <h2 id="why-how-title" class="why-how__title">
+      2 Questions Every Product Needs to Answer
+    </h2>
 
     <div class="why-how__grid">
-      {
-        columns.map((c) => (
-          <article class="why-how__cell">
-            <p class="why-how__label">{c.label}</p>
-            <h3 class="why-how__question">{c.question}</h3>
-            <p class="why-how__approach">{c.approach}</p>
-            <p class="why-how__value">{c.value}</p>
-          </article>
-        ))
-      }
+      <span class="why-how__rule" aria-hidden="true">
+        <span class="why-how__dot"></span>
+      </span>
+      {columns.map((c) => (
+        <article class="why-how__cell">
+          <h3 class="why-how__question">{c.question}</h3>
+          <p class="why-how__approach">{c.approach}</p>
+          <p class="why-how__value">{c.value}</p>
+        </article>
+      ))}
     </div>
   </div>
 </section>
@@ -51,6 +51,7 @@ const columns = [
   }
 
   .why-how__grid {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     border-bottom: var(--hairline);
@@ -68,14 +69,8 @@ const columns = [
     border-top: var(--hairline);
   }
 
-  .why-how__label {
-    font-size: var(--text-small);
-    color: var(--accent);
-    letter-spacing: 0.02em;
-  }
-
   .why-how__question {
-    max-width: 22ch;
+    max-width: 26ch;
     font-size: clamp(1.75rem, 1.1rem + 2.2vw, 3rem);
     line-height: 1.05;
     margin-bottom: clamp(1rem, 0.5rem + 3vw, 4rem);
@@ -97,15 +92,40 @@ const columns = [
     line-height: var(--leading-body);
   }
 
+  .why-how__rule {
+    display: none;
+  }
+
   @media (min-width: 800px) {
+    .why-how__rule {
+      display: block;
+      position: absolute;
+      inset-block: 0;
+      left: 50%;
+      width: 1px;
+      background: var(--border-color);
+      transform-origin: top;
+    }
+
+    /* The page's one accent "wink", echoing the status dot in the hero: a terracotta point where the divider meets the header line */
+    .why-how__dot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--accent);
+      margin: -0.25rem 0 0 -0.25rem;
+    }
+
     .why-how__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    /* Vertical hairline sits on the shared edge; padding keeps text off the line */
+    /* The divider is the .why-how__rule element (drawn in by the script); padding keeps text off it */
     .why-how__cell + .why-how__cell {
       border-top: 0;
-      border-left: var(--hairline);
       padding-left: clamp(1.5rem, 0.5rem + 3vw, 4rem);
     }
 
@@ -121,11 +141,15 @@ const columns = [
   const section = document.querySelector<HTMLElement>('.why-how');
   const title = section?.querySelector<HTMLElement>('.why-how__title');
   const cells = gsap.utils.toArray<HTMLElement>('.why-how__cell');
+  const rule = section?.querySelector<HTMLElement>('.why-how__rule');
+  const dot = section?.querySelector<HTMLElement>('.why-how__dot');
 
-  if (section && title && !prefersReducedMotion()) {
+  if (section && title && rule && dot && !prefersReducedMotion()) {
     // Start states set in JS so no-JS visitors still see the content.
     gsap.set(title, { y: 20, opacity: 0 });
     gsap.set(cells, { y: 30, opacity: 0 });
+    gsap.set(rule, { scaleY: 0 });
+    gsap.set(dot, { scale: 0 });
 
     ScrollTrigger.create({
       trigger: section,
@@ -135,7 +159,9 @@ const columns = [
         gsap
           .timeline({ defaults: { duration: 1, ease: 'power3.out', y: 0, opacity: 1 } })
           .to(title, {})
-          .to(cells, { stagger: 0.15 }, '-=0.7');
+          .to(cells, { stagger: 0.15 }, '-=0.7')
+          .to(rule, { scaleY: 1, y: 0, opacity: 1, duration: 1.4, ease: 'expo.inOut' }, '-=1.2')
+          .to(dot, { scale: 1, y: 0, opacity: 1, duration: 0.6, ease: 'back.out(2)' }, '-=0.4');
       },
     });
   }

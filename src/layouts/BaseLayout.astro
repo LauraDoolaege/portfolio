@@ -10,7 +10,8 @@ interface Props {
 // @font-face lives here, not in a CSS file: withBase() keeps the public/fonts URLs correct in dev and build.
 const fontFaces = ['', 'Italic']
   .map(
-    (v) => `@font-face{font-family:'Switzer';src:url('${withBase(`/fonts/Switzer-Variable${v}.woff2`)}') format('woff2');font-weight:100 900;font-style:${v ? 'italic' : 'normal'};font-display:swap}`
+    (v) =>
+      `@font-face{font-family:'Switzer';src:url('${withBase(`/fonts/Switzer-Variable${v}.woff2`)}') format('woff2');font-weight:100 900;font-style:${v ? 'italic' : 'normal'};font-display:swap}`,
   )
   .join('');
 
@@ -25,7 +26,7 @@ const { title, description = "Laura's portfolio: digital development & design." 
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <meta name="description" content={description} />
     <title>{title}</title>
-    <style is:inline set:html={fontFaces} />
+    <style is:inline set:html={fontFaces}></style>
   </head>
   <body id="top">
     <slot />

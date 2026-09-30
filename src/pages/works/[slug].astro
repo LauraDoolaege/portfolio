@@ -13,13 +13,15 @@ export async function getStaticPaths() {
   const works = (await getCollection('works')).sort((a, b) => a.id.localeCompare(b.id));
   return works.map((entry, i) => ({
     params: { slug: entry.id },
-    props: { entry, next: works[(i + 1) % works.length] },
+    // "More work": the three projects after this one, wrapping around, never this one
+    props: { entry, more: [1, 2, 3].map((n) => works[(i + n) % works.length]) },
   }));
 }
 
-const { entry, next } = Astro.props;
+const { entry, more } = Astro.props;
 const { Content } = await render(entry);
-const { title, description, type, coverImage, role, timeline, tools, team, tldr } = entry.data;
+const { title, description, type, coverImage, role, timeline, tools, team, tldr, behanceUrl } =
+  entry.data;
 
 const meta = [
   { label: 'Role', value: role },
@@ -57,6 +59,12 @@ const meta = [
           ))}
         </dl>
 
+        {behanceUrl && (
+          <a class="behance-btn" href={behanceUrl} target="_blank" rel="noopener noreferrer">
+            [ View full Behance case study <span class="behance-btn__arrow">↗</span> ]
+          </a>
+        )}
+
         {type === 'ux' && tldr && (
           <div class="tldr">
             <p class="tldr__label">TL;DR</p>
@@ -80,14 +88,42 @@ const meta = [
         <Content />
       </div>
 
-      <div class="container">
-        <a class="next" href={withBase(`/works/${next.id}`)}>
-          <span class="next__label">Up next: {next.data.title}</span>
-          <span class="next__link">
-            Next Project <span class="next__arrow">↗</span>
-          </span>
-        </a>
-      </div>
+      {behanceUrl && (
+        <div class="container">
+          <a class="cta" href={behanceUrl} target="_blank" rel="noopener noreferrer">
+            <span class="cta__line">View Behance</span>
+            <span class="cta__line">
+              Case Study <span class="cta__arrow">↗</span>
+            </span>
+          </a>
+        </div>
+      )}
+
+      <section class="more container" aria-labelledby="more-label">
+        <h2 id="more-label" class="more__label">
+          [ More Work ]
+        </h2>
+        <ul class="more__grid">
+          {more.map((w) => (
+            <li class="more__item">
+              <a class="card more__card" href={withBase(`/works/${w.id}`)}>
+                <div data-cursor>
+                  <ProjectImage
+                    src={w.data.coverImage}
+                    alt={`${w.data.title}: cover`}
+                    ratio="4 / 3"
+                    tone={(w.data.type === 'ux' ? 1 : 2) as 1 | 2}
+                  />
+                </div>
+                <h3 class="more__title">{w.data.title}</h3>
+                <p class="more__type">
+                  {w.data.type === 'ux' ? 'UX Strategy' : 'Visual Exploration'}
+                </p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
     <Footer />
   </div>
@@ -297,41 +333,119 @@ const meta = [
     }
   }
 
-  /* Next project */
-  .next {
-    display: block;
-    padding-block: clamp(4rem, 2rem + 8vw, 9rem);
-    transition: color 0.5s var(--ease-out);
-  }
-
-  .next__label {
-    display: block;
-    margin-bottom: clamp(1rem, 0.75rem + 1vw, 2rem);
+  /* Behance: sharp bracketed button under the meta grid; fills with ink on hover */
+  .behance-btn {
+    display: inline-block;
+    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
+    padding: 0.95em 1.3em 0.95em 0;
     font-size: var(--text-small);
-    letter-spacing: 0.02em;
-    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1;
+    transition:
+      background-color 0.5s var(--ease-out),
+      color 0.5s var(--ease-out),
+      padding 0.5s var(--ease-out);
   }
 
-  .next__link {
-    display: block;
-    font-size: clamp(3rem, 1rem + 10vw, 12rem);
-    font-weight: var(--weight-heavy);
-    letter-spacing: var(--tracking-display);
-    line-height: 0.95;
+  .behance-btn:hover,
+  .behance-btn:focus-visible {
+    padding-left: 1.3em;
+    background: var(--text-main);
+    color: var(--bg-primary);
   }
 
-  .next__arrow {
+  .behance-btn__arrow,
+  .cta__arrow {
     display: inline-block;
     transition: transform 0.5s var(--ease-out);
   }
 
-  .next:hover,
-  .next:focus-visible {
+  .behance-btn:hover .behance-btn__arrow,
+  .behance-btn:focus-visible .behance-btn__arrow {
+    transform: translate(2px, -2px);
+  }
+
+  /* Massive bottom CTA */
+  .cta {
+    display: block;
+    padding-block: clamp(3rem, 1.5rem + 6vw, 8rem);
+    /* "VIEW BEHANCE" is about 7.3em wide, so this sizes the first line to fill the container */
+    font-size: clamp(
+      2rem,
+      calc((min(100vw, var(--page-max)) - 2 * var(--page-margin)) / 7.45),
+      14rem
+    );
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 0.92;
+    text-transform: uppercase;
+    transition: color 0.5s var(--ease-out);
+  }
+
+  .cta__line {
+    display: block;
+  }
+
+  .cta:hover,
+  .cta:focus-visible {
+    color: var(--accent);
+  }
+
+  .cta:hover .cta__arrow,
+  .cta:focus-visible .cta__arrow {
+    transform: translate(0.05em, -0.05em);
+  }
+
+  /* More work: a de-boxed lookbook row. The middle card drops, as on the homepage. */
+  .more {
+    padding-block: clamp(3rem, 1.5rem + 5vw, 7rem) clamp(5rem, 3rem + 8vw, 10rem);
+  }
+
+  .more__label {
+    margin-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
+    font-size: var(--text-small);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .more__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 1.5rem + 3vw, 4rem) var(--grid-gutter);
+  }
+
+  .more__card {
+    display: block;
+  }
+
+  .more__title {
+    margin-top: 1rem;
+    transition: color 0.5s var(--ease-out);
+  }
+
+  .more__card:hover .more__title,
+  .more__card:focus-visible .more__title {
     color: var(--accent-text);
   }
 
-  .next:hover .next__arrow,
-  .next:focus-visible .next__arrow {
-    transform: translate(0.05em, -0.05em);
+  .more__type {
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 900px) {
+    .more__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .more__item:nth-child(2) {
+      margin-top: clamp(2rem, 1rem + 4vw, 5rem);
+    }
   }
 </style>

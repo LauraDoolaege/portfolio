@@ -17,6 +17,8 @@ const works = defineCollection({
     coverImage: z.string().optional(),
     // UX only: two bold sentences on the impact, shown under the meta grid
     tldr: z.string().optional(),
+    // Full case study on Behance. Adds a top button and the massive bottom CTA when present.
+    behanceUrl: z.string().optional(),
     role: z.string(),
     timeline: z.string(),
     tools: z.array(z.string()),

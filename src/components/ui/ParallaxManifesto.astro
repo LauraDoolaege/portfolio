@@ -1,4 +1,5 @@
 ---
+import Button from './Button.astro';
 // Centered label + massive statement, with floating placeholder images that overlap the text
 // edges and drift at different speeds as the section scrolls (scrub parallax).
 // Reused by the homepage About teaser and the About page Inspiration block.
@@ -42,17 +43,9 @@ import SectionLabel from './SectionLabel.astro';
     {num ? <SectionLabel num={num} text={label} /> : <p class="manifesto__label">{label}</p>}
     <p class="manifesto__text">{text}</p>
     {cta && (
-      <a class="manifesto__btn btn" href={cta.href} data-magnetic>
+      <Button class="manifesto__btn" href={cta.href} data-magnetic>
         {cta.label}
-        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <path
-            d="M3 9L9 3M4 3h5v5"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linecap="square"
-          />
-        </svg>
-      </a>
+      </Button>
     )}
   </div>
 </section>
@@ -78,7 +71,7 @@ import SectionLabel from './SectionLabel.astro';
 
   .manifesto__label,
   .manifesto__text,
-  .manifesto__btn {
+  :global(.manifesto__btn) {
     margin-top: clamp(2rem, 1.5rem + 2.5vw, 4rem);
   }
 

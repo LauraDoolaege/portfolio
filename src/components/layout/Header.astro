@@ -21,6 +21,7 @@ const currentPath = Astro.url.pathname;
           <li>
             <a
               href={l.href}
+              class="nav-link"
               data-magnetic
               aria-current={l.href === currentPath ? 'page' : undefined}
             >
@@ -68,6 +69,7 @@ const currentPath = Astro.url.pathname;
   }
 
   .site-header__links a {
+    position: relative;
     padding-bottom: 0.35em;
     transition:
       color var(--duration) var(--ease-out),
@@ -85,9 +87,14 @@ const currentPath = Astro.url.pathname;
     color: var(--text-main);
   }
 
-  /* Current page: full ink with a terracotta underline */
+  /* Current page: full ink, with the drawing line held open in terracotta */
   .site-header__links a[aria-current='page'] {
     color: var(--text-main);
-    background: linear-gradient(var(--accent), var(--accent)) 0 100% / 100% 2px no-repeat;
+  }
+
+  .site-header__links a[aria-current='page']::after {
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(1);
   }
 </style>

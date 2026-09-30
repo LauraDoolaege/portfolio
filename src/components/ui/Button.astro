@@ -1,0 +1,52 @@
+---
+// The site's two button types, in one component.
+//   variant="solid" (Type 1): full button, solid ink background, centred label.
+//   variant="link"  (Type 2): text + arrow, underline draws in on hover, arrow nudges along.
+// Type 2 takes size="sm" | "md" | "lg" (big display text). Styling lives in global.css (.btn, .btn-link).
+// `icon` picks the arrow: "up-right" (default), "down" (downloads), "left" (back links).
+// Extra attributes (target, rel, data-*) pass through to the <a>.
+interface Props {
+  href: string;
+  variant?: 'solid' | 'link';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: 'up-right' | 'down' | 'left' | 'none';
+  class?: string;
+  [attr: string]: unknown;
+}
+
+const {
+  href,
+  variant = 'solid',
+  size = 'md',
+  icon = 'up-right',
+  class: extra,
+  ...rest
+} = Astro.props;
+
+const paths = {
+  'up-right': 'M3 9L9 3M4 3h5v5',
+  down: 'M6 2v7M3 6.5L6 9.5l3-3',
+  left: 'M9 6H2.5M5.5 3L2.5 6l3 3',
+} as const;
+
+const classes =
+  variant === 'solid'
+    ? ['btn', extra]
+    : ['btn-link', `btn-link--${size}`, icon === 'left' && 'btn-link--back', extra];
+---
+
+<a class:list={classes} href={href} {...rest}>
+  {icon === 'left' && variant === 'link' && (
+    <svg class="btn__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d={paths.left} stroke="currentColor" stroke-width="1.2" stroke-linecap="square" />
+    </svg>
+  )}
+  <span class="btn__label">
+    <slot />
+  </span>
+  {icon !== 'none' && icon !== 'left' && (
+    <svg class="btn__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d={paths[icon]} stroke="currentColor" stroke-width="1.2" stroke-linecap="square" />
+    </svg>
+  )}
+</a>

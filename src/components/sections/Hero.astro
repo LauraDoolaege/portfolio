@@ -1,4 +1,5 @@
 ---
+import Button from '../ui/Button.astro';
 // Hero: status pill, massive H1, hook, tags. Each text line sits in an
 // overflow-hidden mask; the script slides the inner element up into view.
 ---
@@ -38,22 +39,15 @@
       <ul class="hero__tags reveal--tags" aria-label="Focus">
         <li class="tag">UX Design</li>
         <li>
-          <a
-            class="link"
+          <Button
+            variant="link"
+            size="sm"
             href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
             target="_blank"
             rel="noopener"
           >
-            Devine 3rd Year{' '}
-            <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path
-                d="M3 9L9 3M4 3h5v5"
-                stroke="currentColor"
-                stroke-width="1.2"
-                stroke-linecap="square"
-              />
-            </svg>
-          </a>
+            Devine 3rd Year
+          </Button>
         </li>
       </ul>
     </div>

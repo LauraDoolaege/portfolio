@@ -159,11 +159,6 @@ button:focus-visible {
   outline-offset: 4px;
 }
 
-/* Inline links: pull the ring in so it hugs the text and the drawn underline */
-.link:focus-visible {
-  outline-offset: 2px;
-}
-
 /* Shared 12-column page container: every section aligns to this. */
 .container {
   width: 100%;
@@ -222,42 +217,145 @@ button:focus-visible {
 
 /* ---------- UI element system ---------- */
 
-/* Buttons: sharp, one thin border, "[Text] ↗". Hover fills with the text color and inverts. */
-.btn {
+/* Two button types, both rendered by src/components/ui/Button.astro.
+   Type 1, .btn: a full button. Solid ink fill, sharp corners, centred label; hover inverts it to
+   an outline. Type 2, .btn-link: text plus an arrow, with an underline that draws in on hover.
+   Both lay out as an inline flex row, so the icon can never wrap under the label. */
+.btn,
+.btn-link {
   display: inline-flex;
+  flex-direction: row;
   align-items: center;
-  gap: 0.7em;
-  padding: 0.95em 1.3em;
-  border: 1px solid currentColor;
-  border-radius: 0;
-  font-size: var(--text-body);
-  font-weight: var(--weight-regular);
-  line-height: 1;
+  gap: 0.6em;
   white-space: nowrap;
-  color: var(--text-main);
-  transition:
-    background-color 0.5s var(--ease-out),
-    border-color 0.5s var(--ease-out),
-    color 0.5s var(--ease-out);
+  line-height: 1;
 }
 
-.btn svg {
+.btn__icon {
   width: 0.8em;
   height: 0.8em;
   flex-shrink: 0;
-  transition: transform 0.5s var(--ease-out);
+}
+
+.btn {
+  justify-content: center;
+  padding: 1em 1.4em;
+  border: 1px solid var(--text-main);
+  border-radius: 0;
+  background: var(--text-main);
+  color: var(--bg-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  text-align: center;
+  transition:
+    background-color 0.5s var(--ease-out),
+    color 0.5s var(--ease-out);
 }
 
 .btn:hover,
 .btn:focus-visible {
-  background: var(--text-main);
-  border-color: var(--text-main);
-  color: var(--bg-primary);
+  background: transparent;
+  color: var(--text-main);
 }
 
-.btn:hover svg,
-.btn:focus-visible svg {
-  transform: translate(2px, -2px);
+.btn .btn__icon {
+  transition: transform 0.4s ease-in-out;
+}
+
+.btn:hover .btn__icon,
+.btn:focus-visible .btn__icon {
+  transform: translateX(4px);
+}
+
+.btn-link {
+  position: relative;
+  padding-bottom: 0.3em;
+  color: var(--text-main);
+  font-size: var(--text-paragraph);
+  font-weight: var(--weight-regular);
+}
+
+.btn-link--sm {
+  font-size: var(--text-small);
+}
+
+/* Display size: big heavy uppercase text; the arrow sits on the last line's baseline */
+.btn-link--lg {
+  align-items: flex-end;
+  gap: 0.2em;
+  padding-bottom: 0.12em;
+  /* Sized from the container so two lines of ~7.5em fill its width */
+  font-size: clamp(
+    2rem,
+    calc((min(100vw, var(--page-max)) - 2 * var(--page-margin)) / 7.45),
+    14rem
+  );
+  font-weight: var(--weight-heavy);
+  letter-spacing: var(--tracking-display);
+  line-height: 0.92;
+  text-transform: uppercase;
+  white-space: normal;
+}
+
+.btn-link--lg .btn__icon {
+  width: 0.6em;
+  height: 0.6em;
+  margin-bottom: 0.1em;
+}
+
+/* The drawing line: rests collapsed on the right, so on hover it draws left to right and on leave
+   it retracts to the right. Also used by the header navigation (.nav-link). */
+.btn-link::after,
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.btn-link:hover::after,
+.btn-link:focus-visible::after,
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.btn-link--lg::after {
+  height: 2px;
+}
+
+.btn-link .btn__icon {
+  transition: transform 0.4s ease-in-out;
+}
+
+.btn-link:hover .btn__icon,
+.btn-link:focus-visible .btn__icon {
+  transform: translateX(4px);
+}
+
+/* Back links point left, so their arrow nudges left */
+.btn-link--back:hover .btn__icon,
+.btn-link--back:focus-visible .btn__icon {
+  transform: translateX(-4px);
+}
+
+.btn-link--lg:hover,
+.btn-link--lg:focus-visible {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-link::after,
+  .nav-link::after {
+    transition: none;
+  }
 }
 
 /* Tags: the one label style. Phase markers, section labels, meta labels, categories and pills all
@@ -303,31 +401,6 @@ button:focus-visible {
   line-height: 1.5;
   letter-spacing: -0.005em;
   text-wrap: pretty;
-}
-
-/* Links: plain text with an underline that draws in on hover */
-.link {
-  display: inline;
-  padding-bottom: 0.15em;
-  background-image: linear-gradient(currentColor, currentColor);
-  background-repeat: no-repeat;
-  background-position: 0 100%;
-  background-size: 0% 1px;
-  transition:
-    background-size 0.5s var(--ease-out),
-    color 0.5s var(--ease-out);
-}
-
-.link:hover,
-.link:focus-visible {
-  background-size: 100% 1px;
-}
-
-.link svg {
-  display: inline-block;
-  width: 0.7em;
-  height: 0.7em;
-  margin-left: 0.25em;
 }
 
 /* ---------- Tactile layer ---------- */

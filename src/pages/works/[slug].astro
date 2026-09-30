@@ -6,6 +6,7 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/layout/Header.astro';
 import Footer from '../../components/layout/Footer.astro';
+import Button from '../../components/ui/Button.astro';
 import ProjectImage from '../../components/ProjectImage.astro';
 import { withBase } from '../../utils/url';
 
@@ -36,14 +37,9 @@ const meta = [
     <Header />
     <main id="main" class={`work-page work-page--${type}`}>
       <div class="container">
-        <a class="back" href={`${withBase('/')}#work`}>
-          <span class="back__bracket">[</span>
-          <span class="back__arrow" aria-hidden="true">
-            ←
-          </span>{' '}
+        <Button class="back" variant="link" size="sm" icon="left" href={`${withBase('/')}#work`}>
           Back to works
-          <span class="back__bracket">]</span>
-        </a>
+        </Button>
       </div>
 
       <div class="container">
@@ -72,17 +68,9 @@ const meta = [
         </dl>
 
         {behanceUrl && (
-          <a class="behance-btn btn" href={behanceUrl} target="_blank" rel="noopener noreferrer">
+          <Button class="behance-btn" href={behanceUrl} target="_blank" rel="noopener noreferrer">
             View full Behance case study
-            <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path
-                d="M3 9L9 3M4 3h5v5"
-                stroke="currentColor"
-                stroke-width="1.2"
-                stroke-linecap="square"
-              />
-            </svg>
-          </a>
+          </Button>
         )}
       </div>
 
@@ -94,12 +82,18 @@ const meta = [
 
       {behanceUrl && (
         <div class="container">
-          <a class="cta" href={behanceUrl} target="_blank" rel="noopener noreferrer">
-            <span class="cta__line">View Behance</span>
-            <span class="cta__line">
-              Case Study <span class="cta__arrow">↗</span>
-            </span>
-          </a>
+          <Button
+            class="cta"
+            variant="link"
+            size="lg"
+            href={behanceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Behance
+            <br />
+            Case Study
+          </Button>
         </div>
       )}
 
@@ -144,33 +138,8 @@ const meta = [
     flex: 1;
   }
 
-  .back {
-    display: inline-block;
+  :global(.back) {
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
-    font-size: var(--text-small);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    transition: color 0.5s var(--ease-out);
-  }
-
-  .back__bracket {
-    color: var(--text-muted);
-  }
-
-  .back__arrow {
-    display: inline-block;
-    margin-left: 0.4em;
-    transition: transform 0.5s var(--ease-out);
-  }
-
-  .back:hover,
-  .back:focus-visible {
-    color: var(--accent-text);
-  }
-
-  .back:hover .back__arrow,
-  .back:focus-visible .back__arrow {
-    transform: translateX(-4px);
   }
 
   /* The golden frame: left-aligned with the title, capped width */
@@ -308,44 +277,12 @@ const meta = [
   }
 
   /* Behance button under the meta grid: the shared .btn, just spaced from the meta rules */
-  .behance-btn {
+  :global(.behance-btn) {
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
   }
 
-  .cta__arrow {
-    display: inline-block;
-    transition: transform 0.5s var(--ease-out);
-  }
-
-  /* Massive bottom CTA */
-  .cta {
-    display: block;
-    padding-block: clamp(3rem, 1.5rem + 6vw, 8rem);
-    /* "VIEW BEHANCE" is about 7.3em wide, so this sizes the first line to fill the container */
-    font-size: clamp(
-      2rem,
-      calc((min(100vw, var(--page-max)) - 2 * var(--page-margin)) / 7.45),
-      14rem
-    );
-    font-weight: var(--weight-heavy);
-    letter-spacing: var(--tracking-display);
-    line-height: 0.92;
-    text-transform: uppercase;
-    transition: color 0.5s var(--ease-out);
-  }
-
-  .cta__line {
-    display: block;
-  }
-
-  .cta:hover,
-  .cta:focus-visible {
-    color: var(--accent);
-  }
-
-  .cta:hover .cta__arrow,
-  .cta:focus-visible .cta__arrow {
-    transform: translate(0.05em, -0.05em);
+  :global(.cta) {
+    margin-block: clamp(3rem, 1.5rem + 6vw, 8rem);
   }
 
   /* More work: a de-boxed lookbook row. The middle card drops, as on the homepage. */

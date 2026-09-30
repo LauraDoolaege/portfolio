@@ -1,584 +1,70 @@
 ---
-// Site-wide header/navigation. Nav per content.md's own "Navigation"
-// list: Work / Process / About / Let's talk (a button, linking to
-// contact) - supersedes the brief's earlier Work/About/CV/Contact list.
-// "Let's talk" renders as a Button (secondary, quiet underline) rather
-// than a plain nav link, matching content.md's own "(button)" note, and
-// sits next to CV rather than inside the collapsing nav list - same
-// "always-reachable primary action" treatment CV already had. The
-// wordmark is small — a quiet corner mark rather than a masthead
-// statement, since the Hero carries its own big headline moment (see
-// Hero.astro).
-//
-// Header and Hero now share one alignment system: --intro-max-width /
-// --intro-margin (global.css), not the sitewide --content-max-width /
-// --space-outer used everywhere below the fold — logo, nav/CV, the
-// hero title, and the hero bottom block all sit on the same margin
-// lines. Nav labels use the mono "Label" style (Space Mono, 12px,
-// wide tracking) instead of the body-font style used elsewhere, per
-// explicit request.
-//
-// Open decisions this component had to fill in (see CLAUDE.md "Open
-// decisions" — not locked anywhere yet):
-// - Mobile nav pattern: plain inline text nav from desktop (1024px) up.
-//   Below that — tablet and phone both — a hamburger opens a full-screen
-//   panel (per direct request: "the menu on tablet and mobile screens
-//   should fill the entire screen"), not a small dropdown. CV and "Let's
-//   talk" both stay visible at every width, painted above the panel via
-//   z-index — only Work/Process/About collapse into it.
-// - Sticky vs. static: static (scrolls with the page).
-// - No border under the header, per explicit request — the header and
-//   Hero now read as one continuous opening screen (see index.astro),
-//   so a hard rule between them would cut that in half.
+// Navigation bar: wordmark left, links right, hairline underneath.
 import { withBase } from '../../utils/url';
-import Button from '../ui/Button.astro';
 
-const navItems = [
-  // Work and Process aren't their own pages (see CLAUDE.md "Current
-  // status" — Work index is still proposed, unbuilt), so these point at
-  // same-page anchors instead of 404ing: Work jumps to the homepage's
-  // own #work section (SelectedWork.astro), Process to #process
-  // (Principles.astro, "How I detangle") - a bare hash still works from
-  // any page since both live on the homepage. "Let's talk" (content.md's
-  // 4th nav item, a button linking to contact) renders separately below,
-  // not as a plain link in this list.
+const links = [
   { href: `${withBase('/')}#work`, label: 'Work' },
-  { href: `${withBase('/')}#process`, label: 'Process' },
   { href: withBase('/about'), label: 'About' },
+  { href: '#contact', label: 'Contact' },
 ];
-
-// trailingSlash: 'never' (astro.config.mjs) means Astro.url.pathname never
-// carries one either, so this can compare directly against `withBase()`
-// output without normalizing either side.
 const currentPath = Astro.url.pathname;
-
-// The header's own location/availability line is skipped on the homepage
-// specifically: per direct request, Hero.astro now shows the identical
-// line itself (role -> location -> paragraph -> tools) on every screen
-// width, not just mobile like it used to. Header renders on every page
-// though, and everywhere except the homepage there's no Hero to carry it,
-// so it still needs to show here on About/etc. - only the homepage would
-// otherwise show the same fact twice on screen at once.
-const isHome = currentPath === withBase('/');
 ---
 
 <header class="site-header">
-  <div class="site-header__inner">
-    <div class="site-header__identity">
-      <!--
-        Restyled to the same bracketed-mono-label device Tag.astro/the
-        hero's own tags used to use - per direct request ("make my name
-        at the top have the layout of the current tags instead"), once
-        those hero tags were removed (see Hero.astro's own comment).
-      -->
-      <a href={withBase('/')} class="site-header__name">
-        <span aria-hidden="true">[</span>
-        Laura Doolaege
-        <span aria-hidden="true">]</span>
-      </a>
-
-      <!--
-        Location + availability, per direct request ("a classy and
-        creative way to incorporate my location and 'seeking internship
-        February 2027'"). A hairline rule separates it from the wordmark
-        instead of a status dot - CLAUDE.md's own quality guardrails name
-        "decorative status dots" specifically as something to avoid,
-        which rules out the single most common way sites signal "open to
-        work." The "/" this first used between Belgium and the
-        availability line is gone again (direct follow-up: it read as a
-        nav element, since "/" is already this header's own separator
-        between Work/About/Contact) - a plain "|" instead, which doesn't
-        carry that meaning anywhere else here. Mono/text-secondary, same
-        weight as the nav - a quiet business-card detail next to the
-        wordmark, not a second competing headline.
-      -->
-      {!isHome && (
-        <p class="site-header__status">
-          <svg class="site-header__status-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path
-              d="M8 14.2C8 14.2 12.5 9.8 12.5 6.3C12.5 3.8 10.5 1.8 8 1.8C5.5 1.8 3.5 3.8 3.5 6.3C3.5 9.8 8 14.2 8 14.2Z"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linejoin="round"
-            />
-            <circle cx="8" cy="6.3" r="1.6" stroke="currentColor" stroke-width="1.2" />
-          </svg>
-          Belgium <span aria-hidden="true">|</span> Available Feb 2027
-        </p>
-      )}
-    </div>
-
-    <div class="site-header__right">
-      <nav aria-label="Primary" class="site-header__nav" id="primary-nav">
-        <ul class="site-header__links">
-          {navItems.map((item) => (
+  <div class="container site-header__inner">
+    <a href={withBase('/')} class="site-header__name">Laura Doolaege</a>
+    <nav aria-label="Primary">
+      <ul class="site-header__links">
+        {
+          links.map((l) => (
             <li>
-              <a
-                href={item.href}
-                class="site-header__link"
-                aria-current={item.href === currentPath ? 'page' : undefined}
-              >
-                {/* Text-roll hover: two stacked copies of the label in one
-                grid cell; hover/focus slides the visible one up and out,
-                the hidden duplicate up into view. */}
-                <span class="site-header__link-roll">
-                  <span class="site-header__link-roll-line">{item.label}</span>
-                  <span class="site-header__link-roll-line" aria-hidden="true">
-                    {item.label}
-                  </span>
-                </span>
+              <a href={l.href} aria-current={l.href === currentPath ? 'page' : undefined}>
+                {l.label}
               </a>
             </li>
-          ))}
-          <!-- content.md nav: "Let's talk (button, links to contact)" -
-               a real list item (not a header-level always-visible action
-               like CV below) so it collapses into the full-screen mobile
-               panel along with Work/Process/About instead of fighting
-               them for space on the tight mobile top row. -->
-          <li class="site-header__talk-item">
-            <Button href="#contact" variant="secondary" class="site-header__talk">
-              Let's talk
-            </Button>
-          </li>
-        </ul>
-      </nav>
-
-      <!-- TODO: replace href="#" with the real CV PDF path once supplied (PROJECT_BRIEF.md Section 6) -->
-      <Button href="#" variant="primary" icon="download" class="site-header__cv">
-        CV
-      </Button>
-
-      <button
-        type="button"
-        class="site-header__toggle"
-        aria-expanded="false"
-        aria-controls="primary-nav"
-        aria-label="Menu"
-      >
-        <span class="site-header__toggle-bar"></span>
-        <span class="site-header__toggle-bar"></span>
-      </button>
-    </div>
+          ))
+        }
+      </ul>
+    </nav>
   </div>
 </header>
 
-<script>
-  import { gsap, prefersReducedMotion } from '../../utils/motion';
-
-  const header = document.querySelector('.site-header');
-  const toggle = header?.querySelector('.site-header__toggle');
-  const nav = header?.querySelector('.site-header__nav');
-
-  if (header && toggle && nav) {
-    // The panel now fills the viewport (see the styles below), so it needs
-    // the same background-scroll lock the lightbox already uses elsewhere
-    // in this project — otherwise the page behind it keeps scrolling under
-    // a full-screen overlay, which reads as broken.
-    const closeMenu = () => {
-      nav.classList.remove('is-open');
-      toggle.classList.remove('is-open');
-      toggle.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-    };
-
-    toggle.addEventListener('click', () => {
-      const isOpen = nav.classList.toggle('is-open');
-      toggle.classList.toggle('is-open', isOpen);
-      toggle.setAttribute('aria-expanded', String(isOpen));
-      document.body.style.overflow = isOpen ? 'hidden' : '';
-    });
-
-    nav.addEventListener('click', (event) => {
-      if (event.target instanceof Element && event.target.closest('a')) {
-        closeMenu();
-      }
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeMenu();
-    });
-
-    document.addEventListener('click', (event) => {
-      if (event.target instanceof Node && !header.contains(event.target)) {
-        closeMenu();
-      }
-    });
-
-    // 1024px, not 768px — the panel now covers tablet widths too (see the
-    // styles below), so it should only auto-close once the layout actually
-    // switches back to the plain inline nav.
-    const desktopUpQuery = window.matchMedia('(min-width: 1024px)');
-    desktopUpQuery.addEventListener('change', (event) => {
-      if (event.matches) closeMenu();
-    });
-  }
-
-  // Text-roll hover, GSAP-driven instead of a CSS transition — the two
-  // lines ease independently (the outgoing one a touch quicker than the
-  // incoming one settles in) rather than mirroring each other in
-  // lockstep, which is what made the CSS version feel like a mechanical
-  // swap rather than a roll. The hidden starting position is set here via
-  // gsap.set(), not in static CSS: GSAP writes the shorthand `transform`
-  // property directly, and a stylesheet rule also setting `transform` on
-  // the same element silently loses that tug-of-war the first time GSAP
-  // tries to animate away from it — the tween runs but never visibly
-  // moves anything. Same reasoning as Hero's entrance animation.
-  const reduceMotion = prefersReducedMotion();
-  const rollDuration = reduceMotion ? 0 : 0.5;
-
-  document.querySelectorAll<HTMLAnchorElement>('.site-header__link').forEach((link) => {
-    const [outgoing, incoming] = link.querySelectorAll<HTMLElement>('.site-header__link-roll-line');
-    if (!outgoing || !incoming) return;
-
-    gsap.set(incoming, { yPercent: 100 });
-
-    const enter = () => {
-      gsap.to(outgoing, { yPercent: -100, duration: rollDuration, ease: 'power3.inOut' });
-      gsap.to(incoming, {
-        yPercent: 0,
-        duration: rollDuration,
-        ease: 'power3.inOut',
-        delay: reduceMotion ? 0 : 0.04,
-      });
-    };
-    const leave = () => {
-      gsap.to(outgoing, { yPercent: 0, duration: rollDuration, ease: 'power3.inOut' });
-      gsap.to(incoming, { yPercent: 100, duration: rollDuration, ease: 'power3.inOut' });
-    };
-
-    link.addEventListener('mouseenter', enter);
-    link.addEventListener('mouseleave', leave);
-    link.addEventListener('focus', enter);
-    link.addEventListener('blur', leave);
-  });
-</script>
-
 <style>
   .site-header {
-    position: relative;
-    /* Without an explicit z-index, this only wins paint order against Hero's plain static content by luck: Hero's scroll parallax writes an inline `transform` to .hero__image, and any element with a transform establishes its own stacking context, which then outranks position:relative/absolute siblings that never got a real z-index — regardless of DOM order. That silently put .hero__image on top of the open mobile nav panel, right over the Work/About/Contact links. A real z-index here makes the header (and its nav overlay) win against anything Hero does, GSAP or not. */
-    z-index: 10;
-    padding-block: clamp(1.5rem, 1.5vw + 1rem, 2.25rem);
+    border-bottom: var(--hairline);
   }
 
   .site-header__inner {
-    max-width: var(--intro-max-width);
-    margin-inline: auto;
-    padding-inline: var(--intro-margin);
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    row-gap: 0.75rem;
-    column-gap: 2rem;
+    gap: var(--grid-gutter);
+    padding-block: 1.25rem;
+    font-size: var(--text-small);
+    font-weight: var(--weight-regular);
   }
 
-  /* Small corner mark, not a masthead — see the file header comment. */
   .site-header__name {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-    font-family: var(--font-mono);
-    font-weight: 400;
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--color-ink);
-    white-space: nowrap;
-    transition: color var(--motion-duration) var(--motion-easing);
-  }
-
-  .site-header__name:hover {
-    color: var(--color-accent);
-  }
-
-  .site-header__name:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 4px;
-  }
-
-  .site-header__identity {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    min-width: 0;
-  }
-
-  /* A hairline rule (not a status dot - see the markup comment) separates it from the wordmark, echoing the sitewide hairline-border language instead of inventing a new divider glyph. */
-  .site-header__status {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4em;
-    padding-left: 0.85rem;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
-    white-space: nowrap;
-  }
-
-  .site-header__status::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.2em;
-    bottom: 0.2em;
-    width: var(--border-hairline);
-    background: var(--color-text-secondary);
-  }
-
-  .site-header__status-icon {
-    width: 0.9em;
-    height: 0.9em;
-    flex-shrink: 0;
-  }
-
-  /* The "|" between Belgium and the availability line - not this header's own "/" nav-separator glyph, per direct request that it not read as a navigation element. Extra inline margin so it doesn't crowd either word despite the tight letter-spacing everything else here uses. */
-  .site-header__status span {
-    margin-inline: 0.15em;
-  }
-
-  /* Hidden below phone width, same reasoning as the mobile CV/toggle row needing every inch it can get - a quiet secondary detail is the right thing to drop first when space is tight, not the primary nav/name. */
-  @media (max-width: 639px) {
-    .site-header__status {
-      display: none;
-    }
-  }
-
-  /* Groups the nav links and the CV button together, CV last so it stays
-     the far-right, distinct CTA — not just another item in the nav's own
-     rhythm. Below tablet width the toggle becomes the actual rightmost
-     item instead (see media query). */
-  .site-header__right {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1.75rem;
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-display);
   }
 
   .site-header__links {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem;
+    gap: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+    color: var(--text-muted);
   }
 
-  /* A touch bigger than Button.astro's own default primary size - per
-     direct request ("bring back the previous menu on desktop with a
-     slightly bigger cv cta"). !important for the same specificity-tie
-     reason the mobile z-index override below already documents:
-     Button.astro's own .btn--primary rule (class + Astro's scope-hash)
-     outranks a plain global class regardless of source order. */
-  :global(.site-header__cv) {
-    font-size: 0.8rem !important;
-    padding: 0.85em 1.3em !important;
+  .site-header__links a {
+    transition: color var(--duration) var(--ease-out);
   }
 
-  /* Editorial "/" rhythm between nav items, in place of pure whitespace
-     — decorative punctuation, not content, so it's CSS-generated rather
-     than markup. Skipped before "Let's talk" - a boxed button reads as
-     its own distinct element, not another item in the plain-link rhythm
-     a "/" implies. */
-  .site-header__links li:not(:first-child):not(.site-header__talk-item)::before {
-    content: '/';
-    margin-inline-end: 0.6rem;
-    color: var(--color-text-secondary);
+  .site-header__links a:hover,
+  .site-header__links a[aria-current='page'] {
+    color: var(--text-main);
   }
 
-  /* A little extra breathing room before the button, since it no longer
-     gets the "/" separator's own margin-inline-end to do that job. */
-  .site-header__talk-item {
-    margin-left: 0.6rem;
-  }
-
-  /* Mono "Label" style, per explicit request — matches tags/year/buttons
-     rather than the body-font nav style used before. Still light and
-     subtle (text-secondary, not full ink). */
-  .site-header__link {
-    /* inline-block, not block: the "/" separator before this in the DOM is a plain inline ::before on the <li> — a block-level link here would force it onto its own line above instead of sitting next to it. inline-block still lets .site-header__link-roll's inner display: grid work normally. */
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
-    color: var(--color-text-secondary);
-    padding-block: 0.2em;
-    transition: color var(--motion-duration) var(--motion-easing);
-  }
-
-  .site-header__link:hover,
-  .site-header__link:focus-visible {
-    color: var(--color-accent);
-  }
-
-  .site-header__link:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 4px;
-  }
-
-  /* Current page: full ink instead of text-secondary, no separate icon or
-     underline needed — the same weight step already used everywhere else
-     to mean "the primary, not the supporting, thing". Hover still wins
-     over it, same as any other state. */
-  .site-header__link[aria-current='page'] {
-    color: var(--color-ink);
-  }
-
-  .site-header__link-roll {
-    display: grid;
-    overflow: hidden;
-  }
-
-  .site-header__link-roll-line {
-    grid-area: 1 / 1;
-  }
-
-  /* No static transform here on purpose — see the script's gsap.set()
-     comment above. If this script never runs, both lines render stacked
-     in the same cell (duplicate text, since the second one is
-     aria-hidden and only meant to be visible while rolled into view) —
-     an acceptable fallback for a decorative hover effect. */
-
-  .site-header__toggle {
-    display: none;
-    position: relative;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .site-header__toggle-bar {
-    position: absolute;
-    left: 6px;
-    right: 6px;
-    height: 2px;
-    background: var(--color-ink);
-    transition:
-      transform var(--motion-duration) var(--motion-easing),
-      top var(--motion-duration) var(--motion-easing);
-  }
-
-  .site-header__toggle-bar:first-child {
-    top: 12px;
-  }
-
-  .site-header__toggle-bar:last-child {
-    top: 20px;
-  }
-
-  .site-header__toggle.is-open .site-header__toggle-bar:first-child {
-    top: 16px;
-    transform: rotate(45deg);
-  }
-
-  .site-header__toggle.is-open .site-header__toggle-bar:last-child {
-    top: 16px;
-    transform: rotate(-45deg);
-  }
-
-  .site-header__toggle:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 4px;
-  }
-
-  /* Below desktop (tablet and phone both): Work/Process/About/Let's talk collapse into a full-screen panel, not a small dropdown — per direct request ("the menu on tablet and mobile screens should fill the entire screen"). CV stays visible outside it, painted above the panel via z-index — an always-reachable primary action, not buried behind a menu tap. 1024px matches this project's own established tablet/desktop split (see Hero's tablet range, AboutIntro/AboutStory's breakpoints) rather than the narrower 768px this used before, when tablet still got the plain inline nav. */
-  @media (max-width: 1023px) {
-    .site-header__inner {
-      /* Guarantees CV + the toggle stay on the name's row instead of wrapping underneath it — the base rule's flex-wrap: wrap exists for genuinely narrow content, but here the right-hand group should never drop to its own line. */
-      flex-wrap: nowrap;
-    }
-
-    /* .site-header__nav below gets z-index: 1 to cover the viewport as a full-screen panel — a z-index with an integer value is what actually creates a stacking context (position alone, or position + z-index: auto, doesn't), so without a matching elevation here the name/CV/toggle would paint in the plain unstacked layer underneath it, becoming invisible and unclickable the moment the panel opens, even though DOM order would otherwise suggest they render on top. z-index: 2 beats the nav's 1 regardless of nesting depth, since neither .site-header__inner nor .site-header__right introduces a stacking context of its own in between. */
-    .site-header__name {
-      position: relative;
-      z-index: 2;
-    }
-
-    :global(.site-header__cv) {
-      /* !important is required: Button.astro's own .btn--primary rule already sets position: relative; z-index: 0, and its selector (a class plus Astro's scope-hash attribute) has higher specificity than a plain global class here beats without it — same fragile-tie problem Hero.astro's mobile CTA override already ran into (see that file's own comment), not something safe to leave to stylesheet injection order. */
-      z-index: 2 !important;
-    }
-
-    .site-header__toggle {
-      position: relative;
-      z-index: 2;
-      display: block;
-    }
-
-    /* Fills the viewport rather than dropping down as a small panel under the header — inset: 0, not top: 100%. A soft fade + gentle scale (not the old translateY snap) reads as the calmer entrance asked for, eased with a custom "soft-out" curve instead of the sitewide --motion-easing (a plain ease-out, which accelerates hard out of the gate) — this one settles in gradually on both ends instead. */
-    .site-header__nav {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--color-bg-secondary);
-      visibility: hidden;
-      opacity: 0;
-      transform: scale(0.98);
-      transition:
-        opacity 0.6s var(--motion-easing-soft),
-        transform 0.6s var(--motion-easing-soft),
-        visibility 0.6s;
-    }
-
-    .site-header__nav.is-open {
-      visibility: visible;
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .site-header__links {
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-    }
-
-    .site-header__links li:not(:first-child)::before {
-      content: none;
-    }
-
-    .site-header__link {
-      display: block;
-      text-align: center;
-      padding-block: 0.7em;
-      font-size: clamp(1.75rem, 5vw, 2.5rem);
-    }
-
-    /* Real contrast failure, not just a style preference: mauve
-             (--color-accent) on chalk (--color-bg-secondary, this panel's own
-             background) measures 4.04:1, under the 4.5:1 minimum for normal
-             text - it only passes on porcelain (4.58:1), which is what this
-             link's other context (the desktop inline nav) actually sits on.
-             Ink instead, scoped to this one background. */
-    .site-header__link:hover,
-    .site-header__link:focus-visible {
-      color: var(--color-ink);
-    }
-
-    /* Same failure, same fix, for "Let's talk" (Button.astro's
-             .btn--secondary:hover rule) now that it renders inside this panel
-             too. */
-    :global(.site-header__talk:hover) {
-      color: var(--color-ink) !important;
-    }
-
-    /* Resets the desktop-row-only left margin (see the base rule) - in
-             the centered mobile column it just needs the same breathing room
-             every other stacked item gets. */
-    .site-header__talk-item {
-      margin-left: 0;
-      margin-top: var(--space-24);
-    }
-
-    :global(.site-header__talk) {
-      font-size: 1.1rem !important;
-    }
+  .site-header__links a:hover {
+    color: var(--accent);
   }
 </style>

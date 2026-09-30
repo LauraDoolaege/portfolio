@@ -1,18 +1,14 @@
 ---
-// Homepage - reset to a blank slate for a fresh direction. Every section
-// component that used to render here (Hero, SelectedWork,
-// CurrentlyWorkingOn, Principles, AboutTeaser, ContactCTA, Thread,
-// Footer) is kept in src/components/ in case it's reused, just not
-// imported here. Header (the nav) is the only thing still on the page.
+// Homepage: nav + empty hero shell (step 1).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
-import UnderConstruction from '../components/ui/UnderConstruction.astro';
+import HeroShell from '../components/sections/HeroShell.astro';
 ---
 
 <BaseLayout title="Laura Doolaege" description="Laura's portfolio: digital development & design.">
   <div class="page">
     <Header />
-    <UnderConstruction />
+    <HeroShell />
   </div>
 </BaseLayout>
 

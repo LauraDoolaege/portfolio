@@ -1,0 +1,24 @@
+---
+// Empty Hero container only: grid, spacing and height. Content and GSAP come in the next step.
+---
+
+<section class="hero" aria-label="Introduction">
+  <div class="container hero__inner">
+    <div class="grid hero__grid"></div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    flex: 1;
+    display: flex;
+    padding-block: var(--space-section) clamp(2rem, 1rem + 3vw, 4rem);
+    min-height: calc(100dvh - 4rem);
+  }
+
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+</style>

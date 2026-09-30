@@ -1,115 +1,42 @@
 @import './fonts.css';
 
-/*
-  Design tokens — desktop values only.
-  Source: PROJECT_BRIEF.md Section 3 (LOCKED). Where the brief gives a
-  range instead of an exact value, a concrete number was chosen from
-  inside that range so it can be used in CSS; see CLAUDE.md "Technical
-  decisions" for which tokens are exact-locked vs. chosen-from-range.
-
-  Mobile-scale tokens are intentionally NOT defined here yet — Section 8
-  of the brief leaves breakpoints, mobile type, and mobile spacing open.
-  Add them (and any @media overrides) once those are decided, don't
-  invent values silently in component code.
-*/
 :root {
-  /* Color */
-  --color-bg-primary: #f8f6f1; /* Porcelain */
-  --color-bg-secondary: #ece8de; /* Chalk */
-  --color-ink: #17150f; /* Charcoal */
-  --color-text-secondary: #6c665a; /* Warm grey */
-  --color-accent: #8c6670; /* Mauve — primary interactive accent */
-  --color-accent-soft: #c8aeb2; /* Soft mauve — decorative fills only */
-  --color-accent-signal: #a65139; /* Terracotta — one "wink" per composition, never a general accent */
-  --color-dark-field: #1c1b16; /* Footer / one controlled CTA band only, not a dark mode */
+  /* Color (light default; a dark mode can override these later) */
+  --bg-primary: #f3f2ee; /* Warm alabaster / newsprint */
+  --text-main: #1a1a1a; /* Deep charcoal */
+  --text-muted: #6b6a68; /* Warm grey */
+  --border-color: #d1cfc7; /* 1px architectural grid lines */
+  --accent: #c25e3e; /* Vintage terracotta, sparingly */
 
-  /* text-secondary and accent are both tuned against the light backgrounds
-     (porcelain/chalk) — against dark-field they drop to 3.03:1 / 3.49:1,
-     under the 4.5:1 body-text minimum. These are dark-field-only tints of
-     the same two colors (secondary tinted toward porcelain/the dark-field
-     foreground, accent tinted the same way to keep its hue recognizable),
-     not new accents — use only where text/links sit on dark-field. */
-  --color-text-secondary-on-dark: #8f8a80; /* ~5.0:1 on dark-field */
-  --color-accent-on-dark: #a2838a; /* ~5.0:1 on dark-field */
+  /* Type */
+  --font-sans: 'Switzer', system-ui, sans-serif;
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-bold: 700;
+  --weight-heavy: 800;
 
-  /* Type families */
-  --font-display: 'Barlow Condensed', sans-serif;
-  --font-editorial: 'Instrument Serif', serif; /* italic only, once per page max */
-  --font-body: 'IBM Plex Sans', sans-serif;
-  --font-mono: 'Space Mono', monospace;
-
-  /* Type scale — desktop (Section 3 "Type hierarchy") */
-  --text-h1: 96px;
-  --text-h1-leading: 1;
-  --text-h2: 48px;
-  --text-h2-leading: 1.05;
-  --text-h3: 26px;
-  --text-h3-leading: 1.2;
-  --text-body: 17px;
-  --text-body-leading: 1.5;
-  --text-caption: 13px;
-  --text-nav: 14px;
-  --text-label: 12px;
-  --tracking-caption: 0.06em;
-  --tracking-wide: 0.08em;
-
-  /* Spacing — desktop (Section 3 "Spacing", chosen from the 80-120 / 120-160 ranges) */
-  --space-section: 140px;
+  --text-hero: clamp(3.5rem, 2rem + 9vw, 11rem);
+  --text-h2: clamp(2rem, 1.2rem + 3.5vw, 4.5rem);
+  --text-h3: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  --text-body: 1rem;
+  --text-small: 0.8125rem;
+  --tracking-display: -0.02em;
+  --leading-display: 0.95;
+  --leading-body: 1.5;
 
   /* Layout */
   --grid-columns: 12;
+  --grid-gutter: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+  --page-max: 1600px;
+  --page-margin: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
+  --space-section: clamp(5rem, 3rem + 8vw, 10rem);
+  --hairline: 1px solid var(--border-color);
 
-  /* Borders / radii (Section 3 "Borders / radii") */
-  --border-hairline: 1px;
-  --radius-image: 2px;
-  --radius-pill: 999px;
-
-  /* Motion (Section 3 "Motion / interaction principles", 250-500ms range) */
-  --motion-duration: 300ms;
-  --motion-duration-slow: 450ms;
-  --motion-easing: ease-out;
-  /* A softer alternative to --motion-easing, for hover/press transitions
-     that should read as a tactile glide rather than a mechanical
-     ease-out - plain ease-out decelerates evenly the whole way, which is
-     what read as "harsh" on ProjectCard's hover lift, per direct
-     feedback. This is the same curve already used for the mobile nav
-     panel's entrance (Header.astro) and the Selected Work accordion's
-     flex-grow transition - promoted to a real token now that a third
-     place wants it, rather than a third hand-typed cubic-bezier literal. */
-  --motion-easing-soft: cubic-bezier(0.22, 1, 0.36, 1);
-
-  /* Strict 8px spacing scale — general-purpose, additive to the section
-     rhythm tokens above (--space-outer/--space-section), not a
-     replacement for them. Introduced for the hero rebuild; safe for any
-     future component that wants fixed steps instead of a one-off value. */
-  --space-4: 4px;
-  --space-8: 8px;
-  --space-16: 16px;
-  --space-24: 24px;
-  --space-32: 32px;
-  --space-48: 48px;
-  --space-64: 64px;
-  --space-96: 96px;
-  --space-128: 128px;
-
-  /* "Intro" layout tokens — originally scoped to just the full-viewport
-     opening screen (Header + Hero), deliberately separate from a
-     narrower, flat-100px sitewide grid every section below the fold
-     used instead (--content-max-width: 1320px / --space-outer: 100px).
-     Per direct request, with a sketch showing the two grids visibly
-     misaligned (arrows marking Selected Work's title and cards sitting
-     inside Hero's own margin lines instead of flush with them) - every
-     section now uses these same tokens instead of its own separate
-     pair, so the whole page shares one consistent margin, not two. The
-     old --content-max-width/--space-outer tokens are removed rather
-     than kept as aliases pointing at the same values - two names for
-     one number would only invite them drifting apart again later. */
-  --intro-max-width: 1600px;
-  --intro-margin: clamp(20px, 5vw, 72px);
-  --intro-gutter: var(--space-24);
+  /* Motion (easing curves for GSAP live in src/utils/motion.ts) */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 0.4s;
 }
 
-/* Minimal modern reset */
 *,
 *::before,
 *::after {
@@ -122,22 +49,38 @@ html {
 
 body {
   margin: 0;
-  background: var(--color-bg-primary);
-  color: var(--color-ink);
-  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-sans);
   font-size: var(--text-body);
-  line-height: var(--text-body-leading);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
 h3,
-h4,
-h5,
-h6 {
+h4 {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-display);
+}
+
+h1 {
+  font-size: var(--text-hero);
+  font-weight: var(--weight-heavy);
+  line-height: var(--leading-display);
+}
+
+h2 {
+  font-size: var(--text-h2);
+  line-height: 1;
+}
+
+h3 {
+  font-size: var(--text-h3);
+  line-height: 1.15;
 }
 
 p,
@@ -174,9 +117,26 @@ a {
   text-decoration: none;
 }
 
-/* Visually hidden but still available to assistive tech — for cases like
-   the hero name, where a decorative element visually stands in for part
-   of the text but the full word must still be announced. */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* Shared 12-column page container: every section aligns to this. */
+.container {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--page-margin);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -189,7 +149,6 @@ a {
   border: 0;
 }
 
-/* Locked motion principle: subtle and functional only, never forced on users who opt out */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

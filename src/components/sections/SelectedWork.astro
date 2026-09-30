@@ -1,0 +1,270 @@
+---
+// Section 2: Selected work. Two categories separated by a hairline:
+// UX strategy (2 large cards) and visual explorations (tighter 3-column gallery).
+// Projects are placeholders until real case studies exist.
+const uxProjects = [
+  { title: 'Project title one', tags: ['User Research', 'Wireframing'] },
+  { title: 'Project title two', tags: ['User Interviews', 'Prototyping'] },
+];
+
+const visualProjects = [
+  { title: 'Concept title one', tags: ['Brand Identity', '3D'], ratio: '4 / 5' },
+  { title: 'Concept title two', tags: ['Motion'], ratio: '1 / 1' },
+  { title: 'Concept title three', tags: ['Poster', 'Typography'], ratio: '3 / 4' },
+  { title: 'Concept title four', tags: ['Brand Identity'], ratio: '1 / 1' },
+  { title: 'Concept title five', tags: ['3D', 'Motion'], ratio: '3 / 4' },
+  { title: 'Concept title six', tags: ['Poster'], ratio: '4 / 5' },
+];
+---
+
+<section class="work" id="work" aria-labelledby="work-title">
+  <div class="container">
+    <header class="work__header">
+      <p class="work__label" data-reveal>
+        [ 01 ] The work
+      </p>
+      <h2 id="work-title" class="work__title" data-reveal>
+        Selected work
+      </h2>
+    </header>
+
+    <div class="work__group">
+      <div class="work__intro-row">
+        <h3 class="work__group-title" data-reveal>
+          UX Strategy
+        </h3>
+        <p class="work__intro" data-reveal>
+          In these latest group projects, I got to dive deep into human needs through user
+          interviews, insight gathering, wireframing, and validating solutions as a team.
+        </p>
+      </div>
+
+      <ul class="work__grid work__grid--ux">
+        {uxProjects.map((p) => (
+          <li class="card" data-card="ux">
+            <div class="card__media" style="aspect-ratio: 4 / 3">
+              <div class="card__img" />
+            </div>
+            <h4 class="card__title">{p.title}</h4>
+            <ul class="card__tags" aria-label="Skills">
+              {p.tags.map((t) => (
+                <li>{t}</li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="work__group work__group--divided">
+      <div class="work__intro-row">
+        <h3 class="work__group-title" data-reveal>
+          Visual &amp; Concept Explorations
+        </h3>
+        <p class="work__intro" data-reveal>
+          Same brain, different canvas. Even when there's no app to test, I'm still asking the UX
+          questions: who is this for, what should they feel, and does it make sense?
+        </p>
+      </div>
+
+      <ul class="work__grid work__grid--visual">
+        {visualProjects.map((p) => (
+          <li class="card" data-card="visual">
+            <div class="card__media" style={`aspect-ratio: ${p.ratio}`}>
+              <div class="card__img" />
+            </div>
+            <h4 class="card__title">{p.title}</h4>
+            <ul class="card__tags" aria-label="Skills">
+              {p.tags.map((t) => (
+                <li>{t}</li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .work {
+    padding-block: var(--space-section);
+  }
+
+  .work__header {
+    padding-bottom: clamp(1.5rem, 1rem + 2vw, 3rem);
+    border-bottom: var(--hairline);
+  }
+
+  .work__label {
+    margin-bottom: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+
+  .work__title {
+    font-size: clamp(3rem, 1rem + 10vw, 10rem);
+    font-weight: var(--weight-heavy);
+    line-height: 0.95;
+  }
+
+  .work__group {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 6rem);
+  }
+
+  /* Hairline between the two categories */
+  .work__group--divided {
+    border-top: var(--hairline);
+  }
+
+  .work__group:first-of-type {
+    padding-bottom: clamp(2.5rem, 1.5rem + 4vw, 6rem);
+  }
+
+  .work__group--divided {
+    padding-bottom: 0;
+  }
+
+  .work__intro-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    margin-bottom: clamp(2rem, 1rem + 3vw, 4.5rem);
+  }
+
+  .work__group-title {
+    font-size: var(--text-small);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0;
+  }
+
+  .work__intro {
+    max-width: 40ch;
+    font-size: clamp(1.375rem, 1rem + 1.6vw, 2.25rem);
+    font-weight: var(--weight-light);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+
+  .work__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: var(--grid-gutter);
+    row-gap: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
+    align-items: start;
+  }
+
+  /* Cards */
+  .card__media {
+    overflow: hidden;
+    background: #e6e4dd;
+    margin-bottom: 1rem;
+  }
+
+  .card__img {
+    width: 100%;
+    height: 100%;
+    background: #e6e4dd;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (hover: hover) {
+    .card:hover .card__img {
+      transform: scale(1.03);
+    }
+  }
+
+  .card__title {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    line-height: 1.15;
+    letter-spacing: var(--tracking-display);
+    margin-bottom: 0.75rem;
+  }
+
+  .card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: var(--text-small);
+  }
+
+  .card__tags li {
+    padding: 0.3em 0.8em;
+    border: var(--hairline);
+    border-radius: 999px;
+    color: var(--text-muted);
+  }
+
+  .work__grid--visual .card__title {
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  }
+
+  @media (min-width: 640px) {
+    .work__grid--visual {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 900px) {
+    .work__intro-row {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+    }
+
+    .work__group-title {
+      grid-column: 1 / span 4;
+    }
+
+    .work__intro {
+      grid-column: 5 / -1;
+    }
+
+    .work__grid--ux {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .work__grid--visual {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
+      row-gap: clamp(2rem, 1rem + 2vw, 3.5rem);
+    }
+
+    /* Asymmetry: the middle column drops down so the gallery doesn't read as a flat table */
+    .work__grid--visual .card:nth-child(3n + 2) {
+      margin-top: clamp(2rem, 1rem + 4vw, 5rem);
+    }
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  const section = document.querySelector<HTMLElement>('.work');
+
+  if (section && !prefersReducedMotion()) {
+    const texts = gsap.utils.toArray<HTMLElement>('[data-reveal]', section);
+    const cards = gsap.utils.toArray<HTMLElement>('.card', section);
+
+    // Start states are set in JS so no-JS visitors still see everything.
+    gsap.set(texts, { y: 30, opacity: 0 });
+    gsap.set(cards, { y: 40, opacity: 0 });
+
+    const reveal = { y: 0, opacity: 1, duration: 1, ease: 'power3.out', overwrite: true };
+
+    // Header and intro copy: each slides up as it enters the viewport
+    ScrollTrigger.batch(texts, {
+      start: 'top 88%',
+      once: true,
+      onEnter: (batch) => gsap.to(batch, { ...reveal, stagger: 0.12 }),
+    });
+
+    // Cards: staggered per row as they enter
+    ScrollTrigger.batch(cards, {
+      start: 'top 90%',
+      once: true,
+      onEnter: (batch) => gsap.to(batch, { ...reveal, stagger: 0.15 }),
+    });
+  }
+</script>

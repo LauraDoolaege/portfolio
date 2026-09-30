@@ -237,25 +237,55 @@ button:focus-visible {
   flex-shrink: 0;
 }
 
+/* Outline at rest; on hover the ink fill arrives as sand. The fill is a ::before whose hard-edged
+   gradient wipes across (--fill, registered below so it can transition) and runs through the same
+   #sand-dispersion filter as the image hover, so its leading edge breaks into grains instead of
+   sweeping in flat. The label sits above it and flips to paper colour as the fill reaches it. */
+@property --fill {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: -45%;
+}
+
 .btn {
+  position: relative;
+  isolation: isolate;
   justify-content: center;
   padding: 1em 1.4em;
   border: 1px solid var(--text-main);
   border-radius: 0;
-  background: var(--text-main);
-  color: var(--bg-primary);
+  background: transparent;
+  color: var(--text-main);
   font-size: var(--text-body);
   font-weight: var(--weight-medium);
   text-align: center;
-  transition:
-    background-color 0.5s var(--ease-out),
-    color 0.5s var(--ease-out);
+  transition: color 0.4s var(--ease-out) 0.12s;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    var(--text-main) var(--fill),
+    transparent calc(var(--fill) + 45%)
+  );
+  filter: url(#sand-dispersion);
+  transition: --fill 0.8s var(--ease-out);
 }
 
 .btn:hover,
 .btn:focus-visible {
-  background: transparent;
-  color: var(--text-main);
+  color: var(--bg-primary);
+}
+
+/* --fill is not inherited, so it has to be set on the pseudo-element itself */
+.btn:hover::before,
+.btn:focus-visible::before {
+  --fill: 100%;
 }
 
 .btn .btn__icon {

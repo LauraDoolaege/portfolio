@@ -87,14 +87,12 @@ const currentPath = Astro.url.pathname;
     color: var(--text-main);
   }
 
-  /* Current page: full ink, with the drawing line held open in terracotta */
+  /* Current page: full ink, with the same thin line the hover draws, held open */
   .site-header__links a[aria-current='page'] {
     color: var(--text-main);
   }
 
   .site-header__links a[aria-current='page']::after {
-    height: 2px;
-    background: var(--accent);
     transform: scaleX(1);
   }
 </style>

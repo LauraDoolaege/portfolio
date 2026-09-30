@@ -91,6 +91,12 @@ import SectionLabel from './SectionLabel.astro';
     text-wrap: balance;
   }
 
+  /* The inner layer ignores the pointer so the floating images underneath stay hoverable; the
+     text and button opt back in (the button lost its link to this rule, so it was unclickable) */
+  .manifesto__inner > :global(*) {
+    pointer-events: auto;
+  }
+
   :global(.manifesto__btn) {
     margin-top: clamp(2rem, 1.5rem + 2.5vw, 4rem);
   }

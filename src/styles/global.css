@@ -186,28 +186,45 @@ button:focus-visible {
   cursor: none !important;
 }
 
+/* Zero-size anchor that only ever gets translate3d from GSAP; the dot and disc are centered inside it */
 .cursor {
   position: fixed;
   top: 0;
   left: 0;
   z-index: 9999;
-  width: 60px;
-  height: 60px;
+  width: 0;
+  height: 0;
   pointer-events: none;
   will-change: transform;
 }
 
-.cursor__ball {
+.cursor__dot,
+.cursor__disc {
   position: absolute;
-  inset: 0;
   border-radius: 50%;
-  background: var(--accent);
   will-change: transform;
+}
+
+.cursor__dot {
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  background: var(--accent);
+}
+
+/* Authored at full size and scaled from 0, so the expansion is a transform, not a layout change */
+.cursor__disc {
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  background: var(--accent-text);
 }
 
 .cursor__label {
   position: absolute;
-  inset: 0;
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
   display: grid;
   place-items: center;
   color: var(--bg-primary);

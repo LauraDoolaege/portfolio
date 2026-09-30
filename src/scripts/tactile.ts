@@ -53,49 +53,50 @@ function cursor() {
   const root = document.createElement('div');
   root.className = 'cursor';
   root.setAttribute('aria-hidden', 'true');
-  root.innerHTML = '<div class="cursor__ball"></div><div class="cursor__label"></div>';
+  root.innerHTML =
+    '<div class="cursor__dot"></div><div class="cursor__disc"></div><div class="cursor__label"></div>';
   document.body.appendChild(root);
   document.documentElement.classList.add('has-custom-cursor');
 
-  const ball = root.querySelector<HTMLElement>('.cursor__ball')!;
+  const dot = root.querySelector<HTMLElement>('.cursor__dot')!;
+  const disc = root.querySelector<HTMLElement>('.cursor__disc')!;
   const label = root.querySelector<HTMLElement>('.cursor__label')!;
 
-  // The ball is authored at 60px and scaled down to a dot, so every state change is a cheap transform
-  const DOT = 10 / 60;
-  gsap.set(root, { xPercent: -50, yPercent: -50, opacity: 0 });
-  gsap.set(ball, { scale: DOT });
+  gsap.set(root, { opacity: 0, force3D: true });
+  gsap.set(disc, { scale: 0 });
 
-  const follow = reduceMotion ? 0 : 0.35;
+  // Position: quickTo on x/y writes translate3d on the fixed, pointer-events-none anchor.
+  // A short duration keeps it feeling attached to the hand while still smoothing jitter.
+  const follow = reduceMotion ? 0 : 0.16;
   const x = gsap.quickTo(root, 'x', { duration: follow, ease: 'power3.out' });
   const y = gsap.quickTo(root, 'y', { duration: follow, ease: 'power3.out' });
 
-  type State = 'dot' | 'text' | 'link' | 'media';
+  type State = 'dot' | 'link' | 'media';
   let state: State = 'dot';
+  let labelHtml = '';
 
-  const set = (next: State, text = '') => {
-    if (next === state && label.innerHTML === text) return;
+  const set = (next: State, html = '') => {
+    if (next === state && html === labelHtml) return;
     state = next;
-    const d = reduceMotion ? 0 : 0.45;
-    const to: gsap.TweenVars = { duration: d, ease: 'power3.out', overwrite: 'auto' };
+    labelHtml = html;
+    const d = reduceMotion ? 0 : 0.4;
+    const ease = 'power3.out';
+
     if (next === 'media') {
-      gsap.to(ball, { ...to, scaleX: 1, scaleY: 1, backgroundColor: 'var(--accent-text)' });
-      label.innerHTML = text;
-      gsap.to(label, { ...to, opacity: 1 });
+      label.innerHTML = html;
+      gsap.to(dot, { scale: 0, duration: d, ease, overwrite: 'auto' });
+      gsap.to(disc, { scale: 1, duration: d, ease, overwrite: 'auto' });
+      gsap.to(label, { opacity: 1, duration: d, ease, overwrite: 'auto' });
     } else {
-      gsap.to(label, { duration: d / 2, ease: 'power2.out', opacity: 0, overwrite: 'auto' });
-      const target =
-        next === 'text'
-          ? { scaleX: 2 / 60, scaleY: 22 / 60 } // a thin vertical line
-          : next === 'link'
-            ? { scaleX: 16 / 60, scaleY: 16 / 60 }
-            : { scaleX: DOT, scaleY: DOT };
-      gsap.to(ball, { ...to, ...target, backgroundColor: 'var(--accent)' });
+      gsap.to(disc, { scale: 0, duration: d, ease, overwrite: 'auto' });
+      gsap.to(label, { opacity: 0, duration: d / 2, ease, overwrite: 'auto' });
+      // Links and buttons: the dot swells a little. Text and empty space: always the plain dot.
+      gsap.to(dot, { scale: next === 'link' ? 1.6 : 1, duration: d, ease, overwrite: 'auto' });
     }
   };
 
-  const MEDIA = '.hero__img, .card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
+  const MEDIA = '.card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
   const INTERACTIVE = 'a, button, [data-magnetic]';
-  const TEXT = 'p, h1, h2, h3, h4, blockquote, dt, dd, li';
 
   let shown = false;
   window.addEventListener(
@@ -103,7 +104,6 @@ function cursor() {
     (e) => {
       if (!shown) {
         shown = true;
-        // First move: jump to the pointer, then fade in
         gsap.set(root, { x: e.clientX, y: e.clientY });
         gsap.to(root, { opacity: 1, duration: 0.3 });
       }
@@ -122,8 +122,6 @@ function cursor() {
       set('media', media.closest('.card') ? 'View' : ARROW);
     } else if (t.closest(INTERACTIVE)) {
       set('link');
-    } else if (t.closest(TEXT)) {
-      set('text');
     } else {
       set('dot');
     }
@@ -137,9 +135,35 @@ function cursor() {
   });
 }
 
+/* ---------- Analog darkroom: physical pan inside project image frames ---------- */
+
+function pan(frame: HTMLElement) {
+  const img = frame.querySelector<HTMLElement>('.card__img');
+  if (!img) return;
+
+  // Resting scale hides the edges while the image shifts (5px travel needs ~2% headroom per side)
+  gsap.set(img, { scale: 1.05 });
+  const px = gsap.quickTo(img, 'x', { duration: 0.6, ease: 'power3.out' });
+  const py = gsap.quickTo(img, 'y', { duration: 0.6, ease: 'power3.out' });
+
+  frame.addEventListener('mousemove', (e) => {
+    const r = frame.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width - 0.5; // -0.5 .. 0.5
+    const ny = (e.clientY - r.top) / r.height - 0.5;
+    // The image drifts opposite to the pointer, like looking around inside a print
+    px(-nx * 10);
+    py(-ny * 10);
+  });
+  frame.addEventListener('mouseleave', () => {
+    px(0);
+    py(0);
+  });
+}
+
 if (finePointer) {
   cursor();
   if (!reduceMotion) {
     document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => magnetic(el));
+    document.querySelectorAll<HTMLElement>('.card__media').forEach(pan);
   }
 }

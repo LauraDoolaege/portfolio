@@ -125,10 +125,31 @@ a {
   color: var(--bg-primary);
 }
 
+/* Browser surfaces themed from the palette: scrollbar, caret, tabular numerals */
+html {
+  scrollbar-color: var(--text-muted) var(--bg-primary);
+  scrollbar-width: thin;
+}
+
+input,
+textarea {
+  caret-color: var(--accent);
+}
+
+dd,
+.meta__value {
+  font-variant-numeric: tabular-nums;
+}
+
 a:focus-visible,
 button:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 4px;
+}
+
+/* Inline links: pull the ring in so it hugs the text and the drawn underline */
+.link:focus-visible {
+  outline-offset: 2px;
 }
 
 /* Shared 12-column page container: every section aligns to this. */

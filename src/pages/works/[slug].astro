@@ -51,8 +51,9 @@ const meta = [
           <ProjectImage
             src={coverImage}
             alt={`${title}: cover`}
-            ratio={type === 'ux' ? '2 / 1' : '16 / 9'}
+            ratio={coverImage ? undefined : type === 'ux' ? '2 / 1' : '16 / 9'}
             tone={type === 'ux' ? 1 : 0}
+            loading="eager"
           />
         </div>
 

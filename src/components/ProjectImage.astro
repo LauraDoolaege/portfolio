@@ -1,24 +1,38 @@
 ---
+import { Image } from 'astro:assets';
 // One project image inside the Analog Darkroom frame. Use this (not markdown ![]()) in .mdx files
 // so every image gets the hover/pan interaction. Without `src` it renders the flat placeholder.
 // `fill` makes the frame take its parent's height (used by ImageGrid) instead of an aspect ratio.
 interface Props {
-  src?: string;
+  src?: ImageMetadata | string;
   alt: string;
   ratio?: string;
   tone?: 0 | 1 | 2 | 3;
   caption?: string;
   fill?: boolean;
+  loading?: 'lazy' | 'eager';
 }
 
-const { src, alt, ratio = '16 / 9', tone = 0, caption, fill = false } = Astro.props;
-const frameStyle = fill ? 'height: 100%' : `aspect-ratio: ${ratio}`;
+const { src, alt, ratio, tone = 0, caption, fill = false, loading = 'lazy' } = Astro.props;
+// Optimized images keep their own aspect ratio unless one is passed; placeholders default to 16 / 9
+const natural = src && typeof src === 'object' ? `${src.width} / ${src.height}` : undefined;
+const frameStyle = fill ? 'height: 100%' : `aspect-ratio: ${ratio ?? natural ?? '16 / 9'}`;
 ---
 
 <figure class:list={['project-figure', { 'project-figure--fill': fill }]}>
   <div class="media-frame" style={frameStyle}>
-    {src ? (
-      <img class="media-frame__img" src={src} alt={alt} loading="lazy" decoding="async" />
+    {src && typeof src === 'object' ? (
+      <Image
+        class="media-frame__img"
+        src={src}
+        alt={alt}
+        widths={[640, 1200, 1800]}
+        sizes="(min-width: 1500px) 1200px, 80vw"
+        loading={loading}
+        decoding="async"
+      />
+    ) : src ? (
+      <img class="media-frame__img" src={src} alt={alt} loading={loading} decoding="async" />
     ) : (
       <div class="media-frame__img" data-tone={tone} role="img" aria-label={alt} />
     )}

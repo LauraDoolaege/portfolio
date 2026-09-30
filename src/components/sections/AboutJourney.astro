@@ -1,0 +1,102 @@
+---
+// The Journey: editorial two-column grid. Left: sticky bold labels (~1/3). Right: story copy.
+const blocks = [
+  {
+    label: 'The Foundation',
+    copy: "Before I ever mapped a user journey or opened Figma, I earned a Bachelor's in Marketing Communication (Cum Laude). During my internship at CAW Oost-Vlaanderen, I planned content, wrote nationwide policy letters, and independently led a workshop to restructure their website's content. Looking back, facilitating that workshop was my first UX project—I just didn't know it yet!",
+  },
+  {
+    label: 'The Storyteller',
+    copy: "But honestly, it started way earlier. On the playground, I invented storylines where everyone got a part. At home, I wrote stories starring my sister's favourite Nintendo characters to get her excited about reading. (It worked—she now reads more books than I do).",
+  },
+  {
+    label: 'The Experience Designer',
+    copy: "Now I'm in my third year of Digital Design and Development (Devine), majoring in UX design. I have the same love for stories, just with more tools. Devine has taught me how to research and design experiences a user actually needs. My marketing skills help me position those experiences so they actually reach people.",
+  },
+];
+---
+
+<section class="journey" aria-label="The journey">
+  <div class="container">
+    <ol class="journey__list">
+      {blocks.map((b) => (
+        <li class="journey__block grid">
+          <h2 class="journey__label" data-reveal>
+            {b.label}
+          </h2>
+          <p class="journey__copy" data-reveal>
+            {b.copy}
+          </p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .journey {
+    padding-bottom: var(--space-section);
+  }
+
+  .journey__list {
+    border-bottom: var(--hairline);
+  }
+
+  .journey__block {
+    row-gap: 1rem;
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 6rem);
+    border-top: var(--hairline);
+  }
+
+  .journey__label,
+  .journey__copy {
+    grid-column: 1 / -1;
+  }
+
+  .journey__label {
+    font-size: var(--text-small);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  .journey__copy {
+    max-width: 44ch;
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: var(--weight-regular);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 900px) {
+    /* Labels take the left ~1/3 and stay in view while their story scrolls */
+    .journey__label {
+      grid-column: 1 / span 4;
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+    }
+
+    .journey__copy {
+      grid-column: 5 / -1;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+
+  const items = gsap.utils.toArray<HTMLElement>('.journey [data-reveal]');
+
+  if (items.length && !prefersReducedMotion()) {
+    gsap.set(items, { y: 28, opacity: 0 });
+
+    ScrollTrigger.batch(items, {
+      start: 'top 88%',
+      once: true,
+      onEnter: (batch) =>
+        gsap.to(batch, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: 0.12 }),
+    });
+  }
+</script>

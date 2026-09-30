@@ -1,12 +1,9 @@
 ---
-// About page - reset to a blank slate for a fresh direction. Every
-// section component that used to render here (AboutIntro, AboutStory,
-// AboutProcess, AboutDrives, ContactCTA, Footer) is kept in
-// src/components/ in case it's reused, just not imported here. Header
-// (the nav) is the only thing still on the page.
+// About page, phase 1: hero and the journey. Team, inspiration and skills come later.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
-import UnderConstruction from '../components/ui/UnderConstruction.astro';
+import AboutHero from '../components/sections/AboutHero.astro';
+import AboutJourney from '../components/sections/AboutJourney.astro';
 ---
 
 <BaseLayout
@@ -16,7 +13,8 @@ import UnderConstruction from '../components/ui/UnderConstruction.astro';
   <div class="page">
     <Header />
     <main id="main">
-      <UnderConstruction />
+      <AboutHero />
+      <AboutJourney />
     </main>
   </div>
 </BaseLayout>

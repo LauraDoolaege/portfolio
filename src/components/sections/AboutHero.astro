@@ -1,0 +1,116 @@
+---
+// About hero: H1 sized to fill the container, and an off-grid portrait image below it.
+// Both animate on load (masked line reveal; slow photographic scale-in).
+---
+
+<section class="about-hero" aria-labelledby="about-title">
+  <div class="container">
+    <h1 id="about-title" class="about-hero__title">
+      <span class="mask">
+        <span class="line">My story</span>
+      </span>
+      <span class="mask">
+        <span class="line">didn't start</span>
+      </span>
+      <span class="mask">
+        <span class="line">at Devine.</span>
+      </span>
+    </h1>
+
+    <div class="grid about-hero__row">
+      <figure class="about-hero__figure">
+        <div class="about-hero__frame">
+          <div
+            class="about-hero__img"
+            role="img"
+            aria-label="Portrait of Laura (placeholder)"
+          ></div>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-hero {
+    padding-block: clamp(2rem, 1rem + 3vw, 4rem) 0;
+  }
+
+  /* Clip container for the line reveal; padding/negative margin keep descenders visible */
+  .mask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+
+  .line {
+    display: block;
+  }
+
+  /* "didn't start" is the widest line (~4.95em): derive the size from the container so it fills it without clipping */
+  .about-hero__title {
+    position: relative;
+    z-index: 2;
+    font-size: min(20rem, calc((100vw - 2 * var(--page-margin)) / 5.1));
+    font-weight: var(--weight-heavy);
+    line-height: 0.95;
+    text-wrap: initial;
+  }
+
+  .about-hero__row {
+    position: relative;
+    z-index: 1;
+    /* Tuck the image up under the last line so it breaks out of the grid */
+    margin-top: clamp(-4rem, -1rem - 3vw, -1.5rem);
+    padding-bottom: var(--space-section);
+  }
+
+  .about-hero__figure {
+    grid-column: 1 / -1;
+    width: min(100%, 26rem);
+  }
+
+  .about-hero__frame {
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: #d9d7d0;
+  }
+
+  /* Placeholder photo: warm, slightly desaturated tone for the vintage feel */
+  .about-hero__img {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(160deg, #e3dfd3, #bdb7a6 70%, #a9a392);
+    filter: sepia(0.25) grayscale(0.5) contrast(0.95);
+    will-change: transform;
+  }
+
+  @media (min-width: 700px) {
+    .about-hero__figure {
+      grid-column: 8 / span 4;
+      width: auto;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+
+  const lines = gsap.utils.toArray<HTMLElement>('.about-hero__title .line');
+  const img = document.querySelector<HTMLElement>('.about-hero__img');
+  const frame = document.querySelector<HTMLElement>('.about-hero__frame');
+
+  if (lines.length && img && frame && !prefersReducedMotion()) {
+    // Start states set in JS so no-JS visitors still see everything.
+    gsap.set(lines, { yPercent: 100 });
+    gsap.set(frame, { opacity: 0 });
+    gsap.set(img, { scale: 1.05 });
+
+    gsap
+      .timeline()
+      .to(lines, { yPercent: 0, duration: 1.2, ease: 'power4.out', stagger: 0.12 })
+      .to(frame, { opacity: 1, duration: 1.5, ease: 'power2.out' }, 0.3)
+      .to(img, { scale: 1, duration: 1.5, ease: 'power2.out' }, 0.3);
+  }
+</script>

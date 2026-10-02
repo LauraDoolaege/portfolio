@@ -1,94 +1,408 @@
 ---
 import Button from '../ui/Button.astro';
-// Hero: status pill, massive H1, hook, tags. Each text line sits in an
-// overflow-hidden mask; the script slides the inner element up into view.
+import { withBase } from '../../utils/url';
+// Hero: a centred editorial composition ("Marketer ... Turned / UX Designer") with one playful
+// element, the signature: a Verlet rope the visitor can grab and stretch; it eases back into place
+// (see the script below). The meta strip underneath is the header's footer and is unchanged.
 ---
 
 <section class="hero" aria-label="Introduction">
-  <div class="container hero__inner">
-    <div class="hero__top mask">
-      <p class="hero__pill tag reveal">
-        <span class="hero__dot" aria-hidden="true"></span>
-        Seeking UX &amp; Experience Design Internship (Feb – May 2027)
-      </p>
-    </div>
+  <div class="hero__field" data-hero-field>
+    <!-- Hazy trail the rope leaves behind while it moves (painted by the script, grainy via CSS mask) -->
+    <canvas class="hero__trail" aria-hidden="true" data-trail></canvas>
 
-    <div class="hero__main">
-      <div class="hero__stage">
-        <h1 class="hero__title">
-          <span class="mask">
-            <span class="reveal reveal--title">Experience</span>
+    <div class="hero__stage">
+      <div class="hero__block">
+        <h1 class="hero__title" aria-label="Marketer turned UX designer">
+          <span class="hero__top" aria-hidden="true">
+            <span class="hero__side" data-marketer>
+              <span class="hero__word" data-line>
+                Marketer<i class="hero__baseline"></i>
+              </span>
+            </span>
+            <span class="hero__side" data-turned>
+              <span class="hero__word" data-line>
+                Turned
+              </span>
+            </span>
           </span>
-          <span class="mask">
-            <span class="reveal reveal--title">Designer</span>
+          <span class="hero__big" aria-hidden="true" data-line>
+            UX Designer
           </span>
         </h1>
-
-        <div class="hero__hook subtitle">
-          <p class="mask">
-            <span class="reveal reveal--hook">
-              I detangle briefs into creative concepts that are feasible and grounded in marketing.
-            </span>
-          </p>
-          <p class="mask">
-            <span class="reveal reveal--hook">Online and offline.</span>
-          </p>
-        </div>
       </div>
 
-      <ul class="hero__tags reveal--tags" aria-label="Focus">
-        <li class="tag">UX Design</li>
-        <li>
-          <Button
-            variant="link"
-            size="sm"
-            href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
-            target="_blank"
-            rel="noopener"
-          >
-            Devine 3rd Year
+      <div class="hero__lede">
+        <p class="hero__intro" data-line>
+          I detangle briefings into intuitive concepts
+          <br />— creative, and grounded in marketing.
+        </p>
+        <div class="hero__ctas" data-line>
+          <Button href="#about">Get to know me</Button>
+          <Button href={withBase('/resume.pdf')} icon="down" download>
+            Resume
           </Button>
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
+
+    <!-- The signature: one overlay over the whole field. aria-hidden, the CTAs carry the meaning. -->
+    <svg class="hero__rope" aria-hidden="true" focusable="false" data-rope-svg>
+      <!-- Grain: ragged, sand-like edge on the line. Strength (displacement + speckle cut) is driven by the
+           rope's speed from the script; at rest the filter is detached and the line is crisp. -->
+      <defs>
+        <filter
+          id="hero-rope-grain"
+          data-grain-filter
+          filterUnits="userSpaceOnUse"
+          x="-40"
+          y="-40"
+          width="100"
+          height="100"
+          color-interpolation-filters="sRGB"
+        >
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.9"
+            numOctaves="2"
+            seed="5"
+            result="noise"
+          ></feTurbulence>
+          <feDisplacementMap
+            data-grain-disp
+            in="SourceGraphic"
+            in2="noise"
+            scale="0"
+            xChannelSelector="R"
+            yChannelSelector="G"
+            result="ragged"
+          ></feDisplacementMap>
+          <feColorMatrix
+            in="noise"
+            type="matrix"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0"
+            result="speckle"
+          ></feColorMatrix>
+          <feComponentTransfer in="speckle" result="mask">
+            <feFuncA data-grain-cut type="linear" slope="8" intercept="1"></feFuncA>
+          </feComponentTransfer>
+          <feComposite in="ragged" in2="mask" operator="in"></feComposite>
+        </filter>
+      </defs>
+      <path
+        data-source
+        fill="none"
+        stroke="none"
+        d="M 355 42 C 390 120, 420 230, 435 285 C 455 360, 485 440, 488 475 C 490 515, 450 535, 405 532 C 330 528, 270 512, 220 506 C 150 498, 80 495, 58 508 C 45 520, 52 555, 85 562 C 140 575, 200 545, 260 485 C 330 415, 400 340, 435 285 C 450 240, 455 185, 480 185 C 505 185, 515 220, 512 255 C 510 280, 490 280, 435 285 L 282 285"
+      ></path>
+      <path class="hero__rope-line" data-line-path fill="none" pathLength="1"></path>
+    </svg>
+  </div>
+
+  <!-- Full-width line, then three cells split by 1px rules -->
+  <div class="hero__strip reveal--strip">
+    <ul class="container hero__cells">
+      <li class="hero__cell">
+        <Button
+          variant="link"
+          size="sm"
+          href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
+          target="_blank"
+          rel="noopener"
+        >
+          UX Design at Devine
+        </Button>
+      </li>
+      <li class="hero__cell">
+        <Button
+          variant="link"
+          size="sm"
+          href="https://www.hogent.be"
+          target="_blank"
+          rel="noopener"
+        >
+          Marketing Alumni at HOGENT
+        </Button>
+      </li>
+      <li class="hero__cell hero__cell--status">
+        <span class="hero__dot" aria-hidden="true"></span>
+        Seeking Internship (Feb 2027)
+      </li>
+    </ul>
   </div>
 </section>
 
 <style>
   .hero {
-    flex: 1;
-    display: flex;
-    padding-block: clamp(2rem, 1rem + 3vw, 4rem) clamp(2rem, 1rem + 3vw, 4rem);
-  }
-
-  .hero__inner {
+    /* Fills the first viewport under the nav (~4.1rem): the strip sits on the fold */
+    --hero-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
     display: flex;
     flex-direction: column;
-    gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+    min-height: calc(100dvh - 4.1rem);
+    /* Vertical swipes still scroll on touch; the rope only needs horizontal + free drags on its own points */
+    touch-action: pan-y;
   }
 
-  /* Clip container for the reveal. Bottom padding + matching negative margin keeps descenders from being cut at line-height < 1. */
-  .mask {
-    display: block;
-    overflow: hidden;
-    padding-bottom: 0.12em;
-    margin-bottom: -0.12em;
+  .hero__field {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(4.5rem, 3rem + 4vw, 6.5rem) var(--page-margin) clamp(2.5rem, 1.5rem + 3vw, 5rem);
+    overflow-x: clip;
   }
 
-  .reveal {
-    display: block;
+  /* ---------- Composition ---------- */
+
+  .hero__stage {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2rem, 1rem + 3.5vw, 4.5rem);
+  }
+
+  /* Width = the width of the big line; centred on the page axis */
+  .hero__block {
+    width: max-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .hero__title {
+    display: flex;
+    flex-direction: column;
+    font-size: inherit;
+    font-weight: var(--weight-medium);
+    line-height: 1;
   }
 
   .hero__top {
-    width: fit-content;
-    max-width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-size: clamp(20px, 2.5vw, 38px);
+    font-weight: var(--weight-medium);
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    /* The big line's side bearings would otherwise leave the words a hair inside its edges */
+    margin-bottom: clamp(0.5rem, 0.2rem + 1.2vw, 1.5rem);
   }
 
-  /* A status label: the .tag look with a leading terracotta dot */
-  .hero__pill {
+  .hero__side {
     display: inline-flex;
+    align-items: baseline;
+    gap: 0.5em;
+  }
+
+  .hero__word {
+    display: inline-block;
+  }
+
+  /* Zero-size marker that sits on the text baseline: the script reads the baseline from it */
+  .hero__baseline {
+    display: inline-block;
+    width: 0;
+    height: 0;
+  }
+
+  .hero__big {
+    display: block;
+    font-size: clamp(52px, 9.8vw, 150px);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.045em;
+    line-height: 0.86;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .hero__lede {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  }
+
+  .hero__intro {
+    font-size: 13px;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.05em;
+    line-height: 1.55;
+    text-transform: uppercase;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem clamp(1rem, 0.5rem + 3vw, 3.5rem);
+  }
+
+  /* Small phones: the buttons stack at one shared width instead of wrapping unevenly */
+  @media (max-width: 400px) {
+    .hero__ctas {
+      flex-direction: column;
+      align-items: stretch;
+      width: min(100%, 18rem);
+    }
+
+    .hero__cell {
+      letter-spacing: 0.05em;
+    }
+  }
+
+  /* Short landscape screens (phones on their side): less air, so the hero isn't a scroll of its own */
+  @media (max-height: 520px) and (orientation: landscape) {
+    .hero__field {
+      padding-block: 1.25rem 1.5rem;
+    }
+
+    .hero__stage {
+      gap: 1.25rem;
+    }
+  }
+
+  .hero__ctas :global(.btn) {
+    min-height: 44px;
+    padding: 0.9em 1.5em;
+    font-size: var(--text-small);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Signature overlay ---------- */
+
+  .hero__rope {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    z-index: 4;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .hero__trail {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    pointer-events: none;
+    /* Soft first, then broken into speckle by a noise mask: a gradient haze made of grains */
+    filter: blur(2.5px);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    -webkit-mask-size: 220px 220px;
+    mask-size: 220px 220px;
+  }
+
+  /* Touch devices skip the hazy trail: no hover to reward, and one less layer to paint */
+  @media (hover: none) {
+    .hero__trail {
+      display: none;
+    }
+  }
+
+  .hero__rope-line {
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hero__rope-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .hero__rope-line.is-drawn {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 2.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .hero__rope-line {
+    filter: url(#hero-rope-grain);
+  }
+
+  .hero__rope-line.is-live {
+    /* once live, the dash must never clip the moving path */
+    stroke-dasharray: none;
+    transition: none;
+  }
+
+  /* ---------- Narrow: wrap the big line, stack everything ---------- */
+
+  @media (max-width: 760px) {
+    .hero__field {
+      justify-content: flex-start;
+      padding-top: 1rem;
+      gap: clamp(2rem, 8vw, 3rem);
+    }
+
+    /* Room above the words for the signature: it rests centred above the "Marketer / Turned" row.
+         At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+    .hero__stage {
+      padding-top: 192px;
+    }
+
+    .hero__block {
+      width: 100%;
+    }
+
+    .hero__big {
+      white-space: normal;
+      font-size: clamp(52px, 17vw, 120px);
+    }
+  }
+
+  /* ---------- Meta strip ---------- */
+
+  .hero__strip {
+    border-top: var(--hairline);
+  }
+
+  .hero__cells {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* One label voice, the same as the site's tags: uppercase, tracked, small */
+  .hero__cell {
+    display: flex;
     align-items: center;
     gap: 0.7em;
+    padding-block: 1.1rem;
+    font-size: var(--text-small);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  /* The links inherit that voice instead of the link button's own size */
+  .hero__cell :global(.btn-link) {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+  }
+
+  .hero__cell + .hero__cell {
+    border-top: var(--hairline);
+  }
+
+  .hero__cell--status {
+    color: var(--text-muted);
   }
 
   .hero__dot {
@@ -99,45 +413,16 @@ import Button from '../ui/Button.astro';
     background: var(--accent);
   }
 
-  /* Title and hook share one grid cell: the hook sits in the open space right of "Designer" on desktop, and stacks below on small screens. */
-  .hero__stage {
-    display: grid;
-    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-    column-gap: var(--grid-gutter);
-    row-gap: clamp(1.25rem, 1rem + 1vw, 2rem);
-  }
+  /* Wide: three equal cells, split by 1px vertical rules; the first sits flush with the page margin */
+  @media (min-width: 720px) {
+    .hero__cells {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 
-  .hero__title {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    /* "Experience" is ~5.2em wide: derive the size from the container so it fills it without ever clipping */
-    font-size: min(13rem, calc((100vw - 2 * var(--page-margin)) / 5.4));
-  }
-
-  .hero__hook {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    max-width: 32ch;
-  }
-
-  .hero__tags {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem 1.5rem;
-    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
-    font-size: var(--text-small);
-  }
-
-  /* Side-by-side only once the H1 is capped at its max size and "Designer" leaves the right quarter open */
-  @media (min-width: 1360px) {
-    .hero__hook {
-      grid-column: 10 / -1;
-      grid-row: 1;
-      align-self: end;
-      /* Aligns the last hook line with the baseline area of "Designer" */
-      padding-bottom: 1.6vw;
-      max-width: none;
+    .hero__cell + .hero__cell {
+      border-top: 0;
+      border-left: var(--hairline);
+      padding-left: clamp(1rem, 0.5rem + 1.5vw, 2rem);
     }
   }
 </style>
@@ -145,24 +430,467 @@ import Button from '../ui/Button.astro';
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const pill = document.querySelector<HTMLElement>('.hero__pill');
-  const title = gsap.utils.toArray<HTMLElement>('.reveal--title');
-  const hook = gsap.utils.toArray<HTMLElement>('.reveal--hook');
-  const tags = document.querySelector<HTMLElement>('.reveal--tags');
+  const hero = document.querySelector<HTMLElement>('.hero')!;
+  const field = hero.querySelector<HTMLElement>('[data-hero-field]')!;
+  const svg = hero.querySelector<SVGSVGElement>('[data-rope-svg]')!;
+  const source = svg.querySelector<SVGPathElement>('[data-source]')!;
+  const linePath = svg.querySelector<SVGPathElement>('[data-line-path]')!;
+  const grainFilter = svg.querySelector<SVGFilterElement>('[data-grain-filter]')!;
+  const grainDisp = svg.querySelector<SVGFEDisplacementMapElement>('[data-grain-disp]')!;
+  const grainCut = svg.querySelector<SVGFEFuncAElement>('[data-grain-cut]')!;
+  // Lighter grain on touch: one noise octave instead of two
+  if (window.matchMedia('(hover: none)').matches) {
+    svg.querySelector('feTurbulence')?.setAttribute('numOctaves', '1');
+  }
+  const phone = window.matchMedia('(max-width: 760px)');
+  const coarse = window.matchMedia('(hover: none)').matches;
+  const trail = hero.querySelector<HTMLCanvasElement>('[data-trail]')!;
+  const tctx = trail.getContext('2d')!;
+  const marketer = hero.querySelector<HTMLElement>('[data-marketer]')!;
+  const turned = hero.querySelector<HTMLElement>('[data-turned]')!;
+  const baselineMark = hero.querySelector<HTMLElement>('.hero__baseline')!;
+  const strip = hero.querySelector<HTMLElement>('.reveal--strip');
+  const lines = gsap.utils.toArray<HTMLElement>('[data-line]', hero);
 
-  if (!prefersReducedMotion() && pill && tags) {
-    // Start states are set in JS, not CSS, so no-JS visitors still see everything.
-    // The tags aren't masked, so they get a short travel instead of a full-height slide.
-    gsap.set([pill, ...title, ...hook], { yPercent: 100, opacity: 0 });
-    gsap.set(tags, { y: 24, opacity: 0 });
+  const N = 110;
+  const GRAB_RADIUS = 30;
+  const HOVER_RADIUS = 14;
+  const ITERATIONS = 20;
+  // The line is drawn through a smoothed copy of the points, so slack in the rope never shows as wrinkles
+  const SMOOTH_PASSES = 6;
+  // Grain on the line while it moves: 0 turns it off, 1 is the prototype default, higher is rougher
+  const GRAIN = 1;
+  // The line is grainy even at rest (this share of full grain); motion pushes it up to 1
+  const GRAIN_REST = 0.5;
+  // Touch: a fatter grab target, and lighter effects (no trail) to keep older phones smooth
+  const touchGrab = 44;
+  // Trail: painted at a fraction of the size (it's blurred anyway), fading a little every frame
+  const TRAIL_SCALE = 0.5;
+  const TRAIL_FADE = 0.05;
+  // Tuned to be critically damped: the rope eases back into place without overshooting or wobbling
+  const DAMPING = 0.8;
+  const K_IDLE = 0.01;
+  const K_DRAG = 0.0025;
+  // The grab offset (pointer vs. the point you caught) eases out, so the point ends up exactly under the cursor
+  const OFFSET_DECAY = 0.8;
+  const SIG_W = 490; // path box: x 40–530
+  const SIG_CENTER = { x: 285, y: 305 };
+  const SIG_BASE = 268; // the bottom loop sits this far (in path units) below the centre
 
-    // Sequence: status pill, then H1 lines, then hook, then tags.
-    const defaults = { duration: 1.2, ease: 'expo.out', opacity: 1 };
+  interface Pt {
+    x: number;
+    y: number;
+    px: number;
+    py: number;
+  }
+
+  let pts: Pt[] = [];
+  let rest: { x: number; y: number }[] = [];
+  let restSig: { x: number; y: number }[] = [];
+  let lens: number[] = [];
+  let lensSig: number[] = [];
+  let grabbed = -1;
+  const pointer = { x: 0, y: 0 };
+  const grabOffset = { x: 0, y: 0 };
+  let touched = false;
+  let raf = 0;
+  let width = 0;
+  let height = 0;
+  let layout = { baseline: 0, midY: 0, left: 0, right: 0, capTop: 0, centerX: 0 };
+
+  const rel = (r: DOMRect) => {
+    const f = field.getBoundingClientRect();
+    return {
+      left: r.left - f.left,
+      right: r.right - f.left,
+      top: r.top - f.top,
+      bottom: r.bottom - f.top,
+    };
+  };
+
+  /* ---------- Layout ---------- */
+
+  function measure() {
+    const f = field.getBoundingClientRect();
+    width = f.width;
+    height = f.height;
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    trail.width = Math.max(1, Math.round(width * TRAIL_SCALE));
+    trail.height = Math.max(1, Math.round(height * TRAIL_SCALE));
+    grainFilter.setAttribute('x', '-40');
+    grainFilter.setAttribute('y', '-40');
+    grainFilter.setAttribute('width', String(width + 80));
+    grainFilter.setAttribute('height', String(height + 80));
+
+    const m = rel(marketer.getBoundingClientRect());
+    const t = rel(turned.getBoundingClientRect());
+    const baseline = rel(baselineMark.getBoundingClientRect()).bottom;
+    const fontSize = parseFloat(getComputedStyle(marketer).fontSize) || 24;
+    layout = {
+      baseline,
+      midY: baseline - fontSize * 0.36,
+      left: m.right,
+      right: t.left,
+      // Top of the capital letters, and the middle of the whole row
+      capTop: baseline - fontSize * 0.72,
+      centerX: (m.left + t.right) / 2,
+    };
+  }
+
+  function buildRestSignature() {
+    const total = source.getTotalLength();
+    const scaleW = Math.min(230, Math.max(150, width * 0.14));
+    const s = scaleW / SIG_W;
+    let cx = layout.left + (layout.right - layout.left) * 0.42;
+    let cy = layout.baseline - SIG_BASE * s;
+    if (phone.matches) {
+      // Phones: the gap between the words is too narrow, so the signature rests centred above the row,
+      // its lowest point a little clear of the capital letters
+      cx = layout.centerX;
+      cy = layout.capTop - 14 - SIG_BASE * s;
+    }
+    restSig = [];
+    for (let i = 0; i < N; i++) {
+      const p = source.getPointAtLength((total * i) / (N - 1));
+      restSig.push({ x: cx + (p.x - SIG_CENTER.x) * s, y: cy + (p.y - SIG_CENTER.y) * s });
+    }
+  }
+
+  function segLengths(a: { x: number; y: number }[]) {
+    const out: number[] = [];
+    for (let i = 0; i < a.length - 1; i++)
+      out.push(Math.hypot(a[i + 1].x - a[i].x, a[i + 1].y - a[i].y));
+    return out;
+  }
+
+  /** Full (re)layout. Keeps the current rope where it is, so a resize never teleports it. */
+  function layoutAll(resetPoints: boolean) {
+    measure();
+    buildRestSignature();
+    lensSig = segLengths(restSig);
+    rest = restSig;
+    lens = lensSig;
+    if (resetPoints || pts.length === 0) {
+      pts = rest.map((p) => ({ x: p.x, y: p.y, px: p.x, py: p.y }));
+    }
+    render();
+  }
+
+  /* ---------- Drawing ---------- */
+
+  const sx = new Float32Array(N);
+  const sy = new Float32Array(N);
+  const tx = new Float32Array(N);
+  const ty = new Float32Array(N);
+
+  // Binomial [1 2 1] smoothing, ends fixed: removes point-to-point jitter but keeps the rope's shape
+  function smoothed() {
+    for (let i = 0; i < N; i++) {
+      sx[i] = pts[i].x;
+      sy[i] = pts[i].y;
+    }
+    for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
+      for (let i = 1; i < N - 1; i++) {
+        tx[i] = (sx[i - 1] + 2 * sx[i] + sx[i + 1]) / 4;
+        ty[i] = (sy[i - 1] + 2 * sy[i] + sy[i + 1]) / 4;
+      }
+      for (let i = 1; i < N - 1; i++) {
+        sx[i] = tx[i];
+        sy[i] = ty[i];
+      }
+    }
+  }
+
+  let lastD = '';
+
+  function render() {
+    smoothed();
+    let d = `M ${sx[0].toFixed(2)} ${sy[0].toFixed(2)}`;
+    for (let i = 1; i < N - 1; i++) {
+      const mx = (sx[i] + sx[i + 1]) / 2;
+      const my = (sy[i] + sy[i + 1]) / 2;
+      d += ` Q ${sx[i].toFixed(2)} ${sy[i].toFixed(2)} ${mx.toFixed(2)} ${my.toFixed(2)}`;
+    }
+    d += ` L ${sx[N - 1].toFixed(2)} ${sy[N - 1].toFixed(2)}`;
+    // Unchanged path (rope at rest): leave it alone so the grain filter isn't recomputed every frame
+    if (d === lastD) return;
+    lastD = d;
+    linePath.setAttribute('d', d);
+  }
+
+  /* ---------- Physics ---------- */
+
+  function step() {
+    const k = grabbed >= 0 ? K_DRAG : K_IDLE;
+    for (let i = 0; i < N; i++) {
+      const p = pts[i];
+      if (i === grabbed) continue;
+      const vx = (p.x - p.px) * DAMPING;
+      const vy = (p.y - p.py) * DAMPING;
+      p.px = p.x;
+      p.py = p.y;
+      p.x += vx + (rest[i].x - p.x) * k;
+      p.y += vy + (rest[i].y - p.y) * k;
+    }
+    if (grabbed >= 0) {
+      const g = pts[grabbed];
+      grabOffset.x *= OFFSET_DECAY;
+      grabOffset.y *= OFFSET_DECAY;
+      g.x = g.px = pointer.x + grabOffset.x;
+      g.y = g.py = pointer.y + grabOffset.y;
+    }
+    for (let it = 0; it < ITERATIONS; it++) constrain();
+  }
+
+  function constrain() {
+    for (let i = 0; i < N - 1; i++) {
+      const a = pts[i];
+      const b = pts[i + 1];
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy) || 0.0001;
+      const diff = (dist - lens[i]) / dist;
+      const wa = i === grabbed ? 0 : 1;
+      const wb = i + 1 === grabbed ? 0 : 1;
+      const w = wa + wb;
+      if (w === 0) continue;
+      a.x += (dx * diff * wa) / w;
+      a.y += (dy * diff * wa) / w;
+      b.x -= (dx * diff * wb) / w;
+      b.y -= (dy * diff * wb) / w;
+    }
+  }
+
+  /* ---------- Pointer ---------- */
+
+  function toHero(e: PointerEvent) {
+    const r = field.getBoundingClientRect();
+    // Account for any CSS scaling between the viewBox and the rendered size
+    const sx = r.width ? width / r.width : 1;
+    const sy = r.height ? height / r.height : 1;
+    return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy };
+  }
+
+  function nearest(x: number, y: number, radius = GRAB_RADIUS) {
+    let best = -1;
+    let bestD = radius;
+    for (let i = 0; i < N; i++) {
+      const d = Math.hypot(pts[i].x - x, pts[i].y - y);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  // Distance from a point to the rope as a polyline (not just its sample points)
+  function distToRope(x: number, y: number) {
+    let best = Infinity;
+    for (let i = 0; i < N - 1; i++) {
+      const a = pts[i];
+      const b = pts[i + 1];
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const len2 = dx * dx + dy * dy || 1;
+      const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / len2));
+      best = Math.min(best, Math.hypot(x - (a.x + dx * t), y - (a.y + dy * t)));
+    }
+    return best;
+  }
+
+  // The site's custom cursor (tactile.ts) swells its dot when told to
+  let grow = false;
+  function setGrow(on: boolean) {
+    if (on === grow) return;
+    grow = on;
+    document.dispatchEvent(new CustomEvent('cursor:grow', { detail: on }));
+  }
+
+  function onDown(e: PointerEvent) {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    const p = toHero(e);
+    const i = nearest(p.x, p.y, e.pointerType === 'touch' ? touchGrab : GRAB_RADIUS);
+    if (i < 0) return;
+    e.preventDefault();
+    touched = true;
+    grabbed = i;
+    pointer.x = p.x;
+    pointer.y = p.y;
+    grabOffset.x = pts[i].x - p.x;
+    grabOffset.y = pts[i].y - p.y;
+    setGrow(true);
+  }
+
+  // A finger that lands on the rope must drag it, not scroll the page. Anywhere else the page scrolls as usual.
+  function onTouchStart(e: TouchEvent) {
+    const t = e.touches[0];
+    if (!t || e.touches.length > 1) return;
+    const r = field.getBoundingClientRect();
+    const x = ((t.clientX - r.left) * width) / (r.width || 1);
+    const y = ((t.clientY - r.top) * height) / (r.height || 1);
+    if (nearest(x, y, touchGrab) >= 0) e.preventDefault();
+  }
+
+  function onMove(e: PointerEvent) {
+    const p = toHero(e);
+    if (grabbed >= 0) {
+      pointer.x = p.x;
+      pointer.y = p.y;
+      return;
+    }
+    if (e.pointerType === 'mouse') setGrow(distToRope(p.x, p.y) < HOVER_RADIUS);
+  }
+
+  function onUp() {
+    if (grabbed < 0) return;
+    grabbed = -1;
+  }
+
+  /* ---------- Loop ---------- */
+
+  // 0..1, follows how fast the rope is moving: quick to rise, slow to fade
+  let motion = 0;
+  let level = -1;
+  let quiet = 0;
+  let accent = '#c25e3e';
+
+  function updateGrain() {
+    let sum = 0;
+    for (let i = 0; i < N; i++) sum += Math.hypot(pts[i].x - pts[i].px, pts[i].y - pts[i].py);
+    const target = Math.min(1, sum / N / 2.5);
+    motion += (target - motion) * (target > motion ? 0.25 : 0.05);
+    const next = GRAIN * (GRAIN_REST + (1 - GRAIN_REST) * motion);
+    if (Math.abs(next - level) > 0.004) {
+      level = next;
+      // Displacement roughens the edge; the cut drops a growing share of speckles from the line
+      grainDisp.setAttribute('scale', (level * 5).toFixed(2));
+      grainCut.setAttribute('intercept', (1 - level * 4.2).toFixed(3));
+    }
+  }
+
+  // Paints the current rope into the trail canvas, stronger the faster it moves; older paint fades
+  function paintTrail(frameNo: number) {
+    if (coarse) return;
+    const c = tctx;
+    const w = trail.width;
+    const h = trail.height;
+    c.globalCompositeOperation = 'destination-out';
+    c.fillStyle = `rgba(0,0,0,${TRAIL_FADE})`;
+    c.fillRect(0, 0, w, h);
+    if (motion < 0.03) {
+      // Fully clear once it has been still a while, so faint 8-bit residue never lingers
+      if (++quiet > 120) c.clearRect(0, 0, w, h);
+      return;
+    }
+    quiet = 0;
+    if (frameNo % 60 === 0)
+      accent = getComputedStyle(hero).getPropertyValue('--accent').trim() || accent;
+    c.globalCompositeOperation = 'source-over';
+    c.strokeStyle = accent;
+    c.lineCap = 'round';
+    c.lineJoin = 'round';
+    const k = TRAIL_SCALE;
+    c.beginPath();
+    c.moveTo(sx[0] * k, sy[0] * k);
+    for (let i = 1; i < N - 1; i++) {
+      c.quadraticCurveTo(
+        sx[i] * k,
+        sy[i] * k,
+        ((sx[i] + sx[i + 1]) / 2) * k,
+        ((sy[i] + sy[i + 1]) / 2) * k,
+      );
+    }
+    c.lineTo(sx[N - 1] * k, sy[N - 1] * k);
+    c.globalAlpha = 0.1 * motion;
+    c.lineWidth = 16 * k;
+    c.stroke();
+    c.globalAlpha = 0.16 * motion;
+    c.lineWidth = 5 * k;
+    c.stroke();
+    c.globalAlpha = 1;
+  }
+
+  let frameNo = 0;
+
+  function tick() {
+    step();
+    updateGrain();
+    render();
+    paintTrail(++frameNo);
+    raf = requestAnimationFrame(tick);
+  }
+
+  /* ---------- Boot ---------- */
+
+  const reduce = prefersReducedMotion();
+  layoutAll(true);
+
+  hero.addEventListener('pointerdown', onDown);
+  hero.addEventListener('touchstart', onTouchStart, { passive: false });
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+
+  const ro = new ResizeObserver(() => {
+    // Keep the rope's current points; only the targets move
+    layoutAll(!touched);
+  });
+  ro.observe(field);
+
+  const relayout = () => layoutAll(!touched);
+  document.fonts?.ready.then(relayout);
+
+  if (reduce) {
+    linePath.classList.add('is-live');
+  } else {
+    // Draw the signature in, then hand the path over to the physics
+    linePath.classList.add('is-drawn');
+    window.setTimeout(() => linePath.classList.add('is-live'), 2700);
+    // Start states are set in JS, not CSS, so no-JS visitors still see everything
+    gsap.set(lines, { y: '0.12em', opacity: 0 });
+    if (strip) gsap.set(strip, { y: 24, opacity: 0 });
     gsap
-      .timeline()
-      .to(pill, { ...defaults, yPercent: 0 })
-      .to(title, { ...defaults, yPercent: 0, stagger: 0.12 }, '-=0.95')
-      .to(hook, { ...defaults, yPercent: 0, stagger: 0.1 }, '-=0.9')
-      .to(tags, { ...defaults, y: 0 }, '-=1');
+      .timeline({ onComplete: relayout })
+      .to(lines, { y: 0, opacity: 1, duration: 1, ease: 'expo.out', stagger: 0.12 })
+      .to(strip, { y: 0, opacity: 1, duration: 1, ease: 'expo.out' }, '-=0.9');
+  }
+  // Layout settles once the entrance has finished
+  window.setTimeout(relayout, 1300);
+
+  // Only simulate while the hero is on screen
+  const visible = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      if (!raf) raf = requestAnimationFrame(tick);
+    } else {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+  });
+  visible.observe(hero);
+
+  // Touch has no "Grab" cursor, so the rope gives one small nudge after the entrance to show it moves
+  if (coarse && !reduce) {
+    window.setTimeout(() => {
+      if (touched) return;
+      for (let i = 0; i < N; i++) {
+        const kick = 7 * Math.sin((Math.PI * i) / (N - 1));
+        pts[i].px = pts[i].x - kick;
+        pts[i].py = pts[i].y + kick * 0.4;
+      }
+    }, 3400);
+  }
+
+  document.addEventListener('astro:before-swap', cleanup, { once: true });
+  function cleanup() {
+    cancelAnimationFrame(raf);
+    ro.disconnect();
+    hero.removeEventListener('pointerdown', onDown);
+    hero.removeEventListener('touchstart', onTouchStart);
+    visible.disconnect();
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onUp);
+    setGrow(false);
   }
 </script>

@@ -29,6 +29,12 @@ const currentPath = Astro.url.pathname;
             </a>
           </li>
         ))}
+        <li class="site-header__theme">
+          <button class="theme-toggle" type="button" aria-label="Switch to dark mode">
+            <span class="theme-toggle__icon" aria-hidden="true"></span>
+            <span class="theme-toggle__label">Dark</span>
+          </button>
+        </li>
       </ul>
     </nav>
   </div>
@@ -76,6 +82,35 @@ const currentPath = Astro.url.pathname;
       opacity var(--duration) var(--ease-out);
   }
 
+  /* The theme toggle is the last item in the row: no slash before it, and it stops being fixed. Its base look
+     stays in global.css (.theme-toggle); the parent class here is what outranks that fixed positioning. */
+  .site-header__links li + li.site-header__theme::before {
+    content: none;
+  }
+
+  .site-header__theme {
+    margin-left: clamp(1rem, 0.5rem + 2vw, 2rem);
+  }
+
+  .site-header__links .theme-toggle {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    padding: 0.35em 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .site-header__links .theme-toggle__label::before {
+    content: '( ';
+  }
+
+  .site-header__links .theme-toggle__label::after {
+    content: ' )';
+  }
+
   /* Hover: the hovered link stays full strength, its siblings dim */
   .site-header__links:hover a {
     opacity: 0.5;
@@ -94,5 +129,16 @@ const currentPath = Astro.url.pathname;
 
   .site-header__links a[aria-current='page']::after {
     transform: scaleX(1);
+  }
+
+  /* Narrow phones: no room for the word, so the toggle is its half-moon icon alone (still named by aria-label) */
+  @media (max-width: 479px) {
+    .site-header__links .theme-toggle__label {
+      display: none;
+    }
+
+    .site-header__theme {
+      margin-left: 0.9rem;
+    }
   }
 </style>

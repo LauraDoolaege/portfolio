@@ -230,24 +230,71 @@ import { withBase } from '../../utils/url';
       grid-column: 5 / -1;
     }
 
-    .work__grid--ux {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    /* Offset the second card so the pair isn't a flat row */
-    .work__grid--ux .card:nth-child(2) {
-      margin-top: clamp(3rem, 1rem + 7vw, 8rem);
+    /* Editorial 12-column grid: spans and offsets break the card rhythm */
+    .work__grid--ux,
+    .work__grid--visual {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
     }
 
     .work__grid--visual {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      column-gap: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
       row-gap: clamp(2rem, 1rem + 2vw, 3.5rem);
     }
 
-    /* Asymmetry: the middle column drops down so the gallery doesn't read as a flat table */
+    /* Flagship (Plan A) is the wide hero; the next project steps right on its own row */
+    .work__grid--ux .card:nth-child(1) {
+      grid-column: 1 / span 9;
+    }
+
+    .work__grid--ux .card:nth-child(2) {
+      grid-column: 6 / span 7;
+    }
+
+    .work__grid--ux .card:nth-child(3) {
+      grid-column: 2 / span 6;
+    }
+
+    .work__grid--visual .card:nth-child(3n + 1) {
+      grid-column: 1 / span 5;
+    }
+
     .work__grid--visual .card:nth-child(3n + 2) {
-      margin-top: clamp(2rem, 1rem + 4vw, 5rem);
+      grid-column: 7 / span 6;
+      margin-top: clamp(3rem, 1rem + 6vw, 7rem);
+    }
+
+    .work__grid--visual .card:nth-child(3n) {
+      grid-column: 3 / span 4;
+    }
+  }
+
+  /* Micro-parallax: scroll-driven, compositor-only (individual `translate`, so it never fights the
+     GSAP reveal on .card or the pan on .card__img). Off entirely under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .card__link {
+        --drift: 24px;
+        animation: card-drift linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 100%;
+      }
+
+      .card:nth-child(2n) .card__link {
+        --drift: 44px;
+      }
+
+      .card:nth-child(3n) .card__link {
+        --drift: 32px;
+      }
+
+      @keyframes card-drift {
+        from {
+          translate: 0 var(--drift);
+        }
+        to {
+          translate: 0 calc(var(--drift) * -1);
+        }
+      }
     }
   }
 </style>

@@ -74,6 +74,35 @@ function cursor() {
   type State = 'dot' | 'link' | 'media';
   let state: State = 'dot';
   let labelHtml = '';
+  // Set by interactive elements that want a bigger dot (the hero signature, via 'cursor:grow')
+  let grown = false;
+
+  // Non-media states. The grown state uses the disc (authored at full size) rather than
+  // scaling the 10px dot up, so it stays sharp instead of being rasterised small and stretched.
+  const rest = (d: number) => {
+    const ease = 'power3.out';
+    // Grown (hovering the hero signature): the full 60px disc, labelled "Grab"
+    if (grown) label.textContent = 'Grab';
+    gsap.to(disc, { scale: grown ? 1 : 0, duration: d, ease, overwrite: 'auto' });
+    gsap.to(label, {
+      opacity: grown ? 1 : 0,
+      duration: grown ? d : d / 2,
+      ease,
+      overwrite: 'auto',
+    });
+    // Links and buttons: the dot swells a little. Text and empty space: always the plain dot.
+    gsap.to(dot, {
+      scale: grown ? 0 : state === 'link' ? 1.6 : 1,
+      duration: d,
+      ease,
+      overwrite: 'auto',
+    });
+  };
+
+  document.addEventListener('cursor:grow', (e) => {
+    grown = (e as CustomEvent<boolean>).detail;
+    if (state !== 'media') rest(reduceMotion ? 0 : 0.35);
+  });
 
   const set = (next: State, html = '') => {
     if (next === state && html === labelHtml) return;
@@ -88,10 +117,7 @@ function cursor() {
       gsap.to(disc, { scale: 1, duration: d, ease, overwrite: 'auto' });
       gsap.to(label, { opacity: 1, duration: d, ease, overwrite: 'auto' });
     } else {
-      gsap.to(disc, { scale: 0, duration: d, ease, overwrite: 'auto' });
-      gsap.to(label, { opacity: 0, duration: d / 2, ease, overwrite: 'auto' });
-      // Links and buttons: the dot swells a little. Text and empty space: always the plain dot.
-      gsap.to(dot, { scale: next === 'link' ? 1.6 : 1, duration: d, ease, overwrite: 'auto' });
+      rest(d);
     }
   };
 
@@ -99,8 +125,10 @@ function cursor() {
   const INTERACTIVE = 'a, button, [data-magnetic]';
 
   let shown = false;
+  // pointermove, not mousemove: a component that cancels pointerdown (the hero signature) suppresses
+  // the compatibility mouse events until release, which would freeze the cursor mid-drag.
   window.addEventListener(
-    'mousemove',
+    'pointermove',
     (e) => {
       if (!shown) {
         shown = true;

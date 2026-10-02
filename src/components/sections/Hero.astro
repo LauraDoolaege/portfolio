@@ -1,15 +1,22 @@
 ---
 import Button from '../ui/Button.astro';
 import { withBase } from '../../utils/url';
-// Hero: a centred editorial composition ("Marketer ... Turned / UX Designer") with one playful
-// element, the signature: a Verlet rope the visitor can grab and stretch; it eases back into place
-// (see the script below). The meta strip underneath is the header's footer and is unchanged.
+import SectionLabel from '../ui/SectionLabel.astro';
+// Hero: an editorial composition ("Marketer ... Turned / UX Designer") with one playful element, the
+// signature: a Verlet rope the visitor can grab and stretch; it eases back into place (see the script).
+// Small screens are centred and stacked. From 1000px the title block sits on the left, a vertical hairline
+// divides the page, and the intro + CTAs fill a right column whose bottom lines up with "UX Designer".
+// The meta strip underneath is the header's footer and is unchanged.
 ---
 
 <section class="hero" aria-label="Introduction">
   <div class="hero__field" data-hero-field>
     <!-- Hazy trail the rope leaves behind while it moves (painted by the script, grainy via CSS mask) -->
     <canvas class="hero__trail" aria-hidden="true" data-trail></canvas>
+
+    <div class="hero__label">
+      <SectionLabel num="Portfolio 2026" />
+    </div>
 
     <div class="hero__stage">
       <div class="hero__block">
@@ -31,18 +38,18 @@ import { withBase } from '../../utils/url';
           </span>
         </h1>
       </div>
+    </div>
 
-      <div class="hero__lede">
-        <p class="hero__intro" data-line>
-          I detangle briefings into intuitive concepts
-          <br />— creative, and grounded in marketing.
-        </p>
-        <div class="hero__ctas" data-line>
-          <Button href="#about">Get to know me</Button>
-          <Button href={withBase('/resume.pdf')} icon="down" download>
-            Resume
-          </Button>
-        </div>
+    <div class="hero__lede hero__aside">
+      <p class="hero__intro" data-line>
+        I detangle briefings into intuitive concepts
+        <br />— creative, and grounded in marketing.
+      </p>
+      <div class="hero__ctas" data-line>
+        <Button href="#about">Get to know me</Button>
+        <Button href={withBase('/resume.pdf')} icon="down" download>
+          Resume
+        </Button>
       </div>
     </div>
 
@@ -150,8 +157,18 @@ import { withBase } from '../../utils/url';
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: clamp(2rem, 1rem + 3.5vw, 4.5rem);
     padding: clamp(4.5rem, 3rem + 4vw, 6.5rem) var(--page-margin) clamp(2.5rem, 1.5rem + 3vw, 5rem);
     overflow-x: clip;
+  }
+
+  /* "[ Portfolio 2026 ]": the site's section-label voice, pinned to the top-left corner */
+  .hero__label {
+    position: absolute;
+    top: clamp(1rem, 0.6rem + 1.4vw, 1.75rem);
+    left: var(--page-margin);
+    z-index: 3;
+    margin: 0;
   }
 
   /* ---------- Composition ---------- */
@@ -163,7 +180,6 @@ import { withBase } from '../../utils/url';
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(2rem, 1rem + 3.5vw, 4.5rem);
   }
 
   /* Width = the width of the big line; centred on the page axis */
@@ -265,7 +281,7 @@ import { withBase } from '../../utils/url';
       padding-block: 1.25rem 1.5rem;
     }
 
-    .hero__stage {
+    .hero__field {
       gap: 1.25rem;
     }
   }
@@ -341,17 +357,92 @@ import { withBase } from '../../utils/url';
     transition: none;
   }
 
+  /* ---------- Desktop: title left, hairline, intro + CTAs right ---------- */
+
+  @media (min-width: 1000px) {
+    .hero__field {
+      --col: clamp(16rem, 22vw, 22rem);
+      --gutter: clamp(1.5rem, 3vw, 3rem);
+      --base: clamp(2rem, 1.2rem + 2.2vw, 3.5rem);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--col);
+      grid-template-rows: 1fr;
+      align-items: end;
+      justify-items: start;
+      gap: 0;
+      padding: 0 var(--page-margin);
+    }
+
+    .hero__stage {
+      align-self: end;
+      align-items: flex-start;
+      padding: 0 var(--gutter) var(--base) 0;
+    }
+
+    .hero__block {
+      margin-inline: 0;
+    }
+
+    /* The title is sized to what is left of the row after the right column, so it never overflows */
+    .hero__big {
+      font-size: clamp(
+        52px,
+        calc(
+          (min(100vw, var(--page-max)) - 2 * var(--page-margin) - var(--col) - var(--gutter)) / 6.3
+        ),
+        150px
+      );
+      /* Pulls the box up to the baseline so the glyph bottoms, not the line box, meet the buttons */
+      margin-bottom: -0.067em;
+    }
+
+    /* Right column: the vertical hairline runs the full height of the hero; content hangs from the bottom */
+    .hero__aside {
+      align-self: stretch;
+      justify-content: flex-end;
+      align-items: flex-start;
+      width: 100%;
+      padding: 0 0 var(--base) var(--gutter);
+      border-left: var(--hairline);
+    }
+
+    .hero__intro {
+      text-align: left;
+      text-wrap: pretty;
+    }
+
+    /* Short rule above the paragraph */
+    .hero__intro::before {
+      content: '';
+      display: block;
+      width: 2.5rem;
+      height: 1px;
+      margin-bottom: 1.5rem;
+      background: var(--text-main);
+    }
+
+    .hero__ctas {
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      gap: 0.75rem;
+    }
+
+    .hero__ctas :global(.btn) {
+      justify-content: space-between;
+    }
+  }
+
   /* ---------- Narrow: wrap the big line, stack everything ---------- */
 
   @media (max-width: 760px) {
     .hero__field {
       justify-content: flex-start;
-      padding-top: 1rem;
-      gap: clamp(2rem, 8vw, 3rem);
+      padding-top: 3.5rem;
     }
 
     /* Room above the words for the signature: it rests centred above the "Marketer / Turned" row.
-         At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+                 At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
     .hero__stage {
       padding-top: 192px;
     }

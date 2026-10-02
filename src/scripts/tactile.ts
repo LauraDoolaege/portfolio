@@ -74,6 +74,22 @@ function cursor() {
   type State = 'dot' | 'link' | 'media';
   let state: State = 'dot';
   let labelHtml = '';
+  // Set by interactive elements that want a bigger dot (the hero signature, via 'cursor:grow')
+  let grown = false;
+
+  const dotScale = () => (grown ? 4 : state === 'link' ? 1.6 : 1);
+
+  document.addEventListener('cursor:grow', (e) => {
+    grown = (e as CustomEvent<boolean>).detail;
+    if (state !== 'media') {
+      gsap.to(dot, {
+        scale: dotScale(),
+        duration: reduceMotion ? 0 : 0.35,
+        ease: 'power3.out',
+        overwrite: 'auto',
+      });
+    }
+  });
 
   const set = (next: State, html = '') => {
     if (next === state && html === labelHtml) return;
@@ -91,7 +107,7 @@ function cursor() {
       gsap.to(disc, { scale: 0, duration: d, ease, overwrite: 'auto' });
       gsap.to(label, { opacity: 0, duration: d / 2, ease, overwrite: 'auto' });
       // Links and buttons: the dot swells a little. Text and empty space: always the plain dot.
-      gsap.to(dot, { scale: next === 'link' ? 1.6 : 1, duration: d, ease, overwrite: 'auto' });
+      gsap.to(dot, { scale: dotScale(), duration: d, ease, overwrite: 'auto' });
     }
   };
 

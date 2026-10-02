@@ -1,33 +1,62 @@
 ---
 import Button from '../ui/Button.astro';
-// Hero: massive H1 and hook, resting on a full-width meta strip (credentials + status) that works
-// as the header's footer. Each text line sits in an overflow-hidden mask; the script slides the
-// inner element up into view.
+import { withBase } from '../../utils/url';
+// Hero: a centred editorial composition ("Marketer ... Turned / UX – Designer") with one playful
+// element, the signature. It is a Verlet rope the visitor can grab and detangle into an arrow
+// (see the script below). The meta strip underneath is the header's footer and is unchanged.
 ---
 
 <section class="hero" aria-label="Introduction">
-  <div class="container hero__inner">
-    <div class="hero__stage">
-      <h1 class="hero__title">
-        <span class="mask">
-          <span class="reveal reveal--title">Experience</span>
-        </span>
-        <span class="mask">
-          <span class="reveal reveal--title">Designer</span>
-        </span>
-      </h1>
+  <div class="hero__field" data-hero-field>
+    <!-- Screen-reader announcement for the detangle state; nothing visible -->
+    <p class="sr-only" aria-live="polite" data-live></p>
 
-      <div class="hero__hook subtitle">
-        <p class="mask">
-          <span class="reveal reveal--hook">
-            I detangle briefs into creative concepts that are feasible and grounded in marketing.
+    <div class="hero__stage">
+      <div class="hero__block">
+        <h1 class="hero__title" aria-label="Marketer turned UX designer">
+          <span class="hero__top" aria-hidden="true">
+            <span class="hero__side" data-marketer>
+              <span class="hero__word" data-line>
+                Marketer<i class="hero__baseline"></i>
+              </span>
+            </span>
+            <span class="hero__side" data-turned>
+              <span class="hero__word" data-line>
+                Turned
+              </span>
+            </span>
           </span>
+          <span class="hero__big" aria-hidden="true" data-line>
+            UX&nbsp;–&nbsp;Designer
+          </span>
+        </h1>
+      </div>
+
+      <div class="hero__lede">
+        <p class="hero__intro" data-line>
+          I detangle briefings into intuitive concepts
+          <br />— creative, and grounded in marketing.
         </p>
-        <p class="mask">
-          <span class="reveal reveal--hook">Online and offline.</span>
-        </p>
+        <div class="hero__ctas" data-line>
+          <Button href="#about">Get to know me</Button>
+          <Button href={withBase('/resume.pdf')} icon="down" download>
+            Resume
+          </Button>
+        </div>
       </div>
     </div>
+
+    <!-- The signature: one overlay over the whole field. aria-hidden, the CTAs carry the meaning. -->
+    <svg class="hero__rope" aria-hidden="true" focusable="false" data-rope-svg>
+      <path
+        data-source
+        fill="none"
+        stroke="none"
+        d="M 355 42 C 390 120, 420 230, 435 285 C 455 360, 485 440, 488 475 C 490 515, 450 535, 405 532 C 330 528, 270 512, 220 506 C 150 498, 80 495, 58 508 C 45 520, 52 555, 85 562 C 140 575, 200 545, 260 485 C 330 415, 400 340, 435 285 C 450 240, 455 185, 480 185 C 505 185, 515 220, 512 255 C 510 280, 490 280, 435 285 L 282 285"
+      ></path>
+      <path class="hero__rope-line" data-line-path fill="none" pathLength="1"></path>
+      <path class="hero__rope-head" data-head fill="none"></path>
+    </svg>
   </div>
 
   <!-- Full-width line, then three cells split by 1px rules -->
@@ -66,61 +95,192 @@ import Button from '../ui/Button.astro';
 <style>
   .hero {
     /* Fills the first viewport under the nav (~4.1rem): the strip sits on the fold */
+    --hero-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
     display: flex;
     flex-direction: column;
     min-height: calc(100dvh - 4.1rem);
+    /* Vertical swipes still scroll on touch; the rope only needs horizontal + free drags on its own points */
+    touch-action: pan-y;
   }
 
-  .hero__inner {
+  .hero__field {
+    position: relative;
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding-block: 2rem clamp(1.25rem, 0.75rem + 1.6vw, 2.5rem);
+    justify-content: center;
+    align-items: center;
+    padding: clamp(4.5rem, 3rem + 4vw, 6.5rem) var(--page-margin) clamp(2.5rem, 1.5rem + 3vw, 5rem);
+    overflow-x: clip;
   }
 
-  /* Clip container for the reveal. Bottom padding + matching negative margin keeps descenders from being cut at line-height < 1. */
-  .mask {
-    display: block;
-    overflow: hidden;
-    padding-bottom: 0.12em;
-    margin-bottom: -0.12em;
-  }
+  /* ---------- Composition ---------- */
 
-  .reveal {
-    display: block;
-  }
-
-  /* Title and hook share one grid cell: the hook sits in the open space right of "Designer" on desktop, and stacks below on small screens. */
   .hero__stage {
-    display: grid;
-    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-    column-gap: var(--grid-gutter);
-    row-gap: clamp(1.25rem, 1rem + 1vw, 2rem);
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2rem, 1rem + 3.5vw, 4.5rem);
+  }
+
+  /* Width = the width of the big line; centred on the page axis */
+  .hero__block {
+    width: max-content;
+    max-width: 100%;
+    margin-inline: auto;
   }
 
   .hero__title {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    /* "Experience" is ~5.2em wide: derive the size from the container so it fills it without ever clipping */
-    font-size: min(13rem, calc((100vw - 2 * var(--page-margin)) / 5.4));
+    display: flex;
+    flex-direction: column;
+    font-size: inherit;
+    font-weight: var(--weight-medium);
+    line-height: 1;
   }
 
-  .hero__hook {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    max-width: 32ch;
+  .hero__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-size: clamp(20px, 2.5vw, 38px);
+    font-weight: var(--weight-medium);
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    /* The big line's side bearings would otherwise leave the words a hair inside its edges */
+    margin-bottom: clamp(0.5rem, 0.2rem + 1.2vw, 1.5rem);
   }
 
-  /* Side-by-side only once the H1 is capped at its max size and "Designer" leaves the right quarter open */
-  @media (min-width: 1360px) {
-    .hero__hook {
-      grid-column: 10 / -1;
-      grid-row: 1;
-      align-self: end;
-      /* Aligns the last hook line with the baseline area of "Designer" */
-      padding-bottom: 1.6vw;
-      max-width: none;
+  .hero__side {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5em;
+  }
+
+  .hero__word {
+    display: inline-block;
+  }
+
+  /* Zero-size marker that sits on the text baseline: the script reads the baseline from it */
+  .hero__baseline {
+    display: inline-block;
+    width: 0;
+    height: 0;
+  }
+
+  .hero__big {
+    display: block;
+    font-size: clamp(52px, 9.8vw, 150px);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.045em;
+    line-height: 0.86;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .hero__lede {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  }
+
+  .hero__intro {
+    font-size: 13px;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.05em;
+    line-height: 1.55;
+    text-transform: uppercase;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem clamp(1rem, 0.5rem + 3vw, 3.5rem);
+  }
+
+  .hero__ctas :global(.btn) {
+    min-height: 44px;
+    padding: 0.9em 1.5em;
+    font-size: var(--text-small);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Signature overlay ---------- */
+
+  .hero__rope {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    z-index: 4;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .hero__rope-line,
+  .hero__rope-head {
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hero__rope-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .hero__rope-line.is-drawn {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 2.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .hero__rope-line.is-live {
+    /* once live, the dash must never clip the moving path */
+    stroke-dasharray: none;
+    transition: none;
+  }
+
+  .hero__rope-head {
+    opacity: 0;
+    transition: opacity 0.6s var(--ease-out);
+  }
+
+  .hero__rope-head.is-on {
+    opacity: 1;
+  }
+
+  /* ---------- Narrow: wrap the big line, stack everything ---------- */
+
+  @media (max-width: 760px) {
+    .hero__field {
+      justify-content: flex-start;
+      padding-top: 1rem;
+      gap: clamp(2rem, 8vw, 3rem);
+    }
+
+    /* Room above the words for the signature */
+    .hero__stage {
+      padding-top: clamp(150px, 42vw, 190px);
+    }
+
+    .hero__block {
+      width: 100%;
+    }
+
+    .hero__big {
+      white-space: normal;
+      font-size: clamp(52px, 17vw, 120px);
     }
   }
 
@@ -188,22 +348,413 @@ import Button from '../ui/Button.astro';
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const title = gsap.utils.toArray<HTMLElement>('.reveal--title');
-  const hook = gsap.utils.toArray<HTMLElement>('.reveal--hook');
-  const strip = document.querySelector<HTMLElement>('.reveal--strip');
+  const hero = document.querySelector<HTMLElement>('.hero')!;
+  const field = hero.querySelector<HTMLElement>('[data-hero-field]')!;
+  const svg = hero.querySelector<SVGSVGElement>('[data-rope-svg]')!;
+  const source = svg.querySelector<SVGPathElement>('[data-source]')!;
+  const linePath = svg.querySelector<SVGPathElement>('[data-line-path]')!;
+  const head = svg.querySelector<SVGPathElement>('[data-head]')!;
+  const marketer = hero.querySelector<HTMLElement>('[data-marketer]')!;
+  const turned = hero.querySelector<HTMLElement>('[data-turned]')!;
+  const baselineMark = hero.querySelector<HTMLElement>('.hero__baseline')!;
+  const live = hero.querySelector<HTMLElement>('[data-live]')!;
+  const strip = hero.querySelector<HTMLElement>('.reveal--strip');
+  const lines = gsap.utils.toArray<HTMLElement>('[data-line]', hero);
 
-  if (!prefersReducedMotion() && strip) {
-    // Start states are set in JS, not CSS, so no-JS visitors still see everything.
-    // The strip isn't masked, so it gets a short travel instead of a full-height slide.
-    gsap.set([...title, ...hook], { yPercent: 100, opacity: 0 });
-    gsap.set(strip, { y: 24, opacity: 0 });
+  const N = 110;
+  const GRAB_RADIUS = 30;
+  const HOVER_RADIUS = 14;
+  const ITERATIONS = 12;
+  const DAMPING = 0.9;
+  const K_IDLE = 0.02;
+  const K_DRAG = 0.0025;
+  const K_DONE = 0.06;
+  const SIG_W = 490; // path box: x 40–530
+  const SIG_CENTER = { x: 285, y: 305 };
+  const SIG_BASE = 268; // the bottom loop sits this far (in path units) below the centre
 
-    // Sequence: H1 lines, then hook, then the strip.
-    const defaults = { duration: 1.2, ease: 'expo.out', opacity: 1 };
+  interface Pt {
+    x: number;
+    y: number;
+    px: number;
+    py: number;
+  }
+
+  let pts: Pt[] = [];
+  let rest: { x: number; y: number }[] = [];
+  let restSig: { x: number; y: number }[] = [];
+  let lens: number[] = [];
+  let lensSig: number[] = [];
+  let state: 'tangled' | 'done' = 'tangled';
+  let grabbed = -1;
+  const pointer = { x: 0, y: 0 };
+  let touched = false;
+  let frame = 0;
+  let raf = 0;
+  let width = 0;
+  let height = 0;
+  let layout = { baseline: 0, midY: 0, left: 0, right: 0 };
+
+  const rel = (r: DOMRect) => {
+    const f = field.getBoundingClientRect();
+    return {
+      left: r.left - f.left,
+      right: r.right - f.left,
+      top: r.top - f.top,
+      bottom: r.bottom - f.top,
+    };
+  };
+
+  /* ---------- Layout ---------- */
+
+  function measure() {
+    const f = field.getBoundingClientRect();
+    width = f.width;
+    height = f.height;
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    const m = rel(marketer.getBoundingClientRect());
+    const t = rel(turned.getBoundingClientRect());
+    const baseline = rel(baselineMark.getBoundingClientRect()).bottom;
+    const fontSize = parseFloat(getComputedStyle(marketer).fontSize) || 24;
+    layout = {
+      baseline,
+      midY: baseline - fontSize * 0.36,
+      left: m.right,
+      right: t.left,
+    };
+  }
+
+  function buildRestSignature() {
+    const total = source.getTotalLength();
+    const scaleW = Math.min(230, Math.max(150, width * 0.14));
+    const s = scaleW / SIG_W;
+    const cx = layout.left + (layout.right - layout.left) * 0.42;
+    const cy = layout.baseline - SIG_BASE * s;
+    restSig = [];
+    for (let i = 0; i < N; i++) {
+      const p = source.getPointAtLength((total * i) / (N - 1));
+      restSig.push({ x: cx + (p.x - SIG_CENTER.x) * s, y: cy + (p.y - SIG_CENTER.y) * s });
+    }
+  }
+
+  function segLengths(a: { x: number; y: number }[]) {
+    const out: number[] = [];
+    for (let i = 0; i < a.length - 1; i++)
+      out.push(Math.hypot(a[i + 1].x - a[i].x, a[i + 1].y - a[i].y));
+    return out;
+  }
+
+  function lineRest(reverse: boolean) {
+    const x0 = layout.left + 22;
+    const x1 = layout.right - 22;
+    const out: { x: number; y: number }[] = [];
+    for (let i = 0; i < N; i++) {
+      const u = (reverse ? N - 1 - i : i) / (N - 1);
+      out.push({ x: x0 + (x1 - x0) * u, y: layout.midY });
+    }
+    return out;
+  }
+
+  /** Full (re)layout. Keeps the current rope where it is, so a resize never teleports it. */
+  function layoutAll(resetPoints: boolean) {
+    measure();
+    buildRestSignature();
+    lensSig = segLengths(restSig);
+    if (state === 'tangled') {
+      rest = restSig;
+      lens = lensSig;
+    } else {
+      rest = lineRest(lineReversed);
+      lens = Array(N - 1).fill((layout.right - layout.left - 44) / (N - 1));
+    }
+    if (resetPoints || pts.length === 0) {
+      pts = rest.map((p) => ({ x: p.x, y: p.y, px: p.x, py: p.y }));
+    }
+    updateHead();
+    render();
+  }
+
+  /* ---------- Drawing ---------- */
+
+  function render() {
+    let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+    for (let i = 1; i < N - 1; i++) {
+      const mx = (pts[i].x + pts[i + 1].x) / 2;
+      const my = (pts[i].y + pts[i + 1].y) / 2;
+      d += ` Q ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)} ${mx.toFixed(2)} ${my.toFixed(2)}`;
+    }
+    d += ` L ${pts[N - 1].x.toFixed(2)} ${pts[N - 1].y.toFixed(2)}`;
+    linePath.setAttribute('d', d);
+
+    if (state === 'done') updateHead();
+  }
+
+  let lineReversed = false;
+
+  function updateHead() {
+    if (state !== 'done') return;
+    const e = lineReversed ? 0 : N - 1;
+    const n = lineReversed ? 1 : N - 2;
+    const a = pts[e];
+    const b = pts[n];
+    const ang = Math.atan2(a.y - b.y, a.x - b.x);
+    const len = 9;
+    const spread = 0.5;
+    const p1 = [a.x - Math.cos(ang - spread) * len, a.y - Math.sin(ang - spread) * len];
+    const p2 = [a.x - Math.cos(ang + spread) * len, a.y - Math.sin(ang + spread) * len];
+    head.setAttribute(
+      'd',
+      `M ${p1[0].toFixed(1)} ${p1[1].toFixed(1)} L ${a.x.toFixed(1)} ${a.y.toFixed(1)} L ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`,
+    );
+  }
+
+  /* ---------- Physics ---------- */
+
+  function step() {
+    const k = state === 'done' ? K_DONE : grabbed >= 0 ? K_DRAG : K_IDLE;
+    for (let i = 0; i < N; i++) {
+      const p = pts[i];
+      if (i === grabbed) continue;
+      const vx = (p.x - p.px) * DAMPING;
+      const vy = (p.y - p.py) * DAMPING;
+      p.px = p.x;
+      p.py = p.y;
+      p.x += vx + (rest[i].x - p.x) * k;
+      p.y += vy + (rest[i].y - p.y) * k;
+    }
+    if (grabbed >= 0) {
+      const g = pts[grabbed];
+      g.x = g.px = pointer.x;
+      g.y = g.py = pointer.y;
+    }
+    for (let it = 0; it < ITERATIONS; it++) {
+      for (let i = 0; i < N - 1; i++) {
+        const a = pts[i];
+        const b = pts[i + 1];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.hypot(dx, dy) || 0.0001;
+        const diff = (dist - lens[i]) / dist;
+        const wa = i === grabbed ? 0 : 1;
+        const wb = i + 1 === grabbed ? 0 : 1;
+        const w = wa + wb;
+        if (w === 0) continue;
+        a.x += (dx * diff * wa) / w;
+        a.y += (dy * diff * wa) / w;
+        b.x -= (dx * diff * wb) / w;
+        b.y -= (dy * diff * wb) / w;
+      }
+    }
+  }
+
+  /* ---------- Tangles ---------- */
+
+  function cross(
+    ax: number,
+    ay: number,
+    bx: number,
+    by: number,
+    cx: number,
+    cy: number,
+    dx: number,
+    dy: number,
+  ) {
+    const d1 = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
+    const d2 = (bx - ax) * (dy - ay) - (by - ay) * (dx - ax);
+    const d3 = (dx - cx) * (ay - cy) - (dy - cy) * (ax - cx);
+    const d4 = (dx - cx) * (by - cy) - (dy - cy) * (bx - cx);
+    return d1 * d2 < 0 && d3 * d4 < 0;
+  }
+
+  function countCrossings() {
+    let c = 0;
+    for (let i = 0; i < N - 1; i++) {
+      for (let j = i + 2; j < N - 1; j++) {
+        if (
+          cross(
+            pts[i].x,
+            pts[i].y,
+            pts[i + 1].x,
+            pts[i + 1].y,
+            pts[j].x,
+            pts[j].y,
+            pts[j + 1].x,
+            pts[j + 1].y,
+          )
+        )
+          c++;
+      }
+    }
+    return c;
+  }
+
+  function ropeLength() {
+    let l = 0;
+    for (let i = 0; i < N - 1; i++)
+      l += Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+    return l;
+  }
+
+  function checkTangles() {
+    if (state !== 'tangled' || grabbed < 0 || countCrossings() !== 0) return;
+    const ends = Math.hypot(pts[0].x - pts[N - 1].x, pts[0].y - pts[N - 1].y);
+    if (ends > ropeLength() * 0.55) succeed();
+  }
+
+  function succeed() {
+    grabbed = -1;
+    state = 'done';
+    setGrow(false);
+    lineReversed = pts[0].x > pts[N - 1].x;
+    rest = lineRest(lineReversed);
+    lens = Array(N - 1).fill((layout.right - layout.left - 44) / (N - 1));
+    updateHead();
+    head.classList.add('is-on');
+    live.textContent = 'Detangled. Marketer turned UX designer.';
+  }
+
+  function reset() {
+    state = 'tangled';
+    head.classList.remove('is-on');
+    rest = restSig;
+    lens = lensSig;
+    live.textContent = '';
+  }
+
+  /* ---------- Pointer ---------- */
+
+  function toHero(e: PointerEvent) {
+    const r = field.getBoundingClientRect();
+    // Account for any CSS scaling between the viewBox and the rendered size
+    const sx = r.width ? width / r.width : 1;
+    const sy = r.height ? height / r.height : 1;
+    return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy };
+  }
+
+  function nearest(x: number, y: number) {
+    let best = -1;
+    let bestD = GRAB_RADIUS;
+    for (let i = 0; i < N; i++) {
+      const d = Math.hypot(pts[i].x - x, pts[i].y - y);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  // Distance from a point to the rope as a polyline (not just its sample points)
+  function distToRope(x: number, y: number) {
+    let best = Infinity;
+    for (let i = 0; i < N - 1; i++) {
+      const a = pts[i];
+      const b = pts[i + 1];
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const len2 = dx * dx + dy * dy || 1;
+      const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / len2));
+      best = Math.min(best, Math.hypot(x - (a.x + dx * t), y - (a.y + dy * t)));
+    }
+    return best;
+  }
+
+  // The site's custom cursor (tactile.ts) swells its dot when told to
+  let grow = false;
+  function setGrow(on: boolean) {
+    if (on === grow) return;
+    grow = on;
+    document.dispatchEvent(new CustomEvent('cursor:grow', { detail: on }));
+  }
+
+  function onDown(e: PointerEvent) {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    const p = toHero(e);
+    const i = nearest(p.x, p.y);
+    if (i < 0) return;
+    e.preventDefault();
+    // Grabbing the straightened line tangles it back into the signature
+    if (state === 'done') reset();
+    touched = true;
+    grabbed = i;
+    pointer.x = p.x;
+    pointer.y = p.y;
+    setGrow(true);
+  }
+
+  function onMove(e: PointerEvent) {
+    const p = toHero(e);
+    if (grabbed >= 0) {
+      pointer.x = p.x;
+      pointer.y = p.y;
+      return;
+    }
+    if (e.pointerType === 'mouse') setGrow(distToRope(p.x, p.y) < HOVER_RADIUS);
+  }
+
+  function onUp() {
+    if (grabbed < 0) return;
+    grabbed = -1;
+  }
+
+  /* ---------- Loop ---------- */
+
+  function tick() {
+    frame++;
+    step();
+    render();
+    if (frame % 4 === 0) checkTangles();
+    raf = requestAnimationFrame(tick);
+  }
+
+  /* ---------- Boot ---------- */
+
+  const reduce = prefersReducedMotion();
+  layoutAll(true);
+  checkTangles();
+
+  hero.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+
+  const ro = new ResizeObserver(() => {
+    // Keep the rope's current points; only the targets move
+    layoutAll(!touched && state === 'tangled');
+  });
+  ro.observe(field);
+
+  const relayout = () => layoutAll(!touched && state === 'tangled');
+  document.fonts?.ready.then(relayout);
+
+  if (reduce) {
+    linePath.classList.add('is-live');
+  } else {
+    // Draw the signature in, then hand the path over to the physics
+    linePath.classList.add('is-drawn');
+    window.setTimeout(() => linePath.classList.add('is-live'), 2700);
+    // Start states are set in JS, not CSS, so no-JS visitors still see everything
+    gsap.set(lines, { y: '0.12em', opacity: 0 });
+    if (strip) gsap.set(strip, { y: 24, opacity: 0 });
     gsap
-      .timeline()
-      .to(title, { ...defaults, yPercent: 0, stagger: 0.12 })
-      .to(hook, { ...defaults, yPercent: 0, stagger: 0.1 }, '-=0.9')
-      .to(strip, { ...defaults, y: 0 }, '-=1');
+      .timeline({ onComplete: relayout })
+      .to(lines, { y: 0, opacity: 1, duration: 1, ease: 'expo.out', stagger: 0.12 })
+      .to(strip, { y: 0, opacity: 1, duration: 1, ease: 'expo.out' }, '-=0.9');
+  }
+  // Layout settles once the entrance has finished
+  window.setTimeout(relayout, 1300);
+
+  raf = requestAnimationFrame(tick);
+
+  document.addEventListener('astro:before-swap', cleanup, { once: true });
+  function cleanup() {
+    cancelAnimationFrame(raf);
+    ro.disconnect();
+    hero.removeEventListener('pointerdown', onDown);
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onUp);
+    setGrow(false);
   }
 </script>

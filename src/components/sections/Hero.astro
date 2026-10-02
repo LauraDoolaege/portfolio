@@ -203,7 +203,8 @@ import SectionLabel from '../ui/SectionLabel.astro';
     align-items: baseline;
     gap: 1rem;
     font-size: clamp(20px, 2.5vw, 38px);
-    font-weight: var(--weight-medium);
+    /* Light against the bold title below: the scale tension is in the weight as well as the size */
+    font-weight: var(--weight-light);
     letter-spacing: -0.02em;
     text-transform: uppercase;
     line-height: 1.1;
@@ -442,7 +443,7 @@ import SectionLabel from '../ui/SectionLabel.astro';
     }
 
     /* Room above the words for the signature: it rests centred above the "Marketer / Turned" row.
-                 At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+                   At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
     .hero__stage {
       padding-top: 192px;
     }

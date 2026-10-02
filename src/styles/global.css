@@ -619,7 +619,7 @@ button:focus-visible {
 }
 
 /* .btn is inline-flex already; forcing inline-block on it let the arrow wrap to a second line */
-[data-magnetic]:not(.btn) {
+[data-magnetic]:not(.btn):not(.btn-link) {
   display: inline-block;
 }
 

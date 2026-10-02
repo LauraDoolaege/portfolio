@@ -15,32 +15,41 @@ interface MagneticOptions {
   textStrength?: number;
 }
 
-function magnetic(el: HTMLElement, { strength = 0.3, textStrength = 0.18 }: MagneticOptions = {}) {
+function magnetic(el: HTMLElement, { strength = 0.15, textStrength = 0.09 }: MagneticOptions = {}) {
   // Wrap the content so the text can move a touch further than its container
   const inner = document.createElement('span');
   inner.className = 'magnetic__inner';
   while (el.firstChild) inner.appendChild(el.firstChild);
   el.appendChild(inner);
 
-  const moveX = gsap.quickTo(el, 'x', { duration: 0.6, ease: 'power3.out' });
-  const moveY = gsap.quickTo(el, 'y', { duration: 0.6, ease: 'power3.out' });
-  const textX = gsap.quickTo(inner, 'x', { duration: 0.6, ease: 'power3.out' });
-  const textY = gsap.quickTo(inner, 'y', { duration: 0.6, ease: 'power3.out' });
+  // Plain tweens with overwrite: 'auto', not quickTo: the elastic reset on leave has to replace the
+  // follow tween without killing it, or the next hover would have nothing left to drive.
+  const follow = (x: number, y: number, tx: number, ty: number) => {
+    const vars = { duration: 0.9, ease: 'power3.out', overwrite: 'auto' } as const;
+    gsap.to(el, { x, y, ...vars });
+    gsap.to(inner, { x: tx, y: ty, ...vars });
+  };
 
   el.addEventListener('mousemove', (e) => {
     const r = el.getBoundingClientRect();
-    const dx = e.clientX - (r.left + r.width / 2);
-    const dy = e.clientY - (r.top + r.height / 2);
-    moveX(dx * strength);
-    moveY(dy * strength);
-    textX(dx * textStrength);
-    textY(dy * textStrength);
+    // The live rect includes the element's current translate; remove it so the pointer is measured
+    // from the resting center and the follow doesn't feed back into itself.
+    const dx = e.clientX - (r.left + r.width / 2 - Number(gsap.getProperty(el, 'x')));
+    const dy = e.clientY - (r.top + r.height / 2 - Number(gsap.getProperty(el, 'y')));
+    follow(dx * strength, dy * strength, dx * textStrength, dy * textStrength);
   });
 
   // Spring back to center
   el.addEventListener('mouseleave', () => {
-    gsap.to(el, { x: 0, y: 0, duration: 1.1, ease: 'elastic.out(1, 0.4)', overwrite: true });
-    gsap.to(inner, { x: 0, y: 0, duration: 1.1, ease: 'elastic.out(1, 0.4)', overwrite: true });
+    const spring = {
+      x: 0,
+      y: 0,
+      duration: 1.4,
+      ease: 'elastic.out(1, 0.55)',
+      overwrite: 'auto',
+    } as const;
+    gsap.to(el, spring);
+    gsap.to(inner, spring);
   });
 }
 
@@ -228,7 +237,9 @@ if (finePointer) {
   cursor();
   document.querySelectorAll<HTMLElement>('.card__media, .media-frame').forEach(spotlight);
   if (!reduceMotion) {
-    document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => magnetic(el));
+    document
+      .querySelectorAll<HTMLElement>('[data-magnetic], .btn, .btn-link')
+      .forEach((el) => magnetic(el));
     document.querySelectorAll<HTMLElement>('.card__media, .media-frame').forEach(pan);
   }
 }

@@ -2,6 +2,8 @@
 import Button from '../ui/Button.astro';
 import { withBase } from '../../utils/url';
 import SectionLabel from '../ui/SectionLabel.astro';
+import { Image } from 'astro:assets';
+import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1_201_a.jpeg';
 // Hero: an editorial composition ("Marketer ... Turned / UX Designer") with one playful element, the
 // signature: a Verlet rope the visitor can grab and stretch; it eases back into place (see the script).
 // Small screens are centred and stacked. From 1000px the title block sits on the left, a vertical hairline
@@ -41,6 +43,17 @@ import SectionLabel from '../ui/SectionLabel.astro';
     </div>
 
     <div class="hero__lede hero__aside">
+      <!-- Portrait: warmed by CSS (sepia + a multiplied wash) so the black-and-white photo sits in the paper palette -->
+      <figure class="hero__portrait" data-line>
+        <Image
+          class="hero__portrait-img"
+          src={portrait}
+          alt="Portrait of Laura Doolaege in profile, looking to the left"
+          widths={[320, 480, 640]}
+          sizes="(min-width: 1000px) 22rem, 1px"
+          loading="eager"
+        />
+      </figure>
       <p class="hero__intro" data-line>
         I detangle briefings into intuitive concepts
         <br />— creative, and grounded in marketing.
@@ -371,6 +384,12 @@ import SectionLabel from '../ui/SectionLabel.astro';
     transition: none;
   }
 
+  /* ---------- Portrait ---------- */
+
+  .hero__portrait {
+    display: none;
+  }
+
   /* ---------- Desktop: title left, hairline, intro + CTAs right ---------- */
 
   @media (min-width: 1000px) {
@@ -420,6 +439,45 @@ import SectionLabel from '../ui/SectionLabel.astro';
       border-left: var(--hairline);
     }
 
+    .hero__portrait {
+      position: relative;
+      display: block;
+      isolation: isolate;
+      overflow: hidden;
+      flex: 0 1 auto;
+      width: 100%;
+      min-height: 0;
+      aspect-ratio: 811 / 977;
+      /* Sits near the top of the column; the text hangs from the bottom */
+      margin: clamp(1.25rem, 0.5rem + 2vw, 2.5rem) 0 auto;
+      background: var(--frame-bg);
+    }
+
+    .hero__portrait-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 35% 30%;
+      /* Black and white in, warm print out: a touch of sepia, softened contrast */
+      filter: sepia(0.4) saturate(0.85) contrast(0.96) brightness(1.02);
+    }
+
+    /* Warm wash, multiplied into the photo */
+    .hero__portrait::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: #cf9468;
+      mix-blend-mode: multiply;
+      opacity: 0.32;
+      pointer-events: none;
+    }
+
+    :global(:root[data-theme='dark']) .hero__portrait-img {
+      filter: sepia(0.4) saturate(0.85) contrast(0.96) brightness(0.85);
+    }
+
     .hero__intro {
       text-align: left;
       text-wrap: pretty;
@@ -460,7 +518,7 @@ import SectionLabel from '../ui/SectionLabel.astro';
     }
 
     /* Room above the words for the signature: it rests centred above the "Marketer / Turned" row.
-                     At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+                           At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
     .hero__stage {
       padding-top: 192px;
     }

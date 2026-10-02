@@ -1,70 +1,82 @@
 ---
 import Button from '../ui/Button.astro';
-// Hero: status pill, massive H1, hook, tags. Each text line sits in an
-// overflow-hidden mask; the script slides the inner element up into view.
+// Hero: massive H1 and hook, resting on a full-width meta strip (credentials + status) that works
+// as the header's footer. Each text line sits in an overflow-hidden mask; the script slides the
+// inner element up into view.
 ---
 
 <section class="hero" aria-label="Introduction">
   <div class="container hero__inner">
-    <div class="hero__top mask">
-      <p class="hero__pill tag reveal">
-        <span class="hero__dot" aria-hidden="true"></span>
-        Seeking UX &amp; Experience Design Internship (Feb – May 2027)
-      </p>
-    </div>
+    <div class="hero__stage">
+      <h1 class="hero__title">
+        <span class="mask">
+          <span class="reveal reveal--title">Experience</span>
+        </span>
+        <span class="mask">
+          <span class="reveal reveal--title">Designer</span>
+        </span>
+      </h1>
 
-    <div class="hero__main">
-      <div class="hero__stage">
-        <h1 class="hero__title">
-          <span class="mask">
-            <span class="reveal reveal--title">Experience</span>
+      <div class="hero__hook subtitle">
+        <p class="mask">
+          <span class="reveal reveal--hook">
+            I detangle briefs into creative concepts that are feasible and grounded in marketing.
           </span>
-          <span class="mask">
-            <span class="reveal reveal--title">Designer</span>
-          </span>
-        </h1>
-
-        <div class="hero__hook subtitle">
-          <p class="mask">
-            <span class="reveal reveal--hook">
-              I detangle briefs into creative concepts that are feasible and grounded in marketing.
-            </span>
-          </p>
-          <p class="mask">
-            <span class="reveal reveal--hook">Online and offline.</span>
-          </p>
-        </div>
+        </p>
+        <p class="mask">
+          <span class="reveal reveal--hook">Online and offline.</span>
+        </p>
       </div>
-
-      <ul class="hero__tags reveal--tags" aria-label="Focus">
-        <li class="tag">UX Design</li>
-        <li>
-          <Button
-            variant="link"
-            size="sm"
-            href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
-            target="_blank"
-            rel="noopener"
-          >
-            Devine 3rd Year
-          </Button>
-        </li>
-      </ul>
     </div>
+  </div>
+
+  <!-- Full-width line, then three cells split by 1px rules -->
+  <div class="hero__strip reveal--strip">
+    <ul class="container hero__cells">
+      <li class="hero__cell">
+        <Button
+          variant="link"
+          size="sm"
+          href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
+          target="_blank"
+          rel="noopener"
+        >
+          UX Design at Devine
+        </Button>
+      </li>
+      <li class="hero__cell">
+        <Button
+          variant="link"
+          size="sm"
+          href="https://www.hogent.be"
+          target="_blank"
+          rel="noopener"
+        >
+          Marketing Alumni at HOGENT
+        </Button>
+      </li>
+      <li class="hero__cell hero__cell--status">
+        <span class="hero__dot" aria-hidden="true"></span>
+        Seeking Internship (Feb 2027)
+      </li>
+    </ul>
   </div>
 </section>
 
 <style>
   .hero {
-    flex: 1;
+    /* Fills the first viewport under the nav (~4.1rem): the strip sits on the fold */
     display: flex;
-    padding-block: clamp(2rem, 1rem + 3vw, 4rem) clamp(2rem, 1rem + 3vw, 4rem);
+    flex-direction: column;
+    min-height: calc(100dvh - 4.1rem);
   }
 
   .hero__inner {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+    justify-content: flex-end;
+    padding-block: 2rem clamp(1.25rem, 0.75rem + 1.6vw, 2.5rem);
   }
 
   /* Clip container for the reveal. Bottom padding + matching negative margin keeps descenders from being cut at line-height < 1. */
@@ -77,26 +89,6 @@ import Button from '../ui/Button.astro';
 
   .reveal {
     display: block;
-  }
-
-  .hero__top {
-    width: fit-content;
-    max-width: 100%;
-  }
-
-  /* A status label: the .tag look with a leading terracotta dot */
-  .hero__pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.7em;
-  }
-
-  .hero__dot {
-    flex-shrink: 0;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--accent);
   }
 
   /* Title and hook share one grid cell: the hook sits in the open space right of "Designer" on desktop, and stacks below on small screens. */
@@ -120,15 +112,6 @@ import Button from '../ui/Button.astro';
     max-width: 32ch;
   }
 
-  .hero__tags {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem 1.5rem;
-    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
-    font-size: var(--text-small);
-  }
-
   /* Side-by-side only once the H1 is capped at its max size and "Designer" leaves the right quarter open */
   @media (min-width: 1360px) {
     .hero__hook {
@@ -140,29 +123,87 @@ import Button from '../ui/Button.astro';
       max-width: none;
     }
   }
+
+  /* ---------- Meta strip ---------- */
+
+  .hero__strip {
+    border-top: var(--hairline);
+  }
+
+  .hero__cells {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* One label voice, the same as the site's tags: uppercase, tracked, small */
+  .hero__cell {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding-block: 1.1rem;
+    font-size: var(--text-small);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  /* The links inherit that voice instead of the link button's own size */
+  .hero__cell :global(.btn-link) {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+  }
+
+  .hero__cell + .hero__cell {
+    border-top: var(--hairline);
+  }
+
+  .hero__cell--status {
+    color: var(--text-muted);
+  }
+
+  .hero__dot {
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Wide: three equal cells, split by 1px vertical rules; the first sits flush with the page margin */
+  @media (min-width: 720px) {
+    .hero__cells {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .hero__cell + .hero__cell {
+      border-top: 0;
+      border-left: var(--hairline);
+      padding-left: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+    }
+  }
 </style>
 
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
 
-  const pill = document.querySelector<HTMLElement>('.hero__pill');
   const title = gsap.utils.toArray<HTMLElement>('.reveal--title');
   const hook = gsap.utils.toArray<HTMLElement>('.reveal--hook');
-  const tags = document.querySelector<HTMLElement>('.reveal--tags');
+  const strip = document.querySelector<HTMLElement>('.reveal--strip');
 
-  if (!prefersReducedMotion() && pill && tags) {
+  if (!prefersReducedMotion() && strip) {
     // Start states are set in JS, not CSS, so no-JS visitors still see everything.
-    // The tags aren't masked, so they get a short travel instead of a full-height slide.
-    gsap.set([pill, ...title, ...hook], { yPercent: 100, opacity: 0 });
-    gsap.set(tags, { y: 24, opacity: 0 });
+    // The strip isn't masked, so it gets a short travel instead of a full-height slide.
+    gsap.set([...title, ...hook], { yPercent: 100, opacity: 0 });
+    gsap.set(strip, { y: 24, opacity: 0 });
 
-    // Sequence: status pill, then H1 lines, then hook, then tags.
+    // Sequence: H1 lines, then hook, then the strip.
     const defaults = { duration: 1.2, ease: 'expo.out', opacity: 1 };
     gsap
       .timeline()
-      .to(pill, { ...defaults, yPercent: 0 })
-      .to(title, { ...defaults, yPercent: 0, stagger: 0.12 }, '-=0.95')
+      .to(title, { ...defaults, yPercent: 0, stagger: 0.12 })
       .to(hook, { ...defaults, yPercent: 0, stagger: 0.1 }, '-=0.9')
-      .to(tags, { ...defaults, y: 0 }, '-=1');
+      .to(strip, { ...defaults, y: 0 }, '-=1');
   }
 </script>

@@ -77,12 +77,19 @@ function cursor() {
   // Set by interactive elements that want a bigger dot (the hero signature, via 'cursor:grow')
   let grown = false;
 
-  // Non-media states. The grown state uses the disc (authored at full size, scaled down) rather than
+  // Non-media states. The grown state uses the disc (authored at full size) rather than
   // scaling the 10px dot up, so it stays sharp instead of being rasterised small and stretched.
   const rest = (d: number) => {
     const ease = 'power3.out';
-    gsap.to(disc, { scale: grown ? 0.67 : 0, duration: d, ease, overwrite: 'auto' });
-    gsap.to(label, { opacity: 0, duration: d / 2, ease, overwrite: 'auto' });
+    // Grown (hovering the hero signature): the full 60px disc, labelled "Grab"
+    if (grown) label.textContent = 'Grab';
+    gsap.to(disc, { scale: grown ? 1 : 0, duration: d, ease, overwrite: 'auto' });
+    gsap.to(label, {
+      opacity: grown ? 1 : 0,
+      duration: grown ? d : d / 2,
+      ease,
+      overwrite: 'auto',
+    });
     // Links and buttons: the dot swells a little. Text and empty space: always the plain dot.
     gsap.to(dot, {
       scale: grown ? 0 : state === 'link' ? 1.6 : 1,

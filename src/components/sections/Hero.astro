@@ -1,16 +1,13 @@
 ---
 import Button from '../ui/Button.astro';
 import { withBase } from '../../utils/url';
-// Hero: a centred editorial composition ("Marketer ... Turned / UX – Designer") with one playful
-// element, the signature. It is a Verlet rope the visitor can grab and detangle into an arrow
+// Hero: a centred editorial composition ("Marketer ... Turned / UX Designer") with one playful
+// element, the signature: a Verlet rope the visitor can grab and stretch; it eases back into place
 // (see the script below). The meta strip underneath is the header's footer and is unchanged.
 ---
 
 <section class="hero" aria-label="Introduction">
   <div class="hero__field" data-hero-field>
-    <!-- Screen-reader announcement for the detangle state; nothing visible -->
-    <p class="sr-only" aria-live="polite" data-live></p>
-
     <div class="hero__stage">
       <div class="hero__block">
         <h1 class="hero__title" aria-label="Marketer turned UX designer">
@@ -27,7 +24,7 @@ import { withBase } from '../../utils/url';
             </span>
           </span>
           <span class="hero__big" aria-hidden="true" data-line>
-            UX&nbsp;–&nbsp;Designer
+            UX Designer
           </span>
         </h1>
       </div>
@@ -55,7 +52,6 @@ import { withBase } from '../../utils/url';
         d="M 355 42 C 390 120, 420 230, 435 285 C 455 360, 485 440, 488 475 C 490 515, 450 535, 405 532 C 330 528, 270 512, 220 506 C 150 498, 80 495, 58 508 C 45 520, 52 555, 85 562 C 140 575, 200 545, 260 485 C 330 415, 400 340, 435 285 C 450 240, 455 185, 480 185 C 505 185, 515 220, 512 255 C 510 280, 490 280, 435 285 L 282 285"
       ></path>
       <path class="hero__rope-line" data-line-path fill="none" pathLength="1"></path>
-      <path class="hero__rope-head" data-head fill="none"></path>
     </svg>
   </div>
 
@@ -227,8 +223,7 @@ import { withBase } from '../../utils/url';
     pointer-events: none;
   }
 
-  .hero__rope-line,
-  .hero__rope-head {
+  .hero__rope-line {
     stroke: var(--accent);
     stroke-width: 1.8;
     stroke-linecap: round;
@@ -249,15 +244,6 @@ import { withBase } from '../../utils/url';
     /* once live, the dash must never clip the moving path */
     stroke-dasharray: none;
     transition: none;
-  }
-
-  .hero__rope-head {
-    opacity: 0;
-    transition: opacity 0.6s var(--ease-out);
-  }
-
-  .hero__rope-head.is-on {
-    opacity: 1;
   }
 
   /* ---------- Narrow: wrap the big line, stack everything ---------- */
@@ -353,22 +339,24 @@ import { withBase } from '../../utils/url';
   const svg = hero.querySelector<SVGSVGElement>('[data-rope-svg]')!;
   const source = svg.querySelector<SVGPathElement>('[data-source]')!;
   const linePath = svg.querySelector<SVGPathElement>('[data-line-path]')!;
-  const head = svg.querySelector<SVGPathElement>('[data-head]')!;
   const marketer = hero.querySelector<HTMLElement>('[data-marketer]')!;
   const turned = hero.querySelector<HTMLElement>('[data-turned]')!;
   const baselineMark = hero.querySelector<HTMLElement>('.hero__baseline')!;
-  const live = hero.querySelector<HTMLElement>('[data-live]')!;
   const strip = hero.querySelector<HTMLElement>('.reveal--strip');
   const lines = gsap.utils.toArray<HTMLElement>('[data-line]', hero);
 
   const N = 110;
   const GRAB_RADIUS = 30;
   const HOVER_RADIUS = 14;
-  const ITERATIONS = 12;
-  const DAMPING = 0.9;
-  const K_IDLE = 0.02;
+  const ITERATIONS = 20;
+  // The line is drawn through a smoothed copy of the points, so slack in the rope never shows as wrinkles
+  const SMOOTH_PASSES = 6;
+  // Tuned to be critically damped: the rope eases back into place without overshooting or wobbling
+  const DAMPING = 0.8;
+  const K_IDLE = 0.01;
   const K_DRAG = 0.0025;
-  const K_DONE = 0.06;
+  // The grab offset (pointer vs. the point you caught) eases out, so the point ends up exactly under the cursor
+  const OFFSET_DECAY = 0.8;
   const SIG_W = 490; // path box: x 40–530
   const SIG_CENTER = { x: 285, y: 305 };
   const SIG_BASE = 268; // the bottom loop sits this far (in path units) below the centre
@@ -385,11 +373,10 @@ import { withBase } from '../../utils/url';
   let restSig: { x: number; y: number }[] = [];
   let lens: number[] = [];
   let lensSig: number[] = [];
-  let state: 'tangled' | 'done' = 'tangled';
   let grabbed = -1;
   const pointer = { x: 0, y: 0 };
+  const grabOffset = { x: 0, y: 0 };
   let touched = false;
-  let frame = 0;
   let raf = 0;
   let width = 0;
   let height = 0;
@@ -445,74 +432,60 @@ import { withBase } from '../../utils/url';
     return out;
   }
 
-  function lineRest(reverse: boolean) {
-    const x0 = layout.left + 22;
-    const x1 = layout.right - 22;
-    const out: { x: number; y: number }[] = [];
-    for (let i = 0; i < N; i++) {
-      const u = (reverse ? N - 1 - i : i) / (N - 1);
-      out.push({ x: x0 + (x1 - x0) * u, y: layout.midY });
-    }
-    return out;
-  }
-
   /** Full (re)layout. Keeps the current rope where it is, so a resize never teleports it. */
   function layoutAll(resetPoints: boolean) {
     measure();
     buildRestSignature();
     lensSig = segLengths(restSig);
-    if (state === 'tangled') {
-      rest = restSig;
-      lens = lensSig;
-    } else {
-      rest = lineRest(lineReversed);
-      lens = Array(N - 1).fill((layout.right - layout.left - 44) / (N - 1));
-    }
+    rest = restSig;
+    lens = lensSig;
     if (resetPoints || pts.length === 0) {
       pts = rest.map((p) => ({ x: p.x, y: p.y, px: p.x, py: p.y }));
     }
-    updateHead();
     render();
   }
 
   /* ---------- Drawing ---------- */
 
-  function render() {
-    let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
-    for (let i = 1; i < N - 1; i++) {
-      const mx = (pts[i].x + pts[i + 1].x) / 2;
-      const my = (pts[i].y + pts[i + 1].y) / 2;
-      d += ` Q ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)} ${mx.toFixed(2)} ${my.toFixed(2)}`;
-    }
-    d += ` L ${pts[N - 1].x.toFixed(2)} ${pts[N - 1].y.toFixed(2)}`;
-    linePath.setAttribute('d', d);
+  const sx = new Float32Array(N);
+  const sy = new Float32Array(N);
+  const tx = new Float32Array(N);
+  const ty = new Float32Array(N);
 
-    if (state === 'done') updateHead();
+  // Binomial [1 2 1] smoothing, ends fixed: removes point-to-point jitter but keeps the rope's shape
+  function smoothed() {
+    for (let i = 0; i < N; i++) {
+      sx[i] = pts[i].x;
+      sy[i] = pts[i].y;
+    }
+    for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
+      for (let i = 1; i < N - 1; i++) {
+        tx[i] = (sx[i - 1] + 2 * sx[i] + sx[i + 1]) / 4;
+        ty[i] = (sy[i - 1] + 2 * sy[i] + sy[i + 1]) / 4;
+      }
+      for (let i = 1; i < N - 1; i++) {
+        sx[i] = tx[i];
+        sy[i] = ty[i];
+      }
+    }
   }
 
-  let lineReversed = false;
-
-  function updateHead() {
-    if (state !== 'done') return;
-    const e = lineReversed ? 0 : N - 1;
-    const n = lineReversed ? 1 : N - 2;
-    const a = pts[e];
-    const b = pts[n];
-    const ang = Math.atan2(a.y - b.y, a.x - b.x);
-    const len = 9;
-    const spread = 0.5;
-    const p1 = [a.x - Math.cos(ang - spread) * len, a.y - Math.sin(ang - spread) * len];
-    const p2 = [a.x - Math.cos(ang + spread) * len, a.y - Math.sin(ang + spread) * len];
-    head.setAttribute(
-      'd',
-      `M ${p1[0].toFixed(1)} ${p1[1].toFixed(1)} L ${a.x.toFixed(1)} ${a.y.toFixed(1)} L ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`,
-    );
+  function render() {
+    smoothed();
+    let d = `M ${sx[0].toFixed(2)} ${sy[0].toFixed(2)}`;
+    for (let i = 1; i < N - 1; i++) {
+      const mx = (sx[i] + sx[i + 1]) / 2;
+      const my = (sy[i] + sy[i + 1]) / 2;
+      d += ` Q ${sx[i].toFixed(2)} ${sy[i].toFixed(2)} ${mx.toFixed(2)} ${my.toFixed(2)}`;
+    }
+    d += ` L ${sx[N - 1].toFixed(2)} ${sy[N - 1].toFixed(2)}`;
+    linePath.setAttribute('d', d);
   }
 
   /* ---------- Physics ---------- */
 
   function step() {
-    const k = state === 'done' ? K_DONE : grabbed >= 0 ? K_DRAG : K_IDLE;
+    const k = grabbed >= 0 ? K_DRAG : K_IDLE;
     for (let i = 0; i < N; i++) {
       const p = pts[i];
       if (i === grabbed) continue;
@@ -525,101 +498,31 @@ import { withBase } from '../../utils/url';
     }
     if (grabbed >= 0) {
       const g = pts[grabbed];
-      g.x = g.px = pointer.x;
-      g.y = g.py = pointer.y;
+      grabOffset.x *= OFFSET_DECAY;
+      grabOffset.y *= OFFSET_DECAY;
+      g.x = g.px = pointer.x + grabOffset.x;
+      g.y = g.py = pointer.y + grabOffset.y;
     }
-    for (let it = 0; it < ITERATIONS; it++) {
-      for (let i = 0; i < N - 1; i++) {
-        const a = pts[i];
-        const b = pts[i + 1];
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const dist = Math.hypot(dx, dy) || 0.0001;
-        const diff = (dist - lens[i]) / dist;
-        const wa = i === grabbed ? 0 : 1;
-        const wb = i + 1 === grabbed ? 0 : 1;
-        const w = wa + wb;
-        if (w === 0) continue;
-        a.x += (dx * diff * wa) / w;
-        a.y += (dy * diff * wa) / w;
-        b.x -= (dx * diff * wb) / w;
-        b.y -= (dy * diff * wb) / w;
-      }
-    }
+    for (let it = 0; it < ITERATIONS; it++) constrain();
   }
 
-  /* ---------- Tangles ---------- */
-
-  function cross(
-    ax: number,
-    ay: number,
-    bx: number,
-    by: number,
-    cx: number,
-    cy: number,
-    dx: number,
-    dy: number,
-  ) {
-    const d1 = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
-    const d2 = (bx - ax) * (dy - ay) - (by - ay) * (dx - ax);
-    const d3 = (dx - cx) * (ay - cy) - (dy - cy) * (ax - cx);
-    const d4 = (dx - cx) * (by - cy) - (dy - cy) * (bx - cx);
-    return d1 * d2 < 0 && d3 * d4 < 0;
-  }
-
-  function countCrossings() {
-    let c = 0;
+  function constrain() {
     for (let i = 0; i < N - 1; i++) {
-      for (let j = i + 2; j < N - 1; j++) {
-        if (
-          cross(
-            pts[i].x,
-            pts[i].y,
-            pts[i + 1].x,
-            pts[i + 1].y,
-            pts[j].x,
-            pts[j].y,
-            pts[j + 1].x,
-            pts[j + 1].y,
-          )
-        )
-          c++;
-      }
+      const a = pts[i];
+      const b = pts[i + 1];
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy) || 0.0001;
+      const diff = (dist - lens[i]) / dist;
+      const wa = i === grabbed ? 0 : 1;
+      const wb = i + 1 === grabbed ? 0 : 1;
+      const w = wa + wb;
+      if (w === 0) continue;
+      a.x += (dx * diff * wa) / w;
+      a.y += (dy * diff * wa) / w;
+      b.x -= (dx * diff * wb) / w;
+      b.y -= (dy * diff * wb) / w;
     }
-    return c;
-  }
-
-  function ropeLength() {
-    let l = 0;
-    for (let i = 0; i < N - 1; i++)
-      l += Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
-    return l;
-  }
-
-  function checkTangles() {
-    if (state !== 'tangled' || grabbed < 0 || countCrossings() !== 0) return;
-    const ends = Math.hypot(pts[0].x - pts[N - 1].x, pts[0].y - pts[N - 1].y);
-    if (ends > ropeLength() * 0.55) succeed();
-  }
-
-  function succeed() {
-    grabbed = -1;
-    state = 'done';
-    setGrow(false);
-    lineReversed = pts[0].x > pts[N - 1].x;
-    rest = lineRest(lineReversed);
-    lens = Array(N - 1).fill((layout.right - layout.left - 44) / (N - 1));
-    updateHead();
-    head.classList.add('is-on');
-    live.textContent = 'Detangled. Marketer turned UX designer.';
-  }
-
-  function reset() {
-    state = 'tangled';
-    head.classList.remove('is-on');
-    rest = restSig;
-    lens = lensSig;
-    live.textContent = '';
   }
 
   /* ---------- Pointer ---------- */
@@ -674,12 +577,12 @@ import { withBase } from '../../utils/url';
     const i = nearest(p.x, p.y);
     if (i < 0) return;
     e.preventDefault();
-    // Grabbing the straightened line tangles it back into the signature
-    if (state === 'done') reset();
     touched = true;
     grabbed = i;
     pointer.x = p.x;
     pointer.y = p.y;
+    grabOffset.x = pts[i].x - p.x;
+    grabOffset.y = pts[i].y - p.y;
     setGrow(true);
   }
 
@@ -701,10 +604,8 @@ import { withBase } from '../../utils/url';
   /* ---------- Loop ---------- */
 
   function tick() {
-    frame++;
     step();
     render();
-    if (frame % 4 === 0) checkTangles();
     raf = requestAnimationFrame(tick);
   }
 
@@ -712,7 +613,6 @@ import { withBase } from '../../utils/url';
 
   const reduce = prefersReducedMotion();
   layoutAll(true);
-  checkTangles();
 
   hero.addEventListener('pointerdown', onDown);
   window.addEventListener('pointermove', onMove);
@@ -721,11 +621,11 @@ import { withBase } from '../../utils/url';
 
   const ro = new ResizeObserver(() => {
     // Keep the rope's current points; only the targets move
-    layoutAll(!touched && state === 'tangled');
+    layoutAll(!touched);
   });
   ro.observe(field);
 
-  const relayout = () => layoutAll(!touched && state === 'tangled');
+  const relayout = () => layoutAll(!touched);
   document.fonts?.ready.then(relayout);
 
   if (reduce) {

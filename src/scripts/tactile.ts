@@ -77,18 +77,24 @@ function cursor() {
   // Set by interactive elements that want a bigger dot (the hero signature, via 'cursor:grow')
   let grown = false;
 
-  const dotScale = () => (grown ? 4 : state === 'link' ? 1.6 : 1);
+  // Non-media states. The grown state uses the disc (authored at full size, scaled down) rather than
+  // scaling the 10px dot up, so it stays sharp instead of being rasterised small and stretched.
+  const rest = (d: number) => {
+    const ease = 'power3.out';
+    gsap.to(disc, { scale: grown ? 0.67 : 0, duration: d, ease, overwrite: 'auto' });
+    gsap.to(label, { opacity: 0, duration: d / 2, ease, overwrite: 'auto' });
+    // Links and buttons: the dot swells a little. Text and empty space: always the plain dot.
+    gsap.to(dot, {
+      scale: grown ? 0 : state === 'link' ? 1.6 : 1,
+      duration: d,
+      ease,
+      overwrite: 'auto',
+    });
+  };
 
   document.addEventListener('cursor:grow', (e) => {
     grown = (e as CustomEvent<boolean>).detail;
-    if (state !== 'media') {
-      gsap.to(dot, {
-        scale: dotScale(),
-        duration: reduceMotion ? 0 : 0.35,
-        ease: 'power3.out',
-        overwrite: 'auto',
-      });
-    }
+    if (state !== 'media') rest(reduceMotion ? 0 : 0.35);
   });
 
   const set = (next: State, html = '') => {
@@ -104,10 +110,7 @@ function cursor() {
       gsap.to(disc, { scale: 1, duration: d, ease, overwrite: 'auto' });
       gsap.to(label, { opacity: 1, duration: d, ease, overwrite: 'auto' });
     } else {
-      gsap.to(disc, { scale: 0, duration: d, ease, overwrite: 'auto' });
-      gsap.to(label, { opacity: 0, duration: d / 2, ease, overwrite: 'auto' });
-      // Links and buttons: the dot swells a little. Text and empty space: always the plain dot.
-      gsap.to(dot, { scale: dotScale(), duration: d, ease, overwrite: 'auto' });
+      rest(d);
     }
   };
 

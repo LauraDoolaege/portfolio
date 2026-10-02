@@ -246,6 +246,30 @@ import { withBase } from '../../utils/url';
     gap: 1rem clamp(1rem, 0.5rem + 3vw, 3.5rem);
   }
 
+  /* Small phones: the buttons stack at one shared width instead of wrapping unevenly */
+  @media (max-width: 400px) {
+    .hero__ctas {
+      flex-direction: column;
+      align-items: stretch;
+      width: min(100%, 18rem);
+    }
+
+    .hero__cell {
+      letter-spacing: 0.05em;
+    }
+  }
+
+  /* Short landscape screens (phones on their side): less air, so the hero isn't a scroll of its own */
+  @media (max-height: 520px) and (orientation: landscape) {
+    .hero__field {
+      padding-block: 1.25rem 1.5rem;
+    }
+
+    .hero__stage {
+      gap: 1.25rem;
+    }
+  }
+
   .hero__ctas :global(.btn) {
     min-height: 44px;
     padding: 0.9em 1.5em;
@@ -281,6 +305,13 @@ import { withBase } from '../../utils/url';
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     -webkit-mask-size: 220px 220px;
     mask-size: 220px 220px;
+  }
+
+  /* Touch devices skip the hazy trail: no hover to reward, and one less layer to paint */
+  @media (hover: none) {
+    .hero__trail {
+      display: none;
+    }
   }
 
   .hero__rope-line {
@@ -319,9 +350,10 @@ import { withBase } from '../../utils/url';
       gap: clamp(2rem, 8vw, 3rem);
     }
 
-    /* Room above the words for the signature */
+    /* Room above the words for the signature: it rests centred above the "Marketer / Turned" row.
+         At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
     .hero__stage {
-      padding-top: clamp(150px, 42vw, 190px);
+      padding-top: 192px;
     }
 
     .hero__block {
@@ -406,6 +438,12 @@ import { withBase } from '../../utils/url';
   const grainFilter = svg.querySelector<SVGFilterElement>('[data-grain-filter]')!;
   const grainDisp = svg.querySelector<SVGFEDisplacementMapElement>('[data-grain-disp]')!;
   const grainCut = svg.querySelector<SVGFEFuncAElement>('[data-grain-cut]')!;
+  // Lighter grain on touch: one noise octave instead of two
+  if (window.matchMedia('(hover: none)').matches) {
+    svg.querySelector('feTurbulence')?.setAttribute('numOctaves', '1');
+  }
+  const phone = window.matchMedia('(max-width: 760px)');
+  const coarse = window.matchMedia('(hover: none)').matches;
   const trail = hero.querySelector<HTMLCanvasElement>('[data-trail]')!;
   const tctx = trail.getContext('2d')!;
   const marketer = hero.querySelector<HTMLElement>('[data-marketer]')!;
@@ -424,6 +462,8 @@ import { withBase } from '../../utils/url';
   const GRAIN = 1;
   // The line is grainy even at rest (this share of full grain); motion pushes it up to 1
   const GRAIN_REST = 0.5;
+  // Touch: a fatter grab target, and lighter effects (no trail) to keep older phones smooth
+  const touchGrab = 44;
   // Trail: painted at a fraction of the size (it's blurred anyway), fading a little every frame
   const TRAIL_SCALE = 0.5;
   const TRAIL_FADE = 0.05;
@@ -456,7 +496,7 @@ import { withBase } from '../../utils/url';
   let raf = 0;
   let width = 0;
   let height = 0;
-  let layout = { baseline: 0, midY: 0, left: 0, right: 0 };
+  let layout = { baseline: 0, midY: 0, left: 0, right: 0, capTop: 0, centerX: 0 };
 
   const rel = (r: DOMRect) => {
     const f = field.getBoundingClientRect();
@@ -491,6 +531,9 @@ import { withBase } from '../../utils/url';
       midY: baseline - fontSize * 0.36,
       left: m.right,
       right: t.left,
+      // Top of the capital letters, and the middle of the whole row
+      capTop: baseline - fontSize * 0.72,
+      centerX: (m.left + t.right) / 2,
     };
   }
 
@@ -498,8 +541,14 @@ import { withBase } from '../../utils/url';
     const total = source.getTotalLength();
     const scaleW = Math.min(230, Math.max(150, width * 0.14));
     const s = scaleW / SIG_W;
-    const cx = layout.left + (layout.right - layout.left) * 0.42;
-    const cy = layout.baseline - SIG_BASE * s;
+    let cx = layout.left + (layout.right - layout.left) * 0.42;
+    let cy = layout.baseline - SIG_BASE * s;
+    if (phone.matches) {
+      // Phones: the gap between the words is too narrow, so the signature rests centred above the row,
+      // its lowest point a little clear of the capital letters
+      cx = layout.centerX;
+      cy = layout.capTop - 14 - SIG_BASE * s;
+    }
     restSig = [];
     for (let i = 0; i < N; i++) {
       const p = source.getPointAtLength((total * i) / (N - 1));
@@ -622,9 +671,9 @@ import { withBase } from '../../utils/url';
     return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy };
   }
 
-  function nearest(x: number, y: number) {
+  function nearest(x: number, y: number, radius = GRAB_RADIUS) {
     let best = -1;
-    let bestD = GRAB_RADIUS;
+    let bestD = radius;
     for (let i = 0; i < N; i++) {
       const d = Math.hypot(pts[i].x - x, pts[i].y - y);
       if (d < bestD) {
@@ -661,7 +710,7 @@ import { withBase } from '../../utils/url';
   function onDown(e: PointerEvent) {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     const p = toHero(e);
-    const i = nearest(p.x, p.y);
+    const i = nearest(p.x, p.y, e.pointerType === 'touch' ? touchGrab : GRAB_RADIUS);
     if (i < 0) return;
     e.preventDefault();
     touched = true;
@@ -671,6 +720,16 @@ import { withBase } from '../../utils/url';
     grabOffset.x = pts[i].x - p.x;
     grabOffset.y = pts[i].y - p.y;
     setGrow(true);
+  }
+
+  // A finger that lands on the rope must drag it, not scroll the page. Anywhere else the page scrolls as usual.
+  function onTouchStart(e: TouchEvent) {
+    const t = e.touches[0];
+    if (!t || e.touches.length > 1) return;
+    const r = field.getBoundingClientRect();
+    const x = ((t.clientX - r.left) * width) / (r.width || 1);
+    const y = ((t.clientY - r.top) * height) / (r.height || 1);
+    if (nearest(x, y, touchGrab) >= 0) e.preventDefault();
   }
 
   function onMove(e: PointerEvent) {
@@ -712,6 +771,7 @@ import { withBase } from '../../utils/url';
 
   // Paints the current rope into the trail canvas, stronger the faster it moves; older paint fades
   function paintTrail(frameNo: number) {
+    if (coarse) return;
     const c = tctx;
     const w = trail.width;
     const h = trail.height;
@@ -767,6 +827,7 @@ import { withBase } from '../../utils/url';
   layoutAll(true);
 
   hero.addEventListener('pointerdown', onDown);
+  hero.addEventListener('touchstart', onTouchStart, { passive: false });
   window.addEventListener('pointermove', onMove);
   window.addEventListener('pointerup', onUp);
   window.addEventListener('pointercancel', onUp);
@@ -797,13 +858,36 @@ import { withBase } from '../../utils/url';
   // Layout settles once the entrance has finished
   window.setTimeout(relayout, 1300);
 
-  raf = requestAnimationFrame(tick);
+  // Only simulate while the hero is on screen
+  const visible = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      if (!raf) raf = requestAnimationFrame(tick);
+    } else {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+  });
+  visible.observe(hero);
+
+  // Touch has no "Grab" cursor, so the rope gives one small nudge after the entrance to show it moves
+  if (coarse && !reduce) {
+    window.setTimeout(() => {
+      if (touched) return;
+      for (let i = 0; i < N; i++) {
+        const kick = 7 * Math.sin((Math.PI * i) / (N - 1));
+        pts[i].px = pts[i].x - kick;
+        pts[i].py = pts[i].y + kick * 0.4;
+      }
+    }, 3400);
+  }
 
   document.addEventListener('astro:before-swap', cleanup, { once: true });
   function cleanup() {
     cancelAnimationFrame(raf);
     ro.disconnect();
     hero.removeEventListener('pointerdown', onDown);
+    hero.removeEventListener('touchstart', onTouchStart);
+    visible.disconnect();
     window.removeEventListener('pointermove', onMove);
     window.removeEventListener('pointerup', onUp);
     window.removeEventListener('pointercancel', onUp);

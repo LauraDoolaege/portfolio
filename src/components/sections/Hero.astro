@@ -46,7 +46,9 @@ import SectionLabel from '../ui/SectionLabel.astro';
         <br />— creative, and grounded in marketing.
       </p>
       <div class="hero__ctas" data-line>
-        <Button href="#about">Get to know me</Button>
+        <Button variant="link" size="md" href="#about" class="hero__link">
+          Get to know me
+        </Button>
         <Button href={withBase('/resume.pdf')} icon="down" download>
           Resume
         </Button>
@@ -287,6 +289,17 @@ import SectionLabel from '../ui/SectionLabel.astro';
     }
   }
 
+  /* The secondary CTA is the text + arrow link: it hugs its text instead of stretching with the column */
+  .hero__ctas :global(.hero__link) {
+    align-self: center;
+    min-height: 44px;
+    padding-block: 0.3em;
+    font-size: var(--text-small);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .hero__ctas :global(.btn) {
     min-height: 44px;
     padding: 0.9em 1.5em;
@@ -429,6 +442,10 @@ import SectionLabel from '../ui/SectionLabel.astro';
       gap: 0.75rem;
     }
 
+    .hero__ctas :global(.hero__link) {
+      align-self: flex-start;
+    }
+
     .hero__ctas :global(.btn) {
       justify-content: space-between;
     }
@@ -443,7 +460,7 @@ import SectionLabel from '../ui/SectionLabel.astro';
     }
 
     /* Room above the words for the signature: it rests centred above the "Marketer / Turned" row.
-                   At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+                     At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
     .hero__stage {
       padding-top: 192px;
     }

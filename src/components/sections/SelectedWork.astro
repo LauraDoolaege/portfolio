@@ -1,331 +1,87 @@
 ---
-// Section 2: Selected work. Two categories separated by whitespace:
-// UX strategy (2 large cards) and visual explorations (tighter 3-column gallery).
-// Cards come from the `works` content collection and link to /works/[slug].
-const works = (await getCollection('works')).sort((a, b) => a.id.localeCompare(b.id));
-// The two kinds of work, named on every card as well as in the group headings
-const TYPE_LABEL = { ux: 'UX Strategy', visual: 'Visual Exploration' } as const;
-const uxProjects = works.filter((w) => w.data.type === 'ux');
-// Placeholder aspect ratios for the visual gallery, until real images set their own
-const ratios = ['4 / 5', '1 / 1', '3 / 4'];
-// Real images set their own aspect ratio; placeholders fall back to the given one
-const natural = (w: (typeof works)[number], fallback: string) =>
-  w.data.coverImage ? `${w.data.coverImage.width} / ${w.data.coverImage.height}` : fallback;
-const visualProjects = works.filter((w) => w.data.type === 'visual');
+// Section 02: selected work, two kinds. Each group opens with a row (name left, what it is in the rail),
+// then its projects in an even grid. Projects come from the `works` collection and link to /works/[slug].
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
 import SectionLabel from '../ui/SectionLabel.astro';
-import { withBase } from '../../utils/url';
+import WorkCard from '../ui/WorkCard.astro';
+
+const works = (await getCollection('works')).sort((a, b) => a.id.localeCompare(b.id));
+// Image projects first, so any still-text-only entry closes the group as a row
+const byCover = (a: (typeof works)[number], b: (typeof works)[number]) =>
+  Number(!!b.data.coverImage) - Number(!!a.data.coverImage);
+const groups = [
+  {
+    title: 'UX Strategy',
+    intro:
+      'In these latest group projects, I got to dive deep into human needs through user interviews, insight gathering, wireframing, and validating solutions as a team.',
+    projects: works.filter((w) => w.data.type === 'ux').sort(byCover),
+    cols: 'two',
+    sizes: '(min-width: 700px) 50vw, 100vw',
+  },
+  {
+    title: 'Visual & Concept Explorations',
+    intro:
+      "Same brain, different canvas. Even when there's no app to test, I'm still asking the UX questions: who is this for, what should they feel, and does it make sense?",
+    projects: works.filter((w) => w.data.type === 'visual').sort(byCover),
+    cols: 'three',
+    sizes: '(min-width: 900px) 33vw, (min-width: 600px) 50vw, 100vw',
+  },
+];
 ---
 
-<section class="work" id="work" aria-labelledby="work-title">
+<section class="sec" id="work" aria-labelledby="work-title">
   <div class="container">
-    <header class="work__header">
-      <SectionLabel num="02" text="The Work" data-reveal />
-      <h2 id="work-title" class="section-title work__title" data-reveal>
+    <header class="sec__head">
+      <SectionLabel num="02" text="The work" data-reveal />
+      <h2 id="work-title" class="sec-title" data-reveal>
         Selected work
       </h2>
     </header>
 
-    <div class="work__group">
-      <div class="work__intro-row">
-        <h3 class="work__group-title title" data-reveal>
-          UX Strategy
-        </h3>
-        <p class="work__intro text" data-reveal>
-          In these latest group projects, I got to dive deep into human needs through user
-          interviews, insight gathering, wireframing, and validating solutions as a team.
-        </p>
+    {groups.map((g) => (
+      <div class="work__group">
+        <div class="row" data-reveal>
+          <h3 class="title">{g.title}</h3>
+          <div class="row__rail">
+            <p class="text">{g.intro}</p>
+          </div>
+        </div>
+        <ul class={`work__grid work__grid--${g.cols}`}>
+          {g.projects.map((p) => (
+            <WorkCard project={p} sizes={g.sizes} />
+          ))}
+        </ul>
       </div>
-
-      <ul class="work__grid work__grid--ux">
-        {uxProjects.map((p) => (
-          <li class="card" data-card="ux">
-            <a class="card__link" href={withBase(`/works/${p.id}`)}>
-              <div class="card__media" style={`aspect-ratio: ${natural(p, '4 / 3')}`}>
-                {p.data.coverImage ? (
-                  <Image
-                    class="card__img"
-                    src={p.data.coverImage}
-                    alt={`${p.data.title}: cover`}
-                    widths={[480, 800, 1200]}
-                    sizes="(min-width: 900px) 50vw, 100vw"
-                  />
-                ) : (
-                  <div class="card__img" />
-                )}
-              </div>
-              <p class="card__type tag">{TYPE_LABEL[p.data.type]}</p>
-              <h4 class="card__title">{p.data.title}</h4>
-              <ul class="card__tags" aria-label="Tools">
-                {p.data.tools.slice(0, 2).map((t) => (
-                  <li class="tag">{t}</li>
-                ))}
-              </ul>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-
-    <div class="work__group work__group--divided">
-      <div class="work__intro-row">
-        <h3 class="work__group-title title" data-reveal>
-          Visual &amp; Concept Explorations
-        </h3>
-        <p class="work__intro text" data-reveal>
-          Same brain, different canvas. Even when there's no app to test, I'm still asking the UX
-          questions: who is this for, what should they feel, and does it make sense?
-        </p>
-      </div>
-
-      <ul class="work__grid work__grid--visual">
-        {visualProjects.map((p, i) => (
-          <li class="card" data-card="visual">
-            <a class="card__link" href={withBase(`/works/${p.id}`)}>
-              <div
-                class="card__media"
-                style={`aspect-ratio: ${natural(p, ratios[i % ratios.length])}`}
-              >
-                {p.data.coverImage ? (
-                  <Image
-                    class="card__img"
-                    src={p.data.coverImage}
-                    alt={`${p.data.title}: cover`}
-                    widths={[400, 700, 1000]}
-                    sizes="(min-width: 900px) 33vw, 50vw"
-                  />
-                ) : (
-                  <div class="card__img" />
-                )}
-              </div>
-              <p class="card__type tag">{TYPE_LABEL[p.data.type]}</p>
-              <h4 class="card__title">{p.data.title}</h4>
-              <ul class="card__tags" aria-label="Tools">
-                {p.data.tools.slice(0, 2).map((t) => (
-                  <li class="tag">{t}</li>
-                ))}
-              </ul>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
+    ))}
   </div>
 </section>
 
 <style>
-  .work {
-    padding-block: var(--space-section);
-  }
-
-  /* Title and label spacing come from the shared .section-label / .section-title classes */
-  .work__group:first-of-type {
-    padding-top: 0;
-  }
-
-  .work__group {
-    padding-block: clamp(2.5rem, 1.5rem + 4vw, 6rem);
-  }
-
-  .work__group:first-of-type {
-    padding-bottom: clamp(2.5rem, 1.5rem + 4vw, 6rem);
-  }
-
-  /* Categories are separated by space alone */
-  .work__group--divided {
-    padding-top: clamp(5rem, 3rem + 8vw, 11rem);
-    padding-bottom: 0;
-  }
-
-  .work__intro-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1rem;
-    margin-bottom: clamp(2rem, 1rem + 3vw, 4.5rem);
-  }
-
-  .work__intro {
-    max-width: 52ch;
+  .work__group + .work__group {
+    margin-top: clamp(4rem, 2rem + 6vw, 8rem);
   }
 
   .work__grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    column-gap: var(--grid-gutter);
-    row-gap: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
+    gap: clamp(2.5rem, 1.5rem + 3vw, 4rem) var(--grid-gutter);
     align-items: start;
+    padding-top: clamp(0.5rem, 0.25rem + 1vw, 1.5rem);
   }
 
-  /* Cards */
-  .card__media {
-    margin-bottom: 1rem;
-  }
+  @media (min-width: 600px) {
+    .work__grid--two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
-  /* Soft mask, spotlight and grain come from .card__media in global.css; the pan (x/y) and the resting 1.05 scale are set by GSAP in src/scripts/tactile.ts. */
-  .card__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background: linear-gradient(150deg, #c98f78, #a86a55);
-    will-change: transform;
-  }
-
-  /* Placeholder tones, so the cards read as distinct until real photos arrive */
-  .card:nth-child(4n + 2) .card__img {
-    background: linear-gradient(150deg, #a3ad92, #7f8b6f);
-  }
-
-  .card:nth-child(4n + 3) .card__img {
-    background: linear-gradient(150deg, #d1b57a, #b08d4c);
-  }
-
-  .card:nth-child(4n) .card__img {
-    background: linear-gradient(150deg, #9fb0b8, #7a8f99);
-  }
-
-  .card__link {
-    display: block;
-  }
-
-  .card__type {
-    margin-bottom: 0.6rem;
-  }
-
-  .card__title {
-    font-size: var(--text-h3);
-    font-weight: var(--weight-bold);
-    line-height: 1.15;
-    letter-spacing: var(--tracking-display);
-    margin-bottom: 0.75rem;
-  }
-
-  .card__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .work__grid--visual .card__title {
-    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
-  }
-
-  @media (min-width: 640px) {
-    .work__grid--visual {
+    .work__grid--three {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   @media (min-width: 900px) {
-    .work__intro-row {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: var(--grid-gutter);
-    }
-
-    .work__group-title {
-      grid-column: 1 / span 4;
-    }
-
-    .work__intro {
-      grid-column: 5 / -1;
-    }
-
-    /* Editorial 12-column grid: spans and offsets break the card rhythm */
-    .work__grid--ux,
-    .work__grid--visual {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: var(--grid-gutter);
-    }
-
-    .work__grid--visual {
-      row-gap: clamp(2rem, 1rem + 2vw, 3.5rem);
-    }
-
-    /* Flagship (Plan A) is the wide hero; the next project steps right on its own row */
-    .work__grid--ux .card:nth-child(1) {
-      grid-column: 1 / span 9;
-    }
-
-    .work__grid--ux .card:nth-child(2) {
-      grid-column: 6 / span 7;
-    }
-
-    .work__grid--ux .card:nth-child(3) {
-      grid-column: 2 / span 6;
-    }
-
-    .work__grid--visual .card:nth-child(3n + 1) {
-      grid-column: 1 / span 5;
-    }
-
-    .work__grid--visual .card:nth-child(3n + 2) {
-      grid-column: 7 / span 6;
-      margin-top: clamp(3rem, 1rem + 6vw, 7rem);
-    }
-
-    .work__grid--visual .card:nth-child(3n) {
-      grid-column: 3 / span 4;
-    }
-  }
-
-  /* Micro-parallax: scroll-driven, compositor-only (individual `translate`, so it never fights the
-     GSAP reveal on .card or the pan on .card__img). Off entirely under reduced motion. */
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .card__link {
-        --drift: 24px;
-        animation: card-drift linear both;
-        animation-timeline: view();
-        animation-range: cover 0% cover 100%;
-      }
-
-      .card:nth-child(2n) .card__link {
-        --drift: 44px;
-      }
-
-      .card:nth-child(3n) .card__link {
-        --drift: 32px;
-      }
-
-      @keyframes card-drift {
-        from {
-          translate: 0 var(--drift);
-        }
-        to {
-          translate: 0 calc(var(--drift) * -1);
-        }
-      }
+    .work__grid--three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 </style>
-
-<script>
-  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
-
-  const section = document.querySelector<HTMLElement>('.work');
-
-  if (section && !prefersReducedMotion()) {
-    const texts = gsap.utils.toArray<HTMLElement>('[data-reveal]', section);
-    const cards = gsap.utils.toArray<HTMLElement>('.card', section);
-
-    // Start states are set in JS so no-JS visitors still see everything.
-    gsap.set(texts, { y: 30, opacity: 0 });
-    gsap.set(cards, { y: 40, opacity: 0 });
-
-    const reveal = { y: 0, opacity: 1, duration: 1, ease: 'power3.out', overwrite: true };
-
-    // Header and intro copy: each slides up as it enters the viewport
-    ScrollTrigger.batch(texts, {
-      start: 'top 88%',
-      once: true,
-      onEnter: (batch) => gsap.to(batch, { ...reveal, stagger: 0.12 }),
-    });
-
-    // Cards: staggered per row as they enter
-    ScrollTrigger.batch(cards, {
-      start: 'top 90%',
-      once: true,
-      onEnter: (batch) => gsap.to(batch, { ...reveal, stagger: 0.15 }),
-    });
-  }
-</script>

@@ -1,5 +1,5 @@
 ---
-// Homepage: nav + hero (step 2).
+// Homepage: nav, hero, then four ruled sections (philosophy, work, desk, about) and the footer.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import Hero from '../components/sections/Hero.astro';
@@ -31,3 +31,30 @@ import Footer from '../components/layout/Footer.astro';
     min-height: 100dvh;
   }
 </style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../utils/motion';
+
+  // Every [data-reveal] below the hero slides up as it enters the viewport.
+  // Start states are set in JS so no-JS visitors still see everything.
+  const items = gsap.utils.toArray<HTMLElement>('.sec [data-reveal]');
+
+  if (items.length && !prefersReducedMotion()) {
+    gsap.set(items, { y: 28, opacity: 0 });
+
+    ScrollTrigger.batch(items, {
+      start: 'top 90%',
+      once: true,
+      onEnter: (batch) =>
+        gsap.to(batch, {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: 'power3.out',
+          // A long batch (e.g. after a jump link) never takes longer than ~0.5s to stagger in
+          stagger: Math.min(0.12, 0.5 / batch.length),
+          overwrite: true,
+        }),
+    });
+  }
+</script>

@@ -118,8 +118,10 @@ function cursor() {
   const INTERACTIVE = 'a, button, [data-magnetic]';
 
   let shown = false;
+  // pointermove, not mousemove: a component that cancels pointerdown (the hero signature) suppresses
+  // the compatibility mouse events until release, which would freeze the cursor mid-drag.
   window.addEventListener(
-    'mousemove',
+    'pointermove',
     (e) => {
       if (!shown) {
         shown = true;

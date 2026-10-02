@@ -35,15 +35,20 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
               </span>
             </span>
           </span>
-          <span class="hero__big" aria-hidden="true" data-line>
-            UX Designer
+          <span class="hero__big" aria-hidden="true">
+            <span class="hero__big-line" data-line>
+              UX
+            </span>
+            <span class="hero__big-line" data-line>
+              Designer
+            </span>
           </span>
         </h1>
       </div>
     </div>
 
     <div class="hero__lede hero__aside">
-      <!-- Portrait: warmed by CSS (sepia + a multiplied wash) so the black-and-white photo sits in the paper palette -->
+      <!-- Portrait: the black-and-white photo as it is -->
       <figure class="hero__portrait" data-line>
         <Image
           class="hero__portrait-img"
@@ -59,9 +64,6 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
         <br />— creative, and grounded in marketing.
       </p>
       <div class="hero__ctas" data-line>
-        <Button variant="link" size="md" href="#about" class="hero__link">
-          Get to know me
-        </Button>
         <Button href={withBase('/resume.pdf')} icon="down" download>
           Resume
         </Button>
@@ -121,30 +123,33 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
     </svg>
   </div>
 
-  <!-- Full-width line, then three cells split by 1px rules -->
+  <!-- Full-width line, then the same split as the hero above: the links under the title column,
+       the status under the portrait column, so the divider runs straight through -->
   <div class="hero__strip reveal--strip">
-    <ul class="container hero__cells">
-      <li class="hero__cell">
-        <Button
-          variant="link"
-          size="sm"
-          href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
-          target="_blank"
-          rel="noopener"
-        >
-          UX Design at Devine
-        </Button>
-      </li>
-      <li class="hero__cell">
-        <Button
-          variant="link"
-          size="sm"
-          href="https://www.hogent.be"
-          target="_blank"
-          rel="noopener"
-        >
-          Marketing Alumni at HOGENT
-        </Button>
+    <ul class="hero__cells">
+      <li class="hero__cell hero__cell--links">
+        <span class="hero__item">
+          <Button
+            variant="link"
+            size="sm"
+            href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
+            target="_blank"
+            rel="noopener"
+          >
+            Digital design and development @ Devine
+          </Button>
+        </span>
+        <span class="hero__item">
+          <Button
+            variant="link"
+            size="sm"
+            href="https://www.hogent.be"
+            target="_blank"
+            rel="noopener"
+          >
+            Marketing Alumni at HOGENT
+          </Button>
+        </span>
       </li>
       <li class="hero__cell hero__cell--status">
         <span class="hero__dot" aria-hidden="true"></span>
@@ -212,11 +217,12 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
     line-height: 1;
   }
 
+  /* "Marketer turned": one light line above the heavy title */
   .hero__top {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: baseline;
-    gap: 1rem;
+    gap: 0.5em;
     font-size: clamp(20px, 2.5vw, 38px);
     /* Light against the bold title below: the scale tension is in the weight as well as the size */
     font-weight: var(--weight-light);
@@ -230,7 +236,6 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
   .hero__side {
     display: inline-flex;
     align-items: baseline;
-    gap: 0.5em;
   }
 
   .hero__word {
@@ -252,6 +257,14 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
     line-height: 0.86;
     text-transform: uppercase;
     white-space: nowrap;
+  }
+
+  .hero__big-line {
+    display: inline-block;
+  }
+
+  .hero__big-line + .hero__big-line {
+    margin-left: 0.22em;
   }
 
   .hero__lede {
@@ -303,16 +316,6 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
   }
 
   /* The secondary CTA is the text + arrow link: it hugs its text instead of stretching with the column */
-  .hero__ctas :global(.hero__link) {
-    align-self: center;
-    min-height: 44px;
-    padding-block: 0.3em;
-    font-size: var(--text-small);
-    font-weight: var(--weight-medium);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
   .hero__ctas :global(.btn) {
     min-height: 44px;
     padding: 0.9em 1.5em;
@@ -359,7 +362,7 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
 
   .hero__rope-line {
     stroke: var(--accent);
-    stroke-width: 1.8;
+    stroke-width: 2.6;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
@@ -393,63 +396,88 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
   /* ---------- Desktop: title left, hairline, intro + CTAs right ---------- */
 
   @media (min-width: 1000px) {
+    .hero {
+      /* One inset runs all the way round: page edge, divider, nav rule, strip rule. The right column
+                             (--col) is shared with the strip below, so the divider is one unbroken line. */
+      --inset: var(--page-margin);
+      --col: clamp(18rem, 26vw, 26rem);
+    }
+
     .hero__field {
-      --col: clamp(16rem, 22vw, 22rem);
-      --gutter: clamp(1.5rem, 3vw, 3rem);
-      --base: clamp(2rem, 1.2rem + 2.2vw, 3.5rem);
       display: grid;
       grid-template-columns: minmax(0, 1fr) var(--col);
       grid-template-rows: 1fr;
       align-items: end;
       justify-items: start;
       gap: 0;
-      padding: 0 var(--page-margin);
+      padding: 0 0 0 var(--inset);
+    }
+
+    .hero__label {
+      top: var(--inset);
     }
 
     .hero__stage {
       align-self: end;
       align-items: flex-start;
-      padding: 0 var(--gutter) var(--base) 0;
+      padding: 0 var(--inset) var(--inset) 0;
     }
 
     .hero__block {
       margin-inline: 0;
     }
 
-    /* The title is sized to what is left of the row after the right column, so it never overflows */
+    .hero__top {
+      justify-content: flex-start;
+    }
+
+    /* "Designer" is the widest line: the font is sized so it runs almost to the divider.
+                 It measures 4.51em wide at this tracking; the divisor leaves a little air before the divider. */
     .hero__big {
-      font-size: clamp(
-        52px,
-        calc(
-          (min(100vw, var(--page-max)) - 2 * var(--page-margin) - var(--col) - var(--gutter)) / 6.3
-        ),
-        150px
-      );
-      /* Pulls the box up to the baseline so the glyph bottoms, not the line box, meet the buttons */
+      font-size: clamp(52px, calc((100vw - var(--col) - 2 * var(--inset)) / 4.62), 340px);
+      /* Pulls the box up to the baseline so the glyph bottoms, not the line box, meet the button */
       margin-bottom: -0.067em;
     }
 
-    /* Right column: the vertical hairline runs the full height of the hero; content hangs from the bottom */
+    .hero__big-line {
+      display: block;
+    }
+
+    /* Optical alignment: the U and the D start ~0.06em inside their box, so pull them (and the
+               light words above) back so every left edge lands on the page margin, in line with the strip */
+    .hero__big-line:first-child {
+      margin-left: -0.055em;
+    }
+
+    .hero__big-line + .hero__big-line {
+      margin-left: -0.061em;
+    }
+
+    .hero__top {
+      margin-left: -0.06em;
+    }
+
+    /* Right column: the vertical hairline runs the full height of the hero and on through the strip.
+                 Everything inside keeps the same inset from the divider, the nav rule, the right edge and the strip rule. */
     .hero__aside {
       align-self: stretch;
-      justify-content: flex-end;
-      align-items: flex-start;
+      justify-content: flex-start;
+      align-items: stretch;
       width: 100%;
-      padding: 0 0 var(--base) var(--gutter);
+      gap: 1.5rem;
+      padding: var(--inset);
       border-left: var(--hairline);
     }
 
+    /* The portrait takes whatever height is left, so the column runs evenly from top to bottom */
     .hero__portrait {
       position: relative;
       display: block;
       isolation: isolate;
       overflow: hidden;
-      flex: 0 1 auto;
+      flex: 1 1 0;
       width: 100%;
-      min-height: 0;
-      aspect-ratio: 811 / 977;
-      /* Sits near the top of the column; the text hangs from the bottom */
-      margin: clamp(1.25rem, 0.5rem + 2vw, 2.5rem) 0 auto;
+      min-height: 12rem;
       background: var(--frame-bg);
     }
 
@@ -458,24 +486,12 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
       height: 100%;
       object-fit: cover;
       object-position: 35% 30%;
-      /* Black and white in, warm print out: a touch of sepia, softened contrast */
-      filter: sepia(0.4) saturate(0.85) contrast(0.96) brightness(1.02);
-    }
-
-    /* Warm wash, multiplied into the photo */
-    .hero__portrait::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      background: #cf9468;
-      mix-blend-mode: multiply;
-      opacity: 0.32;
-      pointer-events: none;
+      /* The photo as it is, black and white, with the contrast softened a touch */
+      filter: contrast(0.96) brightness(1.02);
     }
 
     :global(:root[data-theme='dark']) .hero__portrait-img {
-      filter: sepia(0.4) saturate(0.85) contrast(0.96) brightness(0.85);
+      filter: contrast(0.96) brightness(0.85);
     }
 
     .hero__intro {
@@ -497,11 +513,6 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
       flex-direction: column;
       align-items: stretch;
       width: 100%;
-      gap: 0.75rem;
-    }
-
-    .hero__ctas :global(.hero__link) {
-      align-self: flex-start;
     }
 
     .hero__ctas :global(.btn) {
@@ -511,16 +522,18 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
 
   /* ---------- Narrow: wrap the big line, stack everything ---------- */
 
+  @media (max-width: 999px) {
+    /* Room above the words for the signature: it rests centred above the "Marketer turned" row.
+                 At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+    .hero__stage {
+      padding-top: 192px;
+    }
+  }
+
   @media (max-width: 760px) {
     .hero__field {
       justify-content: flex-start;
       padding-top: 3.5rem;
-    }
-
-    /* Room above the words for the signature: it rests centred above the "Marketer / Turned" row.
-                           At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
-    .hero__stage {
-      padding-top: 192px;
     }
 
     .hero__block {
@@ -542,19 +555,53 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
   .hero__cells {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    padding-inline: var(--page-margin);
   }
 
   /* One label voice, the same as the site's tags: uppercase, tracked, small */
   .hero__cell {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.7em;
+    gap: 0.5rem 0.7em;
     padding-block: 1.1rem;
     font-size: var(--text-small);
     font-weight: var(--weight-medium);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     line-height: 1.3;
+  }
+
+  /* The two links share the cell, split by their own vertical rule (as in the original strip) */
+  .hero__cell--links {
+    align-items: stretch;
+    gap: 0;
+    padding-block: 0;
+  }
+
+  .hero__item {
+    display: flex;
+    align-items: center;
+    padding-block: 1.1rem;
+    padding-right: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+  }
+
+  .hero__item + .hero__item {
+    padding-left: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+    border-left: var(--hairline);
+  }
+
+  /* Phones: stacked, the rule becomes a line above the second link */
+  @media (max-width: 719px) {
+    .hero__cell--links {
+      flex-direction: column;
+    }
+
+    .hero__item + .hero__item {
+      padding-left: 0;
+      border-left: 0;
+      border-top: var(--hairline);
+    }
   }
 
   /* The links inherit that voice instead of the link button's own size */
@@ -568,10 +615,6 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
     border-top: var(--hairline);
   }
 
-  .hero__cell--status {
-    color: var(--text-muted);
-  }
-
   .hero__dot {
     flex-shrink: 0;
     width: 0.5rem;
@@ -580,16 +623,29 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
     background: var(--accent);
   }
 
-  /* Wide: three equal cells, split by 1px vertical rules; the first sits flush with the page margin */
+  /* Wide: the status gets its own column behind the same vertical rule as the hero's right column */
   @media (min-width: 720px) {
     .hero__cells {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1fr) auto;
     }
 
     .hero__cell + .hero__cell {
       border-top: 0;
       border-left: var(--hairline);
       padding-left: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+    }
+  }
+
+  /* Desktop: exactly the hero's split. The strip runs to the page edge, like the field above it,
+     and the status starts where the portrait starts. */
+  @media (min-width: 1000px) {
+    .hero__cells {
+      grid-template-columns: minmax(0, 1fr) var(--col);
+      padding-right: 0;
+    }
+
+    .hero__cell + .hero__cell {
+      padding-left: var(--inset);
     }
   }
 </style>
@@ -609,12 +665,15 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
   if (window.matchMedia('(hover: none)').matches) {
     svg.querySelector('feTurbulence')?.setAttribute('numOctaves', '1');
   }
-  const phone = window.matchMedia('(max-width: 760px)');
+  // Below 1000px the rope rests centred above the words; from 1000px it spans the two columns
+  const stacked = window.matchMedia('(max-width: 999px)');
   const coarse = window.matchMedia('(hover: none)').matches;
   const trail = hero.querySelector<HTMLCanvasElement>('[data-trail]')!;
   const tctx = trail.getContext('2d')!;
   const marketer = hero.querySelector<HTMLElement>('[data-marketer]')!;
   const turned = hero.querySelector<HTMLElement>('[data-turned]')!;
+  const aside = hero.querySelector<HTMLElement>('.hero__aside')!;
+  const bigLines = hero.querySelectorAll<HTMLElement>('.hero__big-line');
   const baselineMark = hero.querySelector<HTMLElement>('.hero__baseline')!;
   const strip = hero.querySelector<HTMLElement>('.reveal--strip');
   const lines = gsap.utils.toArray<HTMLElement>('[data-line]', hero);
@@ -663,7 +722,16 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
   let raf = 0;
   let width = 0;
   let height = 0;
-  let layout = { baseline: 0, midY: 0, left: 0, right: 0, capTop: 0, centerX: 0 };
+  let layout = {
+    baseline: 0,
+    midY: 0,
+    left: 0,
+    right: 0,
+    capTop: 0,
+    centerX: 0,
+    dividerX: 0,
+    titleBottom: 0,
+  };
 
   const rel = (r: DOMRect) => {
     const f = field.getBoundingClientRect();
@@ -701,25 +769,45 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
       // Top of the capital letters, and the middle of the whole row
       capTop: baseline - fontSize * 0.72,
       centerX: (m.left + t.right) / 2,
+      // Desktop: the vertical divider, and where the last line of the title sits on its baseline
+      dividerX: rel(aside.getBoundingClientRect()).left,
+      titleBottom:
+        rel(bigLines[bigLines.length - 1].getBoundingClientRect()).bottom -
+        (parseFloat(getComputedStyle(bigLines[0]).fontSize) || 100) * 0.12,
     };
   }
 
   function buildRestSignature() {
     const total = source.getTotalLength();
-    const scaleW = Math.min(230, Math.max(150, width * 0.14));
-    const s = scaleW / SIG_W;
-    let cx = layout.left + (layout.right - layout.left) * 0.42;
-    let cy = layout.baseline - SIG_BASE * s;
-    if (phone.matches) {
-      // Phones: the gap between the words is too narrow, so the signature rests centred above the row,
-      // its lowest point a little clear of the capital letters
-      cx = layout.centerX;
-      cy = layout.capTop - 14 - SIG_BASE * s;
-    }
     restSig = [];
+    if (stacked.matches) {
+      // Tablet and phone: centred above the "Marketer turned" row, its lowest point a little clear of the capitals
+      const s = Math.min(230, Math.max(150, width * 0.14)) / SIG_W;
+      const cx = layout.centerX;
+      const cy = layout.capTop - 14 - SIG_BASE * s;
+      for (let i = 0; i < N; i++) {
+        const p = source.getPointAtLength((total * i) / (N - 1));
+        restSig.push({ x: cx + (p.x - SIG_CENTER.x) * s, y: cy + (p.y - SIG_CENTER.y) * s });
+      }
+      return;
+    }
+    // Desktop: a big signature that ties the two columns together. Its right loop reaches across the
+    // divider into the portrait column and its lowest loop rests on the title's baseline.
+    const box = source.getBBox();
+    const top = 24;
+    const s = Math.min(
+      (width * 0.37) / box.width,
+      (layout.titleBottom - top) / box.height,
+      (height * 0.72) / box.height,
+    );
+    const right = layout.dividerX + box.width * s * 0.07;
+    const bottom = layout.titleBottom;
     for (let i = 0; i < N; i++) {
       const p = source.getPointAtLength((total * i) / (N - 1));
-      restSig.push({ x: cx + (p.x - SIG_CENTER.x) * s, y: cy + (p.y - SIG_CENTER.y) * s });
+      restSig.push({
+        x: right + (p.x - (box.x + box.width)) * s,
+        y: bottom + (p.y - (box.y + box.height)) * s,
+      });
     }
   }
 

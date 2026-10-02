@@ -8,6 +8,9 @@ import { withBase } from '../../utils/url';
 
 <section class="hero" aria-label="Introduction">
   <div class="hero__field" data-hero-field>
+    <!-- Hazy trail the rope leaves behind while it moves (painted by the script, grainy via CSS mask) -->
+    <canvas class="hero__trail" aria-hidden="true" data-trail></canvas>
+
     <div class="hero__stage">
       <div class="hero__block">
         <h1 class="hero__title" aria-label="Marketer turned UX designer">
@@ -264,6 +267,22 @@ import { withBase } from '../../utils/url';
     pointer-events: none;
   }
 
+  .hero__trail {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    pointer-events: none;
+    /* Soft first, then broken into speckle by a noise mask: a gradient haze made of grains */
+    filter: blur(2.5px);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    -webkit-mask-size: 220px 220px;
+    mask-size: 220px 220px;
+  }
+
   .hero__rope-line {
     stroke: var(--accent);
     stroke-width: 1.8;
@@ -279,6 +298,10 @@ import { withBase } from '../../utils/url';
   .hero__rope-line.is-drawn {
     stroke-dashoffset: 0;
     transition: stroke-dashoffset 2.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .hero__rope-line {
+    filter: url(#hero-rope-grain);
   }
 
   .hero__rope-line.is-live {
@@ -383,6 +406,8 @@ import { withBase } from '../../utils/url';
   const grainFilter = svg.querySelector<SVGFilterElement>('[data-grain-filter]')!;
   const grainDisp = svg.querySelector<SVGFEDisplacementMapElement>('[data-grain-disp]')!;
   const grainCut = svg.querySelector<SVGFEFuncAElement>('[data-grain-cut]')!;
+  const trail = hero.querySelector<HTMLCanvasElement>('[data-trail]')!;
+  const tctx = trail.getContext('2d')!;
   const marketer = hero.querySelector<HTMLElement>('[data-marketer]')!;
   const turned = hero.querySelector<HTMLElement>('[data-turned]')!;
   const baselineMark = hero.querySelector<HTMLElement>('.hero__baseline')!;
@@ -397,6 +422,11 @@ import { withBase } from '../../utils/url';
   const SMOOTH_PASSES = 6;
   // Grain on the line while it moves: 0 turns it off, 1 is the prototype default, higher is rougher
   const GRAIN = 1;
+  // The line is grainy even at rest (this share of full grain); motion pushes it up to 1
+  const GRAIN_REST = 0.5;
+  // Trail: painted at a fraction of the size (it's blurred anyway), fading a little every frame
+  const TRAIL_SCALE = 0.5;
+  const TRAIL_FADE = 0.05;
   // Tuned to be critically damped: the rope eases back into place without overshooting or wobbling
   const DAMPING = 0.8;
   const K_IDLE = 0.01;
@@ -445,6 +475,8 @@ import { withBase } from '../../utils/url';
     width = f.width;
     height = f.height;
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    trail.width = Math.max(1, Math.round(width * TRAIL_SCALE));
+    trail.height = Math.max(1, Math.round(height * TRAIL_SCALE));
     grainFilter.setAttribute('x', '-40');
     grainFilter.setAttribute('y', '-40');
     grainFilter.setAttribute('width', String(width + 80));
@@ -520,6 +552,8 @@ import { withBase } from '../../utils/url';
     }
   }
 
+  let lastD = '';
+
   function render() {
     smoothed();
     let d = `M ${sx[0].toFixed(2)} ${sy[0].toFixed(2)}`;
@@ -529,6 +563,9 @@ import { withBase } from '../../utils/url';
       d += ` Q ${sx[i].toFixed(2)} ${sy[i].toFixed(2)} ${mx.toFixed(2)} ${my.toFixed(2)}`;
     }
     d += ` L ${sx[N - 1].toFixed(2)} ${sy[N - 1].toFixed(2)}`;
+    // Unchanged path (rope at rest): leave it alone so the grain filter isn't recomputed every frame
+    if (d === lastD) return;
+    lastD = d;
     linePath.setAttribute('d', d);
   }
 
@@ -654,30 +691,73 @@ import { withBase } from '../../utils/url';
   /* ---------- Loop ---------- */
 
   // 0..1, follows how fast the rope is moving: quick to rise, slow to fade
-  let grain = 0;
-  let grainOn = false;
+  let motion = 0;
+  let level = -1;
+  let quiet = 0;
+  let accent = '#c25e3e';
 
   function updateGrain() {
     let sum = 0;
     for (let i = 0; i < N; i++) sum += Math.hypot(pts[i].x - pts[i].px, pts[i].y - pts[i].py);
-    const target = Math.min(1, sum / N / 2.5) * GRAIN;
-    grain += (target - grain) * (target > grain ? 0.25 : 0.05);
-    const on = grain > 0.02;
-    if (on) {
+    const target = Math.min(1, sum / N / 2.5);
+    motion += (target - motion) * (target > motion ? 0.25 : 0.05);
+    const next = GRAIN * (GRAIN_REST + (1 - GRAIN_REST) * motion);
+    if (Math.abs(next - level) > 0.004) {
+      level = next;
       // Displacement roughens the edge; the cut drops a growing share of speckles from the line
-      grainDisp.setAttribute('scale', (grain * 5).toFixed(2));
-      grainCut.setAttribute('intercept', (1 - grain * 4.2).toFixed(3));
-    }
-    if (on !== grainOn) {
-      grainOn = on;
-      linePath.style.filter = on ? 'url(#hero-rope-grain)' : '';
+      grainDisp.setAttribute('scale', (level * 5).toFixed(2));
+      grainCut.setAttribute('intercept', (1 - level * 4.2).toFixed(3));
     }
   }
+
+  // Paints the current rope into the trail canvas, stronger the faster it moves; older paint fades
+  function paintTrail(frameNo: number) {
+    const c = tctx;
+    const w = trail.width;
+    const h = trail.height;
+    c.globalCompositeOperation = 'destination-out';
+    c.fillStyle = `rgba(0,0,0,${TRAIL_FADE})`;
+    c.fillRect(0, 0, w, h);
+    if (motion < 0.03) {
+      // Fully clear once it has been still a while, so faint 8-bit residue never lingers
+      if (++quiet > 120) c.clearRect(0, 0, w, h);
+      return;
+    }
+    quiet = 0;
+    if (frameNo % 60 === 0)
+      accent = getComputedStyle(hero).getPropertyValue('--accent').trim() || accent;
+    c.globalCompositeOperation = 'source-over';
+    c.strokeStyle = accent;
+    c.lineCap = 'round';
+    c.lineJoin = 'round';
+    const k = TRAIL_SCALE;
+    c.beginPath();
+    c.moveTo(sx[0] * k, sy[0] * k);
+    for (let i = 1; i < N - 1; i++) {
+      c.quadraticCurveTo(
+        sx[i] * k,
+        sy[i] * k,
+        ((sx[i] + sx[i + 1]) / 2) * k,
+        ((sy[i] + sy[i + 1]) / 2) * k,
+      );
+    }
+    c.lineTo(sx[N - 1] * k, sy[N - 1] * k);
+    c.globalAlpha = 0.1 * motion;
+    c.lineWidth = 16 * k;
+    c.stroke();
+    c.globalAlpha = 0.16 * motion;
+    c.lineWidth = 5 * k;
+    c.stroke();
+    c.globalAlpha = 1;
+  }
+
+  let frameNo = 0;
 
   function tick() {
     step();
     updateGrain();
     render();
+    paintTrail(++frameNo);
     raf = requestAnimationFrame(tick);
   }
 

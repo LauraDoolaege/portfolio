@@ -423,15 +423,13 @@ button:focus-visible {
 }
 
 /* Tags: the one label style. Phase markers, section labels, meta labels, categories and pills all
-   use it. Uppercase, generously tracked, a defined fill with a hairline inset ring, sharp corners. */
+   use it. Uppercase, generously tracked, plain text (no fill or ring), so it sits flush with the grid. */
 .tag {
   display: inline-block;
   /* In a grid cell, hug the text instead of stretching to the column */
   justify-self: start;
   align-self: start;
-  padding: 0.45em 0.75em;
-  background: var(--tag-fill);
-  box-shadow: inset 0 0 0 1px var(--tag-ring);
+  padding: 0.45em 0;
   border-radius: 0;
   font-size: 0.75rem;
   font-weight: var(--weight-medium);

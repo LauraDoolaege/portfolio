@@ -45,6 +45,47 @@ import { withBase } from '../../utils/url';
 
     <!-- The signature: one overlay over the whole field. aria-hidden, the CTAs carry the meaning. -->
     <svg class="hero__rope" aria-hidden="true" focusable="false" data-rope-svg>
+      <!-- Grain: ragged, sand-like edge on the line. Strength (displacement + speckle cut) is driven by the
+           rope's speed from the script; at rest the filter is detached and the line is crisp. -->
+      <defs>
+        <filter
+          id="hero-rope-grain"
+          data-grain-filter
+          filterUnits="userSpaceOnUse"
+          x="-40"
+          y="-40"
+          width="100"
+          height="100"
+          color-interpolation-filters="sRGB"
+        >
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.9"
+            numOctaves="2"
+            seed="5"
+            result="noise"
+          ></feTurbulence>
+          <feDisplacementMap
+            data-grain-disp
+            in="SourceGraphic"
+            in2="noise"
+            scale="0"
+            xChannelSelector="R"
+            yChannelSelector="G"
+            result="ragged"
+          ></feDisplacementMap>
+          <feColorMatrix
+            in="noise"
+            type="matrix"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0"
+            result="speckle"
+          ></feColorMatrix>
+          <feComponentTransfer in="speckle" result="mask">
+            <feFuncA data-grain-cut type="linear" slope="8" intercept="1"></feFuncA>
+          </feComponentTransfer>
+          <feComposite in="ragged" in2="mask" operator="in"></feComposite>
+        </filter>
+      </defs>
       <path
         data-source
         fill="none"
@@ -339,6 +380,9 @@ import { withBase } from '../../utils/url';
   const svg = hero.querySelector<SVGSVGElement>('[data-rope-svg]')!;
   const source = svg.querySelector<SVGPathElement>('[data-source]')!;
   const linePath = svg.querySelector<SVGPathElement>('[data-line-path]')!;
+  const grainFilter = svg.querySelector<SVGFilterElement>('[data-grain-filter]')!;
+  const grainDisp = svg.querySelector<SVGFEDisplacementMapElement>('[data-grain-disp]')!;
+  const grainCut = svg.querySelector<SVGFEFuncAElement>('[data-grain-cut]')!;
   const marketer = hero.querySelector<HTMLElement>('[data-marketer]')!;
   const turned = hero.querySelector<HTMLElement>('[data-turned]')!;
   const baselineMark = hero.querySelector<HTMLElement>('.hero__baseline')!;
@@ -351,6 +395,8 @@ import { withBase } from '../../utils/url';
   const ITERATIONS = 20;
   // The line is drawn through a smoothed copy of the points, so slack in the rope never shows as wrinkles
   const SMOOTH_PASSES = 6;
+  // Grain on the line while it moves: 0 turns it off, 1 is the prototype default, higher is rougher
+  const GRAIN = 1;
   // Tuned to be critically damped: the rope eases back into place without overshooting or wobbling
   const DAMPING = 0.8;
   const K_IDLE = 0.01;
@@ -399,6 +445,10 @@ import { withBase } from '../../utils/url';
     width = f.width;
     height = f.height;
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    grainFilter.setAttribute('x', '-40');
+    grainFilter.setAttribute('y', '-40');
+    grainFilter.setAttribute('width', String(width + 80));
+    grainFilter.setAttribute('height', String(height + 80));
 
     const m = rel(marketer.getBoundingClientRect());
     const t = rel(turned.getBoundingClientRect());
@@ -603,8 +653,30 @@ import { withBase } from '../../utils/url';
 
   /* ---------- Loop ---------- */
 
+  // 0..1, follows how fast the rope is moving: quick to rise, slow to fade
+  let grain = 0;
+  let grainOn = false;
+
+  function updateGrain() {
+    let sum = 0;
+    for (let i = 0; i < N; i++) sum += Math.hypot(pts[i].x - pts[i].px, pts[i].y - pts[i].py);
+    const target = Math.min(1, sum / N / 2.5) * GRAIN;
+    grain += (target - grain) * (target > grain ? 0.25 : 0.05);
+    const on = grain > 0.02;
+    if (on) {
+      // Displacement roughens the edge; the cut drops a growing share of speckles from the line
+      grainDisp.setAttribute('scale', (grain * 5).toFixed(2));
+      grainCut.setAttribute('intercept', (1 - grain * 4.2).toFixed(3));
+    }
+    if (on !== grainOn) {
+      grainOn = on;
+      linePath.style.filter = on ? 'url(#hero-rope-grain)' : '';
+    }
+  }
+
   function tick() {
     step();
+    updateGrain();
     render();
     raf = requestAnimationFrame(tick);
   }

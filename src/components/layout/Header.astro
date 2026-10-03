@@ -58,6 +58,10 @@ const currentPath = Astro.url.pathname;
         </li>
       ))}
     </ul>
+    <button class="theme-toggle menu__theme" type="button" aria-label="Switch to dark mode">
+      <span class="theme-toggle__icon" aria-hidden="true"></span>
+      <span class="theme-toggle__label">Dark</span>
+    </button>
   </div>
 </header>
 
@@ -134,6 +138,29 @@ const currentPath = Astro.url.pathname;
 
   .menu[hidden] {
     display: none;
+  }
+
+  /* Same toggle as the bar's, set at the foot of the menu in the menu's own ink */
+  .menu .menu__theme {
+    position: absolute;
+    right: auto;
+    bottom: 2.5rem;
+    left: 50%;
+    z-index: auto;
+    transform: translateX(-50%);
+    padding: 0.9rem 0.5rem;
+    color: var(--bg-primary);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .menu .menu__theme .theme-toggle__label::before {
+    content: '( ';
+  }
+
+  .menu .menu__theme .theme-toggle__label::after {
+    content: ' )';
   }
 
   .menu__links {

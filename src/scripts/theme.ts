@@ -7,9 +7,8 @@
 type Theme = 'light' | 'dark';
 
 const root = document.documentElement;
-const toggle = document.querySelector<HTMLButtonElement>('.theme-toggle');
-const label = toggle?.querySelector('.theme-toggle__label');
-const icon = toggle?.querySelector<HTMLElement>('.theme-toggle__icon');
+// The header has one toggle and the mobile menu a second; they stay in step
+const toggles = [...document.querySelectorAll<HTMLButtonElement>('.theme-toggle')];
 const themeColor = document.querySelector('meta[name="theme-color"]');
 const COLORS: Record<Theme, string> = { light: '#f3f2ee', dark: '#161513' };
 
@@ -18,8 +17,11 @@ const current = (): Theme => (root.dataset.theme === 'dark' ? 'dark' : 'light');
 function apply(theme: Theme) {
   root.dataset.theme = theme;
   themeColor?.setAttribute('content', COLORS[theme]);
-  if (label) label.textContent = theme === 'dark' ? 'Light' : 'Dark';
-  toggle?.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+  for (const toggle of toggles) {
+    const label = toggle.querySelector('.theme-toggle__label');
+    if (label) label.textContent = theme === 'dark' ? 'Light' : 'Dark';
+    toggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+  }
 }
 
 /**
@@ -107,27 +109,29 @@ export async function sweepWith(update: () => void) {
     .catch(() => {});
 }
 
-toggle?.addEventListener('click', () => {
-  const next: Theme = current() === 'dark' ? 'light' : 'dark';
-  try {
-    localStorage.setItem('theme', next);
-  } catch {
-    /* private mode: the choice just won't persist */
-  }
-  // Icon only: a Y-axis spin, the label stays put
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    icon?.animate(
-      [
-        { transform: 'perspective(120px) rotateY(0deg)' },
-        { transform: 'perspective(120px) rotateY(360deg)' },
-      ],
-      { duration: 480, easing: 'ease-out' },
-    );
-  }
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce || !('startViewTransition' in document)) apply(next);
-  else sweepWith(() => apply(next));
-});
+for (const toggle of toggles) {
+  toggle.addEventListener('click', () => {
+    const next: Theme = current() === 'dark' ? 'light' : 'dark';
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* private mode: the choice just won't persist */
+    }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Icon only: a Y-axis spin, the label stays put
+    if (!reduce) {
+      toggle.querySelector<HTMLElement>('.theme-toggle__icon')?.animate(
+        [
+          { transform: 'perspective(120px) rotateY(0deg)' },
+          { transform: 'perspective(120px) rotateY(360deg)' },
+        ],
+        { duration: 480, easing: 'ease-out' },
+      );
+    }
+    if (reduce || !('startViewTransition' in document)) apply(next);
+    else sweepWith(() => apply(next));
+  });
+}
 
 // Sync label/meta with the theme the head script already set
 apply(current());

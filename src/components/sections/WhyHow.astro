@@ -5,15 +5,67 @@
 // where every segment goes dark. Below 1000px it is a plain stack.
 import SectionLabel from '../ui/SectionLabel.astro';
 
-const columns = [
+// Hand-drawn accents in the signature's ink, drawn as clean single strokes: each one is a list of pen strokes
+// (paths in a small viewBox, stretched to fit their word) that draw one after another when the block becomes active.
+const shapes = {
+  // An overshooting loop, the way a pen circles a word
+  ring: {
+    box: '0 0 200 80',
+    d: ['M 176 22 C 140 6, 72 4, 36 18 C 8 30, 10 58, 50 67 C 98 77, 168 68, 190 46 C 202 33, 192 20, 168 22'],
+  },
+  // Underline that runs out, doubles back down-left and lands in a short flick
+  underline: {
+    box: '0 0 200 60',
+    d: [
+      'M 4 8 C 50 5, 130 9, 192 4',
+      'M 192 4 C 150 14, 90 20, 38 30 C 80 34, 130 40, 172 36',
+    ],
+  },
+  // Loose arrow leaning in toward the word
+  arrow: {
+    box: '0 0 60 70',
+    d: ['M 54 6 C 42 24, 26 42, 10 58', 'M 6 38 C 8 46, 9 52, 10 60 C 18 58, 26 57, 32 58'],
+  },
+  heart: {
+    box: '0 0 60 56',
+    d: ['M 30 52 C 8 36, 2 18, 14 8 C 24 0, 30 10, 30 16 C 30 10, 38 0, 48 8 C 60 18, 52 36, 30 52'],
+  },
+} as const;
+
+type Mark = { shape: keyof typeof shapes; off: number; float?: boolean };
+type Part = string | { word: string; marks: Mark[]; tail?: string };
+
+const columns: { parts: Part[]; approach: string; value: string }[] = [
   {
-    question: 'How do we design an experience people actually need?',
+    parts: [
+      'How do we ',
+      {
+        word: 'design',
+        marks: [
+          { shape: 'ring', off: 0 },
+          { shape: 'arrow', off: 2, float: true },
+        ],
+      },
+      ' an experience people actually ',
+      {
+        word: 'need',
+        tail: '?',
+        marks: [
+          { shape: 'underline', off: 1 },
+        ],
+      },
+    ],
     approach: 'Devine (UX Major)',
     value:
       'Human-centered research, mapping user journeys, and prototyping interactions across physical and digital touchpoints.',
   },
   {
-    question: 'How do we make sure people discover it?',
+    parts: [
+      'How do we make sure ',
+      { word: 'people', marks: [{ shape: 'heart', off: 1.4, float: true }] },
+      ' ',
+      { word: 'discover', marks: [{ shape: 'ring', off: 0 }], tail: ' it?' },
+    ],
     approach: 'Bachelor in Marketing Communication (Cum Laude)',
     value:
       'Content strategy, persuasion, nudging, and understanding human behavior to bridge user needs with business goals.',
@@ -36,7 +88,25 @@ const columns = [
     <ol class="why__list">
       {columns.map((c) => (
         <li class="why__item" data-why-item>
-          <h3 class="why__question" data-reveal>{c.question}</h3>
+          <h3 class="why__question" data-reveal>
+            {c.parts.map((part) =>
+              typeof part === 'string' ? (
+                part
+              ) : (
+                <span class="why__nw">
+                  <span class="why__host">
+                    {part.word}
+                    {part.marks.map((m) => (
+                      <svg class:list={['why__mark', `why__mark--${m.shape}`, m.float && 'why__float']} viewBox={shapes[m.shape].box} preserveAspectRatio="none" aria-hidden="true" focusable="false" style={`--off:${m.off}s`} data-why-mark>
+                        {shapes[m.shape].d.map((d) => <path pathLength="1" d={d}></path>)}
+                      </svg>
+                    ))}
+                  </span>
+                  {part.tail}
+                </span>
+              ),
+            )}
+          </h3>
           <div class="why__answer" data-reveal>
             <p class="tag">{c.approach}</p>
             <p class="text">{c.value}</p>
@@ -66,7 +136,10 @@ const columns = [
     border-top: var(--hairline);
   }
 
+  /* A stacking context of its own, so the marks (z-index -1) sit behind the letters, never over them */
   .why__question {
+    position: relative;
+    isolation: isolate;
     max-width: 16ch;
     font-size: clamp(2rem, 1rem + 2.8vw, 3.75rem);
     font-weight: var(--weight-bold);
@@ -80,6 +153,93 @@ const columns = [
     gap: 0.5rem;
     margin-top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
     max-width: 46ch;
+  }
+
+  /* Nowrap keeps the question mark with its word; the host is inline so the marks can overshoot it freely */
+  .why__nw {
+    white-space: nowrap;
+  }
+
+  .why__host {
+    position: relative;
+  }
+
+  .why__mark {
+    position: absolute;
+    z-index: -1;
+    display: block;
+    max-width: none;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .why__mark path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .why__mark--ring {
+    left: -10%;
+    top: -0.06em;
+    width: 122%;
+    height: 1.2em;
+  }
+
+  .why__mark--underline {
+    left: -3%;
+    top: 1.1em;
+    width: 160%;
+    height: 0.62em;
+  }
+
+  .why__mark--arrow {
+    /* Sits in the gap right of "design an", its tip leaning down-left toward "people" on the next line */
+    left: calc(100% + 3.4em);
+    top: 0.05em;
+    width: 0.85em;
+    height: 0.95em;
+  }
+
+  .why__mark--heart {
+    left: calc(100% + 0.5em);
+    top: 0.02em;
+    width: 0.85em;
+    height: 0.8em;
+    rotate: 10deg;
+  }
+
+  /* Only the marks that are not tied to a word sit beside it, and their place depends on the line breaks:
+     on narrow screens they are left out */
+  .why__float {
+    display: none;
+  }
+
+  /* Armed by script (so no-JS visitors see them finished). Each pen stroke is drawn in turn after its mark's --off;
+     opacity flips with the same delay so no stray round-cap dot shows while a stroke waits. */
+  .why__mark.is-armed path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+
+  .why__mark.is-drawn path {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transition:
+      stroke-dashoffset 1s cubic-bezier(0.35, 0.1, 0.25, 1) var(--delay, 0s),
+      opacity 0s linear var(--delay, 0s);
+  }
+
+  .why__mark path:nth-child(1) {
+    --delay: var(--off, 0s);
+  }
+
+  .why__mark path:nth-child(2) {
+    --delay: calc(var(--off, 0s) + 0.9s);
   }
 
   .why__close {
@@ -96,6 +256,14 @@ const columns = [
   }
 
   @media (min-width: 1000px) {
+    .why__float {
+      display: block;
+    }
+
+    .why__mark path {
+      stroke-width: 6px;
+    }
+
     .why__grid {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -178,10 +346,20 @@ const columns = [
       bars.forEach((el, i) => el.classList.toggle('is-active', closing || i === index));
     };
 
+    // The marks in a block are drawn the first time it becomes active, and stay
+    const marks = Array.from(document.querySelectorAll<SVGElement>('[data-why-mark]'));
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      marks.forEach((m) => m.classList.add('is-armed'));
+    }
+    const draw = (item: HTMLElement) =>
+      item.querySelectorAll<SVGElement>('[data-why-mark]').forEach((m) => m.classList.add('is-drawn'));
+
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) activate(items.indexOf(entry.target as HTMLElement));
+          if (!entry.isIntersecting) continue;
+          activate(items.indexOf(entry.target as HTMLElement));
+          draw(entry.target as HTMLElement);
         }
       },
       // A thin band across the middle of the screen: whichever block crosses it is the active one

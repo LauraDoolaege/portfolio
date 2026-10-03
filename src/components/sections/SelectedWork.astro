@@ -40,11 +40,9 @@ const groups = [
 
     {groups.map((g) => (
       <div class="work__group">
-        <div class="row" data-reveal>
-          <h3 class="title">{g.title}</h3>
-          <div class="row__rail">
-            <p class="text">{g.intro}</p>
-          </div>
+        <div class="work__head" data-reveal>
+          <h3 class="title work__title">{g.title}</h3>
+          <p class="text work__intro">{g.intro}</p>
         </div>
         <ul class={`work__grid work__grid--${g.cols}`}>
           {g.projects.map((p) => (
@@ -61,15 +59,32 @@ const groups = [
     margin-top: clamp(4rem, 2rem + 6vw, 8rem);
   }
 
-  .work__grid {
+  /* Group head on the same 12 columns as the cards: name left, what it is in columns 8-12 */
+  .work__head {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: clamp(2.5rem, 1.5rem + 3vw, 4rem) var(--grid-gutter);
-    align-items: start;
-    padding-top: clamp(0.5rem, 0.25rem + 1vw, 1.5rem);
+    gap: 1rem var(--grid-gutter);
+    padding-block: clamp(1.5rem, 1rem + 2vw, 2.5rem) clamp(2rem, 1.5rem + 2vw, 3.5rem);
+    border-top: var(--hairline);
   }
 
-  @media (min-width: 600px) {
+  .work__intro {
+    max-width: 46ch;
+  }
+
+  .work__grid {
+    --ratio: 4 / 3;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(3rem, 2rem + 3vw, 5rem) var(--grid-gutter);
+    align-items: stretch;
+  }
+
+  .work__grid--three {
+    --ratio: 4 / 5;
+  }
+
+  @media (min-width: 700px) {
     .work__grid--two {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -82,6 +97,18 @@ const groups = [
   @media (min-width: 900px) {
     .work__grid--three {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .work__head {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .work__title {
+      grid-column: 1 / 7;
+    }
+
+    .work__intro {
+      grid-column: 8 / 13;
     }
   }
 </style>

@@ -362,9 +362,15 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
 
   .hero__rope-line {
     stroke: var(--accent);
-    stroke-width: 2.6;
+    stroke-width: 6;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  @media (min-width: 1000px) {
+    .hero__rope-line {
+      stroke-width: 8;
+    }
   }
 
   .hero__rope-line {

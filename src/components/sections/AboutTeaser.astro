@@ -1,28 +1,30 @@
 ---
-// Section 04: who am I. The same row again: the statement on the left, the way into the About page in the rail.
+// Section 04: who am I. The statement runs in columns 1-8 at display size, one sentence per line: the first in bold,
+// the rest light. The way into the About page sits in 10-12 on the last line, under a soft rule.
 // Hero's "Get to know me" link jumps here (#about).
 import Button from '../ui/Button.astro';
-import Signature from '../ui/Signature.astro';
 import SectionLabel from '../ui/SectionLabel.astro';
 import { withBase } from '../../utils/url';
 ---
 
 <section class="sec" id="about" aria-labelledby="about-title">
   <div class="container">
-    <header class="sec__head about__head">
+    <header class="sec__head">
       <SectionLabel num="04" text="About" data-reveal />
       <h2 id="about-title" class="sec-title" data-reveal>
         Who am I
       </h2>
-      <Signature class="about__signature" />
     </header>
 
-    <div class="row" data-reveal>
-      <p class="lede about__statement">
-        A marketer turned experience designer. A storyteller since the playground. I bridge human
-        needs with smart strategy to create concepts that actually reach people.
+    <div class="about__grid">
+      <p class="about__statement" data-reveal>
+        <span class="about__line about__line--lead">A marketer turned experience designer.</span>
+        <span class="about__line">A storyteller since the playground.</span>
+        <span class="about__line">
+          I bridge human needs with smart strategy to create concepts that actually reach people.
+        </span>
       </p>
-      <div class="row__rail">
+      <div class="about__link" data-reveal>
         <Button variant="link" href={withBase('/about')}>
           Get to know me better
         </Button>
@@ -32,29 +34,48 @@ import { withBase } from '../../utils/url';
 </section>
 
 <style>
-  .about__head {
-    position: relative;
+  .about__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem var(--grid-gutter);
   }
 
-  :global(.about__signature) {
-    position: absolute;
-    top: 0;
-    right: clamp(0rem, 3vw, 4rem);
-    width: clamp(6rem, 18vw, 15rem);
-    height: auto;
-  }
-
-  @media (max-width: 40rem) {
-    :global(.about__signature) {
-      width: 4.5rem;
-      top: -0.5rem;
-    }
-  }
-
-  /* A paragraph, not a question: a touch smaller and wider than the shared lede */
   .about__statement {
-    max-width: 32ch;
-    font-size: clamp(1.5rem, 1rem + 1.8vw, 2.5rem);
-    line-height: 1.22;
+    display: grid;
+    gap: 0.35em;
+    font-size: clamp(1.9rem, 1rem + 2.6vw, 3.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    text-wrap: pretty;
+  }
+
+  .about__line {
+    display: block;
+    font-weight: var(--weight-light);
+  }
+
+  .about__line--lead {
+    font-weight: var(--weight-bold);
+    text-wrap: balance;
+  }
+
+  .about__link {
+    padding-top: 1.25rem;
+    border-top: var(--hairline);
+  }
+
+  @media (min-width: 1000px) {
+    .about__grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: end;
+    }
+
+    .about__statement {
+      grid-column: 1 / 9;
+    }
+
+    .about__link {
+      grid-column: 10 / 13;
+    }
   }
 </style>

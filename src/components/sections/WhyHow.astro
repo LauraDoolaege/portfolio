@@ -1,7 +1,8 @@
 ---
 // Section 01: two questions, two educations. On desktop the headline is pinned in the left columns while the two
 // question blocks scroll past on the right; the block in the middle of the screen is the active one (the rest dim,
-// and the matching segment in the pinned column darkens). Below 1000px it is a plain stack.
+// and the matching segment in the pinned column darkens). A third step closes it ("...and I want to answer both!"),
+// where every segment goes dark. Below 1000px it is a plain stack.
 import SectionLabel from '../ui/SectionLabel.astro';
 
 const columns = [
@@ -28,7 +29,7 @@ const columns = [
         Every company has 2 questions...
       </h2>
       <div class="why__bars" aria-hidden="true">
-        {columns.map(() => <span class="why__bar"></span>)}
+        {[...columns, null].map(() => <span class="why__bar"></span>)}
       </div>
     </div>
 
@@ -42,6 +43,9 @@ const columns = [
           </div>
         </li>
       ))}
+      <li class="why__item why__item--close" data-why-item>
+        <p class="why__close" data-reveal>and I want to answer both!</p>
+      </li>
     </ol>
   </div>
 </section>
@@ -76,6 +80,15 @@ const columns = [
     gap: 0.5rem;
     margin-top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
     max-width: 46ch;
+  }
+
+  .why__close {
+    max-width: 12ch;
+    font-size: clamp(2.5rem, 1rem + 4.2vw, 5.5rem);
+    font-weight: var(--weight-heavy);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
   }
 
   .why__bars {
@@ -118,6 +131,10 @@ const columns = [
       border-bottom: 0;
     }
 
+    .why__item--close {
+      min-height: 70vh;
+    }
+
     .why__grid.is-armed .why__item {
       opacity: 0.3;
     }
@@ -156,7 +173,9 @@ const columns = [
     // Armed by script, so no-JS visitors and narrow screens just see everything at full strength
     const activate = (index: number) => {
       items.forEach((el, i) => el.classList.toggle('is-active', i === index));
-      bars.forEach((el, i) => el.classList.toggle('is-active', i === index));
+      // On the closing step every segment goes dark: both answers
+      const closing = index === items.length - 1;
+      bars.forEach((el, i) => el.classList.toggle('is-active', closing || i === index));
     };
 
     const io = new IntersectionObserver(

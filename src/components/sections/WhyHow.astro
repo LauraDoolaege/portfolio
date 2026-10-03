@@ -1,17 +1,18 @@
 ---
-// Section 01: two questions, two answers. Each question is a row: the question on the left, where it
-// comes from (the degree) and what it covers in the narrow rail, the same split as the hero.
+// Section 01: two questions, two educations. On desktop the headline is pinned in the left columns while the two
+// question blocks scroll past on the right; the block in the middle of the screen is the active one (the rest dim,
+// and the matching segment in the pinned column darkens). Below 1000px it is a plain stack.
 import SectionLabel from '../ui/SectionLabel.astro';
 
 const columns = [
   {
-    question: 'How do we design an experience people actually need, love, and connect with?',
+    question: 'How do we design an experience people actually need?',
     approach: 'Devine (UX Major)',
     value:
       'Human-centered research, mapping user journeys, and prototyping interactions across physical and digital touchpoints.',
   },
   {
-    question: 'How do we make sure people discover it and engage with it?',
+    question: 'How do we make sure people discover it?',
     approach: 'Bachelor in Marketing Communication (Cum Laude)',
     value:
       'Content strategy, persuasion, nudging, and understanding human behavior to bridge user needs with business goals.',
@@ -19,20 +20,23 @@ const columns = [
 ];
 ---
 
-<section class="sec" aria-labelledby="why-how-title">
-  <div class="container">
-    <header class="sec__head">
-      <SectionLabel num="01" text="Philosophy" data-reveal />
+<section class="sec why" aria-labelledby="why-how-title" data-why>
+  <div class="container why__grid">
+    <div class="why__pin">
+      <SectionLabel num="01" text="The big idea" data-reveal />
       <h2 id="why-how-title" class="sec-title" data-reveal>
-        2 questions every product needs to answer
+        Every company has 2 questions...
       </h2>
-    </header>
+      <div class="why__bars" aria-hidden="true">
+        {columns.map(() => <span class="why__bar"></span>)}
+      </div>
+    </div>
 
-    <ol>
+    <ol class="why__list">
       {columns.map((c) => (
-        <li class="row" data-reveal>
-          <h3 class="lede">{c.question}</h3>
-          <div class="row__rail">
+        <li class="why__item" data-why-item>
+          <h3 class="why__question" data-reveal>{c.question}</h3>
+          <div class="why__answer" data-reveal>
             <p class="tag">{c.approach}</p>
             <p class="text">{c.value}</p>
           </div>
@@ -41,3 +45,136 @@ const columns = [
     </ol>
   </div>
 </section>
+
+<style>
+  .why__pin .sec-title {
+    margin-bottom: 0;
+  }
+
+  .why__list {
+    display: grid;
+    gap: clamp(3rem, 2rem + 4vw, 5rem);
+    margin-top: clamp(2.5rem, 1.5rem + 4vw, 4rem);
+  }
+
+  .why__item {
+    padding-top: 1.75rem;
+    border-top: var(--hairline);
+  }
+
+  .why__question {
+    max-width: 16ch;
+    font-size: clamp(2rem, 1rem + 2.8vw, 3.75rem);
+    font-weight: var(--weight-bold);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .why__answer {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    max-width: 46ch;
+  }
+
+  .why__bars {
+    display: none;
+  }
+
+  @media (min-width: 1000px) {
+    .why__grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+    }
+
+    .why__pin {
+      grid-column: 1 / 6;
+      position: sticky;
+      top: clamp(5rem, 14vh, 9rem);
+      align-self: start;
+    }
+
+    .why__list {
+      grid-column: 7 / 13;
+      gap: 0;
+      margin-top: 0;
+    }
+
+    /* Each block is most of a screen tall, so it takes real scrolling to move from one answer to the next */
+    .why__item {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 85vh;
+      padding-block: 3rem;
+      border-top: 0;
+      border-bottom: var(--hairline);
+      transition: opacity 0.6s var(--ease-out);
+    }
+
+    .why__item:last-child {
+      border-bottom: 0;
+    }
+
+    .why__grid.is-armed .why__item {
+      opacity: 0.3;
+    }
+
+    .why__grid.is-armed .why__item.is-active {
+      opacity: 1;
+    }
+
+    /* Progress in the pinned column: one segment per answer, the active one in ink */
+    .why__bars {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: clamp(2rem, 1.5rem + 3vw, 4rem);
+    }
+
+    .why__bar {
+      width: 3.5rem;
+      height: 2px;
+      background: var(--border-color);
+      transition: background-color 0.5s var(--ease-out);
+    }
+
+    .why__bar.is-active {
+      background: var(--text-main);
+    }
+  }
+</style>
+
+<script>
+  const grid = document.querySelector<HTMLElement>('[data-why] .why__grid');
+  const items = Array.from(document.querySelectorAll<HTMLElement>('[data-why-item]'));
+  const bars = Array.from(document.querySelectorAll<HTMLElement>('.why__bar'));
+  const desktop = matchMedia('(min-width: 1000px)');
+
+  if (grid && items.length) {
+    // Armed by script, so no-JS visitors and narrow screens just see everything at full strength
+    const activate = (index: number) => {
+      items.forEach((el, i) => el.classList.toggle('is-active', i === index));
+      bars.forEach((el, i) => el.classList.toggle('is-active', i === index));
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) activate(items.indexOf(entry.target as HTMLElement));
+        }
+      },
+      // A thin band across the middle of the screen: whichever block crosses it is the active one
+      { rootMargin: '-45% 0px -45% 0px' },
+    );
+
+    const arm = () => {
+      grid.classList.toggle('is-armed', desktop.matches);
+    };
+    arm();
+    desktop.addEventListener('change', arm);
+    activate(0);
+    items.forEach((el) => io.observe(el));
+  }
+</script>

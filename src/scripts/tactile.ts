@@ -155,8 +155,10 @@ function cursor() {
     if (!t) return;
     const media = t.closest<HTMLElement>(MEDIA);
     if (media) {
-      // Project cards read as "View"; decorative floating images just get the arrow
-      set('media', media.closest('.card') ? 'View' : ARROW);
+      // Project cards carry their own "View project" call to action, so the cursor stays a plain link there;
+      // decorative floating images just get the arrow
+      if (media.closest('.card')) set('link');
+      else set('media', ARROW);
     } else if (t.closest(INTERACTIVE)) {
       set('link');
     } else {
@@ -233,9 +235,16 @@ function spotlight(frame: HTMLElement) {
   });
 }
 
+// Project cards keep the paper grain on hover but not the sand spotlight: their hover is the veil + call to action.
+function grainOnly(frame: HTMLElement) {
+  frame.addEventListener('mouseenter', () => frame.classList.add('is-hover'));
+  frame.addEventListener('mouseleave', () => frame.classList.remove('is-hover'));
+}
+
 if (finePointer) {
   cursor();
-  document.querySelectorAll<HTMLElement>('.card__media, .media-frame').forEach(spotlight);
+  document.querySelectorAll<HTMLElement>('.media-frame').forEach(spotlight);
+  document.querySelectorAll<HTMLElement>('.card__media').forEach(grainOnly);
   if (!reduceMotion) {
     document
       .querySelectorAll<HTMLElement>('[data-magnetic], .btn, .btn-link')

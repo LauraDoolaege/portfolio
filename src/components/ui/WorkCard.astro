@@ -1,7 +1,7 @@
 ---
-// One project in the homepage work grid. With a cover it is a card: title and type on one line, the image at the
-// group's fixed ratio, a hairline, a few lines about the project with an arrow, then its tools as chips.
-// Without a cover it is a plain ruled text row. Both link to the case study.
+// One project in the homepage work grid: the image at the group's fixed ratio, a hairline, then everything to read
+// below it: title and type on one line, a few lines about the project, and its tools as chips.
+// Without a cover yet, the image slot is a flat placeholder so the grid stays whole. Links to the case study.
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { withBase } from '../../utils/url';
@@ -19,14 +19,10 @@ const href = withBase(`/works/${p.id}`);
 const tools = p.data.tools.slice(0, 3);
 ---
 
-{cover ? (
-  <li class="card" data-reveal>
-    <a class="card__link" href={href}>
-      <header class="card__top">
-        <h4 class="card__title">{p.data.title}</h4>
-        <p class="card__type">{TYPE_LABEL[p.data.type]}</p>
-      </header>
-      <div class="card__media">
+<li class="card" data-reveal>
+  <a class="card__link" href={href}>
+    <div class="card__media">
+      {cover ? (
         <Image
           class="card__img"
           src={cover}
@@ -34,28 +30,32 @@ const tools = p.data.tools.slice(0, 3);
           widths={[400, 700, 1000, 1400]}
           sizes={sizes}
         />
-      </div>
-      <div class="card__body">
-        <p class="card__desc">{p.data.description}</p>
-        <svg class="card__arrow" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <path d="M3 9L9 3M4 3h5v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="square" />
-        </svg>
-      </div>
-      <ul class="card__tags" aria-label="Tools">
-        {tools.map((t) => (
-          <li class="card__chip">{t}</li>
-        ))}
-      </ul>
-    </a>
-  </li>
-) : (
-  <li class="entry" data-reveal>
-    <a class="entry__link" href={href}>
-      <h4 class="entry__title">{p.data.title}</h4>
-      <p class="tag">{p.data.tools.slice(0, 2).join(' · ')}</p>
-    </a>
-  </li>
-)}
+      ) : (
+        <div class="card__img card__img--empty" aria-hidden="true"></div>
+      )}
+      <span class="card__cta" aria-hidden="true">
+        <span class="card__cta-label">
+          View project
+          <svg class="card__cta-icon" viewBox="0 0 12 12" fill="none">
+            <path d="M2 6h8M6.5 2.5L10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" />
+          </svg>
+        </span>
+      </span>
+    </div>
+    <div class="card__body">
+      <header class="card__top">
+        <h4 class="card__title">{p.data.title}</h4>
+        <p class="card__type">{TYPE_LABEL[p.data.type]}</p>
+      </header>
+      <p class="card__desc">{p.data.description}</p>
+    </div>
+    <ul class="card__tags" aria-label="Tools">
+      {tools.map((t) => (
+        <li class="card__chip">{t}</li>
+      ))}
+    </ul>
+  </a>
+</li>
 
 <style>
   .card__link {
@@ -69,7 +69,7 @@ const tools = p.data.tools.slice(0, 3);
     align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
 
   .card__title {
@@ -98,11 +98,79 @@ const tools = p.data.tools.slice(0, 3);
     will-change: transform;
   }
 
+  .card__img--empty {
+    background: var(--frame-bg);
+  }
+
+  /* Hover call to action: a dark veil that arrives as sand, the same hard-edged wipe through #sand-dispersion as the
+     button fill (--fill is registered in global.css), then the label fades in over it. Hover-capable devices only. */
+  .card__cta {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: none;
+    place-items: center;
+    pointer-events: none;
+  }
+
+  .card__cta::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(
+      to right,
+      rgba(22, 20, 18, 0.62) var(--fill),
+      transparent calc(var(--fill) + 45%)
+    );
+    filter: url(#sand-dispersion);
+    transition: --fill 0.8s var(--ease-out);
+  }
+
+  .card__cta-label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    color: #fff;
+    font-size: clamp(1.25rem, 0.9rem + 1vw, 1.75rem);
+    font-weight: var(--weight-heavy);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(0.4em);
+    transition:
+      opacity 0.4s var(--ease-out),
+      transform 0.5s var(--ease-out);
+  }
+
+  .card__cta-icon {
+    width: 0.8em;
+    height: 0.8em;
+  }
+
+  @media (hover: hover) {
+    .card__cta {
+      display: grid;
+    }
+
+    .card__link:hover .card__cta::before,
+    .card__link:focus-visible .card__cta::before {
+      --fill: 100%;
+    }
+
+    .card__link:hover .card__cta-label,
+    .card__link:focus-visible .card__cta-label {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.25s;
+    }
+
+  }
+
+  /* Everything to read sits under the line */
   .card__body {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.5rem;
+    position: relative;
     margin-top: 1.25rem;
     padding-top: 1.25rem;
     border-top: var(--hairline);
@@ -120,19 +188,6 @@ const tools = p.data.tools.slice(0, 3);
     text-wrap: pretty;
   }
 
-  .card__arrow {
-    flex: none;
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-top: 0.15rem;
-    transition: transform 0.4s ease-in-out;
-  }
-
-  .card__link:hover .card__arrow,
-  .card__link:focus-visible .card__arrow {
-    transform: translate(3px, -3px);
-  }
-
   .card__tags {
     display: flex;
     flex-wrap: wrap;
@@ -146,33 +201,5 @@ const tools = p.data.tools.slice(0, 3);
     font-size: var(--text-small);
     line-height: 1.2;
     color: var(--text-muted);
-  }
-
-  /* Text-only entry: spans the whole grid as a row, like the rows elsewhere on the page */
-  .entry {
-    grid-column: 1 / -1;
-    border-top: var(--hairline);
-  }
-
-  .entry__link {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem 2rem;
-    padding-block: clamp(1.25rem, 1rem + 1vw, 2rem);
-  }
-
-  .entry__title {
-    font-size: var(--text-h3);
-    font-weight: var(--weight-bold);
-    line-height: 1.15;
-    letter-spacing: var(--tracking-display);
-    transition: opacity 0.4s var(--ease-out);
-  }
-
-  .entry__link:hover .entry__title,
-  .entry__link:focus-visible .entry__title {
-    opacity: 0.6;
   }
 </style>

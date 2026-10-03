@@ -203,13 +203,9 @@ const currentPath = Astro.url.pathname;
       display: block;
     }
 
-    /* The three links live in the menu now; the theme toggle stays in the bar */
-    .site-header__links li:not(.site-header__theme) {
+    /* The links and the theme toggle both live in the menu now */
+    .site-header__inner .site-header__links {
       display: none;
-    }
-
-    .site-header__theme {
-      margin-left: 0;
     }
   }
 

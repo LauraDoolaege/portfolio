@@ -75,6 +75,23 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
 
 <section class="sec why" aria-labelledby="why-how-title" data-why>
   <div class="container why__grid">
+    <!-- The signature's grain, for every mark: a ragged edge and a few dropped speckles. The script roughens it
+         while a mark is being thrown around, like the rope in the hero. -->
+    <svg class="why__defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="why-grain" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5" result="noise"></feTurbulence>
+          <feDisplacementMap data-grain-disp in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="ragged"></feDisplacementMap>
+          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0" result="speckle"></feColorMatrix>
+          <feComponentTransfer in="speckle" result="mask">
+            <feFuncA data-grain-cut type="linear" slope="8" intercept="-1.1"></feFuncA>
+          </feComponentTransfer>
+          <feComposite in="ragged" in2="mask" operator="in"></feComposite>
+        </filter>
+      </defs>
+    </svg>
+    <!-- Hazy trail left behind a heart or arrow while it moves (painted by the script, grainy via CSS mask) -->
+    <canvas class="why__trail" aria-hidden="true" data-why-trail></canvas>
     <div class="why__pin">
       <SectionLabel num="01" text="The big idea" data-reveal />
       <h2 id="why-how-title" class="sec-title" data-reveal>
@@ -164,9 +181,32 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     position: relative;
   }
 
+  .why__defs {
+    position: absolute;
+  }
+
+  /* Behind everything in the section; the grid is its own stacking context so -1 never leaves it */
+  .why__trail {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    display: none;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    pointer-events: none;
+    /* Soft first, then broken into speckle by a noise mask: a haze made of grains (same as the hero) */
+    filter: blur(2.5px);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    -webkit-mask-size: 220px 220px;
+    mask-size: 220px 220px;
+  }
+
   .why__mark {
     position: absolute;
     z-index: -1;
+    filter: url(#why-grain);
     display: block;
     max-width: none;
     overflow: visible;
@@ -209,7 +249,6 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     top: 0.02em;
     width: 0.85em;
     height: 0.8em;
-    rotate: 10deg;
   }
 
   /* Only the marks that are not tied to a word sit beside it, and their place depends on the line breaks:
@@ -256,8 +295,25 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
   }
 
   @media (min-width: 1000px) {
+    .why__grid {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .why__trail {
+      display: block;
+    }
+
+    /* The question lets pointers through so the heart and arrow behind it can be grabbed and thrown */
+    .why__question {
+      pointer-events: none;
+    }
+
     .why__float {
       display: block;
+      pointer-events: auto;
+      cursor: grab;
+      touch-action: none;
     }
 
     .why__mark path {
@@ -373,5 +429,144 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     desktop.addEventListener('change', arm);
     activate(0);
     items.forEach((el) => io.observe(el));
+  }
+</script>
+
+<script>
+  // The heart and the arrow can be grabbed and thrown. They carry the signature's grain, which roughens while they
+  // move, and leave the same hazy grain trail the hero rope does. After a pause they ease back to their word.
+  import { gsap, prefersReducedMotion } from '../../utils/motion';
+  import { Draggable } from 'gsap/Draggable';
+  import { InertiaPlugin } from 'gsap/InertiaPlugin';
+
+  gsap.registerPlugin(Draggable, InertiaPlugin);
+
+  const grid = document.querySelector<HTMLElement>('[data-why] .why__grid');
+  const trail = grid?.querySelector<HTMLCanvasElement>('[data-why-trail]');
+  const floats = Array.from(document.querySelectorAll<SVGSVGElement>('.why__float'));
+  const filter = document.querySelector('#why-grain');
+  const disp = filter?.querySelector<SVGFEDisplacementMapElement>('[data-grain-disp]');
+  const cut = filter?.querySelector<SVGFEFuncAElement>('[data-grain-cut]');
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (grid && trail && disp && cut && floats.length && finePointer && !prefersReducedMotion()) {
+    const ctx = trail.getContext('2d')!;
+    const SCALE = 0.5; // painted at half size: it is blurred anyway
+    const FADE = 0.05;
+    const GRAIN_REST = 0.5;
+
+    const resize = () => {
+      trail.width = Math.max(1, Math.round(grid.clientWidth * SCALE));
+      trail.height = Math.max(1, Math.round(grid.clientHeight * SCALE));
+    };
+    resize();
+    new ResizeObserver(resize).observe(grid);
+
+    // Each float's strokes as Path2D in its own viewBox units, so the trail can repaint the exact shape anywhere
+    const shapes = floats.map((el) => {
+      const vb = el.viewBox.baseVal;
+      return {
+        el,
+        vb,
+        paths: Array.from(el.querySelectorAll('path')).map((p) => new Path2D(p.getAttribute('d')!)),
+        last: { x: 0, y: 0 },
+        motion: 0,
+      };
+    });
+
+    let accent = '#c25e3e';
+    let grain = -1;
+    let quiet = 0;
+    let frameNo = 0;
+
+    const tick = () => {
+      frameNo++;
+      const gr = trail.getBoundingClientRect();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = `rgba(0,0,0,${FADE})`;
+      ctx.fillRect(0, 0, trail.width, trail.height);
+
+      let fastest = 0;
+      let painted = false;
+      if (frameNo % 60 === 1) accent = getComputedStyle(grid).getPropertyValue('--accent').trim() || accent;
+
+      for (const s of shapes) {
+        if (getComputedStyle(s.el).display === 'none') continue; // hidden on narrow screens
+        const r = s.el.getBoundingClientRect();
+        const speed = Math.hypot(r.left - s.last.x, r.top - s.last.y);
+        s.last.x = r.left;
+        s.last.y = r.top;
+        const target = Math.min(1, speed / 14);
+        s.motion += (target - s.motion) * (target > s.motion ? 0.25 : 0.05);
+        fastest = Math.max(fastest, s.motion);
+        if (s.motion < 0.03) continue;
+
+        painted = true;
+        const sx = r.width / s.vb.width;
+        const sy = r.height / s.vb.height;
+        ctx.setTransform(SCALE * sx, 0, 0, SCALE * sy, (r.left - gr.left) * SCALE, (r.top - gr.top) * SCALE);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = accent;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        const unit = 2 / (sx + sy); // one CSS pixel in the shape's own units
+        ctx.globalAlpha = 0.1 * s.motion;
+        ctx.lineWidth = 16 * unit;
+        s.paths.forEach((p) => ctx.stroke(p));
+        ctx.globalAlpha = 0.16 * s.motion;
+        ctx.lineWidth = 5 * unit;
+        s.paths.forEach((p) => ctx.stroke(p));
+      }
+      ctx.globalAlpha = 1;
+
+      // Fully clear once still for a while, so faint 8-bit residue never lingers
+      if (!painted && ++quiet > 120) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, trail.width, trail.height);
+        quiet = 120;
+      } else if (painted) quiet = 0;
+
+      // Rougher grain while anything is moving, back to the resting level when it stops
+      const level = GRAIN_REST + (1 - GRAIN_REST) * fastest;
+      if (Math.abs(level - grain) > 0.004) {
+        grain = level;
+        disp.setAttribute('scale', (level * 5).toFixed(2));
+        cut.setAttribute('intercept', (1 - level * 4.2).toFixed(3));
+      }
+    };
+    gsap.ticker.add(tick);
+
+    shapes.forEach(({ el }) => {
+      let back: gsap.core.Tween | undefined;
+      let wait: gsap.core.Tween | undefined;
+      const goHome = () => {
+        back = gsap.to(el, { x: 0, y: 0, duration: 1.6, ease: 'elastic.out(1, 0.55)' });
+      };
+      const later = () => {
+        wait?.kill();
+        wait = gsap.delayedCall(2.4, goHome);
+      };
+
+      Draggable.create(el, {
+        type: 'x,y',
+        inertia: true,
+        // The block it belongs to is its playground, so a throw never sends it off-screen
+        bounds: el.closest('.why__item') ?? grid,
+        edgeResistance: 0.75,
+        minimumMovement: 2,
+        onPress() {
+          wait?.kill();
+          back?.kill();
+          gsap.killTweensOf(el);
+          el.style.cursor = 'grabbing';
+        },
+        onRelease() {
+          el.style.cursor = '';
+          later();
+        },
+        onThrowComplete: later,
+      });
+    });
   }
 </script>

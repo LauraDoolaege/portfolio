@@ -1,6 +1,6 @@
 ---
 // Section 04: who am I. The statement runs in columns 1-8, one sentence per line, with "marketer turned experience designer" scribbled
-// out by hand, one big scribble over both rows; the photo sits in columns 9-12 with a mustache drawn on it, and the way into the About page sits under it.
+// out by hand, one continuous scribble over both rows; the photo sits in columns 9-12 with a mustache drawn on it, and the way into the About page sits under it.
 // Both marks are the page's only orange in the body and draw in once as they scroll into view.
 // Hero's "Get to know me" link jumps here (#about).
 import { Image } from 'astro:assets';
@@ -19,12 +19,27 @@ import photo from '../../assets/images/photo_aboutTeaser.jpeg';
       </h2>
     </header>
 
+    <!-- The signature's grain for both marks: a ragged edge and a few dropped speckles -->
+    <svg class="about__defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="about-grain" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5" result="noise"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="ragged"></feDisplacementMap>
+          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0" result="speckle"></feColorMatrix>
+          <feComponentTransfer in="speckle" result="mask">
+            <feFuncA type="linear" slope="8" intercept="-1.1"></feFuncA>
+          </feComponentTransfer>
+          <feComposite in="ragged" in2="mask" operator="in"></feComposite>
+        </filter>
+      </defs>
+    </svg>
+
     <div class="about__grid">
       <p class="about__statement" data-reveal>
         <span class="about__line about__line--lead">
           <span class="about__row">A marketer turned</span>
           <span class="about__row">experience designer.</span>
-          <svg class="about__scribble" viewBox="0 0 400 130" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-about-mark><path pathLength="1" d="M 4 112 C 30 70, 50 20, 70 8 C 82 4, 86 30, 84 60 C 84 100, 82 120, 100 122 C 118 124, 122 60, 126 20 C 128 6, 144 4, 146 40 C 148 90, 148 118, 166 120 C 184 120, 184 40, 190 14"></path><path pathLength="1" d="M 190 14 C 196 2, 212 6, 212 50 C 212 100, 214 122, 232 120 C 250 118, 250 50, 256 16 C 260 4, 276 6, 276 50 C 276 100, 280 122, 298 118 C 316 114, 316 44, 322 16 C 328 4, 344 8, 344 54 C 344 100, 350 122, 368 116"></path><path pathLength="1" d="M 368 116 C 390 104, 402 60, 394 22 C 388 4, 372 10, 356 36 C 300 120, 150 84, 84 96 C 40 104, 14 90, 12 70 C 80 50, 240 22, 392 66"></path></svg>
+          <svg class="about__scribble" viewBox="0 0 400 130" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-about-mark><path pathLength="1" d="M 6 118 C 26 104, 52 98, 74 106 C 130 90, 200 36, 262 12 C 282 6, 292 22, 278 40 C 268 54, 256 70, 268 76 C 300 62, 318 40, 338 40 C 354 42, 352 64, 344 82 C 338 98, 336 112, 356 108 C 380 100, 396 60, 390 30 C 386 12, 370 8, 362 22 C 340 60, 250 100, 176 84 C 120 72, 60 90, 22 68"></path></svg>
         </span>
         <span class="about__line">But so much more than that...</span>
       </p>
@@ -38,7 +53,7 @@ import photo from '../../assets/images/photo_aboutTeaser.jpeg';
           sizes="(min-width: 1000px) 50vw, 100vw"
         />
         <!-- Positioned in % of the square frame, under the nose in the cropped photo -->
-        <svg class="about__mustache" style="--off: 2s" viewBox="0 0 120 44" aria-hidden="true" focusable="false" data-about-mark>
+        <svg class="about__mustache" style="--off: 2.6s" viewBox="0 0 120 44" aria-hidden="true" focusable="false" data-about-mark>
           <path pathLength="1" d="M 60 14 C 50 28, 30 34, 14 24 C 4 20, 6 8, 14 10"></path><path pathLength="1" d="M 60 14 C 70 28, 90 34, 106 24 C 116 20, 114 8, 106 10"></path>
         </svg>
       </figure>
@@ -88,6 +103,15 @@ import photo from '../../assets/images/photo_aboutTeaser.jpeg';
   }
 
   /* One big scribble-out over both rows. It overshoots the words a little on purpose. */
+  .about__defs {
+    position: absolute;
+  }
+
+  .about__scribble,
+  .about__mustache {
+    filter: url(#about-grain);
+  }
+
   .about__scribble {
     position: absolute;
     left: -3%;
@@ -137,7 +161,7 @@ import photo from '../../assets/images/photo_aboutTeaser.jpeg';
     fill: none;
     stroke: var(--accent);
     /* The signature's weight: 6px, 8px on desktop, constant on screen whatever the box size */
-    stroke-width: 6px;
+    stroke-width: 5px;
     vector-effect: non-scaling-stroke;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -148,7 +172,7 @@ import photo from '../../assets/images/photo_aboutTeaser.jpeg';
   @media (min-width: 1000px) {
     .about__scribble path,
     .about__mustache path {
-      stroke-width: 8px;
+      stroke-width: 6px;
     }
   }
 
@@ -181,8 +205,10 @@ import photo from '../../assets/images/photo_aboutTeaser.jpeg';
     --delay: calc(var(--off, 0s) + 1.9s);
   }
 
+  /* One continuous stroke: drawn in a single sweep, quick at first and slowing as it lands */
   .about__scribble path {
-    transition-duration: 1s, 0s;
+    transition-duration: 2.6s, 0s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.3, 1), linear;
   }
 
   .about__link {

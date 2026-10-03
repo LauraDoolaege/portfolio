@@ -56,7 +56,8 @@ function sweepMask(vw: number, vh: number, band: number) {
   return { src, url: `url("${src}")`, w, h };
 }
 
-async function sweepTo(theme: Theme) {
+/** Runs `update` (a DOM change) under the grainy sweep. Also used by the mobile menu. */
+export async function sweepWith(update: () => void) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const d = Math.hypot(vw, vh);
@@ -83,7 +84,7 @@ async function sweepTo(theme: Theme) {
     document as Document & {
       startViewTransition: (cb: () => void) => { ready: Promise<void> };
     }
-  ).startViewTransition(() => apply(theme));
+  ).startViewTransition(update);
 
   t.ready
     .then(() => {
@@ -125,7 +126,7 @@ toggle?.addEventListener('click', () => {
   }
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce || !('startViewTransition' in document)) apply(next);
-  else sweepTo(next);
+  else sweepWith(() => apply(next));
 });
 
 // Sync label/meta with the theme the head script already set

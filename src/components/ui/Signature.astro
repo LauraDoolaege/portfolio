@@ -1,0 +1,76 @@
+---
+// The hero's signature, drawn once as a quiet static mark. It returns in the "Who am I" section and the footer
+// so the page reads as signed. Same path and ink as the hero rope; not interactive. Decorative.
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  class:list={['signature', className]}
+  viewBox="30 30 520 560"
+  aria-hidden="true"
+  focusable="false"
+  data-signature
+>
+  <path
+    pathLength="1"
+    d="M 355 42 C 390 120, 420 230, 435 285 C 455 360, 485 440, 488 475 C 490 515, 450 535, 405 532 C 330 528, 270 512, 220 506 C 150 498, 80 495, 58 508 C 45 520, 52 555, 85 562 C 140 575, 200 545, 260 485 C 330 415, 400 340, 435 285 C 450 240, 455 185, 480 185 C 505 185, 515 220, 512 255 C 510 280, 490 280, 435 285 L 282 285"
+  ></path>
+</svg>
+
+<style>
+  .signature {
+    display: block;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .signature path {
+    fill: none;
+    stroke: var(--accent);
+    /* Constant on-screen weight, matching the hero rope at its size */
+    stroke-width: 6px;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (min-width: 1000px) {
+    .signature path {
+      stroke-width: 8px;
+    }
+  }
+
+  /* Armed by the script (so no-JS and reduced-motion visitors see the finished mark), then drawn in on scroll */
+  .signature.is-armed path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .signature.is-drawn path {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 2.2s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+</style>
+
+<script>
+  const marks = document.querySelectorAll<SVGElement>('[data-signature]');
+  if (marks.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add('is-drawn');
+          io.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.4 },
+    );
+    marks.forEach((m) => {
+      m.classList.add('is-armed');
+      io.observe(m);
+    });
+  }
+</script>

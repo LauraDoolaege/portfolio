@@ -281,6 +281,16 @@ button:focus-visible {
   gap: 0.75rem;
 }
 
+/* The rail carries the substance (credentials, what a project covers): one step up from the global tag, and a readable measure */
+.row__rail .tag {
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+}
+
+.row__rail .text {
+  max-width: 62ch;
+}
+
 /* The large light statement used for questions and the about line */
 .lede {
   max-width: 24ch;
@@ -501,6 +511,19 @@ button:focus-visible {
   .btn-link::after,
   .nav-link::after {
     transition: none;
+  }
+}
+
+/* Touch: text links keep their look but get a ~44px hit area (the underline pseudo-element stays on ::after) */
+@media (hover: none) {
+  .btn-link {
+    position: relative;
+  }
+
+  .btn-link::before {
+    content: '';
+    position: absolute;
+    inset: -0.9rem -0.4rem;
   }
 }
 

@@ -608,6 +608,11 @@ import portrait from '../../assets/images/9F8A75B9-8282-4173-B57D-5A88240C9FE6_1
       border-left: 0;
       border-top: var(--hairline);
     }
+
+    /* The longest label is wider than a 375px phone on one line: let it wrap instead of pushing the page sideways */
+    .hero__item :global(.btn-link) {
+      white-space: normal;
+    }
   }
 
   /* The links inherit that voice instead of the link button's own size */

@@ -37,12 +37,159 @@ const currentPath = Astro.url.pathname;
         </li>
       </ul>
     </nav>
+    <button
+      class="menu-toggle"
+      type="button"
+      aria-label="Open menu"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <span class="menu-toggle__bar"></span>
+      <span class="menu-toggle__bar"></span>
+    </button>
+  </div>
+
+  <!-- Phones: the links move into a full-screen menu in the inverted palette -->
+  <div class="menu" id="mobile-menu" aria-label="Menu" hidden>
+    <ul class="menu__links">
+      {links.map((l) => (
+        <li>
+          <a href={l.href} class="menu__link">{l.label}</a>
+        </li>
+      ))}
+    </ul>
   </div>
 </header>
 
 <style>
   .site-header {
+    position: relative;
+    z-index: 60;
     border-bottom: var(--hairline);
+  }
+
+  /* Above the open menu */
+  .site-header__inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Hamburger: two bars that cross into an X. Hidden above the phone breakpoint. */
+  .menu-toggle {
+    display: none;
+    position: relative;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: -0.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .menu-toggle__bar {
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    height: 1.5px;
+    background: currentColor;
+    transition:
+      transform 0.5s var(--ease-out),
+      top 0.5s var(--ease-out);
+  }
+
+  .menu-toggle__bar:first-child {
+    top: calc(50% - 4px);
+  }
+
+  .menu-toggle__bar:last-child {
+    top: calc(50% + 3px);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bar:first-child {
+    top: 50%;
+    transform: rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bar:last-child {
+    top: 50%;
+    transform: rotate(-45deg);
+  }
+
+  /* The menu: full screen, the page's ink as its ground and the page's ground as its type (so it is beige in
+     dark mode and charcoal in light). Revealed with the same grainy sweep as the theme switch (see the script). */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem var(--page-margin) 3rem;
+    background: var(--text-main);
+    color: var(--bg-primary);
+    text-align: center;
+  }
+
+  .menu[hidden] {
+    display: none;
+  }
+
+  .menu__links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1rem, 4vh, 2rem);
+  }
+
+  .menu__link {
+    display: block;
+    padding: 0.2em 0.4em;
+    font-size: clamp(2.75rem, 1.5rem + 11vw, 4.5rem);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 1;
+  }
+
+  .menu__link:focus-visible {
+    outline: 1.5px solid currentColor;
+    outline-offset: 0.1em;
+  }
+
+  /* Open: the header's own marks flip to the menu's palette so they stay readable on it */
+  :global(html.menu-open) {
+    overflow: hidden;
+  }
+
+  :global(html.menu-open) .site-header {
+    border-color: color-mix(in srgb, var(--bg-primary) 22%, transparent);
+    color: var(--bg-primary);
+  }
+
+  :global(html.menu-open) .site-header__links .theme-toggle {
+    color: var(--bg-primary);
+  }
+
+  @media (max-width: 719px) {
+    .menu-toggle {
+      display: block;
+    }
+
+    /* The three links live in the menu now; the theme toggle stays in the bar */
+    .site-header__links li:not(.site-header__theme) {
+      display: none;
+    }
+
+    .site-header__theme {
+      margin-left: 0;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .menu {
+      display: none;
+    }
   }
 
   .site-header__inner {
@@ -131,6 +278,23 @@ const currentPath = Astro.url.pathname;
     transform: scaleX(1);
   }
 
+  /* Touch: the marks stay small, their hit areas grow to ~44px without moving anything */
+  @media (hover: none) {
+    .site-header__name,
+    .site-header__links a,
+    .site-header__links .theme-toggle {
+      position: relative;
+    }
+
+    .site-header__name::before,
+    .site-header__links a::before,
+    .site-header__links .theme-toggle::before {
+      content: '';
+      position: absolute;
+      inset: -0.75rem -0.5rem;
+    }
+  }
+
   /* Narrow phones: no room for the word, so the toggle is its half-moon icon alone (still named by aria-label) */
   @media (max-width: 479px) {
     .site-header__links .theme-toggle__label {
@@ -142,3 +306,46 @@ const currentPath = Astro.url.pathname;
     }
   }
 </style>
+
+<script>
+  import { sweepWith } from '../../scripts/theme';
+
+  const root = document.documentElement;
+  const button = document.querySelector<HTMLButtonElement>('.menu-toggle');
+  const menu = document.querySelector<HTMLElement>('#mobile-menu');
+  const wide = window.matchMedia('(min-width: 720px)');
+  const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function set(open: boolean) {
+    if (!button || !menu) return;
+    menu.hidden = !open;
+    root.classList.toggle('menu-open', open);
+    button.setAttribute('aria-expanded', String(open));
+    button.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+
+  function toggle(open: boolean, animate = true) {
+    if (!button || !menu || root.classList.contains('menu-open') === open) return;
+    if (animate && !reduce() && 'startViewTransition' in document) {
+      sweepWith(() => set(open));
+    } else {
+      set(open);
+      // No View Transitions: a plain fade in
+      if (open && animate && !reduce()) menu.animate({ opacity: [0, 1] }, { duration: 400, easing: 'ease-out' });
+    }
+    if (open) menu.querySelector<HTMLElement>('a')?.focus({ preventScroll: true });
+    else if (animate) button.focus({ preventScroll: true });
+  }
+
+  button?.addEventListener('click', () => toggle(!root.classList.contains('menu-open')));
+  // Picking a link closes the menu at once, then the browser follows the link
+  menu?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) toggle(false, false);
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') toggle(false);
+  });
+  wide.addEventListener('change', () => {
+    if (wide.matches) toggle(false, false);
+  });
+</script>

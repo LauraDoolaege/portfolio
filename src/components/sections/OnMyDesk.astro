@@ -1,6 +1,6 @@
 ---
-// Section 03: what's on the desk right now. Same rows as the philosophy section: the project on the
-// left, its focus and a line about it in the rail.
+// Section 03: what's on the desk right now, set as a quiet ledger on the 12-column grid. One soft rule above each
+// row (and under the last): project in columns 1-5, its focus in 6-7, a line about it in 8-12.
 import SectionLabel from '../ui/SectionLabel.astro';
 
 const items = [
@@ -28,16 +28,70 @@ const items = [
       </h2>
     </header>
 
-    <ul>
+    <ul class="desk__ledger">
       {items.map((item) => (
-        <li class="row" data-reveal>
-          <h3 class="lede">{item.title}</h3>
-          <div class="row__rail">
-            <p class="tag">{item.focus}</p>
-            <p class="text">{item.description}</p>
-          </div>
+        <li class="desk__row" data-reveal>
+          <h3 class="desk__title">{item.title}</h3>
+          <p class="desk__focus">{item.focus}</p>
+          <p class="desk__text">{item.description}</p>
         </li>
       ))}
     </ul>
   </div>
 </section>
+
+<style>
+  .desk__ledger {
+    border-bottom: var(--hairline);
+  }
+
+  .desk__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    padding-block: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+    border-top: var(--hairline);
+  }
+
+  .desk__title {
+    font-size: var(--text-title);
+    font-weight: var(--weight-bold);
+    line-height: 1.05;
+    letter-spacing: var(--tracking-display);
+    text-wrap: balance;
+  }
+
+  /* Same quiet small print as the work cards' type label, so the two sections read as one system */
+  .desk__focus {
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+
+  .desk__text {
+    max-width: 52ch;
+    font-size: var(--text-body);
+    font-weight: var(--weight-light);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 1000px) {
+    .desk__row {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+      align-items: baseline;
+    }
+
+    .desk__title {
+      grid-column: 1 / 6;
+    }
+
+    .desk__focus {
+      grid-column: 6 / 8;
+    }
+
+    .desk__text {
+      grid-column: 8 / 13;
+    }
+  }
+</style>

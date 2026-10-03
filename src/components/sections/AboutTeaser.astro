@@ -1,10 +1,13 @@
 ---
-// Section 04: who am I. The statement runs in columns 1-8 at display size, one sentence per line: the first in bold,
-// the rest light. The way into the About page sits in 10-12 on the last line, under a soft rule.
+// Section 04: who am I. The statement runs in columns 1-8, one sentence per line, with "marketer turned experience designer" scribbled
+// out by hand, one scribble per line; the photo sits in columns 9-12 with a mustache drawn on it, and the way into the About page sits under it.
+// Both marks are the page's only orange in the body and draw in once as they scroll into view.
 // Hero's "Get to know me" link jumps here (#about).
+import { Image } from 'astro:assets';
 import Button from '../ui/Button.astro';
 import SectionLabel from '../ui/SectionLabel.astro';
 import { withBase } from '../../utils/url';
+import photo from '../../assets/images/photo_aboutTeaser.jpeg';
 ---
 
 <section class="sec" id="about" aria-labelledby="about-title">
@@ -18,12 +21,26 @@ import { withBase } from '../../utils/url';
 
     <div class="about__grid">
       <p class="about__statement" data-reveal>
-        <span class="about__line about__line--lead">A marketer turned experience designer.</span>
-        <span class="about__line">A storyteller since the playground.</span>
-        <span class="about__line">
-          I bridge human needs with smart strategy to create concepts that actually reach people.
+        <span class="about__line about__line--lead">
+          A <span class="about__struck">marketer turned<svg class="about__scribble" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-about-mark><path pathLength="1" d="M 10 36 C 80 10, 190 6, 290 20 C 308 24, 302 46, 262 46 C 180 48, 90 52, 24 30 C 8 26, 6 44, 40 48 C 120 54, 220 40, 288 30"></path></svg></span> <span class="about__struck">experience designer.<svg class="about__scribble" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-about-mark><path pathLength="1" d="M 290 34 C 220 8, 110 6, 12 22 C -4 26, 2 46, 42 46 C 120 48, 210 52, 276 30 C 292 26, 296 44, 262 48 C 190 54, 100 40, 20 32"></path></svg></span>
         </span>
+        <span class="about__line">But so much more than that...</span>
       </p>
+
+      <figure class="about__figure media-frame" data-reveal>
+        <Image
+          class="media-frame__img about__photo"
+          src={photo}
+          alt="Laura Doolaege on a motorbike, looking at the camera"
+          widths={[700, 1000, 1400]}
+          sizes="(min-width: 1000px) 50vw, 100vw"
+        />
+        <!-- Positioned in % of the square frame, under the nose in the cropped photo -->
+        <svg class="about__mustache" viewBox="0 0 120 44" aria-hidden="true" focusable="false" data-about-mark>
+          <path pathLength="1" d="M 14 10 C 6 8, 4 20, 14 24 C 30 34, 50 28, 60 14 C 70 28, 90 34, 106 24 C 116 20, 114 8, 106 10"></path>
+        </svg>
+      </figure>
+
       <div class="about__link" data-reveal>
         <Button variant="link" href={withBase('/about')}>
           Get to know me better
@@ -59,23 +76,141 @@ import { withBase } from '../../utils/url';
     text-wrap: balance;
   }
 
+  .about__struck {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  /* The scribble overshoots the words on purpose */
+  .about__scribble {
+    position: absolute;
+    left: -5%;
+    top: 0.05em;
+    width: 112%;
+    height: 1.05em;
+    max-width: none;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .about__figure {
+    position: relative;
+    width: min(100%, 24rem);
+    aspect-ratio: 1 / 1;
+  }
+
+  /* Black and white, like the hero portrait, so the orange line is the only colour on it */
+  .about__photo {
+    filter: grayscale(1) contrast(1.05);
+  }
+
+  /* Cropped in on the face: the frame shows the middle of a 175% image (the face sits at ~48% / 30% of the original) */
+  .about__figure :global(.about__photo) {
+    position: absolute;
+    left: -38%;
+    top: -6%;
+    width: 175%;
+    height: 175%;
+    max-width: none;
+  }
+
+  .about__mustache {
+    position: absolute;
+    z-index: 3;
+    left: 38%;
+    top: 44.5%;
+    width: 21%;
+    height: auto;
+    max-width: none;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .about__scribble path,
+  .about__mustache path {
+    fill: none;
+    stroke: var(--accent);
+    /* The signature's weight: 6px, 8px on desktop, constant on screen whatever the box size */
+    stroke-width: 6px;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Armed by the script (so no-JS and reduced-motion visitors see the finished marks); a zero-length dash still
+     paints a round cap, so each path stays hidden until it starts drawing */
+  @media (min-width: 1000px) {
+    .about__scribble path,
+    .about__mustache path {
+      stroke-width: 8px;
+    }
+  }
+
+  [data-about-mark].is-armed path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+
+  [data-about-mark].is-drawn path {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transition:
+      stroke-dashoffset 1.6s cubic-bezier(0.65, 0, 0.35, 1),
+      opacity 0s;
+  }
+
   .about__link {
     padding-top: 1.25rem;
     border-top: var(--hairline);
+    width: min(100%, 24rem);
   }
 
   @media (min-width: 1000px) {
     .about__grid {
       grid-template-columns: repeat(12, minmax(0, 1fr));
-      align-items: end;
+      grid-template-rows: auto auto;
+      align-items: start;
     }
 
     .about__statement {
-      grid-column: 1 / 9;
+      grid-column: 1 / 8;
+      grid-row: 1 / 3;
+    }
+
+    .about__figure {
+      grid-column: 9 / 13;
+      grid-row: 1;
+      width: 100%;
     }
 
     .about__link {
-      grid-column: 10 / 13;
+      grid-column: 9 / 13;
+      grid-row: 2;
+      width: 100%;
     }
   }
 </style>
+
+<script>
+  const marks = document.querySelectorAll<SVGElement>('[data-about-mark]');
+  if (marks.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          // The scribble goes first; the mustache arrives a beat after the photo is in view
+          const delay = entry.target.classList.contains('about__mustache') ? 500 : 300;
+          setTimeout(() => entry.target.classList.add('is-drawn'), delay);
+          io.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    marks.forEach((m) => {
+      m.classList.add('is-armed');
+      io.observe(m);
+    });
+  }
+</script>

@@ -8,7 +8,9 @@ import WorkRow from '../ui/WorkRow.astro';
 
 const works = (await getCollection('works')).sort((a, b) => a.id.localeCompare(b.id));
 // Image projects first, so any still-text-only entry closes the group as a row
+// Newest first (`order` in the frontmatter), then image projects before text-only ones
 const byCover = (a: (typeof works)[number], b: (typeof works)[number]) =>
+  (a.data.order ?? 99) - (b.data.order ?? 99) ||
   Number(!!b.data.coverImage) - Number(!!a.data.coverImage);
 const groups = [
   {

@@ -1,0 +1,50 @@
+---
+// A plain, even grid of style frames under a motion project's video: 2 columns (1 on phones), every
+// frame at 16:9. Each is a CaseImage, so it opens in the lightbox. Without `src` it is a labelled placeholder.
+import CaseImage from './CaseImage.astro';
+
+interface Item {
+  label: string;
+  src?: ImageMetadata | string;
+  caption?: string;
+  tone?: 0 | 1 | 2 | 3;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const items = Astro.props.items.slice(0, 6);
+---
+
+<div class="frames">
+  {items.map((it, i) => (
+    <CaseImage
+      label={it.label}
+      src={it.src}
+      caption={it.caption}
+      tone={it.tone ?? ((i % 4) as 0 | 1 | 2 | 3)}
+      ratio="16 / 9"
+      size="wide"
+    />
+  ))}
+</div>
+
+<style>
+  .frames {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 2rem + 3vw, 5rem) var(--grid-gutter);
+    padding-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(4rem, 2rem + 6vw, 8rem);
+  }
+
+  .frames :global(.case-image) {
+    margin-block: 0;
+  }
+
+  @media (min-width: 700px) {
+    .frames {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -29,8 +29,10 @@ const details = p.data.discipline ?? p.data.role;
         <div class="wrow__img wrow__img--empty"></div>
       )}
     </div>
-    <span class="wrow__num">{num}</span>
-    <h4 class="wrow__title">{p.data.title}</h4>
+    <h4 class="wrow__title">
+      {p.data.title}
+      <span class="wrow__num">{num}</span>
+    </h4>
     <div class="wrow__more">
       <div class="wrow__more-inner">
         <p class="wrow__details">
@@ -93,14 +95,15 @@ const details = p.data.discipline ?? p.data.role;
     background: var(--frame-bg);
   }
 
-  /* Number: fine and quiet, flush right on desktop; not shown on touch */
+  /* Number: fine and quiet, set just after the title like a footnote mark */
   .wrow__num {
-    display: none;
-    grid-area: num;
+    margin-left: 0.7rem;
     font-size: var(--text-small);
     font-weight: var(--weight-light);
     letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
+    line-height: 1;
+    vertical-align: top;
     color: var(--text-muted);
   }
 
@@ -173,22 +176,13 @@ const details = p.data.discipline ?? p.data.role;
       --thumb-rest: 4.5rem;
       /* The open thumbnail is as tall as the text block beside it (title + details), so the number and details sit level with its bottom edge */
       --thumb-open: max(6rem, calc(var(--title-size) * 1.02 + 2.1rem));
-      grid-template-columns: var(--thumb-open) 3.25rem minmax(0, 1fr);
+      grid-template-columns: var(--thumb-open) minmax(0, 1fr);
       /* Spare height from the growing thumbnail goes to the second row, so the details stay tight under the title */
       grid-template-rows: auto 1fr;
       grid-template-areas:
-        'thumb num title'
-        'thumb num more';
-      column-gap: 0;
-    }
-
-    /* The number rides the bottom of the text block: under the title at rest, level with the details once open */
-    .wrow__num {
-      display: block;
-      align-self: end;
-      padding-left: clamp(0.75rem, 0.25rem + 1.5vw, 1.5rem);
-      padding-bottom: 0.3rem;
-      line-height: 1;
+        'thumb title'
+        'thumb more';
+      column-gap: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
     }
 
     .wrow__thumb {

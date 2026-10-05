@@ -1,39 +1,45 @@
 ---
-title: 'Visual Project One'
-description: 'A placeholder hook: one line on the feeling you wanted.'
+title: 'Thrive Unwind'
+description: "Working Nine to Thrive: Recovering from the workouts you didn't know you did."
 type: 'visual'
 coverImage: '../../assets/images/frame_thrive.png'
-role: 'Art direction, design'
+role: 'Art direction, copywriting'
+discipline: 'Art direction · Copywriting · Campaign strategy'
 timeline: '2026'
 tools: ['Illustrator', 'Blender']
+tags: ['Art Direction', 'Copywriting', 'Campaign Strategy']
+hook: "Working Nine to Thrive: Recovering from the workouts you didn't know you did."
 ---
 
-import ProjectImage from '../../components/ProjectImage.astro';
-import ImageGrid from '../../components/ImageGrid.astro';
-import AuditBlock from '../../components/AuditBlock.astro';
+import Gallery from '../../components/Gallery.astro';
+import thrive from '../../assets/images/frame_thrive.png';
 
-[Placeholder: one short paragraph. The idea, in a breath.]
+Thrive Unwind is an alcohol-free, magnesium sports beer. The brief was to take it beyond pure athletics and speak to everyone, not only the people who train.
 
-<ProjectImage alt="Placeholder: hero visual" ratio="16 / 9" tone={2} />
+Working Nine to Thrive treats everyday life as the workout. Photo-bashed puns follow Tom, a man with a beer can for a head, as he recovers from a 500m dash to catch the train, crunching numbers and pitching ideas. Life takes a toll on the body, so Thrive Unwind is for everyone.
 
-## Concept
-
-[Placeholder: two or three punchy sentences.]
-
-<ImageGrid
-  images={[
-    { alt: 'Placeholder: large visual' },
-    { alt: 'Placeholder: detail one' },
-    { alt: 'Placeholder: detail two' },
+<Gallery
+  items={[
+    { label: 'Hero: Tom the Thriver', src: thrive, caption: 'Tom, the face of the campaign.' },
+    {
+      label: 'Collage Ad: 500m Train Dash',
+      tone: 3,
+      caption: 'Placeholder: the dash to catch the train.',
+    },
+    {
+      label: 'Collage Ad: Crunching Numbers',
+      tone: 2,
+      caption: 'Placeholder: crunching numbers at the desk.',
+    },
+    {
+      label: 'UI Asset: Stress Level Agenda',
+      tone: 1,
+      caption: 'Placeholder: the stress level agenda.',
+    },
+    {
+      label: 'Collage Ad: Pitching Ideas',
+      tone: 0,
+      caption: 'Placeholder: pitching ideas in the meeting room.',
+    },
   ]}
 />
-
-## Detail
-
-[Placeholder: a short note on one choice.]
-
-<ImageGrid images={[{ alt: 'Placeholder: wide visual' }, { alt: 'Placeholder: small visual' }]} />
-
-<AuditBlock num="01">
-  [Placeholder: what you would critique in the old design, and what you would do now.]
-</AuditBlock>

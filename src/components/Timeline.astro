@@ -1,0 +1,102 @@
+---
+// A vertical timeline for a sequence of steps (the initiator's journey). A fine line runs down the
+// side and fills in as you scroll; each step's dot lights up when the line reaches it.
+// Use with <TimelineStep title="...">text</TimelineStep> children. Without JS or with reduced
+// motion the line is drawn in full.
+---
+
+<ol class="timeline" data-timeline>
+  <span class="timeline__track" aria-hidden="true">
+    <span class="timeline__fill"></span>
+  </span>
+  <slot />
+</ol>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-timeline]').forEach((tl) => {
+    const fill = tl.querySelector<HTMLElement>('.timeline__fill')!;
+    const steps = Array.from(tl.querySelectorAll<HTMLElement>('.tl-step'));
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const update = () => {
+      const rect = tl.getBoundingClientRect();
+      // The line reaches as far down as the reading line (60% down the viewport) has travelled
+      const reach = reduce
+        ? rect.height
+        : Math.min(Math.max(window.innerHeight * 0.6 - rect.top, 0), rect.height);
+      fill.style.transform = `scaleY(${rect.height ? reach / rect.height : 0})`;
+      steps.forEach((s) => s.classList.toggle('is-reached', reduce || s.offsetTop <= reach));
+    };
+
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+  });
+</script>
+
+<style is:global>
+  .timeline {
+    --dot: 0.75rem;
+    position: relative;
+    margin-top: 2rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The fine line, down the left edge, centred on the dots */
+  .timeline__track {
+    position: absolute;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    left: calc(var(--dot) / 2);
+    width: 1px;
+    background: var(--border-color);
+  }
+
+  .timeline__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+
+  .tl-step {
+    position: relative;
+    padding: 0 0 clamp(2rem, 1.5rem + 2vw, 3rem) calc(var(--dot) + 1.5rem);
+  }
+
+  .tl-step:last-child {
+    padding-bottom: 0;
+  }
+
+  .tl-step::before {
+    content: '';
+    position: absolute;
+    top: 0.3rem;
+    left: 0;
+    width: var(--dot);
+    height: var(--dot);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--bg-primary);
+    transition:
+      background 0.5s var(--ease-out),
+      border-color 0.5s var(--ease-out);
+  }
+
+  .tl-step.is-reached::before {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .timeline .tl-step .tl-step__title {
+    margin: 0 0 0.5rem;
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.15;
+    text-transform: none;
+    color: var(--text-main);
+  }
+</style>

@@ -16,7 +16,10 @@ const works = defineCollection({
       // Path relative to the .mdx file (e.g. "../../assets/images/frame_x.png"), optimized by
       // astro:assets. Left out until an image exists; the page then shows the flat placeholder frame.
       coverImage: image().optional(),
-      // Full case study on Behance. Adds a top button and the massive bottom CTA when present.
+      // Header facts for the case-study layout (Role comes from `role`). When present the page uses
+      // the case layout: compact header, sticky contents list, narrow reading column, gallery.
+      facts: z.object({ scope: z.string(), context: z.string() }).optional(),
+      // Full case study on Behance. Adds a top button and a quiet closing CTA when present.
       behanceUrl: z.string().optional(),
       role: z.string(),
       timeline: z.string(),

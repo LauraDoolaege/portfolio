@@ -1,0 +1,107 @@
+---
+// One image on a case-study page. Labelled, proportional (it never goes full-bleed) and openable in
+// the gallery (src/components/Lightbox.astro collects every [data-lightbox] on the page, in DOM order).
+// Without `src` it renders the flat labelled placeholder. Keep a page to 3-5 of these.
+//   size="wide":   fills the content column (screens, flows)
+//   size="narrow": a phone-sized print, capped so portrait UI never towers over the text
+import ProjectImage from './ProjectImage.astro';
+
+interface Props {
+  label: string;
+  src?: ImageMetadata | string;
+  alt?: string;
+  ratio?: string;
+  tone?: 0 | 1 | 2 | 3;
+  size?: 'wide' | 'narrow';
+  caption?: string;
+  loading?: 'lazy' | 'eager';
+}
+
+const { label, src, alt, ratio, tone = 0, size = 'wide', caption, loading } = Astro.props;
+const defaultRatio = size === 'narrow' ? '4 / 5' : '16 / 10';
+---
+
+<div
+  class:list={['case-image', `case-image--${size}`]}
+  data-lightbox
+  data-label={label}
+  data-caption={caption}
+>
+  <div class="case-image__frame" data-cursor>
+    <ProjectImage
+      src={src}
+      alt={alt ?? `${label}: placeholder`}
+      ratio={ratio ?? defaultRatio}
+      tone={tone}
+      loading={loading}
+    />
+    <button
+      type="button"
+      class="case-image__open"
+      aria-label={`Open ${label} in the gallery`}
+    ></button>
+  </div>
+  <div class="case-image__body">
+    <div class="case-image__label">
+      <span class="case-image__title">{label}</span>
+    </div>
+    {caption && <div class="case-image__caption">{caption}</div>}
+  </div>
+</div>
+
+<style>
+  .case-image {
+    width: 100%;
+    margin-block: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  }
+
+  .case-image--narrow {
+    max-width: min(100%, 26rem);
+  }
+
+  /* Keyboard route in. Clicks reach the frame (pan, sand) and bubble to .case-image, so the
+     button itself ignores the pointer and only carries focus. */
+  .case-image__frame {
+    position: relative;
+  }
+
+  .case-image__open {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  /* Same as the project cards: the print, a hairline, then a bold title with its small note on the right */
+  .case-image__body {
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: var(--hairline);
+  }
+
+  .case-image__label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .case-image__title {
+    font-size: var(--text-body);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.15;
+  }
+
+  .case-image__caption {
+    margin-top: 0.4rem;
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+
+  .case-image :global(.project-figure) {
+    margin: 0;
+  }
+</style>

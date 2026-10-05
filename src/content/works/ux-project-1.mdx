@@ -1,58 +1,121 @@
 ---
 title: 'Plan A'
-description: 'Plan A untangles complex user onboarding by transforming a dense, friction-heavy process into a guided, confident user experience. I mapped the journey, listened to what people told us, and cut the steps that slowed them down.'
+description: 'Plan A makes Antwerp the city where plans actually make it out of the group chat: a website where a friend group plans a trip while playing an Antwerp-themed game.'
 type: 'ux'
 coverImage: '../../assets/images/frame_antwerp.png'
 behanceUrl: 'https://www.behance.net/gallery/198751543/Plan-A-A-Digital-Journey'
-role: 'UX Researcher & Concept Strategist'
+role: 'UX Designer, Digital Designer'
 timeline: '4 Weeks (Devine)'
 tools: ['Figma', 'User Testing', 'Miro', 'Information Architecture']
 team: ['Huyen Pham', 'Laura Doolaege']
+facts:
+  scope: 'UX · Digital design · Game concept'
+  context: 'Devine project, 4 weeks'
 ---
 
-import ProjectImage from '../../components/ProjectImage.astro';
-import Phase from '../../components/Phase.astro';
-import PullQuote from '../../components/PullQuote.astro';
+import CaseImage from '../../components/CaseImage.astro';
+import Timeline from '../../components/Timeline.astro';
+import TimelineStep from '../../components/TimelineStep.astro';
+import cover from '../../assets/images/frame_antwerp.png';
 
-<Phase num="01" title="The Problem" />
+## Overview
 
-People weren't dropping out because they didn't care. The process asked too much, too fast, and every extra decision gave them a reason to stop.
+Antwerp draws plenty of shoppers and tourists but few Gen Z visitors. The brief was to conceptualise and build a digital solution that changes that. The result is Plan A: a website where a friend group plans a trip to Antwerp while playing an Antwerp-themed game, and the highest score wins a free drink at a local bar.
 
-As a marketer, I know that moment well: the second someone hesitates, you've lost them. The job was to find out where that happened, and why.
+The project brought UX, design and development together, and I worked on it as UX designer and digital designer.
 
-<PullQuote size="md" source="How might we">
-  How might we reduce cognitive load during complex onboarding so users feel guided rather than
-  interrogated?
-</PullQuote>
-
-<ProjectImage
-  alt="Placeholder: research and journey mapping"
+<CaseImage
+  label="Antwerp Cover"
+  src={cover}
+  alt="Plan A: Antwerp cover"
+  size="wide"
   ratio="16 / 9"
-  tone={1}
-  caption="Placeholder: replace with a progress shot from research."
+  caption="Plan A: the Antwerp the game is set in."
+  loading="eager"
 />
 
-<Phase num="02" title="My Role & Process" />
+## The Challenge & Research
 
-My focus was the human side: mapping user journeys and turning qualitative feedback into decisions. I laid the whole journey out in Miro, marked where people slowed down, and asked of every step whether it had earned its place.
+### The Brief
 
-<PullQuote source="The insight behind Plan A">
-  Users don't fail because they lack interest; they fail because cognitive load creates hesitation.
-</PullQuote>
+Antwerp attracts plenty of shoppers and tourists but lacks a strong Gen Z presence. The task was to conceptualise and build a digital solution to fix this.
 
-Each round of testing gave us another step to remove or simplify. Huyen and I checked every change against what users said, not what we assumed.
+### The Insight
 
-<Phase num="03" title="The Solution" />
+Gen Z values the company of friends over the actual destination. But friend group plans frequently fail because the designated initiative taker often gets left on read in the group chat.
 
-A guided journey with fewer steps and one clear decision at a time. The information architecture does the heavy lifting, so users don't have to.
-
-<ProjectImage
-  alt="Placeholder: final screens"
-  ratio="16 / 9"
+<CaseImage
+  label="Group Chat UI"
+  size="narrow"
   tone={3}
-  caption="Placeholder: replace with the final Plan A screens."
+  caption="The problem in one screen: a trip proposal left on read."
 />
 
-<Phase num="04" title="Retrospective" />
+## The Hook & Solution
 
-Fewer steps beat better explanations. Next time I'd bring users in even earlier, before the journey map hardens into a solution.
+### The Concept
+
+Make Antwerp the city where plans actually make it out of the group chat.
+
+### The Product
+
+Plan A is a website where a friend group plans a trip to Antwerp while playing an Antwerp-themed game. The player with the highest score wins a free drink from a local bar.
+
+<CaseImage label="Hero App Mockup" size="narrow" tone={0} caption="Plan A on a smartphone." />
+
+## Discovery & The Initiator's Journey
+
+<Timeline>
+  <TimelineStep title="Discovery">
+    Travel influencers promote the platform through short videos on TikTok, Instagram and other
+    social media.
+  </TimelineStep>
+  <TimelineStep title="Taking Action">
+    The initiative taker sets an initial game score and fills in the trip details: dates, length of
+    stay, budget, preferences and group size.
+  </TimelineStep>
+  <TimelineStep title="Sharing">
+    They enter their email, set a time limit for friends to play, and share the link in the group
+    chat. If every invited player joins, the planning is sent automatically. Otherwise it is sent
+    when the timer ends.
+  </TimelineStep>
+</Timeline>
+
+## The Game Mechanics
+
+### Gameplay
+
+The game works like the Google dinosaur game: players tap to jump over obstacles and can practise as often as they like.
+
+### Design
+
+The background shows Antwerp eras, diamonds and historic scenes. Extra points become collectibles (a smiley, a coupon, a camera, a beer) that point to things to do in Antwerp.
+
+<CaseImage
+  label="Game Interface"
+  size="wide"
+  ratio="16 / 9"
+  tone={2}
+  caption="The pixel-style game, with the Antwerp background and collectibles."
+/>
+
+## The Friends' Experience & Reward
+
+### Joining In
+
+Friends open the link, view the initiator's plan, add their own availability and play the game to beat the score.
+
+### Choosing the Winner
+
+The final trip date is the one most players chose. The highest score wins a coupon for a free drink, as long as they picked the final date. If not, the coupon goes to the highest-scoring player who did.
+
+### The Coupon
+
+A QR code links to a random bar based on the selected preference tags, drawn from a database of three places per tag.
+
+<CaseImage
+  label="QR Code Flow"
+  size="wide"
+  tone={1}
+  caption="Voting results and the winning coupon."
+/>

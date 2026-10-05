@@ -1,0 +1,90 @@
+---
+// Sticky contents list for case studies: the article's h2s, with the one being read highlighted.
+// Hidden below 1000px, where the page is a single column. The highlight is set by the script below.
+interface Props {
+  items: { slug: string; text: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc__title tag">Contents</p>
+  <ol class="toc__list">
+    {items.map((h) => (
+      <li>
+        <a class="toc__link" href={`#${h.slug}`} data-toc-link>
+          {h.text}
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<script>
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+  const targets = links
+    .map((a) => document.getElementById(a.hash.slice(1)))
+    .filter((el): el is HTMLElement => Boolean(el));
+
+  if (targets.length) {
+    const mark = () => {
+      // The last heading that has passed the reading line near the top of the viewport
+      let current = 0;
+      targets.forEach((t, i) => {
+        if (t.getBoundingClientRect().top <= window.innerHeight * 0.3) current = i;
+      });
+      links.forEach((a, i) => {
+        if (i === current) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      });
+    };
+    mark();
+    window.addEventListener('scroll', mark, { passive: true });
+    window.addEventListener('resize', mark);
+  }
+</script>
+
+<style>
+  .toc {
+    display: none;
+  }
+
+  @media (min-width: 1000px) {
+    .toc {
+      display: block;
+      position: sticky;
+      top: 6rem;
+      align-self: start;
+    }
+  }
+
+  .toc__title {
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+  }
+
+  .toc__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    list-style: none;
+  }
+
+  .toc__link {
+    font-size: var(--text-small);
+    line-height: 1.35;
+    color: var(--text-muted);
+    transition: color 0.4s var(--ease-out);
+  }
+
+  .toc__link:hover,
+  .toc__link:focus-visible,
+  .toc__link[aria-current='true'] {
+    color: var(--text-main);
+  }
+
+  .toc__link[aria-current='true'] {
+    font-weight: var(--weight-medium);
+  }
+</style>

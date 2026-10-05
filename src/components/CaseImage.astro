@@ -41,16 +41,19 @@ const defaultRatio = size === 'narrow' ? '4 / 5' : '16 / 10';
       aria-label={`Open ${label} in the gallery`}
     ></button>
   </div>
-  <p class="case-image__label tag">
-    <span>{label}</span>
-    <span class="case-image__hint">Enlarge</span>
-  </p>
+  <div class="case-image__body">
+    <div class="case-image__label">
+      <span class="case-image__title">{label}</span>
+      <span class="case-image__hint">Enlarge</span>
+    </div>
+    {caption && <div class="case-image__caption">{caption}</div>}
+  </div>
 </div>
 
 <style>
   .case-image {
     width: 100%;
-    margin-block: clamp(1.5rem, 1rem + 2vw, 3rem);
+    margin-block: clamp(2rem, 1.5rem + 2vw, 3.5rem);
   }
 
   .case-image--narrow {
@@ -72,16 +75,36 @@ const defaultRatio = size === 'narrow' ? '4 / 5' : '16 / 10';
     pointer-events: none;
   }
 
+  /* Same as the project cards: the print, a hairline, then a bold title with its small note on the right */
+  .case-image__body {
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: var(--hairline);
+  }
+
   .case-image__label {
     display: flex;
+    align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    width: 100%;
+  }
+
+  .case-image__title {
+    font-size: var(--text-body);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.15;
+  }
+
+  .case-image__caption {
     margin-top: 0.4rem;
+    font-size: var(--text-small);
     color: var(--text-muted);
   }
 
   .case-image__hint {
+    font-size: var(--text-small);
+    color: var(--text-muted);
     transition: color 0.4s var(--ease-out);
   }
 

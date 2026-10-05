@@ -8,7 +8,7 @@ import Header from '../../components/layout/Header.astro';
 import Footer from '../../components/layout/Footer.astro';
 import Button from '../../components/ui/Button.astro';
 import ProjectImage from '../../components/ProjectImage.astro';
-import CaseImage from '../../components/CaseImage.astro';
+import ContentsNav from '../../components/ContentsNav.astro';
 import Lightbox from '../../components/Lightbox.astro';
 import { withBase } from '../../utils/url';
 
@@ -22,25 +22,26 @@ export async function getStaticPaths() {
 }
 
 const { entry, more } = Astro.props;
-const { Content } = await render(entry);
-const { title, description, type, coverImage, role, timeline, tools, team, behanceUrl, overview } =
+const { Content, headings } = await render(entry);
+const { title, description, type, coverImage, role, timeline, tools, team, behanceUrl, facts } =
   entry.data;
-const isCase = Boolean(overview);
+const isCase = Boolean(facts);
+// Contents list: the h2s of the article
+const contents = headings.filter((h) => h.depth === 2);
 
 const meta = [
   { label: 'Role', value: role },
-  ...(overview
-    ? [
-        { label: 'Subject', value: overview.subject },
-        { label: 'Brief', value: overview.brief },
-        { label: 'Insight', value: overview.insight },
-        { label: 'Solution', value: overview.solution },
-      ]
-    : []),
   { label: 'Timeline', value: timeline },
   { label: 'Tools', value: tools.join(', ') },
   ...(team?.length ? [{ label: 'Team', value: team.join(', ') }] : []),
 ];
+const caseFacts = facts
+  ? [
+      { label: 'Role', value: role },
+      { label: 'Scope', value: facts.scope },
+      { label: 'Context', value: facts.context },
+    ]
+  : [];
 ---
 
 <BaseLayout title={`${title} | Laura Doolaege`} description={description}>
@@ -53,58 +54,80 @@ const meta = [
         </Button>
       </div>
 
-      <div class="container">
-        <div class="cover">
-          {isCase ? (
-            <CaseImage
-              label="Antwerp Cover"
-              src={coverImage}
-              alt={`${title}: cover`}
-              ratio="2 / 1"
-              tone={1}
-              loading="eager"
-            />
-          ) : (
-            <ProjectImage
-              src={coverImage}
-              alt={`${title}: cover`}
-              ratio={coverImage ? undefined : type === 'ux' ? '2 / 1' : '16 / 9'}
-              tone={type === 'ux' ? 1 : 0}
-              loading="eager"
-            />
-          )}
-        </div>
+      {isCase ? (
+        <>
+          <div class="container">
+            <header class="chead">
+              <h1 class="hero__title">{title}</h1>
+              <p class="hero__description subtitle">{description}</p>
+            </header>
+            <dl class="facts">
+              {caseFacts.map((m) => (
+                <div class="facts__item">
+                  <dt class="facts__label tag">{m.label}</dt>
+                  <dd class="facts__value text">{m.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
 
-        <header class="hero">
-          <h1 class="hero__title">{title}</h1>
-          <p class="hero__description subtitle">{description}</p>
-        </header>
-
-        <dl class="meta">
-          {meta.map((m) => (
-            <div class="meta__row">
-              <dt class="meta__label tag">{m.label}</dt>
-              <dd class="meta__value text">{m.value}</dd>
+          <div class="container case">
+            <ContentsNav items={contents} />
+            <article class="case__main prose-case">
+              <Content />
+            </article>
+          </div>
+        </>
+      ) : (
+        <>
+          <div class="container">
+            <div class="cover">
+              <ProjectImage
+                src={coverImage}
+                alt={`${title}: cover`}
+                ratio={coverImage ? undefined : type === 'ux' ? '2 / 1' : '16 / 9'}
+                tone={type === 'ux' ? 1 : 0}
+                loading="eager"
+              />
             </div>
-          ))}
-        </dl>
 
-        {behanceUrl && !isCase && (
-          <Button class="behance-btn" href={behanceUrl} target="_blank" rel="noopener noreferrer">
-            View full Behance case study
-          </Button>
-        )}
-      </div>
+            <header class="hero">
+              <h1 class="hero__title">{title}</h1>
+              <p class="hero__description subtitle">{description}</p>
+            </header>
 
-      <div
-        class:list={[
-          'container prose',
-          isCase ? 'prose--case' : `prose--${type}`,
-          { 'gallery-inset': type === 'visual' },
-        ]}
-      >
-        <Content />
-      </div>
+            <dl class="meta">
+              {meta.map((m) => (
+                <div class="meta__row">
+                  <dt class="meta__label tag">{m.label}</dt>
+                  <dd class="meta__value text">{m.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {behanceUrl && (
+              <Button
+                class="behance-btn"
+                href={behanceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View full Behance case study
+              </Button>
+            )}
+          </div>
+
+          <div
+            class:list={[
+              'container prose',
+              `prose--${type}`,
+              { 'gallery-inset': type === 'visual' },
+            ]}
+          >
+            <Content />
+          </div>
+        </>
+      )}
 
       {behanceUrl && (
         <section class="container closing" aria-label="Full case study">
@@ -300,9 +323,99 @@ const meta = [
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
   }
 
-  /* Case-study body: CaseSections stack with generous air; each brings its own hairline */
-  .prose--case {
-    gap: clamp(3.5rem, 2rem + 6vw, 8rem);
+  /* ---------- Case-study layout ---------- */
+
+  /* Compact header: title, one intro line, then three facts on a hairline. No hero image. */
+  .chead {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) clamp(2rem, 1rem + 3vw, 3.5rem);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    margin: 0;
+    padding-block: 1.5rem;
+    border-block: var(--hairline);
+  }
+
+  .facts__label {
+    color: var(--text-muted);
+  }
+
+  .facts__value {
+    margin: 0.3rem 0 0;
+  }
+
+  /* Contents list left (sticky), reading column right */
+  .case {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(2rem, 1rem + 3vw, 4rem);
+  }
+
+  .case__main {
+    min-width: 0;
+    max-width: 44rem;
+  }
+
+  @media (min-width: 700px) {
+    .facts {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .case {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      column-gap: clamp(3rem, 2rem + 5vw, 8rem);
+    }
+  }
+
+  /* Article typography (markdown from the .mdx): headings are the contents list's anchors */
+  .case__main :global(h2) {
+    scroll-margin-top: 6rem;
+    margin-top: clamp(3.5rem, 2rem + 5vw, 6.5rem);
+    padding-top: 1.25rem;
+    border-top: var(--hairline);
+    font-size: var(--text-title);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  .case__main :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .case__main :global(h3) {
+    margin-top: 2rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .case__main :global(h2 + p),
+  .case__main :global(h2 + h3) {
+    margin-top: 1.5rem;
+  }
+
+  .case__main :global(p) {
+    max-width: 62ch;
+    font-size: var(--text-paragraph);
+    font-weight: var(--weight-light);
+    line-height: var(--leading-paragraph);
+    text-wrap: pretty;
+  }
+
+  .case__main :global(p + p) {
+    margin-top: 0.9em;
   }
 
   /* Closing CTA: a hairline, one line, one button. Same Button as the hero, nothing louder. */

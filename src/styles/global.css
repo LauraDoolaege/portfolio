@@ -649,12 +649,6 @@ button:focus-visible {
   white-space: nowrap;
 }
 
-/* Over a project card: the disc is scaled up by script, the label grows with it */
-.cursor--view .cursor__label {
-  font-size: 1.05rem;
-  letter-spacing: 0.04em;
-}
-
 /* .btn is inline-flex already; forcing inline-block on it let the arrow wrap to a second line */
 [data-magnetic]:not(.btn):not(.btn-link) {
   display: inline-block;

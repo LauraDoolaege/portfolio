@@ -125,7 +125,8 @@ const tools = p.data.tools.slice(0, 3);
       display: grid;
     }
 
-    .card__link:hover .card__cta::before,
+    /* Only the image itself sands over; the cursor's "View" follows the whole card */
+    .card__media:hover .card__cta::before,
     .card__link:focus-visible .card__cta::before {
       --fill: 100%;
     }

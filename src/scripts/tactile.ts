@@ -113,28 +113,24 @@ function cursor() {
     if (state !== 'media') rest(reduceMotion ? 0 : 0.35);
   });
 
-  // `big` is the project-card cursor: a larger disc with a "View" label
-  let isBig = false;
-  const set = (next: State, html = '', big = false) => {
-    if (next === state && html === labelHtml && big === isBig) return;
+  const set = (next: State, html = '') => {
+    if (next === state && html === labelHtml) return;
     state = next;
     labelHtml = html;
-    isBig = big;
-    root.classList.toggle('cursor--view', big);
     const d = reduceMotion ? 0 : 0.4;
     const ease = 'power3.out';
 
     if (next === 'media') {
       label.innerHTML = html;
       gsap.to(dot, { scale: 0, duration: d, ease, overwrite: 'auto' });
-      gsap.to(disc, { scale: big ? 1.9 : 1, duration: d, ease, overwrite: 'auto' });
+      gsap.to(disc, { scale: 1, duration: d, ease, overwrite: 'auto' });
       gsap.to(label, { opacity: 1, duration: d, ease, overwrite: 'auto' });
     } else {
       rest(d);
     }
   };
 
-  const MEDIA = '.card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
+  const MEDIA = '.card__link, .card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
   const INTERACTIVE = 'a, button, [data-magnetic]';
 
   let shown = false;
@@ -159,8 +155,8 @@ function cursor() {
     if (!t) return;
     const media = t.closest<HTMLElement>(MEDIA);
     if (media) {
-      // Project cards turn the cursor into a big orange "View"; decorative floating images just get the arrow
-      if (media.closest('.card')) set('media', 'View', true);
+      // Anywhere over a project card (not just its image) the cursor turns into an orange "View" disc, as big as the hero's "Grab"; decorative floating images just get the arrow
+      if (media.closest('.card')) set('media', 'View');
       else set('media', ARROW);
     } else if (t.closest(INTERACTIVE)) {
       set('link');

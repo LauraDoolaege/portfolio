@@ -38,15 +38,15 @@ const details = p.data.discipline ?? p.data.role;
           <span class="wrow__year">{p.data.timeline}</span>
         </p>
         <span class="wrow__view">
-          View project
           <svg class="wrow__arrow" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path
-              d="M3 9L9 3M4 3h5v5"
+              d="M2 2v6.5h7.5M7.5 6l2.5 2.5L7.5 11"
               stroke="currentColor"
               stroke-width="1.2"
               stroke-linecap="square"
             />
           </svg>
+          <span class="wrow__view-label">View project</span>
         </span>
       </div>
     </div>
@@ -106,7 +106,7 @@ const details = p.data.discipline ?? p.data.role;
 
   .wrow__title {
     grid-area: title;
-    font-size: clamp(1.75rem, 1.1rem + 2.6vw, 4.25rem);
+    font-size: var(--title-size, clamp(1.75rem, 1.1rem + 2.8vw, 4.75rem));
     font-weight: var(--weight-bold);
     letter-spacing: var(--tracking-display);
     line-height: 1.02;
@@ -143,19 +143,25 @@ const details = p.data.discipline ?? p.data.role;
     font-variant-numeric: tabular-nums;
   }
 
-  /* Same size and baseline as the details line; flush right with the number above it */
+  /* Elbow arrow, then the label with a fixed underline, as in the reference. Flush right. */
   .wrow__view {
     display: inline-flex;
     align-items: baseline;
-    gap: 0.45em;
+    gap: 0.6em;
     font-size: var(--text-body);
-    font-weight: var(--weight-medium);
+    font-weight: var(--weight-regular);
     line-height: 1.4;
   }
 
+  .wrow__view-label {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
   .wrow__arrow {
-    width: 0.7em;
-    height: 0.7em;
+    width: 0.85em;
+    height: 0.85em;
     align-self: center;
     transition: transform 0.5s var(--ease-out);
   }
@@ -163,21 +169,26 @@ const details = p.data.discipline ?? p.data.role;
   /* Desktop with hover: details collapsed at rest, the row and its thumbnail open on hover/focus */
   @media (hover: hover) and (min-width: 700px) {
     .wrow {
-      --thumb-rest: 5.5rem;
-      --thumb-open: 10rem;
-      grid-template-columns: var(--thumb-open) minmax(0, 1fr) auto;
+      --title-size: clamp(1.75rem, 1.1rem + 2.8vw, 4.75rem);
+      --thumb-rest: 4.5rem;
+      /* The open thumbnail is as tall as the text block beside it (title + details), so the number and details sit level with its bottom edge */
+      --thumb-open: max(6rem, calc(var(--title-size) * 1.02 + 2.1rem));
+      grid-template-columns: var(--thumb-open) 3.25rem minmax(0, 1fr);
       /* Spare height from the growing thumbnail goes to the second row, so the details stay tight under the title */
       grid-template-rows: auto 1fr;
       grid-template-areas:
-        'thumb title num'
-        'thumb more  more';
-      column-gap: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
+        'thumb num title'
+        'thumb num more';
+      column-gap: 0;
     }
 
+    /* The number rides the bottom of the text block: under the title at rest, level with the details once open */
     .wrow__num {
       display: block;
-      align-self: start;
-      padding-top: 0.35rem;
+      align-self: end;
+      padding-left: clamp(0.75rem, 0.25rem + 1.5vw, 1.5rem);
+      padding-bottom: 0.3rem;
+      line-height: 1;
     }
 
     .wrow__thumb {
@@ -215,7 +226,7 @@ const details = p.data.discipline ?? p.data.role;
 
     .wrow:hover .wrow__arrow,
     .wrow:focus-visible .wrow__arrow {
-      transform: translate(2px, -2px);
+      transform: translate(2px, 2px);
     }
   }
 

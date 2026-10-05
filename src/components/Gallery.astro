@@ -1,0 +1,96 @@
+---
+// Asymmetric image gallery for visual projects: up to 5 labelled images placed on a 12-column grid,
+// staggered so the page has movement and the pieces breathe. Each image is a CaseImage, so it opens
+// in the lightbox. Stacks to one column on small screens. Without `src` an item is a labelled placeholder.
+import CaseImage from './CaseImage.astro';
+
+interface Item {
+  label: string;
+  src?: ImageMetadata | string;
+  caption?: string;
+  tone?: 0 | 1 | 2 | 3;
+  ratio?: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+// Default frame ratio per slot; the grid placement for each slot is in the styles below
+const RATIOS = ['4 / 3', '3 / 4', '4 / 5', '4 / 3', '16 / 9'];
+const items = Astro.props.items.slice(0, 5);
+---
+
+<div class="gallery">
+  {items.map((it, i) => (
+    <div class={`gallery__item gallery__item--${i + 1}`}>
+      <CaseImage
+        label={it.label}
+        src={it.src}
+        caption={it.caption}
+        tone={it.tone ?? ((i % 4) as 0 | 1 | 2 | 3)}
+        ratio={it.ratio ?? RATIOS[i]}
+        size="wide"
+      />
+    </div>
+  ))}
+</div>
+
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(3rem, 2rem + 4vw, 6rem) var(--grid-gutter);
+    padding-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(4rem, 2rem + 6vw, 8rem);
+  }
+
+  .gallery :global(.case-image) {
+    margin-block: 0;
+  }
+
+  .gallery__item {
+    min-width: 0;
+  }
+
+  /* Portrait pieces stay a little narrower than the column on phones */
+  .gallery__item--2,
+  .gallery__item--3 {
+    max-width: 26rem;
+  }
+
+  @media (min-width: 900px) {
+    .gallery {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .gallery__item--2,
+    .gallery__item--3 {
+      max-width: none;
+    }
+
+    /* Row 1: a large piece left, a tall one right and lower */
+    .gallery__item--1 {
+      grid-column: 1 / 8;
+    }
+
+    .gallery__item--2 {
+      grid-column: 9 / 13;
+      margin-top: clamp(4rem, 2rem + 6vw, 9rem);
+    }
+
+    /* Row 2: a portrait left, a landscape right and lower */
+    .gallery__item--3 {
+      grid-column: 2 / 7;
+    }
+
+    .gallery__item--4 {
+      grid-column: 8 / 13;
+      margin-top: clamp(3rem, 1.5rem + 5vw, 7rem);
+    }
+
+    /* Row 3: one wide piece, off-centre */
+    .gallery__item--5 {
+      grid-column: 4 / 11;
+    }
+  }
+</style>

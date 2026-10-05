@@ -8,6 +8,7 @@ import Header from '../../components/layout/Header.astro';
 import Footer from '../../components/layout/Footer.astro';
 import Button from '../../components/ui/Button.astro';
 import ProjectImage from '../../components/ProjectImage.astro';
+import Gallery from '../../components/Gallery.astro';
 import ContentsNav from '../../components/ContentsNav.astro';
 import Lightbox from '../../components/Lightbox.astro';
 import { withBase } from '../../utils/url';
@@ -23,9 +24,22 @@ export async function getStaticPaths() {
 
 const { entry, more } = Astro.props;
 const { Content, headings } = await render(entry);
-const { title, description, type, coverImage, role, timeline, tools, team, behanceUrl, facts } =
-  entry.data;
+const {
+  title,
+  description,
+  type,
+  coverImage,
+  role,
+  timeline,
+  tools,
+  team,
+  behanceUrl,
+  facts,
+  hook,
+  tags,
+} = entry.data;
 const isCase = Boolean(facts);
+const isGallery = type === 'visual' && Boolean(hook);
 // Contents list: the h2s of the article
 const contents = headings.filter((h) => h.depth === 2);
 
@@ -54,7 +68,26 @@ const caseFacts = facts
         </Button>
       </div>
 
-      {isCase ? (
+      {isGallery ? (
+        <>
+          <div class="container">
+            <header class="vhead">
+              <h1 class="vhead__title">{title}</h1>
+              {tags && (
+                <ul class="vhead__tags" aria-label="Disciplines">
+                  {tags.map((t) => (
+                    <li class="vhead__tag tag">{t}</li>
+                  ))}
+                </ul>
+              )}
+              <p class="vhead__hook">{hook}</p>
+            </header>
+          </div>
+          <div class="container">
+            <Content />
+          </div>
+        </>
+      ) : isCase ? (
         <>
           <div class="container">
             <header class="chead">
@@ -321,6 +354,46 @@ const caseFacts = facts
   /* Behance button under the meta grid: the shared .btn, just spaced from the meta rules */
   :global(.behance-btn) {
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
+  }
+
+  /* ---------- Visual project (gallery) layout ---------- */
+
+  /* Minimal, bold header: title, the disciplines, one hook sentence. Nothing else. */
+  .vhead {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) 0;
+  }
+
+  .vhead__title {
+    max-width: 14ch;
+    font-size: clamp(3rem, 1.5rem + 7vw, 8rem);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 0.95;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  .vhead__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.75rem;
+    margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    padding: 0;
+    list-style: none;
+  }
+
+  .vhead__tag {
+    color: var(--text-muted);
+  }
+
+  .vhead__hook {
+    max-width: 26ch;
+    margin-top: clamp(2rem, 1.5rem + 3vw, 4rem);
+    font-size: clamp(1.75rem, 1rem + 2.6vw, 3.5rem);
+    font-weight: var(--weight-medium);
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    text-wrap: balance;
   }
 
   /* ---------- Case-study layout ---------- */

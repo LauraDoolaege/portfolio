@@ -49,9 +49,9 @@ import portrait from '../../assets/images/hero_portrait.png';
 
     <div class="hero__lede hero__aside">
       <!-- Portrait: the black-and-white photo as it is -->
-      <figure class="hero__portrait" data-line>
+      <figure class="hero__portrait media-frame" data-line>
         <Image
-          class="hero__portrait-img"
+          class="hero__portrait-img media-frame__img"
           src={portrait}
           alt="Portrait of Laura Doolaege in profile, looking to the left"
           widths={[320, 480, 640]}
@@ -60,8 +60,7 @@ import portrait from '../../assets/images/hero_portrait.png';
         />
       </figure>
       <p class="hero__intro" data-line>
-        I detangle briefings into intuitive concepts
-        <br />— creative, and grounded in marketing.
+        I detangle briefings into intuitive concepts, creative and grounded in marketing.
       </p>
       <div class="hero__ctas" data-line>
         <Button href={withBase('/resume.pdf')} icon="down" download>
@@ -161,6 +160,10 @@ import portrait from '../../assets/images/hero_portrait.png';
 
 <style>
   .hero {
+    /* Its own stacking context above the sections that follow, so the signature stays on top when it is dragged
+       out of the header instead of being cut off by the next section */
+    position: relative;
+    z-index: 20;
     /* Fills the first viewport under the nav (~4.1rem): the strip sits on the fold */
     --hero-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
     display: flex;
@@ -277,9 +280,8 @@ import portrait from '../../assets/images/hero_portrait.png';
   .hero__intro {
     font-size: 13px;
     font-weight: var(--weight-medium);
-    letter-spacing: 0.05em;
+    letter-spacing: 0;
     line-height: 1.55;
-    text-transform: uppercase;
     text-align: center;
     text-wrap: balance;
   }
@@ -763,10 +765,14 @@ import portrait from '../../assets/images/hero_portrait.png';
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     trail.width = Math.max(1, Math.round(width * TRAIL_SCALE));
     trail.height = Math.max(1, Math.round(height * TRAIL_SCALE));
-    grainFilter.setAttribute('x', '-40');
-    grainFilter.setAttribute('y', '-40');
-    grainFilter.setAttribute('width', String(width + 80));
-    grainFilter.setAttribute('height', String(height + 80));
+    // The filter region is also the rope's visible region, so it reaches far past the field: a signature dragged out
+    // of the header over the sections below must not be cut off at the field's edge
+    const REACH_X = 400;
+    const REACH_Y = 1600;
+    grainFilter.setAttribute('x', String(-REACH_X));
+    grainFilter.setAttribute('y', String(-REACH_Y));
+    grainFilter.setAttribute('width', String(width + REACH_X * 2));
+    grainFilter.setAttribute('height', String(height + REACH_Y * 2));
 
     const m = rel(marketer.getBoundingClientRect());
     const t = rel(turned.getBoundingClientRect());

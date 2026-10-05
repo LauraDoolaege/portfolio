@@ -130,7 +130,7 @@ function cursor() {
     }
   };
 
-  const MEDIA = '.card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
+  const MEDIA = '.card__link, .card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
   const INTERACTIVE = 'a, button, [data-magnetic]';
 
   let shown = false;
@@ -155,9 +155,8 @@ function cursor() {
     if (!t) return;
     const media = t.closest<HTMLElement>(MEDIA);
     if (media) {
-      // Project cards carry their own "View project" call to action, so the cursor stays a plain link there;
-      // decorative floating images just get the arrow
-      if (media.closest('.card')) set('link');
+      // Anywhere over a project card (not just its image) the cursor turns into an orange "View" disc, as big as the hero's "Grab"; decorative floating images just get the arrow
+      if (media.closest('.card')) set('media', 'View');
       else set('media', ARROW);
     } else if (t.closest(INTERACTIVE)) {
       set('link');
@@ -249,6 +248,8 @@ if (finePointer) {
     document
       .querySelectorAll<HTMLElement>('[data-magnetic], .btn, .btn-link')
       .forEach((el) => magnetic(el));
-    document.querySelectorAll<HTMLElement>('.card__media, .media-frame').forEach(pan);
+    document
+      .querySelectorAll<HTMLElement>('.card__media, .media-frame:not([data-no-pan])')
+      .forEach(pan);
   }
 }

@@ -1,7 +1,7 @@
 ---
 // Section 04: who am I. The statement runs in columns 1-8, one sentence per line, with "marketer turned experience designer" scribbled
-// out by hand, one continuous scribble over both rows; the photo sits in columns 9-12 with a mustache drawn on it, and the way into the About page sits under it.
-// Both marks are the page's only orange in the body and draw in once as they scroll into view.
+// out by hand, one continuous scribble over both rows; the full, uncropped photo sits small in columns 9-12 and the way into the About page sits under it.
+// The scribble is the page's only orange in the body and draws in once as it scrolls into view.
 // Hero's "Get to know me" link jumps here (#about).
 import { Image } from 'astro:assets';
 import Button from '../ui/Button.astro';
@@ -44,18 +44,14 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
         <span class="about__line">But so much more than that...</span>
       </p>
 
-      <figure class="about__figure media-frame" data-reveal>
+      <figure class="about__figure media-frame" data-no-pan data-reveal>
         <Image
           class="media-frame__img about__photo"
           src={photo}
           alt="Portrait of Laura Doolaege looking at the camera"
-          widths={[700, 1000, 1400]}
-          sizes="(min-width: 1000px) 50vw, 100vw"
+          widths={[240, 480, 720]}
+          sizes="15rem"
         />
-        <!-- Positioned in % of the square frame, under the nose in the cropped photo -->
-        <svg class="about__mustache" style="--off: 2.6s" viewBox="0 0 120 44" aria-hidden="true" focusable="false" data-about-mark>
-          <path pathLength="1" d="M 60 14 C 50 28, 30 34, 14 24 C 4 20, 6 8, 14 10"></path><path pathLength="1" d="M 60 14 C 70 28, 90 34, 106 24 C 116 20, 114 8, 106 10"></path>
-        </svg>
       </figure>
 
       <div class="about__link" data-reveal>
@@ -107,8 +103,7 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
     position: absolute;
   }
 
-  .about__scribble,
-  .about__mustache {
+  .about__scribble {
     filter: url(#about-grain);
   }
 
@@ -123,41 +118,21 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
     pointer-events: none;
   }
 
+  /* The whole portrait, uncropped, kept small */
   .about__figure {
-    position: relative;
-    width: min(100%, 24rem);
-    aspect-ratio: 1 / 1;
+    width: min(100%, 15rem);
   }
 
   /* Black and white, like the hero portrait, so the orange line is the only colour on it */
-  .about__photo {
+  .about__figure :global(.about__photo) {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
     filter: grayscale(1) contrast(1.05);
   }
 
-  /* Cropped in on the face: the frame shows part of a 150%-wide 3:4 image (the nose sits at ~37% / 36% of the original) */
-  .about__figure :global(.about__photo) {
-    position: absolute;
-    left: -11%;
-    top: -27%;
-    width: 150%;
-    height: auto;
-    max-width: none;
-  }
-
-  .about__mustache {
-    position: absolute;
-    z-index: 3;
-    left: 36%;
-    top: 46.5%;
-    width: 16%;
-    height: auto;
-    max-width: none;
-    overflow: visible;
-    pointer-events: none;
-  }
-
-  .about__scribble path,
-  .about__mustache path {
+  .about__scribble path {
     fill: none;
     stroke: var(--accent);
     /* The signature's weight: 6px, 8px on desktop, constant on screen whatever the box size */
@@ -170,8 +145,7 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
   /* Armed by the script (so no-JS and reduced-motion visitors see the finished marks); a zero-length dash still
      paints a round cap, so each path stays hidden until it starts drawing */
   @media (min-width: 1000px) {
-    .about__scribble path,
-    .about__mustache path {
+    .about__scribble path {
       stroke-width: 6px;
     }
   }
@@ -214,7 +188,7 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
   .about__link {
     padding-top: 1.25rem;
     border-top: var(--hairline);
-    width: min(100%, 24rem);
+    width: min(100%, 15rem);
   }
 
   @media (min-width: 1000px) {
@@ -232,13 +206,11 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
     .about__figure {
       grid-column: 9 / 13;
       grid-row: 1;
-      width: 100%;
     }
 
     .about__link {
       grid-column: 9 / 13;
       grid-row: 2;
-      width: 100%;
     }
   }
 </style>

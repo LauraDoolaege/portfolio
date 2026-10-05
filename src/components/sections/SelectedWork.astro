@@ -55,8 +55,9 @@ const groups = [
 </section>
 
 <style>
+  /* Airy on purpose: the groups sit far apart and the cards get generous gutters, so each project reads on its own */
   .work__group + .work__group {
-    margin-top: clamp(4rem, 2rem + 6vw, 8rem);
+    margin-top: clamp(6rem, 3rem + 9vw, 13rem);
   }
 
   /* Group head on the same 12 columns as the cards: name left, what it is in columns 8-12 */
@@ -64,19 +65,19 @@ const groups = [
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 1rem var(--grid-gutter);
-    padding-block: clamp(1.5rem, 1rem + 2vw, 2.5rem) clamp(2rem, 1.5rem + 2vw, 3.5rem);
-    border-top: var(--hairline);
+    padding-block: 0 clamp(3rem, 2rem + 4vw, 6rem);
   }
 
   .work__intro {
-    max-width: 46ch;
+    max-width: 44ch;
+    line-height: 1.6;
   }
 
   .work__grid {
     --ratio: 4 / 3;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: clamp(3.5rem, 2.5rem + 4vw, 6.5rem) clamp(1.75rem, 1rem + 3vw, 4.5rem);
+    gap: clamp(5rem, 3rem + 7vw, 10rem) clamp(2rem, 1rem + 4vw, 6rem);
     align-items: stretch;
   }
 

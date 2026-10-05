@@ -1,9 +1,10 @@
 ---
 // Section 02: selected work, two kinds. Each group opens with a row (name left, what it is in the rail),
-// then its projects in an even grid. Projects come from the `works` collection and link to /works/[slug].
+// then its projects: UX as large cards (an offset pair), visual work as a lighter list of rows. Projects come from the `works` collection and link to /works/[slug].
 import { getCollection } from 'astro:content';
 import SectionLabel from '../ui/SectionLabel.astro';
 import WorkCard from '../ui/WorkCard.astro';
+import WorkRow from '../ui/WorkRow.astro';
 
 const works = (await getCollection('works')).sort((a, b) => a.id.localeCompare(b.id));
 // Image projects first, so any still-text-only entry closes the group as a row
@@ -15,16 +16,16 @@ const groups = [
     intro:
       'In these latest group projects, I got to dive deep into human needs through user interviews, insight gathering, wireframing, and validating solutions as a team.',
     projects: works.filter((w) => w.data.type === 'ux').sort(byCover),
-    cols: 'three',
-    sizes: '(min-width: 900px) 30vw, (min-width: 600px) 50vw, 100vw',
+    layout: 'cards',
+    sizes: '(min-width: 700px) 45vw, 100vw',
   },
   {
     title: 'Visual & Concept Explorations',
     intro:
       "Same brain, different canvas. Even when there's no app to test, I'm still asking the UX questions: who is this for, what should they feel, and does it make sense?",
     projects: works.filter((w) => w.data.type === 'visual').sort(byCover),
-    cols: 'three',
-    sizes: '(min-width: 900px) 30vw, (min-width: 600px) 50vw, 100vw',
+    layout: 'list',
+    sizes: '',
   },
 ];
 ---
@@ -44,11 +45,19 @@ const groups = [
           <h3 class="title work__title">{g.title}</h3>
           <p class="text work__intro">{g.intro}</p>
         </div>
-        <ul class={`work__grid work__grid--${g.cols}`}>
-          {g.projects.map((p) => (
-            <WorkCard project={p} sizes={g.sizes} />
-          ))}
-        </ul>
+        {g.layout === 'cards' ? (
+          <ul class="work__grid">
+            {g.projects.map((p) => (
+              <WorkCard project={p} sizes={g.sizes} />
+            ))}
+          </ul>
+        ) : (
+          <ul class="work__list">
+            {g.projects.map((p, i) => (
+              <WorkRow project={p} index={i + 1} />
+            ))}
+          </ul>
+        )}
       </div>
     ))}
   </div>
@@ -73,25 +82,32 @@ const groups = [
     line-height: 1.6;
   }
 
+  /* UX: two large cards, the second sitting lower so the pair reads as composed, not as a short row */
   .work__grid {
-    --ratio: 4 / 3;
+    --ratio: 5 / 4;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: clamp(5rem, 3rem + 7vw, 10rem) clamp(2rem, 1rem + 4vw, 6rem);
+    gap: clamp(4rem, 3rem + 5vw, 8rem) clamp(2rem, 1rem + 4vw, 6rem);
     align-items: stretch;
   }
 
   @media (min-width: 700px) {
-    .work__grid--three {
+    .work__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .work__grid > :global(:nth-child(even)) {
+      margin-top: clamp(4rem, 2rem + 8vw, 10rem);
     }
   }
 
-  @media (min-width: 900px) {
-    .work__grid--three {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+  /* Visual: a quiet list, one hairline-separated row per project */
+  .work__list {
+    display: flex;
+    flex-direction: column;
+  }
 
+  @media (min-width: 900px) {
     .work__head {
       grid-template-columns: repeat(12, minmax(0, 1fr));
     }

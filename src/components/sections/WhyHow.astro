@@ -7,6 +7,8 @@ import SectionLabel from '../ui/SectionLabel.astro';
 
 // Hand-drawn accents in the signature's ink, drawn as clean single strokes: each one is a list of pen strokes
 // (paths in a small viewBox, stretched to fit their word) that draw one after another when the block becomes active.
+// `off` is each mark's start (seconds after its block becomes active), so they play in order: first block the ring
+// round "design", the arrow towards "people", then the underline; second block the heart, then the ring round it.
 const shapes = {
   // An overshooting loop, the way a pen circles a word
   ring: {
@@ -43,7 +45,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
         word: 'design',
         marks: [
           { shape: 'ring', off: 0 },
-          { shape: 'arrow', off: 2, float: true },
+          { shape: 'arrow', off: 1, float: true },
         ],
       },
       ' an experience people actually ',
@@ -51,7 +53,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
         word: 'need',
         tail: '?',
         marks: [
-          { shape: 'underline', off: 1 },
+          { shape: 'underline', off: 2.9 },
         ],
       },
     ],
@@ -62,9 +64,9 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
   {
     parts: [
       'How do we make sure ',
-      { word: 'people', marks: [{ shape: 'heart', off: 1.4, float: true }] },
+      { word: 'people', marks: [{ shape: 'heart', off: 0, float: true }] },
       ' ',
-      { word: 'discover', marks: [{ shape: 'ring', off: 0 }], tail: ' it?' },
+      { word: 'discover', marks: [{ shape: 'ring', off: 1.1 }], tail: ' it?' },
     ],
     approach: 'Bachelor in Marketing Communication (Cum Laude)',
     value:
@@ -100,6 +102,9 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       <div class="why__bars" aria-hidden="true">
         {[...columns, null].map(() => <span class="why__bar"></span>)}
       </div>
+      <!-- The closing line, set in the headline's own type and lined up with its last line by the script, so on the
+           last step the two read as one quote. The list item below keeps the real text for assistive tech. -->
+      <p class="why__merge" aria-hidden="true" data-why-merge>and I want to answer both!</p>
     </div>
 
     <ol class="why__list">
@@ -150,7 +155,6 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
 
   .why__item {
     padding-top: 1.75rem;
-    border-top: var(--hairline);
   }
 
   /* A stacking context of its own, so the marks (z-index -1) sit behind the letters, never over them */
@@ -294,6 +298,10 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     display: none;
   }
 
+  .why__merge {
+    display: none;
+  }
+
   @media (min-width: 1000px) {
     .why__grid {
       position: relative;
@@ -346,17 +354,47 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       justify-content: center;
       min-height: 85vh;
       padding-block: 3rem;
-      border-top: 0;
-      border-bottom: var(--hairline);
       transition: opacity 0.6s var(--ease-out);
-    }
-
-    .why__item:last-child {
-      border-bottom: 0;
     }
 
     .why__item--close {
       min-height: 70vh;
+    }
+
+    /* The list's own copy only holds the scroll distance (and the text for screen readers) */
+    .why__grid.is-armed .why__item--close .why__close {
+      /* !important: the scroll reveal writes an inline opacity onto it */
+      opacity: 0 !important;
+    }
+
+    /* Same type as the headline, so the two are one voice. The script places it beside the headline's last line:
+       --merge-left is the list's left edge, --merge-top the top of that line (both measured, never guessed). */
+    .why__grid.is-armed .why__merge {
+      position: absolute;
+      left: var(--merge-left, 100%);
+      top: var(--merge-top, 0);
+      width: var(--merge-width, 30rem);
+      display: block;
+      margin: 0;
+      font-size: clamp(2.5rem, 1.4rem + 4.2vw, 5.25rem);
+      font-weight: var(--weight-heavy);
+      letter-spacing: var(--tracking-display);
+      line-height: 0.98;
+      text-wrap: balance;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateX(2rem);
+      filter: blur(6px);
+      transition:
+        opacity 0.9s var(--ease-out),
+        transform 1.1s var(--ease-out),
+        filter 0.9s var(--ease-out);
+    }
+
+    .why__grid.is-closing .why__merge {
+      opacity: 1;
+      transform: none;
+      filter: none;
     }
 
     .why__grid.is-armed .why__item {
@@ -399,6 +437,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       items.forEach((el, i) => el.classList.toggle('is-active', i === index));
       // On the closing step every segment goes dark: both answers
       const closing = index === items.length - 1;
+      grid.classList.toggle('is-closing', closing);
       bars.forEach((el, i) => el.classList.toggle('is-active', closing || i === index));
     };
 
@@ -422,9 +461,27 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       { rootMargin: '-45% 0px -45% 0px' },
     );
 
+    // The closing line sits where the headline's last line ends: same top, and at the list's left edge. Measured from
+    // layout (offsets ignore the reveal transforms), re-measured on resize and once the fonts have loaded.
+    const merge = grid.querySelector<HTMLElement>('[data-why-merge]');
+    const title = grid.querySelector<HTMLElement>('.why__pin .sec-title');
+    const list = grid.querySelector<HTMLElement>('.why__list');
+    const pin = grid.querySelector<HTMLElement>('.why__pin');
+    const place = () => {
+      if (!merge || !title || !list || !pin || !desktop.matches) return;
+      const lh = parseFloat(getComputedStyle(title).lineHeight);
+      const lines = Math.max(1, Math.round(title.offsetHeight / lh));
+      merge.style.setProperty('--merge-top', `${title.offsetTop + (lines - 1) * lh}px`);
+      merge.style.setProperty('--merge-left', `${list.offsetLeft - pin.offsetLeft}px`);
+      merge.style.setProperty('--merge-width', `${list.offsetWidth}px`);
+    };
+
     const arm = () => {
       grid.classList.toggle('is-armed', desktop.matches);
+      place();
     };
+    new ResizeObserver(place).observe(grid);
+    document.fonts?.ready.then(place);
     arm();
     desktop.addEventListener('change', arm);
     activate(0);

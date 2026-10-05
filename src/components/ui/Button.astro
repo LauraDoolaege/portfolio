@@ -3,7 +3,7 @@
 //   variant="solid" (Type 1): full button, solid ink background, centred label.
 //   variant="link"  (Type 2): text + arrow, underline draws in on hover, arrow nudges along.
 // Type 2 takes size="sm" | "md" | "lg" (big display text). Styling lives in global.css (.btn, .btn-link).
-// `icon` picks the arrow: "up-right" (default), "down" (downloads), "left" (back links).
+// `icon` picks the glyph: "up-right" (default), "down" (the download icon: arrow onto a tray), "left" (back links).
 // Extra attributes (target, rel, data-*) pass through to the <a>.
 interface Props {
   href: string;
@@ -25,7 +25,7 @@ const {
 
 const paths = {
   'up-right': 'M3 9L9 3M4 3h5v5',
-  down: 'M6 2v7M3 6.5L6 9.5l3-3',
+  down: 'M6 1.5v6.5M3.5 5.5L6 8l2.5-2.5M1.5 10.5h9',
   left: 'M9 6H2.5M5.5 3L2.5 6l3 3',
 } as const;
 
@@ -45,7 +45,7 @@ const classes =
     <slot />
   </span>
   {icon !== 'none' && icon !== 'left' && (
-    <svg class="btn__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+    <svg class:list={['btn__icon', icon === 'down' && 'btn__icon--down']} viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path d={paths[icon]} stroke="currentColor" stroke-width="1.2" stroke-linecap="square" />
     </svg>
   )}

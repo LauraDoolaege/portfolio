@@ -113,17 +113,21 @@ function cursor() {
     if (state !== 'media') rest(reduceMotion ? 0 : 0.35);
   });
 
-  const set = (next: State, html = '') => {
-    if (next === state && html === labelHtml) return;
+  // `big` is the project-card cursor: a larger disc with a "View" label
+  let isBig = false;
+  const set = (next: State, html = '', big = false) => {
+    if (next === state && html === labelHtml && big === isBig) return;
     state = next;
     labelHtml = html;
+    isBig = big;
+    root.classList.toggle('cursor--view', big);
     const d = reduceMotion ? 0 : 0.4;
     const ease = 'power3.out';
 
     if (next === 'media') {
       label.innerHTML = html;
       gsap.to(dot, { scale: 0, duration: d, ease, overwrite: 'auto' });
-      gsap.to(disc, { scale: 1, duration: d, ease, overwrite: 'auto' });
+      gsap.to(disc, { scale: big ? 1.9 : 1, duration: d, ease, overwrite: 'auto' });
       gsap.to(label, { opacity: 1, duration: d, ease, overwrite: 'auto' });
     } else {
       rest(d);
@@ -155,9 +159,8 @@ function cursor() {
     if (!t) return;
     const media = t.closest<HTMLElement>(MEDIA);
     if (media) {
-      // Project cards carry their own "View project" call to action, so the cursor stays a plain link there;
-      // decorative floating images just get the arrow
-      if (media.closest('.card')) set('link');
+      // Project cards turn the cursor into a big orange "View"; decorative floating images just get the arrow
+      if (media.closest('.card')) set('media', 'View', true);
       else set('media', ARROW);
     } else if (t.closest(INTERACTIVE)) {
       set('link');
@@ -249,6 +252,8 @@ if (finePointer) {
     document
       .querySelectorAll<HTMLElement>('[data-magnetic], .btn, .btn-link')
       .forEach((el) => magnetic(el));
-    document.querySelectorAll<HTMLElement>('.card__media, .media-frame').forEach(pan);
+    document
+      .querySelectorAll<HTMLElement>('.card__media, .media-frame:not([data-no-pan])')
+      .forEach(pan);
   }
 }

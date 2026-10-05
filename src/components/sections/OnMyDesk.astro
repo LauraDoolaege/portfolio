@@ -1,6 +1,6 @@
 ---
-// Section 03: what's on the desk right now, set as a quiet ledger on the 12-column grid. One soft rule above each
-// row (and under the last): project in columns 1-5, its focus in 6-7, a line about it in 8-12.
+// Section 03: what's on the desk right now, set as a quiet ledger on the 12-column grid. One soft rule between
+// the two rows: project in columns 1-5, its focus in 6-7, a line about it in 8-12.
 import SectionLabel from '../ui/SectionLabel.astro';
 
 const items = [
@@ -41,15 +41,15 @@ const items = [
 </section>
 
 <style>
-  .desk__ledger {
-    border-bottom: var(--hairline);
-  }
-
   .desk__row {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0.75rem;
     padding-block: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+  }
+
+  /* The one rule in this section: between the two projects */
+  .desk__row + .desk__row {
     border-top: var(--hairline);
   }
 

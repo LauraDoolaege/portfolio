@@ -7,7 +7,7 @@ import { Image } from 'astro:assets';
 import Button from '../ui/Button.astro';
 import SectionLabel from '../ui/SectionLabel.astro';
 import { withBase } from '../../utils/url';
-import photo from '../../assets/images/photo_aboutTeaser.jpeg';
+import photo from '../../assets/images/photo_aboutTeaser.png';
 ---
 
 <section class="sec" id="about" aria-labelledby="about-title">
@@ -48,7 +48,7 @@ import photo from '../../assets/images/photo_aboutTeaser.jpeg';
         <Image
           class="media-frame__img about__photo"
           src={photo}
-          alt="Laura Doolaege on a motorbike, looking at the camera"
+          alt="Portrait of Laura Doolaege looking at the camera"
           widths={[700, 1000, 1400]}
           sizes="(min-width: 1000px) 50vw, 100vw"
         />
@@ -134,22 +134,22 @@ import photo from '../../assets/images/photo_aboutTeaser.jpeg';
     filter: grayscale(1) contrast(1.05);
   }
 
-  /* Cropped in on the face: the frame shows the middle of a 175% image (the face sits at ~48% / 30% of the original) */
+  /* Cropped in on the face: the frame shows part of a 150%-wide 3:4 image (the nose sits at ~37% / 36% of the original) */
   .about__figure :global(.about__photo) {
     position: absolute;
-    left: -38%;
-    top: -6%;
-    width: 175%;
-    height: 175%;
+    left: -11%;
+    top: -27%;
+    width: 150%;
+    height: auto;
     max-width: none;
   }
 
   .about__mustache {
     position: absolute;
     z-index: 3;
-    left: 35%;
-    top: 46.4%;
-    width: 18%;
+    left: 36%;
+    top: 46.5%;
+    width: 16%;
     height: auto;
     max-width: none;
     overflow: visible;

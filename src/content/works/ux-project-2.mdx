@@ -1,58 +1,122 @@
 ---
-title: 'Nexus'
-description: 'Nexus bridges real-world behaviors with strategic digital interactions. We researched physical user environments to design a digital tool that nudges users without overwhelming their daily routines.'
+title: 'Nexxus'
+description: 'Nexxus explores how a generational spaceship can stay safe without making its people feel watched: social safety instead of constant monitoring.'
 type: 'ux'
 coverImage: '../../assets/images/frame_nexxus.png'
-behanceUrl: 'https://www.behance.net/gallery/201205607/UX-4'
-role: 'UX Strategist & Wireframer'
+behanceUrl: 'https://www.behance.net/gallery/249089863/Interstellar-Starship?oid=hq4jQDz6k_gBXtJ4kGoFdg'
+role: 'UX Researcher, UX/UI Designer'
 timeline: 'Devine Project'
 tools: ['Figma', 'Prototyping', 'User Research']
 team: ['Huyen Pham', 'Laura Doolaege']
+facts:
+  scope: 'UX research · UX/UI design · Prototyping'
+  context: 'Group assignment, Devine project'
 ---
 
-import ProjectImage from '../../components/ProjectImage.astro';
-import Phase from '../../components/Phase.astro';
-import PullQuote from '../../components/PullQuote.astro';
+import CaseImage from '../../components/CaseImage.astro';
+import Timeline from '../../components/Timeline.astro';
+import TimelineStep from '../../components/TimelineStep.astro';
+import cover from '../../assets/images/frame_nexxus.png';
 
-<Phase num="01" title="The Problem" />
+## Overview
 
-Designing for people who are already busy is its own challenge. They don't have spare attention for another app, and they'll drop anything that asks for it.
+Nexxus is a group assignment about safety on a generational spaceship: how do you keep a closed community secure for a very long time without making people feel monitored and controlled? I worked on it as UX researcher and UX/UI designer.
 
-So we left the screen and went to where the behavior actually happens: the physical spaces and routines users move through every day.
+### How Might We
 
-<PullQuote size="md" source="How might we">
-  How might we design an interface that seamlessly integrates into a user's physical routine without
-  demanding their undivided attention?
-</PullQuote>
+How might we maintain social safety for a long period of time in a closed environment, without creating a feeling of excessive monitoring or control?
 
-<ProjectImage
-  alt="Placeholder: research in the user's environment"
+<CaseImage
+  label="Nexxus Cover"
+  src={cover}
+  alt="Nexxus: cover"
+  size="wide"
   ratio="16 / 9"
-  tone={1}
-  caption="Placeholder: replace with a shot from the environment research."
+  caption="Nexxus, the safety app for a generational spaceship."
+  loading="eager"
 />
 
-<Phase num="02" title="Process" />
+## The Research & Concept
 
-I worked as strategist and wireframer. We turned what we saw in real environments into interactions, then wireframed them in Figma so the team had something concrete to react to.
+<Timeline>
+  <TimelineStep title="Problem definition space">
+    We started by exploring the problem space before looking for solutions.
+  </TimelineStep>
+  <TimelineStep title="Design principles">
+    From that exploration we defined the principles the concept had to follow.
+  </TimelineStep>
+  <TimelineStep title="Divergent ideation">
+    We generated a broad range of ideas before narrowing down.
+  </TimelineStep>
+  <TimelineStep title="Converging on a concept">
+    We converged on one direction and developed it into Nexxus.
+  </TimelineStep>
+</Timeline>
 
-<PullQuote source="The rule we designed by">
-  If the value proposition isn't clear within 3 seconds, UI polish won't save the experience.
-</PullQuote>
+### The Insight
 
-Huyen and I traded wireframes and critiques until each nudge earned its place on the screen.
+Social safety works better than systemic monitoring. Think of the neighbourhood grandma who keeps an eye on the street: people look out for each other, and nobody feels watched.
 
-<Phase num="03" title="Solution" />
+### Validation
 
-A digital tool that nudges without overwhelming: small, clear interactions that fit into a routine instead of interrupting it.
+We tested the concept with users to check that it was clear, relevant and desirable.
 
-<ProjectImage
-  alt="Placeholder: wireframes and prototype"
-  ratio="21 / 9"
+## The Solution
+
+### Home Page & Dashboard
+
+The central hub. Users open a personal dashboard with their tracked data, such as heartbeat or body temperature, and can manage subscriptions to unlock more detailed, continuously monitored data.
+
+<CaseImage
+  label="Home & Dashboard"
+  size="wide"
   tone={3}
-  caption="Placeholder: replace with wireframes."
+  caption="The home page and personal dashboard."
 />
 
-<Phase num="04" title="Retrospective" />
+### Community Accountability
 
-Strategy only works when it survives contact with a wireframe. Next time I'd test the nudges in the real environment sooner.
+Safety Lead is a rotating role: community members take shifts to help keep the neighbourhood secure, with a calendar, shift details and task lists.
+
+<CaseImage
+  label="Safety Lead"
+  size="narrow"
+  tone={1}
+  caption="Shift calendar, details and tasks."
+/>
+
+### Reward System
+
+Users earn optional Helper Points by assisting other astronauts, good karma made visible. The points can be exchanged for rewards such as a free croissant, a cocktail, a massage or a dinner.
+
+<CaseImage
+  label="Helper Points"
+  size="narrow"
+  tone={2}
+  caption="Earning and exchanging Helper Points."
+/>
+
+### Reporting
+
+Users can submit a report about a concern, for example a community member who is struggling with their mental health, and follow the status of that report.
+
+<CaseImage
+  label="Reporting"
+  size="narrow"
+  tone={0}
+  caption="Submitting a report and tracking its status."
+/>
+
+## The Process & Iteration
+
+### Development
+
+We translated the concept into a detailed information architecture, built interactive prototypes and ran usability tests.
+
+### Refinement
+
+Insights from those sessions fed back into the design, strengthening the flow and the overall usability.
+
+## Final Results
+
+The full design process, the prototype and the demonstration video are documented on Behance.

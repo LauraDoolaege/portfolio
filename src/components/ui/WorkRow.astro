@@ -93,13 +93,15 @@ const details = p.data.discipline ?? p.data.role;
     background: var(--frame-bg);
   }
 
-  /* Number: small, sits before the title on touch, beside it on desktop */
+  /* Number: fine and quiet, flush right on desktop; not shown on touch */
   .wrow__num {
     display: none;
     grid-area: num;
     font-size: var(--text-small);
-    font-weight: var(--weight-bold);
+    font-weight: var(--weight-light);
+    letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
   }
 
   .wrow__title {
@@ -113,6 +115,7 @@ const details = p.data.discipline ?? p.data.role;
 
   .wrow__more {
     grid-area: more;
+    align-self: start;
     display: grid;
     grid-template-rows: 1fr;
   }
@@ -125,7 +128,7 @@ const details = p.data.discipline ?? p.data.role;
     gap: 0.5rem 1.5rem;
     min-height: 0;
     overflow: hidden;
-    padding-top: 0.9rem;
+    padding-top: 0.6rem;
   }
 
   .wrow__details {
@@ -140,18 +143,20 @@ const details = p.data.discipline ?? p.data.role;
     font-variant-numeric: tabular-nums;
   }
 
+  /* Same size and baseline as the details line; flush right with the number above it */
   .wrow__view {
     display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    font-size: var(--text-small);
+    align-items: baseline;
+    gap: 0.45em;
+    font-size: var(--text-body);
     font-weight: var(--weight-medium);
-    letter-spacing: 0.04em;
+    line-height: 1.4;
   }
 
   .wrow__arrow {
-    width: 0.75em;
-    height: 0.75em;
+    width: 0.7em;
+    height: 0.7em;
+    align-self: center;
     transition: transform 0.5s var(--ease-out);
   }
 
@@ -160,17 +165,19 @@ const details = p.data.discipline ?? p.data.role;
     .wrow {
       --thumb-rest: 5.5rem;
       --thumb-open: 10rem;
-      grid-template-columns: var(--thumb-open) 3.5rem minmax(0, 1fr);
+      grid-template-columns: var(--thumb-open) minmax(0, 1fr) auto;
+      /* Spare height from the growing thumbnail goes to the second row, so the details stay tight under the title */
+      grid-template-rows: auto 1fr;
       grid-template-areas:
-        'thumb num title'
-        'thumb .   more';
-      column-gap: 0;
+        'thumb title num'
+        'thumb more  more';
+      column-gap: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
     }
 
     .wrow__num {
       display: block;
-      align-self: end;
-      padding-bottom: 0.45em;
+      align-self: start;
+      padding-top: 0.35rem;
     }
 
     .wrow__thumb {

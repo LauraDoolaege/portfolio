@@ -27,7 +27,7 @@ const defaultRatio = size === 'narrow' ? '4 / 5' : '16 / 10';
   data-label={label}
   data-caption={caption}
 >
-  <div class="case-image__frame">
+  <div class="case-image__frame" data-cursor>
     <ProjectImage
       src={src}
       alt={alt ?? `${label}: placeholder`}
@@ -44,7 +44,6 @@ const defaultRatio = size === 'narrow' ? '4 / 5' : '16 / 10';
   <div class="case-image__body">
     <div class="case-image__label">
       <span class="case-image__title">{label}</span>
-      <span class="case-image__hint">Enlarge</span>
     </div>
     {caption && <div class="case-image__caption">{caption}</div>}
   </div>
@@ -100,17 +99,6 @@ const defaultRatio = size === 'narrow' ? '4 / 5' : '16 / 10';
     margin-top: 0.4rem;
     font-size: var(--text-small);
     color: var(--text-muted);
-  }
-
-  .case-image__hint {
-    font-size: var(--text-small);
-    color: var(--text-muted);
-    transition: color 0.4s var(--ease-out);
-  }
-
-  .case-image:hover .case-image__hint,
-  .case-image:focus-within .case-image__hint {
-    color: var(--accent-text);
   }
 
   .case-image :global(.project-figure) {

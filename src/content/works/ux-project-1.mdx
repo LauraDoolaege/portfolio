@@ -14,6 +14,8 @@ facts:
 ---
 
 import CaseImage from '../../components/CaseImage.astro';
+import Timeline from '../../components/Timeline.astro';
+import TimelineStep from '../../components/TimelineStep.astro';
 import cover from '../../assets/images/frame_antwerp.png';
 
 ## Overview
@@ -63,17 +65,21 @@ Plan A is a website where a friend group plans a trip to Antwerp while playing a
 
 ## Discovery & The Initiator's Journey
 
-### Discovery
-
-Travel influencers promote the platform through short videos on TikTok, Instagram and other social media.
-
-### Taking Action
-
-The initiative taker sets an initial game score and fills in the trip details: dates, length of stay, budget, preferences and group size.
-
-### Sharing
-
-They enter their email, set a time limit for friends to play, and share the link in the group chat. If every invited player joins, the planning is sent automatically. Otherwise it is sent when the timer ends.
+<Timeline>
+  <TimelineStep title="Discovery">
+    Travel influencers promote the platform through short videos on TikTok, Instagram and other
+    social media.
+  </TimelineStep>
+  <TimelineStep title="Taking Action">
+    The initiative taker sets an initial game score and fills in the trip details: dates, length of
+    stay, budget, preferences and group size.
+  </TimelineStep>
+  <TimelineStep title="Sharing">
+    They enter their email, set a time limit for friends to play, and share the link in the group
+    chat. If every invited player joins, the planning is sent automatically. Otherwise it is sent
+    when the timer ends.
+  </TimelineStep>
+</Timeline>
 
 ## The Game Mechanics
 

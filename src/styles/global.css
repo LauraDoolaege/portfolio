@@ -634,6 +634,10 @@ button:focus-visible {
   background: var(--accent-text);
 }
 
+.cursor__sm {
+  font-size: 0.6875rem;
+}
+
 .cursor__label {
   position: absolute;
   width: 60px;

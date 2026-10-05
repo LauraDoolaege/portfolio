@@ -1,0 +1,223 @@
+---
+// One project in the homepage list (the lighter tier, for visual work). At rest: a small thumbnail,
+// a number and the title, between hairlines. On hover or keyboard focus the row opens: the thumbnail
+// grows and the discipline, year and a "View project" link appear under the title. Where there is no
+// hover (touch, narrow screens) the details are simply always shown. Links to the case study.
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../../utils/url';
+
+interface Props {
+  project: CollectionEntry<'works'>;
+  /** 1-based position in the list, shown as 01, 02... */
+  index: number;
+}
+
+const { project: p, index } = Astro.props;
+const cover = p.data.coverImage;
+const href = withBase(`/works/${p.id}`);
+const num = String(index).padStart(2, '0');
+const details = p.data.discipline ?? p.data.role;
+---
+
+<li class="wrow-item" data-reveal>
+  <a class="wrow" href={href}>
+    <div class="wrow__thumb" aria-hidden="true">
+      {cover ? (
+        <Image class="wrow__img" src={cover} alt="" widths={[200, 400]} sizes="160px" />
+      ) : (
+        <div class="wrow__img wrow__img--empty"></div>
+      )}
+    </div>
+    <span class="wrow__num">{num}</span>
+    <h4 class="wrow__title">{p.data.title}</h4>
+    <div class="wrow__more">
+      <div class="wrow__more-inner">
+        <p class="wrow__details">
+          {details}
+          <span class="wrow__year">{p.data.timeline}</span>
+        </p>
+        <span class="wrow__view">
+          View project
+          <svg class="wrow__arrow" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path
+              d="M3 9L9 3M4 3h5v5"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="square"
+            />
+          </svg>
+        </span>
+      </div>
+    </div>
+  </a>
+</li>
+
+<style>
+  .wrow-item {
+    border-top: var(--hairline);
+  }
+
+  .wrow-item:last-child {
+    border-bottom: var(--hairline);
+  }
+
+  .wrow {
+    --thumb-rest: 4rem;
+    --thumb-open: 4rem;
+    display: grid;
+    grid-template-columns: var(--thumb-open) minmax(0, 1fr);
+    grid-template-areas:
+      'thumb title'
+      'thumb more';
+    column-gap: clamp(1rem, 0.5rem + 2vw, 2rem);
+    align-items: start;
+    padding-block: clamp(1.25rem, 1rem + 1vw, 2rem);
+  }
+
+  .wrow__thumb {
+    grid-area: thumb;
+    width: var(--thumb-rest);
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--frame-bg);
+  }
+
+  .wrow__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .wrow__img--empty {
+    background: var(--frame-bg);
+  }
+
+  /* Number: small, sits before the title on touch, beside it on desktop */
+  .wrow__num {
+    display: none;
+    grid-area: num;
+    font-size: var(--text-small);
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wrow__title {
+    grid-area: title;
+    font-size: clamp(1.75rem, 1.1rem + 2.6vw, 4.25rem);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .wrow__more {
+    grid-area: more;
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
+  .wrow__more-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    min-height: 0;
+    overflow: hidden;
+    padding-top: 0.9rem;
+  }
+
+  .wrow__details {
+    font-size: var(--text-body);
+    font-weight: var(--weight-light);
+    line-height: 1.4;
+    color: var(--text-muted);
+  }
+
+  .wrow__year {
+    margin-left: 0.9em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wrow__view {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: var(--text-small);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.04em;
+  }
+
+  .wrow__arrow {
+    width: 0.75em;
+    height: 0.75em;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  /* Desktop with hover: details collapsed at rest, the row and its thumbnail open on hover/focus */
+  @media (hover: hover) and (min-width: 700px) {
+    .wrow {
+      --thumb-rest: 5.5rem;
+      --thumb-open: 10rem;
+      grid-template-columns: var(--thumb-open) 3.5rem minmax(0, 1fr);
+      grid-template-areas:
+        'thumb num title'
+        'thumb .   more';
+      column-gap: 0;
+    }
+
+    .wrow__num {
+      display: block;
+      align-self: end;
+      padding-bottom: 0.45em;
+    }
+
+    .wrow__thumb {
+      transition:
+        width 0.7s var(--ease-out),
+        aspect-ratio 0.7s var(--ease-out);
+    }
+
+    .wrow__more {
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.7s var(--ease-out);
+    }
+
+    .wrow__more-inner {
+      opacity: 0;
+      transition: opacity 0.4s var(--ease-out);
+    }
+
+    .wrow:hover .wrow__thumb,
+    .wrow:focus-visible .wrow__thumb {
+      width: var(--thumb-open);
+      aspect-ratio: 1;
+    }
+
+    .wrow:hover .wrow__more,
+    .wrow:focus-visible .wrow__more {
+      grid-template-rows: 1fr;
+    }
+
+    .wrow:hover .wrow__more-inner,
+    .wrow:focus-visible .wrow__more-inner {
+      opacity: 1;
+      transition-delay: 0.15s;
+    }
+
+    .wrow:hover .wrow__arrow,
+    .wrow:focus-visible .wrow__arrow {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wrow__thumb,
+    .wrow__more,
+    .wrow__more-inner,
+    .wrow__arrow {
+      transition: none;
+    }
+  }
+</style>

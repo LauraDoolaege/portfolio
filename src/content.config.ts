@@ -22,6 +22,9 @@ const works = defineCollection({
       // Full case study on Behance. Adds a top button and a quiet closing CTA when present.
       behanceUrl: z.string().optional(),
       role: z.string(),
+      // Short discipline line for the homepage list rows (visual work), e.g. "Motion · Illustration".
+      // Falls back to `role` when left out.
+      discipline: z.string().optional(),
       timeline: z.string(),
       tools: z.array(z.string()),
       team: z.array(z.string()).optional(),

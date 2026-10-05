@@ -1,0 +1,96 @@
+---
+// One image on a case-study page. Labelled, proportional (it never goes full-bleed) and openable in
+// the gallery (src/components/Lightbox.astro collects every [data-lightbox] on the page, in DOM order).
+// Without `src` it renders the flat labelled placeholder. Keep a page to 3-5 of these.
+//   size="wide":   fills the content column (screens, flows)
+//   size="narrow": a phone-sized print, capped so portrait UI never towers over the text
+import ProjectImage from './ProjectImage.astro';
+
+interface Props {
+  label: string;
+  src?: ImageMetadata | string;
+  alt?: string;
+  ratio?: string;
+  tone?: 0 | 1 | 2 | 3;
+  size?: 'wide' | 'narrow';
+  caption?: string;
+  loading?: 'lazy' | 'eager';
+}
+
+const { label, src, alt, ratio, tone = 0, size = 'wide', caption, loading } = Astro.props;
+const defaultRatio = size === 'narrow' ? '4 / 5' : '16 / 10';
+---
+
+<div
+  class:list={['case-image', `case-image--${size}`]}
+  data-lightbox
+  data-label={label}
+  data-caption={caption}
+>
+  <div class="case-image__frame">
+    <ProjectImage
+      src={src}
+      alt={alt ?? `${label}: placeholder`}
+      ratio={ratio ?? defaultRatio}
+      tone={tone}
+      loading={loading}
+    />
+    <button
+      type="button"
+      class="case-image__open"
+      aria-label={`Open ${label} in the gallery`}
+    ></button>
+  </div>
+  <p class="case-image__label tag">
+    <span>{label}</span>
+    <span class="case-image__hint">Enlarge</span>
+  </p>
+</div>
+
+<style>
+  .case-image {
+    width: 100%;
+    margin-block: clamp(1.5rem, 1rem + 2vw, 3rem);
+  }
+
+  .case-image--narrow {
+    max-width: min(100%, 26rem);
+  }
+
+  /* Keyboard route in. Clicks reach the frame (pan, sand) and bubble to .case-image, so the
+     button itself ignores the pointer and only carries focus. */
+  .case-image__frame {
+    position: relative;
+  }
+
+  .case-image__open {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .case-image__label {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+  }
+
+  .case-image__hint {
+    transition: color 0.4s var(--ease-out);
+  }
+
+  .case-image:hover .case-image__hint,
+  .case-image:focus-within .case-image__hint {
+    color: var(--accent-text);
+  }
+
+  .case-image :global(.project-figure) {
+    margin: 0;
+  }
+</style>

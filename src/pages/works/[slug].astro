@@ -8,6 +8,8 @@ import Header from '../../components/layout/Header.astro';
 import Footer from '../../components/layout/Footer.astro';
 import Button from '../../components/ui/Button.astro';
 import ProjectImage from '../../components/ProjectImage.astro';
+import CaseImage from '../../components/CaseImage.astro';
+import Lightbox from '../../components/Lightbox.astro';
 import { withBase } from '../../utils/url';
 
 export async function getStaticPaths() {
@@ -21,11 +23,20 @@ export async function getStaticPaths() {
 
 const { entry, more } = Astro.props;
 const { Content } = await render(entry);
-const { title, description, type, coverImage, role, timeline, tools, team, behanceUrl } =
+const { title, description, type, coverImage, role, timeline, tools, team, behanceUrl, overview } =
   entry.data;
+const isCase = Boolean(overview);
 
 const meta = [
   { label: 'Role', value: role },
+  ...(overview
+    ? [
+        { label: 'Subject', value: overview.subject },
+        { label: 'Brief', value: overview.brief },
+        { label: 'Insight', value: overview.insight },
+        { label: 'Solution', value: overview.solution },
+      ]
+    : []),
   { label: 'Timeline', value: timeline },
   { label: 'Tools', value: tools.join(', ') },
   ...(team?.length ? [{ label: 'Team', value: team.join(', ') }] : []),
@@ -44,13 +55,24 @@ const meta = [
 
       <div class="container">
         <div class="cover">
-          <ProjectImage
-            src={coverImage}
-            alt={`${title}: cover`}
-            ratio={coverImage ? undefined : type === 'ux' ? '2 / 1' : '16 / 9'}
-            tone={type === 'ux' ? 1 : 0}
-            loading="eager"
-          />
+          {isCase ? (
+            <CaseImage
+              label="Antwerp Cover"
+              src={coverImage}
+              alt={`${title}: cover`}
+              ratio="2 / 1"
+              tone={1}
+              loading="eager"
+            />
+          ) : (
+            <ProjectImage
+              src={coverImage}
+              alt={`${title}: cover`}
+              ratio={coverImage ? undefined : type === 'ux' ? '2 / 1' : '16 / 9'}
+              tone={type === 'ux' ? 1 : 0}
+              loading="eager"
+            />
+          )}
         </div>
 
         <header class="hero">
@@ -67,7 +89,7 @@ const meta = [
           ))}
         </dl>
 
-        {behanceUrl && (
+        {behanceUrl && !isCase && (
           <Button class="behance-btn" href={behanceUrl} target="_blank" rel="noopener noreferrer">
             View full Behance case study
           </Button>
@@ -75,26 +97,22 @@ const meta = [
       </div>
 
       <div
-        class:list={['container prose', `prose--${type}`, { 'gallery-inset': type === 'visual' }]}
+        class:list={[
+          'container prose',
+          isCase ? 'prose--case' : `prose--${type}`,
+          { 'gallery-inset': type === 'visual' },
+        ]}
       >
         <Content />
       </div>
 
       {behanceUrl && (
-        <div class="container">
-          <Button
-            class="cta"
-            variant="link"
-            size="lg"
-            href={behanceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View Behance
-            <br />
-            Case Study
+        <section class="container closing" aria-label="Full case study">
+          <p class="closing__text subtitle">The full process, from research to final screens.</p>
+          <Button href={behanceUrl} target="_blank" rel="noopener noreferrer">
+            Full Behance Case Study
           </Button>
-        </div>
+        </section>
       )}
 
       <section class="more container" aria-labelledby="more-label">
@@ -123,6 +141,7 @@ const meta = [
         </ul>
       </section>
     </main>
+    <Lightbox />
     <Footer />
   </div>
 </BaseLayout>
@@ -281,8 +300,32 @@ const meta = [
     margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
   }
 
-  :global(.cta) {
-    margin-block: clamp(3rem, 1.5rem + 6vw, 8rem);
+  /* Case-study body: CaseSections stack with generous air; each brings its own hairline */
+  .prose--case {
+    gap: clamp(3.5rem, 2rem + 6vw, 8rem);
+  }
+
+  /* Closing CTA: a hairline, one line, one button. Same Button as the hero, nothing louder. */
+  .closing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-top: clamp(1rem, 0.5rem + 2vw, 3rem);
+    padding-block: clamp(2rem, 1rem + 3vw, 3.5rem);
+    border-top: var(--hairline);
+  }
+
+  .closing__text {
+    max-width: 40ch;
+  }
+
+  @media (min-width: 700px) {
+    .closing {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
   }
 
   /* More work: a de-boxed lookbook row. The middle card drops, as on the homepage. */

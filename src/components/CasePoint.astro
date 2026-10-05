@@ -1,0 +1,51 @@
+---
+// A labelled beat inside a CaseSection ("The Brief", "Gameplay"...). Label left, copy right;
+// stacks on small screens. Hairlines between points keep a section scannable.
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="point">
+  <h3 class="point__label tag">{label}</h3>
+  <div class="point__text text">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .point {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.4rem;
+    padding-block: 1.1rem;
+    border-top: var(--hairline);
+  }
+
+  .point:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .point__label {
+    color: var(--text-muted);
+  }
+
+  .point__text {
+    max-width: 58ch;
+    text-wrap: pretty;
+  }
+
+  .point__text :global(p + p) {
+    margin-top: 0.75em;
+  }
+
+  @media (min-width: 700px) {
+    .point {
+      grid-template-columns: 9rem minmax(0, 1fr);
+      column-gap: var(--grid-gutter);
+    }
+  }
+</style>

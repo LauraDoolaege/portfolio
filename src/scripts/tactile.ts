@@ -156,7 +156,7 @@ function cursor() {
     const media = t.closest<HTMLElement>(MEDIA);
     if (media) {
       // Anywhere over a project card (not just its image) the cursor turns into an orange "View" disc, as big as the hero's "Grab"; decorative floating images just get the arrow
-      if (media.closest('.card')) set('media', 'View');
+      if (media.closest('.card') || media.closest('[data-lightbox]')) set('media', 'View');
       else set('media', ARROW);
     } else if (t.closest(INTERACTIVE)) {
       set('link');

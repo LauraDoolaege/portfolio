@@ -1,40 +1,40 @@
 ---
-title: 'Visual Project Two'
-description: 'A placeholder hook: one line on the concept.'
+title: 'Izumi'
+description: 'A 30-second Kickstarter campaign blending ancient Japanese heritage with sharp, fluid motion graphics.'
 type: 'visual'
 coverImage: '../../assets/images/frame_izumi.png'
-role: 'Concept, motion'
-timeline: '2025'
+role: 'Motion graphics, brand storytelling'
+discipline: 'Motion graphics · Brand storytelling · Visual design'
+timeline: '2026'
 tools: ['After Effects', 'Figma']
-team: ['Laura Doolaege', '[Teammate]']
+order: 1
+tags: ['Motion Graphics', 'Brand Storytelling', 'Visual Design']
+hook: 'A 30-second Kickstarter campaign blending ancient Japanese heritage with sharp, fluid motion graphics.'
 ---
 
-import ProjectImage from '../../components/ProjectImage.astro';
-import ImageGrid from '../../components/ImageGrid.astro';
-import AuditBlock from '../../components/AuditBlock.astro';
+import VideoPlayer from '../../components/VideoPlayer.astro';
+import StyleFrames from '../../components/StyleFrames.astro';
+import izumi from '../../assets/images/frame_izumi.png';
 
-[Placeholder: one short paragraph. The idea, in a breath.]
+<VideoPlayer title="Izumi: 30-second Kickstarter promo" poster={izumi} />
 
-<ProjectImage alt="Placeholder: hero visual" ratio="16 / 9" tone={2} />
-
-## Concept
-
-[Placeholder: two or three punchy sentences.]
-
-<ImageGrid
-  images={[
-    { alt: 'Placeholder: large visual' },
-    { alt: 'Placeholder: detail one' },
-    { alt: 'Placeholder: detail two' },
+<StyleFrames
+  items={[
+    {
+      label: 'Style Frame 1: Transition',
+      tone: 3,
+      caption: 'Placeholder: a transition between scenes.',
+    },
+    {
+      label: 'Style Frame 2: Heritage Styling',
+      tone: 2,
+      caption: 'Placeholder: the heritage look.',
+    },
+    {
+      label: 'Style Frame 3: Blade Detail',
+      tone: 1,
+      caption: 'Placeholder: a close-up of the blade.',
+    },
+    { label: 'Style Frame 4: End Card', tone: 0, caption: 'Placeholder: the closing frame.' },
   ]}
 />
-
-## Detail
-
-[Placeholder: a short note on one choice.]
-
-<ImageGrid images={[{ alt: 'Placeholder: wide visual' }, { alt: 'Placeholder: small visual' }]} />
-
-<AuditBlock num="01">
-  [Placeholder: what you would critique in the old design, and what you would do now.]
-</AuditBlock>

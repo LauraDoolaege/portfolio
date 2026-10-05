@@ -23,6 +23,8 @@ const works = defineCollection({
       // page uses the gallery layout (minimal header, asymmetric image gallery, lightbox).
       hook: z.string().optional(),
       tags: z.array(z.string()).optional(),
+      // Lower numbers come first in the homepage work lists (newest first); unset sorts last, by file name.
+      order: z.number().optional(),
       // Full case study on Behance. Adds a top button and a quiet closing CTA when present.
       behanceUrl: z.string().optional(),
       role: z.string(),

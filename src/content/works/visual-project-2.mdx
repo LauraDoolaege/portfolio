@@ -3,38 +3,64 @@ title: 'Izumi'
 description: 'A 30-second Kickstarter campaign blending ancient Japanese heritage with sharp, fluid motion graphics.'
 type: 'visual'
 coverImage: '../../assets/images/frame_izumi.png'
-role: 'Motion graphics, brand storytelling'
+role: 'Motion graphics, brand storytelling, voice-over'
 discipline: 'Motion graphics · Brand storytelling · Visual design'
 timeline: '2026'
 tools: ['After Effects', 'Figma']
 order: 1
-tags: ['Motion Graphics', 'Brand Storytelling', 'Visual Design']
+tags: ['Motion Graphics', 'Brand Storytelling', 'Visual Design', 'Voice-over']
 hook: 'A 30-second Kickstarter campaign blending ancient Japanese heritage with sharp, fluid motion graphics.'
 ---
 
 import VideoPlayer from '../../components/VideoPlayer.astro';
 import StyleFrames from '../../components/StyleFrames.astro';
 import izumi from '../../assets/images/frame_izumi.png';
+import frame1 from '../../assets/images/izumi_frame_1.jpg';
+import frame2 from '../../assets/images/izumi_frame_2.jpg';
+import frame3 from '../../assets/images/izumi_frame_3.jpg';
+import frame4 from '../../assets/images/izumi_frame_4.jpg';
+import frame5 from '../../assets/images/izumi_frame_5.jpg';
+import frame6 from '../../assets/images/izumi_frame_6.jpg';
 
-<VideoPlayer title="Izumi: 30-second Kickstarter promo" poster={izumi} />
+<VideoPlayer
+  title="Izumi: 30-second Kickstarter promo"
+  embed="https://player.vimeo.com/video/1233443344?badge=0&autopause=0&player_id=0&app_id=58479"
+  poster={izumi}
+/>
+
+Motion design, storytelling and the voice-over: all by me.
 
 <StyleFrames
   items={[
     {
-      label: 'Style Frame 1: Transition',
-      tone: 3,
-      caption: 'Placeholder: a transition between scenes.',
+      label: 'Style Frame 1: The Smithy',
+      src: frame1,
+      caption: 'The opening: a thatched smithy under a copper sun, in layered ink-wash hills.',
     },
     {
-      label: 'Style Frame 2: Heritage Styling',
-      tone: 2,
-      caption: 'Placeholder: the heritage look.',
+      label: 'Style Frame 2: Tokyo, 1833',
+      src: frame2,
+      caption: 'Heritage: the smith at the anvil, in silhouette against the lattice window.',
     },
     {
-      label: 'Style Frame 3: Blade Detail',
-      tone: 1,
-      caption: 'Placeholder: a close-up of the blade.',
+      label: 'Style Frame 3: The Reveal',
+      src: frame3,
+      caption: 'The brand reveal: Izumi and its Damascus steel blade.',
     },
-    { label: 'Style Frame 4: End Card', tone: 0, caption: 'Placeholder: the closing frame.' },
+    {
+      label: 'Style Frame 4: Strong',
+      src: frame4,
+      caption: 'Strong: a dark scene where the blade drops into a tea set.',
+    },
+    {
+      label: 'Style Frame 5: Pure',
+      src: frame5,
+      caption: 'A blade sweeps across a torii scroll, the word Pure cut in its path.',
+    },
+    {
+      label: 'Style Frame 6: Sharp',
+      src: frame6,
+      caption: 'Sharp: the blade slicing through chillies on the board.',
+    },
   ]}
 />

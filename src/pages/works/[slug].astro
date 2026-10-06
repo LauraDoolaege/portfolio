@@ -46,7 +46,7 @@ const contents = headings.filter((h) => h.depth === 2);
 const meta = [
   { label: 'Role', value: role },
   { label: 'Timeline', value: timeline },
-  { label: 'Tools', value: tools.join(', ') },
+  { label: 'Focus', value: tools.join(', ') },
   ...(team?.length ? [{ label: 'Team', value: team.join(', ') }] : []),
 ];
 const caseFacts = facts

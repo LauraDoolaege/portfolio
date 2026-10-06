@@ -10,6 +10,8 @@ interface Item {
   caption?: string;
   tone?: 0 | 1 | 2 | 3;
   ratio?: string;
+  /** Solid colour behind a transparent image (same in light and dark mode) */
+  background?: string;
 }
 
 interface Props {
@@ -23,7 +25,7 @@ const items = Astro.props.items.slice(0, 5);
 
 <div class="gallery">
   {items.map((it, i) => (
-    <div class={`gallery__item gallery__item--${i + 1}`}>
+    <div class={`gallery__item gallery__item--${i + 1}`} style={it.background ? `--item-bg: ${it.background}` : undefined}>
       <CaseImage
         label={it.label}
         src={it.src}
@@ -50,6 +52,10 @@ const items = Astro.props.items.slice(0, 5);
 
   .gallery__item {
     min-width: 0;
+  }
+
+  .gallery__item :global(.media-frame) {
+    background: var(--item-bg, transparent);
   }
 
   /* Portrait pieces stay a little narrower than the column on phones */

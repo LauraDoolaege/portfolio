@@ -13,6 +13,9 @@ hook: "Working Nine to Thrive: Recovering from the workouts you didn't know you 
 
 import Gallery from '../../components/Gallery.astro';
 import thrive from '../../assets/images/frame_thrive.png';
+import tom from '../../assets/images/Tom_thriver.png';
+import dash from '../../assets/images/Thrive_2.png';
+import crunch from '../../assets/images/Thrive_3.png';
 
 Thrive Unwind is an alcohol-free, magnesium sports beer. The brief was to take it beyond pure athletics and speak to everyone, not only the people who train.
 
@@ -20,26 +23,30 @@ Working Nine to Thrive treats everyday life as the workout. Photo-bashed puns fo
 
 <Gallery
   items={[
-    { label: 'Hero: Tom the Thriver', src: thrive, caption: 'Tom, the face of the campaign.' },
+    {
+      label: 'Working 9 to Thrive',
+      src: thrive,
+      ratio: '1440 / 1141',
+      background: '#EAEAE7',
+      caption: 'The campaign opener: a man with a beer can for a head, off to work by bike.',
+    },
+    {
+      label: 'Tom the Thriver',
+      src: tom,
+      ratio: '628 / 699',
+      caption: 'Tom, the face of the campaign.',
+    },
     {
       label: 'Collage Ad: 500m Train Dash',
-      tone: 3,
-      caption: 'Placeholder: the dash to catch the train.',
+      src: dash,
+      ratio: '1613 / 1362',
+      caption: 'The dash to catch the train, with the stress level agenda running along the top.',
     },
     {
       label: 'Collage Ad: Crunching Numbers',
-      tone: 2,
-      caption: 'Placeholder: crunching numbers at the desk.',
-    },
-    {
-      label: 'UI Asset: Stress Level Agenda',
-      tone: 1,
-      caption: 'Placeholder: the stress level agenda.',
-    },
-    {
-      label: 'Collage Ad: Pitching Ideas',
-      tone: 0,
-      caption: 'Placeholder: pitching ideas in the meeting room.',
+      src: crunch,
+      ratio: '1613 / 1362',
+      caption: 'Crunching numbers at the desk, with the stress level agenda running along the top.',
     },
   ]}
 />

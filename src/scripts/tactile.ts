@@ -251,7 +251,7 @@ if (finePointer) {
       .querySelectorAll<HTMLElement>('[data-magnetic], .btn, .btn-link')
       .forEach((el) => magnetic(el));
     document
-      .querySelectorAll<HTMLElement>('.card__media, .media-frame:not([data-no-pan])')
+      .querySelectorAll<HTMLElement>('.card__media, .media-frame:not([data-no-pan]):not([data-no-pan] .media-frame)')
       .forEach(pan);
   }
 }

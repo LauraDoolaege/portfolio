@@ -1,0 +1,59 @@
+---
+// One or more app screens (phone screenshots) set side by side at a phone-sized width, each uncropped at its own
+// shape (no hover pan, which scales the image and would clip its edges). Every screen is a CaseImage, so it opens in the lightbox. Wraps to a new row, or a single column, on small screens.
+import CaseImage from './CaseImage.astro';
+
+interface Item {
+  label: string;
+  src: ImageMetadata | string;
+  alt?: string;
+  caption?: string;
+  /** Width / height of the screenshot, so the frame matches the image exactly */
+  ratio?: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="screens">
+  {items.map((it) => (
+    <div class="screens__item" data-no-pan>
+      <CaseImage
+        label={it.label}
+        src={it.src}
+        alt={it.alt}
+        caption={it.caption}
+        ratio={it.ratio ?? '523 / 1135'}
+        size="wide"
+      />
+    </div>
+  ))}
+</div>
+
+<style>
+  .screens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+    margin-block: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  }
+
+  .screens__item {
+    flex: 0 1 17rem;
+    min-width: 0;
+  }
+
+  .screens :global(.case-image) {
+    margin-block: 0;
+  }
+
+  @media (max-width: 599px) {
+    .screens__item {
+      flex-basis: min(100%, 17rem);
+    }
+  }
+</style>

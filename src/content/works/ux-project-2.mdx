@@ -16,7 +16,14 @@ facts:
 import CaseImage from '../../components/CaseImage.astro';
 import Timeline from '../../components/Timeline.astro';
 import TimelineStep from '../../components/TimelineStep.astro';
+import PhoneScreens from '../../components/PhoneScreens.astro';
 import cover from '../../assets/images/frame_nexxus.png';
+import home from '../../assets/images/nexxus_home.png';
+import dashboard from '../../assets/images/nexxus_dashboard.png';
+import safetyLead from '../../assets/images/nexxus_safety-lead.png';
+import pointsIntro from '../../assets/images/nexxus_helper-points-intro.png';
+import rewards from '../../assets/images/nexxus_helper-points.png';
+import emergency from '../../assets/images/nexxus_emergency.png';
 
 ## Overview
 
@@ -67,44 +74,72 @@ We tested the concept with users to check that it was clear, relevant and desira
 
 The central hub. Users open a personal dashboard with their tracked data, such as heartbeat or body temperature, and can manage subscriptions to unlock more detailed, continuously monitored data.
 
-<CaseImage
-  label="Home & Dashboard"
-  size="wide"
-  tone={3}
-  caption="The home page and personal dashboard."
+<PhoneScreens
+  items={[
+    {
+      label: 'Home',
+      src: home,
+      alt: 'Nexxus home page: your points, a dashboard preview and upcoming shifts',
+      caption: 'The home page: points, a dashboard preview and upcoming shifts.',
+    },
+    {
+      label: 'Dashboard',
+      src: dashboard,
+      alt: 'Nexxus personal dashboard with heart rate and body temperature',
+      caption: 'The personal dashboard: heart rate and body temperature.',
+    },
+  ]}
 />
 
 ### Community Accountability
 
 Safety Lead is a rotating role: community members take shifts to help keep the neighbourhood secure, with a calendar, shift details and task lists.
 
-<CaseImage
-  label="Safety Lead"
-  size="narrow"
-  tone={1}
-  caption="Shift calendar, details and tasks."
+<PhoneScreens
+  items={[
+    {
+      label: 'Safety Lead',
+      src: safetyLead,
+      alt: 'Nexxus Safety lead page with a shift calendar and upcoming shifts',
+      caption: 'Shift calendar and upcoming shifts.',
+    },
+  ]}
 />
 
 ### Reward System
 
 Users earn optional Helper Points by assisting other astronauts, good karma made visible. The points can be exchanged for rewards such as a free croissant, a cocktail, a massage or a dinner.
 
-<CaseImage
-  label="Helper Points"
-  size="narrow"
-  tone={2}
-  caption="Earning and exchanging Helper Points."
+<PhoneScreens
+  items={[
+    {
+      label: 'Helper Points',
+      src: pointsIntro,
+      alt: 'Nexxus Helper Point introduction: the reputation system',
+      caption: 'The Helper Point system: welcome to the reputation system.',
+    },
+    {
+      label: 'Rewards',
+      src: rewards,
+      alt: 'Nexxus reward examples: VR experiences, massage sessions and cocktails',
+      caption: 'Reward examples to exchange points for.',
+    },
+  ]}
 />
 
 ### Reporting
 
 Users can submit a report about a concern, for example a community member who is struggling with their mental health, and follow the status of that report.
 
-<CaseImage
-  label="Reporting"
-  size="narrow"
-  tone={0}
-  caption="Submitting a report and tracking its status."
+<PhoneScreens
+  items={[
+    {
+      label: 'Help',
+      src: emergency,
+      alt: 'Nexxus emergency signal confirmation with a cancel button',
+      caption: 'Help: sending an emergency signal, with a chance to cancel if it was an accident.',
+    },
+  ]}
 />
 
 ## The Process & Iteration

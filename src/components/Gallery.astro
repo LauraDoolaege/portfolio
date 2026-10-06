@@ -12,6 +12,8 @@ interface Item {
   ratio?: string;
   /** Solid colour behind a transparent image (same in light and dark mode) */
   background?: string;
+  /** No hover grain or sand: the image just sits there */
+  plain?: boolean;
 }
 
 interface Props {
@@ -25,7 +27,7 @@ const items = Astro.props.items.slice(0, 5);
 
 <div class="gallery">
   {items.map((it, i) => (
-    <div class={`gallery__item gallery__item--${i + 1}`} style={it.background ? `--item-bg: ${it.background}` : undefined}>
+    <div class={`gallery__item gallery__item--${i + 1}`} style={it.background ? `--item-bg: ${it.background}` : undefined} data-plain={it.plain ? '' : undefined}>
       <CaseImage
         label={it.label}
         src={it.src}

@@ -243,7 +243,8 @@ function grainOnly(frame: HTMLElement) {
 
 if (finePointer) {
   cursor();
-  document.querySelectorAll<HTMLElement>('.media-frame').forEach(spotlight);
+  // `[data-plain]` (a gallery item set to `plain`) opts out of the grain and sand hover
+  document.querySelectorAll<HTMLElement>('.media-frame:not([data-plain] .media-frame)').forEach(spotlight);
   document.querySelectorAll<HTMLElement>('.card__media').forEach(grainOnly);
   if (!reduceMotion) {
     document

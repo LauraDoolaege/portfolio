@@ -12,16 +12,45 @@ hook: 'An interactive digital court case to acquit Miss Chocolate of causing acn
 ---
 
 import Gallery from '../../components/Gallery.astro';
+import courtroom from '../../assets/images/chocolate_2.png';
 import miss from '../../assets/images/frame_miss.png';
+import characters from '../../assets/images/chocolate_1.png';
+import desk from '../../assets/images/chocolate_3.png';
+import board from '../../assets/images/chocolate_4.png';
 
 Miss Chocolate is an interactive digital court case with one goal: to acquit her of causing acne in the first degree. The story is told as a case file, from her history to the proof to the verdict, using illustration and digital storytelling to turn a skincare myth into a trial.
 
 <Gallery
   items={[
-    { label: 'Miss Chocolate', src: miss, caption: 'The defendant.' },
-    { label: 'History Folder Asset', tone: 2, caption: 'Placeholder: the case history folder.' },
-    { label: 'Drawer Polaroids', tone: 3, caption: 'Placeholder: polaroids from the drawer.' },
-    { label: 'Evidence Board', tone: 1, caption: 'Placeholder: the evidence board.' },
-    { label: 'Verdict Screen', tone: 0, caption: 'Placeholder: the final verdict.' },
+    {
+      label: 'Miss Chocolate',
+      src: miss,
+      ratio: '1440 / 1014',
+      caption: 'The defendant, and the three chapters: history, proof, verdict.',
+    },
+    {
+      label: 'Courtroom Intro',
+      src: courtroom,
+      ratio: '1440 / 1024',
+      caption: 'The courtroom: click the hammer to open the case.',
+    },
+    {
+      label: 'Ms. Chocolate and Ms. Pimple',
+      src: characters,
+      ratio: '1440 / 1024',
+      caption: 'The two parties in the case file: the accused and her accuser.',
+    },
+    {
+      label: 'The Desk',
+      src: desk,
+      ratio: '2051 / 1341',
+      caption: 'History: a desk of folders, polaroids and a food diary to investigate.',
+    },
+    {
+      label: 'Evidence Board',
+      src: board,
+      ratio: '1440 / 911',
+      caption: 'Proof: connecting the dots until the culprit turns out to be hormones and inflammation.',
+    },
   ]}
 />

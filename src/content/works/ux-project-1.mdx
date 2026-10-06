@@ -16,7 +16,12 @@ facts:
 import CaseImage from '../../components/CaseImage.astro';
 import Timeline from '../../components/Timeline.astro';
 import TimelineStep from '../../components/TimelineStep.astro';
+import VideoPlayer from '../../components/VideoPlayer.astro';
 import cover from '../../assets/images/frame_antwerp.png';
+import onboarding from '../../assets/images/plan-a_onboarding.webp';
+import planning from '../../assets/images/plan-a_planning.webp';
+import personalize from '../../assets/images/plan-a_personalize.webp';
+import touchpoints from '../../assets/images/plan-a_touchpoints.png';
 
 ## Overview
 
@@ -28,14 +33,10 @@ The project brought UX, design and development together, and I worked on it as U
 
 How might we get a friend group's trip idea out of the group chat and into a real plan, without relying on one person to chase everyone?
 
-<CaseImage
-  label="Antwerp Cover"
-  src={cover}
-  alt="Plan A: Antwerp cover"
-  size="wide"
-  ratio="16 / 9"
-  caption="Plan A: the Antwerp the game is set in."
-  loading="eager"
+<VideoPlayer
+  title="Plan A: case movie"
+  embed="https://player.vimeo.com/video/1233429950?h=f5d95c2d37"
+  poster={cover}
 />
 
 ## The Challenge & Research
@@ -48,13 +49,6 @@ Antwerp attracts plenty of shoppers and tourists but lacks a strong Gen Z presen
 
 Gen Z values the company of friends over the actual destination. But friend group plans frequently fail because the designated initiative taker often gets left on read in the group chat.
 
-<CaseImage
-  label="Group Chat UI"
-  size="narrow"
-  tone={3}
-  caption="The problem in one screen: a trip proposal left on read."
-/>
-
 ## The Hook & Solution
 
 ### The Concept
@@ -65,9 +59,25 @@ Make Antwerp the city where plans actually make it out of the group chat.
 
 Plan A is a website where a friend group plans a trip to Antwerp while playing an Antwerp-themed game. The player with the highest score wins a free drink from a local bar.
 
-<CaseImage label="Hero App Mockup" size="narrow" tone={0} caption="Plan A on a smartphone." />
+<CaseImage
+  label="Onboarding"
+  src={onboarding}
+  alt="Plan A onboarding: four phone screens that explain the game before it starts"
+  size="wide"
+  ratio="16 / 9"
+  caption="Onboarding: clear instruction before the game starts."
+/>
 
 ## Discovery & The Initiator's Journey
+
+<CaseImage
+  label="Touch Points"
+  src={touchpoints}
+  alt="Plan A touch points: social videos, a landing page, and posters and screens around Antwerp"
+  size="wide"
+  ratio="861 / 408"
+  caption="How people find Plan A: social videos, a landing page, and posters and screens around the city."
+/>
 
 <Timeline>
   <TimelineStep title="Discovery">
@@ -85,6 +95,15 @@ Plan A is a website where a friend group plans a trip to Antwerp while playing a
   </TimelineStep>
 </Timeline>
 
+<CaseImage
+  label="Quick Planning Steps"
+  src={planning}
+  alt="Plan A planning steps: dates, players, budget, preferences and email"
+  size="wide"
+  ratio="16 / 9"
+  caption="The initiator's quick planning steps: dates, players, budget and preferences."
+/>
+
 ## The Game Mechanics
 
 ### Gameplay
@@ -96,11 +115,12 @@ The game works like the Google dinosaur game: players tap to jump over obstacles
 The background shows Antwerp eras, diamonds and historic scenes. Extra points become collectibles (a smiley, a coupon, a camera, a beer) that point to things to do in Antwerp.
 
 <CaseImage
-  label="Game Interface"
+  label="Personalise Your Game"
+  src={personalize}
+  alt="Plan A: take a photo, name your character, then run through the Antwerp game"
   size="wide"
   ratio="16 / 9"
-  tone={2}
-  caption="The pixel-style game, with the Antwerp background and collectibles."
+  caption="Personalising the game: a photo, a character name, then the Antwerp run."
 />
 
 ## The Friends' Experience & Reward
@@ -116,10 +136,3 @@ The final trip date is the one most players chose. The highest score wins a coup
 ### The Coupon
 
 A QR code links to a random bar based on the selected preference tags, drawn from a database of three places per tag.
-
-<CaseImage
-  label="QR Code Flow"
-  size="wide"
-  tone={1}
-  caption="Voting results and the winning coupon."
-/>

@@ -739,6 +739,11 @@ button:focus-visible {
   will-change: transform;
 }
 
+/* A real image never carries the placeholder gradient: transparent areas in a PNG show the page, not orange */
+img.media-frame__img {
+  background: transparent;
+}
+
 /* Placeholder tones, only visible until real photos arrive */
 .media-frame__img[data-tone='1'] {
   background: linear-gradient(150deg, #a3ad92, #7f8b6f);

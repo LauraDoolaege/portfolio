@@ -41,6 +41,10 @@
   --page-margin: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
   --space-section: clamp(5rem, 3rem + 8vw, 10rem);
   --hairline: 1px solid var(--border-color);
+  /* One corner scale for the whole site: square on tablet and desktop, slightly rounded on phones (see below).
+     Buttons, cards, tiles, swipe panels and images all use --radius; small chips and thumbnails use --radius-sm. */
+  --radius: 0;
+  --radius-sm: 0;
 
   /* Motion (easing curves for GSAP live in src/utils/motion.ts) */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -60,6 +64,13 @@
   --accent-wash: rgba(210, 105, 74, 0.1);
   --frame-bg: #262421;
   color-scheme: dark;
+}
+
+@media (max-width: 699px) {
+  :root {
+    --radius: 0.625rem;
+    --radius-sm: 0.375rem;
+  }
 }
 
 *,
@@ -364,7 +375,7 @@ button:focus-visible {
   justify-content: center;
   padding: 1em 1.4em;
   border: 1px solid var(--text-main);
-  border-radius: 0;
+  border-radius: var(--radius);
   background: transparent;
   color: var(--text-main);
   font-size: var(--text-body);
@@ -377,6 +388,7 @@ button:focus-visible {
   content: '';
   position: absolute;
   inset: -1px;
+  border-radius: inherit;
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(
@@ -679,6 +691,7 @@ button:focus-visible {
    would stay smooth. */
 .media-frame,
 .card__media {
+  border-radius: var(--radius);
   --x: 50%;
   --y: 50%;
   --spot: 0.01px;
@@ -830,4 +843,62 @@ img.media-frame__img {
 ::view-transition-new(root) {
   mask-repeat: no-repeat;
   mask-mode: alpha;
+}
+
+/* ---------- Phone folds ---------- */
+
+/* Long text on a phone sits behind a "Read more" button. The markup is always complete (no-JS and wide screens
+   show everything); a small inline script on the page folds [data-fold] blocks only below 700px and adds this button. */
+[data-fold][hidden] {
+  display: none !important;
+}
+
+.fold-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.1rem;
+  border: var(--hairline);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-size: var(--text-body);
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease-out);
+}
+
+.fold-toggle[hidden] {
+  display: none;
+}
+
+.fold-toggle::after {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-0.12rem) rotate(45deg);
+  transition: transform 0.4s var(--ease-out);
+}
+
+.fold-toggle[aria-expanded='true']::after {
+  transform: translateY(0.08rem) rotate(-135deg);
+}
+
+.fold-toggle:active {
+  background: var(--tag-fill);
+}
+
+[data-fold].is-opened {
+  animation: fold-in 0.6s var(--ease-out);
+}
+
+@keyframes fold-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
 }

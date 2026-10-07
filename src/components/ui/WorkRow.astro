@@ -24,7 +24,13 @@ const details = p.data.discipline ?? p.data.role;
   <a class="wrow" href={href}>
     <div class="wrow__thumb" aria-hidden="true">
       {cover ? (
-        <Image class="wrow__img" src={cover} alt="" widths={[200, 400]} sizes="160px" />
+        <Image
+          class="wrow__img"
+          src={cover}
+          alt=""
+          widths={[200, 400, 700]}
+          sizes="(max-width: 699px) 62vw, 160px"
+        />
       ) : (
         <div class="wrow__img wrow__img--empty"></div>
       )}
@@ -230,6 +236,23 @@ const details = p.data.discipline ?? p.data.role;
     .wrow__more-inner,
     .wrow__arrow {
       transition: none;
+    }
+  }
+
+  /* Phones: the list at rest, as on desktop before the hover (thumbnail, title, number between hairlines). With no hover
+     to open a row, the details stay out; the whole row is the link. */
+  @media (max-width: 699px) {
+    .wrow {
+      align-items: center;
+      grid-template-areas: 'thumb title';
+    }
+
+    .wrow__more {
+      display: none;
+    }
+
+    .wrow__thumb {
+      border-radius: var(--radius-sm);
     }
   }
 </style>

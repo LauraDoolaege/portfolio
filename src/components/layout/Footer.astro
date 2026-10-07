@@ -18,7 +18,8 @@ const email = 'laura.doolaege@student.howest.be';
 
     <div class="footer__sign">
       <p class="footer__ask subtitle">
-        Looking for a 12 to 14 week internship from February to May 2027. Preferably with a strong focus on user experience design, interaction design, digital design.
+        Looking for a 12 to 14 week internship from February to May 2027. Preferably with a strong
+        focus on user experience design, interaction design, digital design.
       </p>
       <Signature class="footer__signature" />
     </div>
@@ -34,6 +35,53 @@ const email = 'laura.doolaege@student.howest.be';
         Download CV
       </Button>
       <p class="footer__legal">© Laura Doolaege, 2026</p>
+    </div>
+
+    <!-- Phones: the same three links as big, soft, outlined tiles that are easy to hit with a thumb -->
+    <div class="footer__tiles">
+      <a class="tile tile--wide" href={`mailto:${email}`}>
+        <span class="tile__text">
+          <span class="tile__label tag">Email</span>
+          <span class="tile__value">{email}</span>
+        </span>
+        <svg class="tile__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path
+            d="M3 9L9 3M4 3h5v5"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="square"
+          />
+        </svg>
+      </a>
+      <a class="tile" href="#" target="_blank" rel="noopener">
+        <span class="tile__text">
+          <span class="tile__label tag">Say hi</span>
+          <span class="tile__value">LinkedIn</span>
+        </span>
+        <svg class="tile__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path
+            d="M3 9L9 3M4 3h5v5"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="square"
+          />
+        </svg>
+      </a>
+      <a class="tile" href="#">
+        <span class="tile__text">
+          <span class="tile__label tag">PDF</span>
+          <span class="tile__value">Download CV</span>
+        </span>
+        <svg class="tile__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path
+            d="M6 1.5v6.5M3.5 5.5L6 8l2.5-2.5M1.5 10.5h9"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="square"
+          />
+        </svg>
+      </a>
+      <p class="footer__legal footer__legal--phone">© Laura Doolaege, 2026</p>
     </div>
   </div>
 </footer>
@@ -101,6 +149,80 @@ const email = 'laura.doolaege@student.howest.be';
   .footer__legal {
     margin-left: auto;
     color: var(--text-muted);
+  }
+
+  .footer__tiles {
+    display: none;
+  }
+
+  /* Phones: text links in a wrapping row are fiddly, so the links become tiles (the address gets a full-width one) */
+  @media (max-width: 699px) {
+    .footer__links {
+      display: none;
+    }
+
+    .footer__tiles {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 2.5rem;
+    }
+
+    .tile {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 0.75rem;
+      min-height: 5rem;
+      padding: 1rem 1.1rem;
+      border: var(--hairline);
+      border-radius: var(--radius);
+      transition: background-color 0.3s var(--ease-out);
+    }
+
+    .tile:active {
+      background: var(--tag-fill);
+    }
+
+    .tile--wide {
+      grid-column: 1 / -1;
+    }
+
+    .tile__text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      min-width: 0;
+    }
+
+    .tile__label {
+      padding: 0;
+      color: var(--text-muted);
+    }
+
+    .tile__value {
+      font-size: var(--text-body);
+      font-weight: var(--weight-medium);
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .tile__icon {
+      flex: none;
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .footer__legal--phone {
+      grid-column: 1 / -1;
+      margin: 0.75rem 0 0;
+    }
+  }
+
+  @media (min-width: 700px) {
+    .footer__legal--phone {
+      display: none;
+    }
   }
 </style>
 

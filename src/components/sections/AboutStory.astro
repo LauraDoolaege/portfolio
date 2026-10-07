@@ -87,11 +87,20 @@ const paragraphs = [
       </figure>
 
       <div class="story__text">
-        {paragraphs.map((p) => (
-          <p class="text" data-reveal>
-            {p}
-          </p>
-        ))}
+        <p class="text" data-reveal>
+          {paragraphs[0]}
+        </p>
+        <div
+          class="story__more"
+          data-reveal
+          data-fold
+          data-fold-more="Read more"
+          data-fold-less="Show less"
+        >
+          {paragraphs.slice(1).map((p) => (
+            <p class="text">{p}</p>
+          ))}
+        </div>
       </div>
     </div>
   </div>
@@ -186,6 +195,12 @@ const paragraphs = [
 
   .story__text .text {
     max-width: 52ch;
+  }
+
+  /* The rest of the story: folded behind "Read more" on phones (see the inline script in about.astro) */
+  .story__more {
+    display: grid;
+    gap: 1.1em;
   }
 
   /* Tablet and up: portrait and text side by side on the 12 columns (portrait in 4, text in 5-12), wider

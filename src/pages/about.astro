@@ -104,10 +104,49 @@ const background = [
             label="Background"
             title="Where I’ve been"
             groups={background}
+            foldFrom={1}
+            foldLabel="Show full background"
           />
         </div>
       </div>
       <AboutClosing />
+      <script is:inline>
+        // Phones (<700px): blocks marked data-fold sit behind a "Read more" button. Everything stays in the markup,
+        // so no-JS visitors and wider screens see it all. Runs inline, below the fold, so nothing flashes.
+        (function () {
+          var phone = matchMedia('(max-width: 699px)');
+          var folds = Array.prototype.slice.call(document.querySelectorAll('[data-fold]'));
+          folds.forEach(function (fold, n) {
+            if (!fold.id) fold.id = 'fold-' + n;
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'fold-toggle';
+            btn.setAttribute('aria-controls', fold.id);
+            btn.addEventListener('click', function () {
+              set(btn.getAttribute('aria-expanded') !== 'true');
+              if (btn.getAttribute('aria-expanded') === 'true') fold.classList.add('is-opened');
+            });
+            function set(open) {
+              btn.setAttribute('aria-expanded', String(open));
+              btn.textContent = open ? fold.dataset.foldLess : fold.dataset.foldMore;
+              fold.hidden = !open;
+              if (!open) fold.classList.remove('is-opened');
+            }
+            fold.after(btn);
+            fold._fold = { set: set, btn: btn };
+          });
+          function apply() {
+            folds.forEach(function (fold) {
+              var f = fold._fold;
+              f.btn.hidden = !phone.matches;
+              f.set(false);
+              if (!phone.matches) fold.hidden = false;
+            });
+          }
+          apply();
+          phone.addEventListener('change', apply);
+        })();
+      </script>
     </main>
     <Footer />
   </div>

@@ -8,9 +8,12 @@ interface Props {
   title: string;
   id: string;
   groups: { title?: string; rows: { label: string; items: string }[] }[];
+  /** On phones, rows from this index on sit behind a "Show more" button (every row stays in the markup) */
+  foldFrom?: number;
+  foldLabel?: string;
 }
 
-const { label, title, id, groups } = Astro.props;
+const { label, title, id, groups, foldFrom, foldLabel = 'Show more' } = Astro.props;
 ---
 
 <section class="sec" aria-labelledby={id}>
@@ -27,18 +30,30 @@ const { label, title, id, groups } = Astro.props;
         <h3 class="ledger__group-title tag" data-reveal>
           {g.title}
         </h3>
-        <ul>
-          {g.rows.map((r) => (
-            <li class="ledger__row" data-reveal>
-              {g.title ? (
-                <h4 class="ledger__label">{r.label}</h4>
-              ) : (
-                <h3 class="ledger__label">{r.label}</h3>
-              )}
-              <p class="ledger__items text">{r.items}</p>
-            </li>
-          ))}
-        </ul>
+        {[g.rows.slice(0, foldFrom ?? g.rows.length), g.rows.slice(foldFrom ?? g.rows.length)].map(
+          (rows, part) =>
+            rows.length > 0 && (
+              <div
+                class={part ? 'ledger__fold' : undefined}
+                data-fold={part ? '' : undefined}
+                data-fold-more={part ? foldLabel : undefined}
+                data-fold-less={part ? 'Show less' : undefined}
+              >
+                <ul>
+                  {rows.map((r) => (
+                    <li class="ledger__row" data-reveal>
+                      {g.title ? (
+                        <h4 class="ledger__label">{r.label}</h4>
+                      ) : (
+                        <h3 class="ledger__label">{r.label}</h3>
+                      )}
+                      <p class="ledger__items text">{r.items}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ),
+        )}
       </div>
     ))}
   </div>
@@ -63,6 +78,11 @@ const { label, title, id, groups } = Astro.props;
 
   /* The one rule in this section: between rows */
   .ledger__row + .ledger__row {
+    border-top: var(--hairline);
+  }
+
+  /* Rows that fold away on phones start with their own rule, since they are a separate list */
+  .ledger__fold > ul > .ledger__row:first-child {
     border-top: var(--hairline);
   }
 

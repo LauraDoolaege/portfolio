@@ -406,6 +406,60 @@ import portrait from '../../assets/images/hero_portrait.png';
     display: none;
   }
 
+  /* ---------- Phones: one left edge ----------
+     Centred, the wrapped "UX / Designer" line picked up the big line's word gap as an indent and nothing shared an
+     axis. On a phone everything now hangs from the page margin: label, title, intro, button. */
+  @media (max-width: 699px) {
+    .hero__field {
+      align-items: stretch;
+    }
+
+    .hero__stage {
+      align-items: flex-start;
+    }
+
+    .hero__block {
+      margin-inline: 0;
+    }
+
+    .hero__top {
+      justify-content: flex-start;
+      font-size: clamp(18px, 5vw, 22px);
+    }
+
+    .hero__big {
+      font-size: clamp(52px, 16.5vw, 96px);
+      white-space: normal;
+    }
+
+    .hero__big-line {
+      display: block;
+    }
+
+    .hero__big-line + .hero__big-line {
+      margin-left: 0;
+    }
+
+    .hero__lede {
+      align-items: stretch;
+    }
+
+    .hero__intro {
+      max-width: 30ch;
+      font-size: 1rem;
+      text-align: left;
+    }
+
+    .hero__ctas {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .hero__ctas :global(.btn) {
+      width: 100%;
+    }
+  }
+
   /* ---------- Desktop: title left, hairline, intro + CTAs right ---------- */
 
   @media (min-width: 1000px) {

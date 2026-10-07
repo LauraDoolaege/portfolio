@@ -63,6 +63,8 @@ const defaultRatio = size === 'narrow' ? '4 / 5' : '16 / 10';
      button itself ignores the pointer and only carries focus. */
   .case-image__frame {
     position: relative;
+    overflow: hidden;
+    border-radius: var(--radius);
   }
 
   .case-image__open {

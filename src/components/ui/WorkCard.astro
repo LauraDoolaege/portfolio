@@ -166,4 +166,25 @@ const tools = p.data.tools.slice(0, 3);
     line-height: 1.2;
     color: var(--text-muted);
   }
+
+  /* Phones: image on top (rounded like every phone image), text and tools under it, no outline */
+  @media (max-width: 699px) {
+    .card__body {
+      margin-top: 1.1rem;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .card__top {
+      margin-bottom: 0.5rem;
+    }
+
+    .card__tags {
+      margin-top: 1.1rem;
+    }
+
+    .card__chip {
+      border-radius: var(--radius-sm);
+    }
+  }
 </style>

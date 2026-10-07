@@ -139,6 +139,10 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
         <p class="why__close" data-reveal>and I want to answer both!</p>
       </li>
     </ol>
+    <!-- Phones: the answers swipe sideways, and the progress segments sit under the track -->
+    <div class="why__bars why__bars--below" aria-hidden="true">
+      {[...columns, null].map(() => <span class="why__bar"></span>)}
+    </div>
   </div>
 </section>
 
@@ -423,6 +427,77 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       background: var(--text-main);
     }
   }
+
+  .why__bars--below {
+    display: none;
+  }
+
+  /* Phones: the two questions (and the closing line) become swipeable cards in a native scroll-snap track:
+     no scroll hijack, so the page itself always scrolls. The next card peeks in as the hint to swipe. */
+  @media (max-width: 699px) {
+    .why__list {
+      display: flex;
+      gap: 0.9rem;
+      margin-top: clamp(1.5rem, 1rem + 3vw, 2.5rem);
+      margin-inline: calc(var(--page-margin) * -1);
+      padding: 1.5rem var(--page-margin);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--page-margin);
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .why__list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .why__item {
+      flex: 0 0 min(88%, 22rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1.25rem;
+      padding: 1.25rem;
+      border: var(--hairline);
+      border-radius: var(--radius);
+      scroll-snap-align: start;
+    }
+
+    .why__item--close {
+      justify-content: center;
+    }
+
+    .why__question {
+      max-width: none;
+      font-size: clamp(1.625rem, 1.2rem + 1.8vw, 2rem);
+    }
+
+    .why__close {
+      font-size: clamp(2rem, 1.5rem + 2vw, 2.5rem);
+    }
+
+    .why__answer {
+      margin-top: 0;
+    }
+
+    .why__bars--below {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .why__bar {
+      width: 2.25rem;
+      height: 2px;
+      background: var(--border-color);
+      transition: background-color 0.5s var(--ease-out);
+    }
+
+    .why__bar.is-active {
+      background: var(--text-main);
+    }
+  }
 </style>
 
 <script>
@@ -430,6 +505,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
   const items = Array.from(document.querySelectorAll<HTMLElement>('[data-why-item]'));
   const bars = Array.from(document.querySelectorAll<HTMLElement>('.why__bar'));
   const desktop = matchMedia('(min-width: 1000px)');
+  const phone = matchMedia('(max-width: 699px)');
 
   if (grid && items.length) {
     // Armed by script, so no-JS visitors and narrow screens just see everything at full strength
@@ -438,8 +514,28 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       // On the closing step every segment goes dark: both answers
       const closing = index === items.length - 1;
       grid.classList.toggle('is-closing', closing);
-      bars.forEach((el, i) => el.classList.toggle('is-active', closing || i === index));
+      bars.forEach((el, i) => el.classList.toggle('is-active', closing || i % items.length === index));
     };
+
+    // Phones: the progress segments follow the card the swipe has settled on
+    const track = grid.querySelector<HTMLElement>('.why__list');
+    if (track) {
+      let queued = false;
+      track.addEventListener(
+        'scroll',
+        () => {
+          if (queued || !phone.matches) return;
+          queued = true;
+          requestAnimationFrame(() => {
+            queued = false;
+            const step = items[0].offsetWidth + 14;
+            activate(Math.min(items.length - 1, Math.max(0, Math.round(track.scrollLeft / step))));
+          });
+        },
+        { passive: true },
+      );
+      if (phone.matches) activate(0);
+    }
 
     // The marks in a block are drawn the first time it becomes active, and stay
     const marks = Array.from(document.querySelectorAll<SVGElement>('[data-why-mark]'));
@@ -453,7 +549,8 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          activate(items.indexOf(entry.target as HTMLElement));
+          // On phones the active card follows the sideways swipe (below), not the vertical position
+          if (!phone.matches) activate(items.indexOf(entry.target as HTMLElement));
           draw(entry.target as HTMLElement);
         }
       },

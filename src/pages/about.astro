@@ -1,14 +1,26 @@
 ---
 // About: the same rhythm as the homepage. Hero, then ruled-free sections with a label and a title
-// (journey, approach, toolkit, background), and a closing step.
+// (journey, toolkit, background, off the clock), and a closing step.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import AboutManifesto from '../components/sections/AboutManifesto.astro';
 import AboutStory from '../components/sections/AboutStory.astro';
-import AboutApproach from '../components/sections/AboutApproach.astro';
+import AboutProse from '../components/sections/AboutProse.astro';
 import AboutLedger from '../components/sections/AboutLedger.astro';
 import AboutClosing from '../components/sections/AboutClosing.astro';
+import ContentsNav from '../components/ContentsNav.astro';
 import Footer from '../components/layout/Footer.astro';
+
+const offClock = [
+  'Outside of work, I’m walking my dog, Lemmy, baking something, or watching a funny show. I’ve played The Sims since I was ten, so designing little worlds has been a habit for a while.',
+];
+
+const contents = [
+  { slug: 'story-title', text: 'The journey' },
+  { slug: 'toolkit-title', text: 'Toolkit' },
+  { slug: 'background-title', text: 'Background' },
+  { slug: 'offclock-title', text: 'Off the clock' },
+];
 
 const toolkit = [
   {
@@ -72,22 +84,63 @@ const background = [
     <Header />
     <main id="main">
       <AboutManifesto />
-      <AboutStory />
-      <AboutApproach />
-      <AboutLedger id="toolkit-title" label="Toolkit" title="What I work with" groups={toolkit} />
-      <AboutLedger
-        id="background-title"
-        label="Background"
-        title="Where I’ve been"
-        groups={background}
-      />
-      <AboutClosing />
+      <div class="container about">
+        <ContentsNav items={contents} />
+        <div class="about__main">
+          <AboutStory />
+          <AboutLedger
+            id="toolkit-title"
+            label="Toolkit"
+            title="What I work with"
+            groups={toolkit}
+          />
+          <AboutLedger
+            id="background-title"
+            label="Background"
+            title="Where I’ve been"
+            groups={background}
+          />
+          <AboutProse
+            id="offclock-title"
+            label="Outside the screen"
+            title="Off the clock"
+            paragraphs={offClock}
+          />
+          <AboutClosing />
+        </div>
+      </div>
     </main>
     <Footer />
   </div>
 </BaseLayout>
 
 <style>
+  /* Same shape as the case pages: contents list left (sticky), the sections right. The sections bring their own
+     .container, so inside this column it drops its side padding. */
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about__main {
+    min-width: 0;
+  }
+
+  .about__main :global(.container) {
+    padding-inline: 0;
+  }
+
+  .about__main :global(.sec-title) {
+    scroll-margin-top: 8rem;
+  }
+
+  @media (min-width: 1000px) {
+    .about {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      column-gap: clamp(3rem, 2rem + 5vw, 8rem);
+    }
+  }
+
   .page {
     display: flex;
     flex-direction: column;

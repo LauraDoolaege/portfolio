@@ -1,0 +1,55 @@
+---
+// A short prose section for About: standard section header, then paragraphs set in the story's reading column
+// (columns 6-11 on desktop, full width below).
+import SectionLabel from '../ui/SectionLabel.astro';
+
+interface Props {
+  label: string;
+  title: string;
+  id: string;
+  paragraphs: string[];
+}
+
+const { label, title, id, paragraphs } = Astro.props;
+---
+
+<section class="sec" aria-labelledby={id}>
+  <div class="container">
+    <header class="sec__head">
+      <SectionLabel text={label} data-reveal />
+      <h2 id={id} class="sec-title" data-reveal>
+        {title}
+      </h2>
+    </header>
+
+    <div class="prose">
+      {paragraphs.map((p) => (
+        <p class="text" data-reveal>
+          {p}
+        </p>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .prose {
+    display: grid;
+    gap: 1.1em;
+  }
+
+  .prose .text {
+    max-width: 52ch;
+  }
+
+  @media (min-width: 1000px) {
+    .prose {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+    }
+
+    .prose .text {
+      grid-column: 6 / span 6;
+    }
+  }
+</style>

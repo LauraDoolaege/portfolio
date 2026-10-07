@@ -1,0 +1,91 @@
+---
+// A ledger section for About (toolkit, background): standard section header, then groups of rows laid out like the
+// homepage's desk ledger: label in columns 1-4, details in 5-12, one soft rule between rows only.
+import SectionLabel from '../ui/SectionLabel.astro';
+
+interface Props {
+  label: string;
+  title: string;
+  id: string;
+  groups: { title: string; rows: { label: string; items: string }[] }[];
+}
+
+const { label, title, id, groups } = Astro.props;
+---
+
+<section class="sec" aria-labelledby={id}>
+  <div class="container">
+    <header class="sec__head">
+      <SectionLabel text={label} data-reveal />
+      <h2 id={id} class="sec-title" data-reveal>
+        {title}
+      </h2>
+    </header>
+
+    {groups.map((g) => (
+      <div class="ledger__group">
+        <h3 class="ledger__group-title tag" data-reveal>
+          {g.title}
+        </h3>
+        <ul>
+          {g.rows.map((r) => (
+            <li class="ledger__row" data-reveal>
+              <h4 class="ledger__label">{r.label}</h4>
+              <p class="ledger__items text">{r.items}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .ledger__group + .ledger__group {
+    margin-top: clamp(2.5rem, 2rem + 3vw, 5rem);
+  }
+
+  .ledger__group-title {
+    color: var(--text-muted);
+  }
+
+  .ledger__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+    padding-block: clamp(1.25rem, 1rem + 1vw, 2rem);
+  }
+
+  /* The one rule in this section: between rows */
+  .ledger__row + .ledger__row {
+    border-top: var(--hairline);
+  }
+
+  .ledger__label {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    line-height: 1.15;
+    letter-spacing: var(--tracking-display);
+    text-wrap: balance;
+  }
+
+  .ledger__items {
+    max-width: 52ch;
+  }
+
+  @media (min-width: 1000px) {
+    .ledger__row {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+      align-items: baseline;
+    }
+
+    .ledger__label {
+      grid-column: 1 / 5;
+    }
+
+    .ledger__items {
+      grid-column: 5 / 13;
+    }
+  }
+</style>

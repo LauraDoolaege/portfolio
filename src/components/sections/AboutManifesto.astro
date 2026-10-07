@@ -19,13 +19,14 @@
 </section>
 
 <style>
+  /* The sections below bring their own top padding, so the hero only needs a short tail */
   .manifesto-hero {
-    padding-block: clamp(3rem, 2rem + 6vw, 9rem) var(--space-section);
+    padding-block: clamp(3rem, 2rem + 6vw, 9rem) clamp(1rem, 0.5rem + 2vw, 3rem);
   }
 
   .manifesto-hero__title {
     max-width: 16em;
-    font-size: clamp(2.75rem, 1rem + 8.4vw, 10.5rem);
+    font-size: clamp(2.75rem, 1rem + 7vw, 8.5rem);
     line-height: 0.98;
     text-wrap: balance;
   }

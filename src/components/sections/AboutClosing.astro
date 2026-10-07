@@ -1,0 +1,35 @@
+---
+// Closing step: a hairline, one line, one button (the same pattern as the case pages' closing CTA).
+// Contact details live in the footer, so this only points on to the work.
+import Button from '../ui/Button.astro';
+import { withBase } from '../../utils/url';
+---
+
+<section class="container closing" aria-label="Next step">
+  <p class="closing__text lede">Curious what this looks like in practice?</p>
+  <Button href={`${withBase('/')}#work`}>See the work</Button>
+</section>
+
+<style>
+  .closing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: var(--space-section);
+    padding-block: clamp(2rem, 1rem + 3vw, 3.5rem) 0;
+    border-top: var(--hairline);
+  }
+
+  .closing__text {
+    max-width: 24ch;
+  }
+
+  @media (min-width: 700px) {
+    .closing {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+</style>

@@ -1,8 +1,9 @@
 ---
-// The one section label used across the homepage: "[ 01 ] Philosophy". Styling lives in global.css (.section-label)
-// so every label is identical; extra attributes (e.g. data-reveal) pass through.
+// The one section label used across the site: "[ 01 ] Philosophy" on the homepage, or just "Toolkit" when no
+// number is given (About). Styling lives in global.css (.section-label) so every label is identical; extra
+// attributes (e.g. data-reveal) pass through.
 interface Props {
-  num: string;
+  num?: string;
   text?: string;
   [attr: string]: unknown;
 }
@@ -11,5 +12,5 @@ const { num, text, ...rest } = Astro.props;
 ---
 
 <p class="section-label tag" {...rest}>
-  [ {num} ]{text && ` ${text}`}
+  {num ? `[ ${num} ]${text ? ` ${text}` : ''}` : text}
 </p>

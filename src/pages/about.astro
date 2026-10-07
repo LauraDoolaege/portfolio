@@ -1,12 +1,67 @@
 ---
-// About: a narrative flow. Manifesto, journey, approach quote, toolkit.
+// About: the same rhythm as the homepage. Hero, then ruled-free sections with a label and a title
+// (journey, approach, toolkit, background), and a closing step.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import AboutManifesto from '../components/sections/AboutManifesto.astro';
 import AboutStory from '../components/sections/AboutStory.astro';
 import AboutApproach from '../components/sections/AboutApproach.astro';
-import AboutToolkit from '../components/sections/AboutToolkit.astro';
+import AboutLedger from '../components/sections/AboutLedger.astro';
+import AboutClosing from '../components/sections/AboutClosing.astro';
 import Footer from '../components/layout/Footer.astro';
+
+const toolkit = [
+  {
+    title: 'Skills',
+    rows: [
+      {
+        label: 'UX & Research',
+        items:
+          'User interviews, insight gathering, wireframing, paper and digital prototyping, user testing, UI design, information architecture, data analysis, creative data visualisation',
+      },
+      { label: 'Visual', items: 'Brand identity, campaign design, motion, 3D' },
+      {
+        label: 'Marketing & Communication',
+        items:
+          'Content strategy, copywriting, persuasion & nudging, workshop facilitation, pitching and presenting',
+      },
+    ],
+  },
+  {
+    title: 'Tools',
+    rows: [
+      { label: 'Design', items: 'Figma, Photoshop, Illustrator, After Effects, Blender' },
+      { label: 'Research & code', items: 'SPSS, VS Code' },
+    ],
+  },
+];
+
+const background = [
+  {
+    title: 'Experience',
+    rows: [
+      {
+        label: 'Marketing & Communication Intern, CAW Oost-Vlaanderen',
+        items:
+          'Planned content and created social media posts for key dates, wrote letters to policy makers across Belgium, and led a workshop on my own to restructure the new website’s content.',
+      },
+    ],
+  },
+  {
+    title: 'Education',
+    rows: [
+      {
+        label: 'Digital Design & Development (Devine)',
+        items: 'Howest Kortrijk, 2024 to now, major in UX design.',
+      },
+      {
+        label: 'Bachelor in Marketing Communication',
+        items:
+          'Cum laude. Thesis: how do you get colleagues to actually contribute to the internal newsletter? Researched through Cialdini’s principles of persuasion and nudging.',
+      },
+    ],
+  },
+];
 ---
 
 <BaseLayout
@@ -19,7 +74,14 @@ import Footer from '../components/layout/Footer.astro';
       <AboutManifesto />
       <AboutStory />
       <AboutApproach />
-      <AboutToolkit />
+      <AboutLedger id="toolkit-title" label="Toolkit" title="What I work with" groups={toolkit} />
+      <AboutLedger
+        id="background-title"
+        label="Background"
+        title="Where I’ve been"
+        groups={background}
+      />
+      <AboutClosing />
     </main>
     <Footer />
   </div>
@@ -32,3 +94,7 @@ import Footer from '../components/layout/Footer.astro';
     min-height: 100dvh;
   }
 </style>
+
+<script>
+  import '../scripts/reveal';
+</script>

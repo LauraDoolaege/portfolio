@@ -131,7 +131,8 @@ const email = 'laura.doolaege@student.howest.be';
   }
 
   :global(.footer__signature) {
-    width: clamp(6rem, 14vw, 12rem);
+    --sig-w: clamp(6rem, 14vw, 12rem);
+    width: var(--sig-w);
     height: auto;
     margin-left: auto;
     margin-right: clamp(0rem, 3vw, 4rem);

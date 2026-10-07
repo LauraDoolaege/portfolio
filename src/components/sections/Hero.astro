@@ -66,6 +66,11 @@ import portrait from '../../assets/images/hero_portrait.png';
           Resume
         </Button>
       </div>
+      <!-- Phones: the availability sits right under the Resume button (above the fold); the strip's own copy is hidden there -->
+      <p class="hero__status-phone" data-line>
+        <span class="hero__dot" aria-hidden="true"></span>
+        Seeking internship (Feb 2027)
+      </p>
     </div>
 
     <!-- The signature: one overlay over the whole field. aria-hidden, the CTAs carry the meaning. -->
@@ -160,7 +165,7 @@ import portrait from '../../assets/images/hero_portrait.png';
 <style>
   .hero {
     /* Its own stacking context above the sections that follow, so the signature stays on top when it is dragged
-         out of the header instead of being cut off by the next section */
+               out of the header instead of being cut off by the next section */
     position: relative;
     z-index: 20;
     /* Fills the first viewport under the nav (~4.1rem): the strip sits on the fold */
@@ -374,6 +379,13 @@ import portrait from '../../assets/images/hero_portrait.png';
     stroke-linejoin: round;
   }
 
+  /* Phones: the drawing is small, so the line is lighter (it was 6) */
+  @media (max-width: 699px) {
+    .hero__rope-line {
+      stroke-width: 3.5;
+    }
+  }
+
   @media (min-width: 1000px) {
     .hero__rope-line {
       stroke-width: 8;
@@ -410,6 +422,11 @@ import portrait from '../../assets/images/hero_portrait.png';
      Centred, the wrapped "UX / Designer" line picked up the big line's word gap as an indent and nothing shared an
      axis. On a phone everything now hangs from the page margin: label, title, intro, button. */
   @media (max-width: 699px) {
+    /* No forced full-screen height: the strip follows the content, with the availability above it */
+    .hero {
+      min-height: 0;
+    }
+
     .hero__field {
       align-items: stretch;
     }
@@ -465,7 +482,7 @@ import portrait from '../../assets/images/hero_portrait.png';
   @media (min-width: 1000px) {
     .hero {
       /* One inset runs all the way round: page edge, divider, nav rule, strip rule. The right column
-                                 (--col) is shared with the strip below, so the divider is one unbroken line. */
+                                             (--col) is shared with the strip below, so the divider is one unbroken line. */
       --inset: var(--page-margin);
       --col: clamp(18rem, 26vw, 26rem);
     }
@@ -499,7 +516,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* "Designer" is the widest line: the font is sized so it runs almost to the divider.
-                   It measures 4.51em wide at this tracking; the divisor leaves a little air before the divider. */
+                         It measures 4.51em wide at this tracking; the divisor leaves a little air before the divider. */
     .hero__big {
       font-size: clamp(52px, calc((100vw - var(--col) - 2 * var(--inset)) / 4.62), 340px);
       /* Pulls the box up to the baseline so the glyph bottoms, not the line box, meet the button */
@@ -511,7 +528,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* Optical alignment: the U and the D start ~0.06em inside their box, so pull them (and the
-                 light words above) back so every left edge lands on the page margin, in line with the strip */
+                       light words above) back so every left edge lands on the page margin, in line with the strip */
     .hero__big-line:first-child {
       margin-left: -0.055em;
     }
@@ -525,7 +542,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* Right column: the vertical hairline runs the full height of the hero and on through the strip.
-                   Everything inside keeps the same inset from the divider, the nav rule, the right edge and the strip rule. */
+                         Everything inside keeps the same inset from the divider, the nav rule, the right edge and the strip rule. */
     .hero__aside {
       align-self: stretch;
       justify-content: flex-start;
@@ -591,7 +608,7 @@ import portrait from '../../assets/images/hero_portrait.png';
 
   @media (max-width: 999px) {
     /* Room above the words for the signature: it rests centred above the "Marketer turned" row.
-                   At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+                         At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
     .hero__stage {
       padding-top: 192px;
     }
@@ -658,8 +675,38 @@ import portrait from '../../assets/images/hero_portrait.png';
     border-left: var(--hairline);
   }
 
+  .hero__status-phone {
+    display: none;
+  }
+
   /* Phones: stacked, the rule becomes a line above the second link */
   @media (max-width: 719px) {
+    .hero__status-phone {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      font-size: var(--text-small);
+      font-weight: var(--weight-medium);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero__cell--status {
+      display: none;
+    }
+
+    /* The whole row is the link (44px+), not just its text */
+    .hero__item {
+      padding-block: 0;
+      padding-right: 0;
+    }
+
+    .hero__item :global(.btn-link) {
+      width: 100%;
+      min-height: 3.25rem;
+      justify-content: space-between;
+    }
+
     .hero__cell--links {
       flex-direction: column;
     }

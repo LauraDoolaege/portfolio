@@ -30,17 +30,12 @@ const { class: className } = Astro.props;
   .signature path {
     fill: none;
     stroke: var(--accent);
-    /* Constant on-screen weight, matching the hero rope at its size */
-    stroke-width: 6px;
+    /* Same weight as the hero rope relative to the drawing: the rope is 8px on a ~475px mark (about 1.7% of its
+         width), so this smaller copy gets 1.7% of its own width, never thinner than 2px (--sig-w is set by the footer) */
+    stroke-width: max(2px, calc(var(--sig-w, 12rem) * 0.0169));
     vector-effect: non-scaling-stroke;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
-
-  @media (min-width: 1000px) {
-    .signature path {
-      stroke-width: 8px;
-    }
   }
 
   /* Armed by the script (so no-JS and reduced-motion visitors see the finished mark), then drawn in on scroll */

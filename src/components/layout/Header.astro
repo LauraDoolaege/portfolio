@@ -50,11 +50,13 @@ const currentPath = Astro.url.pathname;
   </div>
 
   <!-- Phones: the links move into a full-screen menu in the inverted palette -->
-  <div class="menu" id="mobile-menu" aria-label="Menu" hidden>
+  <div class="menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
     <ul class="menu__links">
       {links.map((l) => (
         <li>
-          <a href={l.href} class="menu__link">{l.label}</a>
+          <a href={l.href} class="menu__link">
+            {l.label}
+          </a>
         </li>
       ))}
     </ul>
@@ -129,11 +131,12 @@ const currentPath = Astro.url.pathname;
     z-index: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 5rem var(--page-margin) 3rem;
     background: var(--text-main);
     color: var(--bg-primary);
-    text-align: center;
+    /* Left-aligned like every page: the links hang from the page margin */
+    text-align: left;
   }
 
   .menu[hidden] {
@@ -144,35 +147,27 @@ const currentPath = Astro.url.pathname;
   .menu .menu__theme {
     position: absolute;
     right: auto;
-    bottom: 2.5rem;
-    left: 50%;
+    bottom: 2rem;
+    left: var(--page-margin);
     z-index: auto;
-    transform: translateX(-50%);
-    padding: 0.9rem 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.9rem 0;
     color: var(--bg-primary);
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     white-space: nowrap;
   }
 
-  .menu .menu__theme .theme-toggle__label::before {
-    content: '( ';
-  }
-
-  .menu .menu__theme .theme-toggle__label::after {
-    content: ' )';
-  }
-
   .menu__links {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: clamp(1rem, 4vh, 2rem);
   }
 
   .menu__link {
     display: block;
-    padding: 0.2em 0.4em;
+    padding: 0.2em 0;
     font-size: clamp(2.75rem, 1.5rem + 11vw, 4.5rem);
     font-weight: var(--weight-heavy);
     letter-spacing: var(--tracking-display);
@@ -301,8 +296,8 @@ const currentPath = Astro.url.pathname;
     transform: scaleX(1);
   }
 
-  /* Touch: the marks stay small, their hit areas grow to ~44px without moving anything */
-  @media (hover: none) {
+  /* Touch and phone widths: the marks stay small, their hit areas grow to ~44px without moving anything */
+  @media (hover: none), (max-width: 719px) {
     .site-header__name,
     .site-header__links a,
     .site-header__links .theme-toggle {
@@ -343,6 +338,8 @@ const currentPath = Astro.url.pathname;
     if (!button || !menu) return;
     menu.hidden = !open;
     root.classList.toggle('menu-open', open);
+    // The page behind an open menu is out of reach (Tab, screen reader and pointer alike)
+    document.querySelectorAll('main, footer').forEach((el) => el.toggleAttribute('inert', open));
     button.setAttribute('aria-expanded', String(open));
     button.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   }
@@ -354,7 +351,8 @@ const currentPath = Astro.url.pathname;
     } else {
       set(open);
       // No View Transitions: a plain fade in
-      if (open && animate && !reduce()) menu.animate({ opacity: [0, 1] }, { duration: 400, easing: 'ease-out' });
+      if (open && animate && !reduce())
+        menu.animate({ opacity: [0, 1] }, { duration: 400, easing: 'ease-out' });
     }
     if (open) menu.querySelector<HTMLElement>('a')?.focus({ preventScroll: true });
     else if (animate) button.focus({ preventScroll: true });
@@ -367,6 +365,19 @@ const currentPath = Astro.url.pathname;
   });
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') toggle(false);
+    // Focus stays inside the open menu: the toggle, the links and the theme button, in a loop
+    if (e.key === 'Tab' && root.classList.contains('menu-open') && button && menu) {
+      const ring = [button, ...Array.from(menu.querySelectorAll<HTMLElement>('a, button'))];
+      const first = ring[0];
+      const last = ring[ring.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
   });
   wide.addEventListener('change', () => {
     if (wide.matches) toggle(false, false);

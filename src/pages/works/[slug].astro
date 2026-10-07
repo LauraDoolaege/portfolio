@@ -173,7 +173,8 @@ const caseFacts = facts
 
       <section class="more container" aria-labelledby="more-label">
         <h2 id="more-label" class="more__label tag">
-          More Work
+          <span class="more__label-wide">More Work</span>
+          <span class="more__label-phone">Next project</span>
         </h2>
         <ul class="more__grid">
           {more.map((w) => (
@@ -573,6 +574,29 @@ const caseFacts = facts
 
     .more__item:nth-child(2) {
       margin-top: clamp(2rem, 1rem + 4vw, 5rem);
+    }
+  }
+
+  /* Phones: one next project instead of three stacked cards, and section titles with some size to them */
+  .more__label-phone {
+    display: none;
+  }
+
+  @media (max-width: 699px) {
+    .more__label-wide {
+      display: none;
+    }
+
+    .more__label-phone {
+      display: inline;
+    }
+
+    .more__item:nth-child(n + 2) {
+      display: none;
+    }
+
+    .case__main :global(h2) {
+      font-size: clamp(1.875rem, 1.4rem + 2vw, 2.25rem);
     }
   }
 </style>

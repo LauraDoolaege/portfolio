@@ -20,14 +20,34 @@ const { title, embed, src, poster } = Astro.props;
 <figure class="theater">
   <div class="theater__frame">
     {embed ? (
-      <iframe
-        class="theater__media"
-        src={embed}
-        title={title}
-        loading="lazy"
-        allow="autoplay; fullscreen; picture-in-picture"
-        allowfullscreen
-      ></iframe>
+      <>
+        <!-- Facade: the poster and a play button; the player (and Vimeo's scripts) load only on tap -->
+        <button
+          class="theater__facade"
+          type="button"
+          data-embed={embed}
+          data-title={title}
+          aria-label={`Play ${title}`}
+        >
+          {poster && (
+            <Image
+              class="theater__poster theater__poster--facade"
+              src={poster}
+              alt=""
+              widths={[800, 1400, 2000]}
+              sizes="100vw"
+            />
+          )}
+          <span class="theater__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5.5v13l11-6.5z"></path>
+            </svg>
+          </span>
+        </button>
+        <noscript>
+          <iframe class="theater__media" src={embed} title={title} allowfullscreen></iframe>
+        </noscript>
+      </>
     ) : src ? (
       <video
         class="theater__media"
@@ -111,6 +131,23 @@ const { title, embed, src, poster } = Astro.props;
     padding: 1.1rem 1.1rem 1.1rem 1.35rem;
     border: 1px solid rgba(243, 242, 238, 0.7);
     border-radius: 50%;
+    /* A dark disc behind the ring, so the button reads on any poster */
+    background: rgba(14, 13, 12, 0.55);
+  }
+
+  .theater__facade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .theater__poster--facade {
+    opacity: 0.85;
   }
 
   .theater__label {
@@ -120,3 +157,21 @@ const { title, embed, src, poster } = Astro.props;
     color: rgba(243, 242, 238, 0.8);
   }
 </style>
+
+<script>
+  // Swap each facade for the real player the moment it is tapped
+  document.querySelectorAll<HTMLButtonElement>('.theater__facade').forEach((facade) => {
+    facade.addEventListener('click', () => {
+      const url = facade.dataset.embed;
+      if (!url) return;
+      const frame = document.createElement('iframe');
+      frame.className = 'theater__media';
+      frame.src = url + (url.includes('?') ? '&' : '?') + 'autoplay=1';
+      frame.title = facade.dataset.title ?? '';
+      frame.allow = 'autoplay; fullscreen; picture-in-picture';
+      frame.allowFullscreen = true;
+      facade.replaceWith(frame);
+      frame.focus();
+    });
+  });
+</script>

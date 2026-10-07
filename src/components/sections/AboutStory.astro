@@ -230,6 +230,13 @@ const paragraphs = [
       grid-column: 7 / span 6;
     }
   }
+
+  /* Phones: the marks are drawn small, so the pen is lighter */
+  @media (max-width: 699px) {
+    .story__mark path {
+      stroke-width: 3px;
+    }
+  }
 </style>
 
 <script>

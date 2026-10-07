@@ -42,7 +42,8 @@
   --space-section: clamp(5rem, 3rem + 8vw, 10rem);
   --hairline: 1px solid var(--border-color);
   /* One corner scale for the whole site: square on tablet and desktop, slightly rounded on phones (see below).
-     Buttons, cards, tiles, swipe panels and images all use --radius; small chips and thumbnails use --radius-sm. */
+     Everything uses --radius on phones (buttons, cards, tiles, swipe panels, images, chips, thumbnails); --radius-sm is
+     an alias kept for small elements, equal to --radius. */
   --radius: 0;
   --radius-sm: 0;
 
@@ -69,7 +70,7 @@
 @media (max-width: 699px) {
   :root {
     --radius: 0.625rem;
-    --radius-sm: 0.375rem;
+    --radius-sm: 0.625rem;
   }
 }
 
@@ -533,8 +534,8 @@ button:focus-visible {
   }
 }
 
-/* Touch: text links keep their look but get a ~44px hit area (the underline pseudo-element stays on ::after) */
-@media (hover: none) {
+/* Touch and phone widths: text links keep their look but get a ~44px hit area (the underline pseudo-element stays on ::after) */
+@media (hover: none), (max-width: 719px) {
   .btn-link {
     position: relative;
   }

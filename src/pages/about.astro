@@ -18,8 +18,8 @@ const offClock = [
 const contents = [
   { slug: 'story-title', text: 'The journey' },
   { slug: 'toolkit-title', text: 'Toolkit' },
-  { slug: 'background-title', text: 'Background' },
   { slug: 'offclock-title', text: 'Off the clock' },
+  { slug: 'background-title', text: 'Background' },
 ];
 
 const toolkit = [
@@ -28,14 +28,12 @@ const toolkit = [
     rows: [
       {
         label: 'UX & Research',
-        items:
-          'User interviews, insight gathering, wireframing, paper and digital prototyping, user testing, UI design, information architecture, data analysis, creative data visualisation',
+        items: 'User interviews, wireframing, prototyping, user testing, UI design, data analysis',
       },
       { label: 'Visual', items: 'Brand identity, campaign design, motion, 3D' },
       {
         label: 'Marketing & Communication',
-        items:
-          'Content strategy, copywriting, persuasion & nudging, workshop facilitation, pitching and presenting',
+        items: 'Content strategy, copywriting, persuasion & nudging, workshop facilitation',
       },
     ],
   },
@@ -50,26 +48,20 @@ const toolkit = [
 
 const background = [
   {
-    title: 'Experience',
-    rows: [
-      {
-        label: 'Marketing & Communication Intern, CAW Oost-Vlaanderen',
-        items:
-          'Planned content and created social media posts for key dates, wrote letters to policy makers across Belgium, and led a workshop on my own to restructure the new website’s content.',
-      },
-    ],
-  },
-  {
-    title: 'Education',
     rows: [
       {
         label: 'Digital Design & Development (Devine)',
-        items: 'Howest Kortrijk, 2024 to now, major in UX design.',
+        items: 'Howest Kortrijk, since 2024. Major in UX design.',
       },
       {
         label: 'Bachelor in Marketing Communication',
         items:
           'Cum laude. Thesis: how do you get colleagues to actually contribute to the internal newsletter? Researched through Cialdini’s principles of persuasion and nudging.',
+      },
+      {
+        label: 'Marketing & Communication Intern, CAW Oost-Vlaanderen',
+        items:
+          'Planned content and created social media posts for key dates, wrote letters to policy makers across Belgium, and led a workshop on my own to restructure the new website’s content.',
       },
     ],
   },
@@ -78,13 +70,18 @@ const background = [
 
 <BaseLayout
   title="About | Laura Doolaege"
-  description="Laura's portfolio: digital development & design."
+  description="About Laura Doolaege: UX design student at Howest, with a marketing communication background, looking for an internship from February 2027."
 >
   <div class="page">
     <Header />
     <main id="main">
       <AboutManifesto />
       <div class="container about">
+        <nav class="about__chips" aria-label="Sections">
+          {contents.map((c) => (
+            <a href={`#${c.slug}`}>{c.text}</a>
+          ))}
+        </nav>
         <div class="about__rail">
           <ContentsNav items={contents} />
         </div>
@@ -96,17 +93,17 @@ const background = [
             title="What I work with"
             groups={toolkit}
           />
+          <AboutProse
+            id="offclock-title"
+            label="Beyond the work"
+            title="Off the clock"
+            paragraphs={offClock}
+          />
           <AboutLedger
             id="background-title"
             label="Background"
             title="Where I’ve been"
             groups={background}
-          />
-          <AboutProse
-            id="offclock-title"
-            label="Outside the screen"
-            title="Off the clock"
-            paragraphs={offClock}
           />
         </div>
       </div>
@@ -143,6 +140,32 @@ const background = [
 
   .about__rail {
     display: none;
+  }
+
+  /* Tablets and large phones have no sticky list, so the sections get a short row of anchors under the hero */
+  .about__chips {
+    display: none;
+  }
+
+  @media (min-width: 700px) and (max-width: 999px) {
+    .about__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.75rem;
+      padding-block: 1rem;
+      border-block: var(--hairline);
+    }
+
+    .about__chips a {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      transition: color 0.4s var(--ease-out);
+    }
+
+    .about__chips a:hover,
+    .about__chips a:focus-visible {
+      color: var(--text-main);
+    }
   }
 
   @media (min-width: 1000px) {

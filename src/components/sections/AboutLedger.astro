@@ -7,7 +7,7 @@ interface Props {
   label: string;
   title: string;
   id: string;
-  groups: { title: string; rows: { label: string; items: string }[] }[];
+  groups: { title?: string; rows: { label: string; items: string }[] }[];
 }
 
 const { label, title, id, groups } = Astro.props;
@@ -30,7 +30,11 @@ const { label, title, id, groups } = Astro.props;
         <ul>
           {g.rows.map((r) => (
             <li class="ledger__row" data-reveal>
-              <h4 class="ledger__label">{r.label}</h4>
+              {g.title ? (
+                <h4 class="ledger__label">{r.label}</h4>
+              ) : (
+                <h3 class="ledger__label">{r.label}</h3>
+              )}
               <p class="ledger__items text">{r.items}</p>
             </li>
           ))}
@@ -47,6 +51,7 @@ const { label, title, id, groups } = Astro.props;
 
   .ledger__group-title {
     color: var(--text-muted);
+    font-size: 0.8125rem;
   }
 
   .ledger__row {

@@ -58,12 +58,12 @@ for reinterpretation on a per-page basis.
 
 ## Evidence on Hand
 
-Full, final About page copy was supplied directly by the user (intro,
-"How I got here" origin story with one pull-quote, "How I work," "What
-drives me" list). Homepage is already built and live. No About portrait
-photo exists yet, and whether one is wanted was never confirmed
-(PROJECT_BRIEF.md Open Decisions) — build without one for now. No CV PDF
-yet.
+Homepage is built and live. The About page was rebuilt in October 2026
+on the homepage's section system: a plain "Hi, I'm Laura." hero with a one-line
+ask, a short origin story beside a small portrait (photo_aboutTeaser.png), a
+skills/tools ledger, "Off the clock", a background ledger, and a closing "See
+the work" step, with a sticky contents list like the case pages. Copy is
+Laura's own and final; no pull-quotes. No CV PDF yet.
 
 ## Product Principles
 
@@ -73,7 +73,7 @@ yet.
   read — About is the one place warmth/personality is allowed to lead,
   but it stays grounded, never casual.
 - One disciplined system, applied consistently — About reuses Header,
-  Footer, ContactCTA, Button, SectionMarker rather than inventing
+  Footer, Button, SectionLabel and the contents list rather than inventing
   parallel chrome.
 - Content over decoration — real, final copy already exists for this
   page; don't pad it, don't invent facts.

@@ -66,6 +66,11 @@ const { label, title, id, groups } = Astro.props;
     border-top: var(--hairline);
   }
 
+  /* A group without a title starts right under the section title, not a row-padding lower */
+  .ledger__group:not(:has(.ledger__group-title)) .ledger__row:first-child {
+    padding-top: 0;
+  }
+
   .ledger__label {
     font-size: var(--text-h3);
     font-weight: var(--weight-bold);
@@ -78,7 +83,7 @@ const { label, title, id, groups } = Astro.props;
     max-width: 52ch;
   }
 
-  @media (min-width: 1000px) {
+  @media (min-width: 700px) {
     .ledger__row {
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--grid-gutter);

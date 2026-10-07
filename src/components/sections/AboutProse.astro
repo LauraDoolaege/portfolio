@@ -42,14 +42,14 @@ const { label, title, id, paragraphs } = Astro.props;
     max-width: 52ch;
   }
 
-  @media (min-width: 1000px) {
+  @media (min-width: 700px) {
     .prose {
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--grid-gutter);
     }
 
     .prose .text {
-      grid-column: 6 / span 6;
+      grid-column: 5 / span 8;
     }
   }
 </style>

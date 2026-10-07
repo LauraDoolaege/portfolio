@@ -101,18 +101,12 @@ const paragraphs = [
   .story__grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 2.5rem var(--grid-gutter);
+    gap: 2rem var(--grid-gutter);
   }
 
   /* Small on phones so the first paragraph shows without scrolling, larger beside the text on desktop */
   .story__figure {
     width: min(100%, 10rem);
-  }
-
-  @media (min-width: 700px) {
-    .story__figure {
-      width: min(100%, 14rem);
-    }
   }
 
   .story__defs {
@@ -194,15 +188,27 @@ const paragraphs = [
     max-width: 52ch;
   }
 
-  @media (min-width: 1000px) {
+  /* Tablet and up: portrait and text side by side on the 12 columns (portrait in 4, text in 5-12), wider
+     portrait once the contents list takes the left rail */
+  @media (min-width: 700px) {
     .story__grid {
       grid-template-columns: repeat(12, minmax(0, 1fr));
       align-items: start;
     }
 
     .story__figure {
-      grid-column: 1 / span 5;
+      grid-column: 1 / span 4;
       width: 100%;
+    }
+
+    .story__text {
+      grid-column: 5 / span 8;
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .story__figure {
+      grid-column: 1 / span 5;
     }
 
     .story__text {

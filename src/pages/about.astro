@@ -133,6 +133,18 @@ const background = [
     scroll-margin-top: 8rem;
   }
 
+  /* Below the desktop rail the sections stack, so a hairline opens each one: a clear beat to scroll by */
+  @media (max-width: 999px) {
+    .about__main :global(.sec ~ .sec > .container) {
+      padding-top: clamp(2rem, 1.5rem + 2vw, 3rem);
+      border-top: var(--hairline);
+    }
+
+    .about__main :global(.sec ~ .sec) {
+      padding-top: 0;
+    }
+  }
+
   /* The contents list ends with the last section, not with the closing step below the grid */
   .about__main :global(.sec:last-child) {
     padding-bottom: 0;

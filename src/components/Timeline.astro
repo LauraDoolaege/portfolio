@@ -13,24 +13,24 @@
 </ol>
 
 <script>
+  import { onScrollFrame } from '../utils/scroll';
+
   document.querySelectorAll<HTMLElement>('[data-timeline]').forEach((tl) => {
     const fill = tl.querySelector<HTMLElement>('.timeline__fill')!;
     const steps = Array.from(tl.querySelectorAll<HTMLElement>('.tl-step'));
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const update = () => {
+    onScrollFrame(() => {
+      // Read everything first, then write, so each frame costs one layout
       const rect = tl.getBoundingClientRect();
       // The line reaches as far down as the reading line (60% down the viewport) has travelled
       const reach = reduce
         ? rect.height
         : Math.min(Math.max(window.innerHeight * 0.6 - rect.top, 0), rect.height);
+      const reached = steps.map((s) => reduce || s.offsetTop <= reach);
       fill.style.transform = `scaleY(${rect.height ? reach / rect.height : 0})`;
-      steps.forEach((s) => s.classList.toggle('is-reached', reduce || s.offsetTop <= reach));
-    };
-
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+      steps.forEach((s, i) => s.classList.toggle('is-reached', reached[i]));
+    });
   });
 </script>
 

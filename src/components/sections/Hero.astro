@@ -167,7 +167,9 @@ import portrait from '../../assets/images/hero_portrait.png';
     --hero-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
     display: flex;
     flex-direction: column;
-    min-height: calc(100dvh - 4.1rem);
+    /* svh, not dvh: dvh changes as iOS toolbars collapse mid-scroll, which re-lays-out the hero on every swipe */
+    min-height: calc(100vh - 4.1rem);
+    min-height: calc(100svh - 4.1rem);
     /* Vertical swipes still scroll on touch; the rope only needs horizontal + free drags on its own points */
     touch-action: pan-y;
   }
@@ -997,16 +999,6 @@ import portrait from '../../assets/images/hero_portrait.png';
     setGrow(true);
   }
 
-  // A finger that lands on the rope must drag it, not scroll the page. Anywhere else the page scrolls as usual.
-  function onTouchStart(e: TouchEvent) {
-    const t = e.touches[0];
-    if (!t || e.touches.length > 1) return;
-    const r = field.getBoundingClientRect();
-    const x = ((t.clientX - r.left) * width) / (r.width || 1);
-    const y = ((t.clientY - r.top) * height) / (r.height || 1);
-    if (nearest(x, y, touchGrab) >= 0) e.preventDefault();
-  }
-
   function onMove(e: PointerEvent) {
     const p = toHero(e);
     if (grabbed >= 0) {
@@ -1102,7 +1094,6 @@ import portrait from '../../assets/images/hero_portrait.png';
   layoutAll(true);
 
   hero.addEventListener('pointerdown', onDown);
-  hero.addEventListener('touchstart', onTouchStart, { passive: false });
   window.addEventListener('pointermove', onMove);
   window.addEventListener('pointerup', onUp);
   window.addEventListener('pointercancel', onUp);
@@ -1161,7 +1152,6 @@ import portrait from '../../assets/images/hero_portrait.png';
     cancelAnimationFrame(raf);
     ro.disconnect();
     hero.removeEventListener('pointerdown', onDown);
-    hero.removeEventListener('touchstart', onTouchStart);
     visible.disconnect();
     window.removeEventListener('pointermove', onMove);
     window.removeEventListener('pointerup', onUp);

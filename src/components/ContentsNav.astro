@@ -22,26 +22,32 @@ const { items } = Astro.props;
 </nav>
 
 <script>
+  import { onScrollFrame } from '../utils/scroll';
+
   const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
   const targets = links
     .map((a) => document.getElementById(a.hash.slice(1)))
     .filter((el): el is HTMLElement => Boolean(el));
 
   if (targets.length) {
-    const mark = () => {
-      // The last heading that has passed the reading line near the top of the viewport
+    let shown = -1;
+    onScrollFrame(() => {
+      // Read first: the last heading that has passed the reading line near the top of the viewport
+      const line = window.innerHeight * 0.3;
       let current = 0;
       targets.forEach((t, i) => {
-        if (t.getBoundingClientRect().top <= window.innerHeight * 0.3) current = i;
+        // The last section is short and the list stops with it, so it counts from a lower line
+        const reach = i === targets.length - 1 ? window.innerHeight * 0.6 : line;
+        if (t.getBoundingClientRect().top <= reach) current = i;
       });
+      if (current === shown) return;
+      // Then write, and only when the active heading actually changed
+      shown = current;
       links.forEach((a, i) => {
         if (i === current) a.setAttribute('aria-current', 'true');
         else a.removeAttribute('aria-current');
       });
-    };
-    mark();
-    window.addEventListener('scroll', mark, { passive: true });
-    window.addEventListener('resize', mark);
+    });
   }
 </script>
 

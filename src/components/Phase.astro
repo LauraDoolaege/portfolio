@@ -1,5 +1,5 @@
 ---
-// Phase marker for UX case studies: "[ 01 ] The Brief". A hairline above gives the page a
+// Phase marker for UX case studies: "01 / The Brief". A hairline above gives the page a
 // steady rhythm to skim against. The h2 is a .tag, the site's one label style.
 interface Props {
   num: string;
@@ -11,7 +11,7 @@ const { num, title } = Astro.props;
 
 <div class="phase">
   <h2 class="section-label tag">
-    [ {num} ] {title}
+    {num} / {title}
   </h2>
 </div>
 

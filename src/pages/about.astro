@@ -85,7 +85,9 @@ const background = [
     <main id="main">
       <AboutManifesto />
       <div class="container about">
-        <ContentsNav items={contents} />
+        <div class="about__rail">
+          <ContentsNav items={contents} />
+        </div>
         <div class="about__main">
           <AboutStory />
           <AboutLedger
@@ -106,9 +108,9 @@ const background = [
             title="Off the clock"
             paragraphs={offClock}
           />
-          <AboutClosing />
         </div>
       </div>
+      <AboutClosing />
     </main>
     <Footer />
   </div>
@@ -134,7 +136,22 @@ const background = [
     scroll-margin-top: 8rem;
   }
 
+  /* The contents list ends with the last section, not with the closing step below the grid */
+  .about__main :global(.sec:last-child) {
+    padding-bottom: 0;
+  }
+
+  .about__rail {
+    display: none;
+  }
+
   @media (min-width: 1000px) {
+    /* Rests level with the first section's label (same top padding as .sec) and sticks from there */
+    .about__rail {
+      display: block;
+      padding-top: clamp(3.5rem, 2rem + 6vw, 7.5rem);
+    }
+
     .about {
       grid-template-columns: 15rem minmax(0, 1fr);
       column-gap: clamp(3rem, 2rem + 5vw, 8rem);

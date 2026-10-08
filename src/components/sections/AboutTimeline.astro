@@ -1,0 +1,41 @@
+---
+// Background on About as a scroll-driven timeline (the same line-and-dots component the UX case pages use),
+// under the standard section header.
+import SectionLabel from '../ui/SectionLabel.astro';
+import Timeline from '../Timeline.astro';
+import TimelineStep from '../TimelineStep.astro';
+
+interface Props {
+  label: string;
+  title: string;
+  id: string;
+  steps: { label: string; items: string }[];
+}
+
+const { label, title, id, steps } = Astro.props;
+---
+
+<section class="sec" aria-labelledby={id}>
+  <div class="container">
+    <header class="sec__head">
+      <SectionLabel text={label} data-reveal />
+      <h2 id={id} class="sec-title" data-reveal>
+        {title}
+      </h2>
+    </header>
+
+    <Timeline>
+      {steps.map((s) => (
+        <TimelineStep title={s.label}>
+          <p class="text tl-about__text">{s.items}</p>
+        </TimelineStep>
+      ))}
+    </Timeline>
+  </div>
+</section>
+
+<style>
+  .tl-about__text {
+    max-width: 52ch;
+  }
+</style>

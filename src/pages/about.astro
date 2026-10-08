@@ -7,8 +7,11 @@ import AboutManifesto from '../components/sections/AboutManifesto.astro';
 import AboutStory from '../components/sections/AboutStory.astro';
 import AboutProse from '../components/sections/AboutProse.astro';
 import AboutLedger from '../components/sections/AboutLedger.astro';
+import AboutTimeline from '../components/sections/AboutTimeline.astro';
 import AboutClosing from '../components/sections/AboutClosing.astro';
 import ContentsNav from '../components/ContentsNav.astro';
+import Button from '../components/ui/Button.astro';
+import { withBase } from '../utils/url';
 import Footer from '../components/layout/Footer.astro';
 
 const offClock = [
@@ -48,22 +51,18 @@ const toolkit = [
 
 const background = [
   {
-    rows: [
-      {
-        label: 'Digital Design & Development (Devine)',
-        items: 'Howest Kortrijk, since 2024. Major in UX design.',
-      },
-      {
-        label: 'Bachelor in Marketing Communication',
-        items:
-          'Cum laude. Thesis: how do you get colleagues to actually contribute to the internal newsletter? Researched through Cialdini’s principles of persuasion and nudging.',
-      },
-      {
-        label: 'Marketing & Communication Intern, CAW Oost-Vlaanderen',
-        items:
-          'Planned content and created social media posts for key dates, wrote letters to policy makers across Belgium, and led a workshop on my own to restructure the new website’s content.',
-      },
-    ],
+    label: 'Digital Design & Development (Devine)',
+    items: 'Howest Kortrijk, since 2024. Major in UX design.',
+  },
+  {
+    label: 'Bachelor in Marketing Communication',
+    items:
+      'Cum laude. Thesis: how do you get colleagues to actually contribute to the internal newsletter? Researched through Cialdini’s principles of persuasion and nudging.',
+  },
+  {
+    label: 'Marketing & Communication Intern, CAW Oost-Vlaanderen',
+    items:
+      'Planned content and created social media posts for key dates, wrote letters to policy makers across Belgium, and led a workshop on my own to restructure the new website’s content.',
   },
 ];
 ---
@@ -75,6 +74,11 @@ const background = [
   <div class="page">
     <Header />
     <main id="main">
+      <div class="container">
+        <Button class="back" variant="link" size="sm" icon="left" href={withBase('/')}>
+          Back to home
+        </Button>
+      </div>
       <AboutManifesto />
       <div class="container about">
         <nav class="about__chips" aria-label="Sections">
@@ -99,13 +103,11 @@ const background = [
             title="Off the clock"
             paragraphs={offClock}
           />
-          <AboutLedger
+          <AboutTimeline
             id="background-title"
             label="Background"
             title="Where I’ve been"
-            groups={background}
-            foldFrom={1}
-            foldLabel="Show full background"
+            steps={background}
           />
         </div>
       </div>
@@ -158,6 +160,10 @@ const background = [
   .about {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  :global(.back) {
+    margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
   }
 
   .about__main {

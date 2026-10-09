@@ -60,7 +60,12 @@ Every resident of the ship, but especially digitally fluent adults (20 to 40) wh
 
 We captured them in one persona, **John Reyes**: a 34-year-old first-generation resident and garden technician. On Earth he worked with monitoring tools that never explained themselves, so anything hidden feels like surveillance to him. He accepts basic health monitoring, but wants everything beyond that to be opt-in.
 
-{/* Visual: John Reyes persona card (Figma: microsite, Ideation section) */}
+<CaseImage
+  label="John Reyes"
+  size="wide"
+  ratio="16 / 9"
+  caption="The persona: John Reyes, 34, garden technician."
+/>
 
 ## Scope & constraints
 
@@ -128,7 +133,12 @@ We deliberately stayed in the problem space before touching solutions, then let 
   />
 </Timeline>
 
-{/* Visual: small thumbnails of the Ishikawa diagram, assumption matrix, COCD matrix, decision matrix, storyboard and user journey map (Figma: microsite) */}
+<CaseImage
+  label="Process Artefacts"
+  size="wide"
+  ratio="16 / 9"
+  caption="From the research: Ishikawa diagram, assumption matrix, COCD matrix, decision matrix, storyboard and user journey map."
+/>
 
 One thread ran through all of it: we turned each design principle into a set of questions and used those as the scoring criteria in the decision matrix. The winning concept, the Transparency app, wasn't the most exciting idea. It was the one that best answered our HMW, so we built on it and pulled in the strongest features of the other two.
 
@@ -142,15 +152,18 @@ We tested with scenarios instead of instructions, and measured clarity, perceive
 
 In round 1 the only safety channel was a concern report, answered within about a day. One tester pointed out that urgent help and a concern are two different things, and asked for an alarm button twice. Others wanted feedback in hours, not days.
 
-{/* Visual: snippet of the testing table, task + tester comments (FigJam, Milestone 4, Testing round 1) */}
-
 ### What we changed
 
 1. Split **help now** from **report a concern**.
 2. Added a large Help button in the centre of the menu. One tap opens a confirmation screen: cancel if it was an accident, confirm, or wait 5 seconds and it sends automatically.
 3. Moved the concern report to the Home page, with a status overview.
 
-{/* Visual: old nav (Home, Score, Community, Report, Safety lead) next to the new nav with the Help button (Figma: microsite, 1.1 Emergency help) */}
+<CaseImage
+  label="Old vs. New Navigation"
+  size="wide"
+  ratio="16 / 9"
+  caption="Before: Home, Score, Community, Report, Safety lead. After: the Help button at the centre."
+/>
 
 <PhoneScreens
   items={[
@@ -204,7 +217,12 @@ Only heartbeat and temperature are tracked by default, and the app explains why.
 
 Routine data is deleted every minute and you can see it happen. Data is only kept in extreme safety events, or if you choose to keep it yourself.
 
-{/* Visual: before/after pair for data deletion (Figma: microsite, Prototype and testing, 1.2) */}
+<CaseImage
+  label="Data Deletion"
+  size="wide"
+  ratio="16 / 9"
+  caption="Data deletion: first iteration (left) and final iteration (right)."
+/>
 
 #### Helper Points
 
@@ -260,7 +278,12 @@ A soft, lightweight elastic band that shouldn't read as a medical device or a sy
 
 Residents scan a QR code to start their shift. It sits at knuckle height (735 mm, the adult average) on a surface tilted 20 to 30°, so you can scan without lifting your arm.
 
-{/* Visual: wearable diagram, and the activation pole with height and angle (Figma: microsite, Prototype early bird, IA) */}
+<CaseImage
+  label="Wearable & Activation Pole"
+  size="wide"
+  ratio="16 / 9"
+  caption="The wearable band, and the activation pole at 735 mm and tilted 20 to 30°."
+/>
 
 ### How testing shaped it
 

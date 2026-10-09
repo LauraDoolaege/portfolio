@@ -490,23 +490,21 @@ const caseFacts = facts
   }
 
   .case__main :global(h3) {
-    margin-top: 2rem;
-    margin-bottom: 0.4rem;
-    font-size: 0.75rem;
-    font-weight: var(--weight-medium);
-    letter-spacing: 0.08em;
-    line-height: 1.3;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  /* A step down from h3: a named part inside a section (a feature, a touchpoint) */
-  .case__main :global(h4) {
-    margin-top: 2.25rem;
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
     font-size: var(--text-h3);
     font-weight: var(--weight-bold);
     letter-spacing: var(--tracking-display);
     line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  /* A step down from h3: a named part inside a subsection (a feature, a touchpoint) */
+  .case__main :global(h4) {
+    margin-top: 2rem;
+    font-size: 1.0625rem;
+    font-weight: var(--weight-bold);
+    line-height: 1.3;
     text-wrap: balance;
   }
 

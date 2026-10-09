@@ -90,6 +90,40 @@
     background: var(--accent);
   }
 
+  /* Methods / result lines: a small muted key, then the text */
+  .timeline .tl-step .tl-step__line {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0 1rem;
+    font-size: var(--text-paragraph);
+    line-height: var(--leading-paragraph);
+  }
+
+  .timeline .tl-step .tl-step__line + .tl-step__line {
+    margin-top: 0.6rem;
+  }
+
+  .tl-step__key {
+    padding-top: 0.2em;
+    font-size: 0.75rem;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 599px) {
+    .timeline .tl-step .tl-step__line {
+      display: block;
+    }
+
+    .tl-step__key {
+      display: block;
+      padding-top: 0;
+    }
+  }
+
   .timeline .tl-step .tl-step__title {
     margin: 0 0 0.5rem;
     font-size: var(--text-h3);

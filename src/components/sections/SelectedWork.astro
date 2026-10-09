@@ -14,9 +14,9 @@ const byCover = (a: (typeof works)[number], b: (typeof works)[number]) =>
   Number(!!b.data.coverImage) - Number(!!a.data.coverImage);
 const groups = [
   {
-    title: 'UX Strategy',
+    title: 'Case studies',
     intro:
-      'In these latest group projects, I got to dive deep into human needs through user interviews, insight gathering, wireframing, and validating solutions as a team.',
+      'Two group projects, told in full. The UX behind them: diving deep into human needs through user interviews, insight gathering, wireframing, and validating solutions as a team.',
     projects: works.filter((w) => w.data.type === 'ux').sort(byCover),
     layout: 'cards',
     sizes: '(min-width: 700px) 45vw, 100vw',

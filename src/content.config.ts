@@ -18,7 +18,13 @@ const works = defineCollection({
       coverImage: image().optional(),
       // Header facts for the case-study layout (Role comes from `role`). When present the page uses
       // the case layout: compact header, sticky contents list, narrow reading column, gallery.
-      facts: z.object({ scope: z.string(), context: z.string() }).optional(),
+      facts: z
+        .object({
+          scope: z.string().optional(),
+          deliverables: z.string().optional(),
+          context: z.string(),
+        })
+        .optional(),
       // Visual-project header: a bold one-sentence hook and a few tags. When `hook` is present the
       // page uses the gallery layout (minimal header, asymmetric image gallery, lightbox).
       hook: z.string().optional(),

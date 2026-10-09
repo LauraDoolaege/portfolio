@@ -1,22 +1,26 @@
 ---
 title: 'Nexxus'
-description: 'Nexxus explores how a generational spaceship can stay safe without making its people feel watched: social safety instead of constant monitoring.'
+description: 'Safety without surveillance on a generational spaceship: a system where residents look out for each other instead of being watched.'
 type: 'ux'
 coverImage: '../../assets/images/frame_nexxus.png'
 behanceUrl: 'https://www.behance.net/gallery/249089863/Interstellar-Starship?oid=hq4jQDz6k_gBXtJ4kGoFdg'
 role: 'UX Researcher, UX/UI Designer'
-timeline: 'Devine Project'
+timeline: 'Devine XD4, 4 milestones'
 tools: ['User Research', 'Information Architecture', 'Prototyping']
-team: ['Huyen Pham', 'Laura Doolaege']
+team: ['Laura Doolaege', 'Huyen Pham', 'Dmytro Anastasiy']
 facts:
-  scope: 'UX research · UX/UI design · Prototyping'
-  context: 'Group assignment, Devine project'
+  context: 'DEVINE XD4 Experience Design (speculative UX), Howest, 2026 · 4 milestones'
+  deliverables: 'Mobile app, wearable monitor, shift activation pole'
 ---
 
 import CaseImage from '../../components/CaseImage.astro';
 import Timeline from '../../components/Timeline.astro';
 import TimelineStep from '../../components/TimelineStep.astro';
 import PhoneScreens from '../../components/PhoneScreens.astro';
+import PullQuote from '../../components/PullQuote.astro';
+import Funnel from '../../components/Funnel.astro';
+import RuledTable from '../../components/RuledTable.astro';
+import Parts from '../../components/Parts.astro';
 import cover from '../../assets/images/frame_nexxus.png';
 import home from '../../assets/images/nexxus_home.png';
 import dashboard from '../../assets/images/nexxus_dashboard.png';
@@ -27,11 +31,7 @@ import emergency from '../../assets/images/nexxus_emergency.png';
 
 ## Overview
 
-Nexxus is a group assignment about safety on a generational spaceship: how do you keep a closed community secure for a very long time without making people feel monitored and controlled? I worked on it as UX researcher and UX/UI designer.
-
-### How Might We
-
-How might we maintain social safety for a long period of time in a closed environment, without creating a feeling of excessive monitoring or control?
+**In short:** on a ship that travels for generations, nobody can leave and nothing can be ignored. We designed a safety system where people look out for each other, track only two vitals by default, and see their data deleted every minute. Two rounds of testing reshaped how help, privacy settings and safety shifts work.
 
 <CaseImage
   label="Nexxus Cover"
@@ -43,36 +43,145 @@ How might we maintain social safety for a long period of time in a closed enviro
   loading="eager"
 />
 
-## The Research & Concept
+## The problem
+
+A closed community needs strong safety, but the usual answer (more cameras, more tracking) makes people feel watched. On a generation ship that tension never goes away: there is no exit, limited privacy, and the same few thousand neighbours for life.
+
+Our research showed that perceived monitoring often harms people more than what is actually tracked. So the challenge wasn't only technical. It was about how safety feels.
+
+<PullQuote size="md">
+  How might we maintain social safety for a long period of time in a closed environment, without
+  creating a feeling of excessive monitoring or control?
+</PullQuote>
+
+### Who faces this problem
+
+Every resident of the ship, but especially digitally fluent adults (20 to 40) who value autonomy and have low tolerance for opaque or controlling systems. They're community-minded, yet protective of their privacy.
+
+We captured them in one persona, **John Reyes**: a 34-year-old first-generation resident and garden technician. On Earth he worked with monitoring tools that never explained themselves, so anything hidden feels like surveillance to him. He accepts basic health monitoring, but wants everything beyond that to be opt-in.
+
+{/* Visual: John Reyes persona card (Figma: microsite, Ideation section) */}
+
+## Scope & constraints
+
+- **The brief.** Design a digital and physical solution that keeps an interstellar habitat safe and liveable over centuries. Our team chose the Security Control theme.
+- **No primary research on the real users.** Nobody lives on a generation ship yet, so we relied on desk research. That's also why we prioritised high-risk assumptions over low-certainty ones.
+- **Ethics as a requirement.** The parallel SAP course on ethical design meant every choice had to hold up against questions of consent, equity and power.
+- **Four milestones, one week of build time.** The final prototype, both testing rounds and the microsite had to fit into a single week in May.
+- **Low-tech physical prototypes.** No time to 3D-print, so the wearable was an elastic band with Velcro and no real sensors. It tested fit and comfort, not tracking.
+- **Testers we knew.** The participant profile was demanding, so we recruited people from our own network, but across different nationalities and cultures.
+
+## Thought process
+
+We deliberately stayed in the problem space before touching solutions, then let three design principles judge every idea. Each phase narrowed the field:
+
+<Funnel
+  items={[
+    { n: '89', label: 'Research questions' },
+    { n: '78', label: 'Ideas' },
+    { n: '19', label: 'Concepts' },
+    { n: '3', label: 'Front-runners' },
+    { n: '1', label: 'Concept, 6 features' },
+  ]}
+/>
 
 <Timeline>
-  <TimelineStep title="Problem definition space">
-    We started by exploring the problem space before looking for solutions.
-  </TimelineStep>
-  <TimelineStep title="Design principles">
-    From that exploration we defined the principles the concept had to follow.
-  </TimelineStep>
-  <TimelineStep title="Divergent ideation">
-    We generated a broad range of ideas before narrowing down.
-  </TimelineStep>
-  <TimelineStep title="Converging on a concept">
-    We converged on one direction and developed it into Nexxus.
-  </TimelineStep>
+  <TimelineStep
+    title="1. Understand the problem"
+    methods="Desk research, Ishikawa diagram, problem scoping canvas, assumption matrix"
+    result="The Ishikawa split causes into “social safety” vs. “feeling monitored” and showed many causes feed both."
+  />
+  <TimelineStep
+    title="2. Set design principles"
+    methods="Question brainstorm (89 questions, filtered to the core), topic clustering"
+    result="Three equal principles: Transparent and minimal monitoring. Strong communities create safety. Safety grows from trust, not fear."
+  />
+  <TimelineStep
+    title="3. Diverge"
+    methods="8 brainstorms: 5 techniques (e.g. Inversion, Teleportstorming, Role play) and 3 cognitive-bias lenses (e.g. Status Quo Bias)"
+    result="78 feature and solution ideas."
+  />
+  <TimelineStep
+    title="4. Converge"
+    methods="Self-converge, COCD matrix, weighted decision matrix scored on our principles"
+    result="19 concepts, narrowed to the top 3: Transparency app, Engagement app, Private wellbeing & community app."
+  />
+  <TimelineStep
+    title="5. Validate"
+    methods="Six Thinking Hats, then strengths / weaknesses / risks / potential"
+    result="Cut the Guideline feature. Final concept of 6 features."
+  />
+  <TimelineStep
+    title="6. Activate"
+    methods="Persona, beginner vs. expert mapping, 2 storyboards, user journey map"
+    result="Goals for prototyping, e.g. visually show the deletion process."
+  />
+  <TimelineStep
+    title="7. Structure"
+    methods="Goals & tasks, 8 task flows, flowchart, user flow"
+    result="The information architecture for the app."
+  />
+  <TimelineStep
+    title="8. Prototype & test"
+    methods="Paper to Figma prototype, wearable and activation pole, alignment matrix (objectives and KPIs), scenario-based testing, 2 rounds"
+    result="The iterations in The solution below."
+  />
 </Timeline>
 
-### The Insight
+{/* Visual: small thumbnails of the Ishikawa diagram, assumption matrix, COCD matrix, decision matrix, storyboard and user journey map (Figma: microsite) */}
 
-Social safety works better than systemic monitoring. Think of the neighbourhood grandma who keeps an eye on the street: people look out for each other, and nobody feels watched.
+One thread ran through all of it: we turned each design principle into a set of questions and used those as the scoring criteria in the decision matrix. The winning concept, the Transparency app, wasn't the most exciting idea. It was the one that best answered our HMW, so we built on it and pulled in the strongest features of the other two.
 
-### Validation
+## Deep dive: the Help button
 
-We tested the concept with users to check that it was clear, relevant and desirable.
+Scenario-based testing changed the core of the app: a slow report form became a one-tap emergency button at the centre of the navigation.
 
-## The Solution
+We tested with scenarios instead of instructions, and measured clarity, perceived safety, trust and how watched people felt, not just task success.
 
-### Home Page & Dashboard
+### What we heard
 
-The central hub. Users open a personal dashboard with their tracked data, such as heartbeat or body temperature, and can manage subscriptions to unlock more detailed, continuously monitored data.
+In round 1 the only safety channel was a concern report, answered within about a day. One tester pointed out that urgent help and a concern are two different things, and asked for an alarm button twice. Others wanted feedback in hours, not days.
+
+{/* Visual: snippet of the testing table, task + tester comments (FigJam, Milestone 4, Testing round 1) */}
+
+### What we changed
+
+1. Split **help now** from **report a concern**.
+2. Added a large Help button in the centre of the menu. One tap opens a confirmation screen: cancel if it was an accident, confirm, or wait 5 seconds and it sends automatically.
+3. Moved the concern report to the Home page, with a status overview.
+
+{/* Visual: old nav (Home, Score, Community, Report, Safety lead) next to the new nav with the Help button (Figma: microsite, 1.1 Emergency help) */}
+
+<PhoneScreens
+  items={[
+    {
+      label: 'Help',
+      src: emergency,
+      alt: 'Nexxus emergency signal confirmation with a cancel button',
+      caption: 'Help: sending an emergency signal, with a chance to cancel if it was an accident.',
+    },
+  ]}
+/>
+
+In round 2 a new scenario tested it: you hear a strange noise in the dark, press the alarm, then realise it’s just a kitten and cancel. Everyone completed it without issues. The button now carries the app’s promise: you’re never alone, and nothing happens without your control.
+
+## The solution
+
+**Nexxus** (working name: Transparency app) is an ecosystem of three products. The insight behind it: think of the neighbourhood grandma who keeps an eye on the street. People look out for each other, and nobody feels watched.
+
+<Parts
+  items={[
+    { title: 'Mobile app', text: 'Your data, your help, your community.' },
+    { title: 'Wearable monitor', text: 'A soft band that tracks two vitals, nothing more.' },
+    { title: 'Activation pole', text: 'A QR code that starts your safety shift.' },
+  ]}
+/>
+
+### The mobile app
+
+#### Dashboard & data
+
+Only heartbeat and temperature are tracked by default, and the app explains why. Everything else is opt-in through subscriptions you can cancel anytime.
 
 <PhoneScreens
   items={[
@@ -91,24 +200,15 @@ The central hub. Users open a personal dashboard with their tracked data, such a
   ]}
 />
 
-### Community Accountability
+#### Visible data deletion
 
-Safety Lead is a rotating role: community members take shifts to help keep the neighbourhood secure, with a calendar, shift details and task lists.
+Routine data is deleted every minute and you can see it happen. Data is only kept in extreme safety events, or if you choose to keep it yourself.
 
-<PhoneScreens
-  items={[
-    {
-      label: 'Safety Lead',
-      src: safetyLead,
-      alt: 'Nexxus Safety lead page with a shift calendar and upcoming shifts',
-      caption: 'Shift calendar and upcoming shifts.',
-    },
-  ]}
-/>
+{/* Visual: before/after pair for data deletion (Figma: microsite, Prototype and testing, 1.2) */}
 
-### Reward System
+#### Helper Points
 
-Users earn optional Helper Points by assisting other astronauts, good karma made visible. The points can be exchanged for rewards such as a free croissant, a cocktail, a massage or a dinner.
+An optional, private reputation space: help someone and earn points to swap for a croissant, a massage or a dinner. No public ranking.
 
 <PhoneScreens
   items={[
@@ -127,31 +227,113 @@ Users earn optional Helper Points by assisting other astronauts, good karma made
   ]}
 />
 
-### Reporting
+#### Community
 
-Users can submit a report about a concern, for example a community member who is struggling with their mental health, and follow the status of that report.
+Ask for help or offer it, individually or in groups. Moderators handle requests to resolve conflicts early, never to punish.
+
+#### Help & Report
+
+One-tap emergency help, plus a non-urgent concern report. The full story is in the deep dive above.
+
+#### Safety Lead
+
+A rotating duty, like jury duty, so safety is shared instead of owned by one authority.
 
 <PhoneScreens
   items={[
     {
-      label: 'Help',
-      src: emergency,
-      alt: 'Nexxus emergency signal confirmation with a cancel button',
-      caption: 'Help: sending an emergency signal, with a chance to cancel if it was an accident.',
+      label: 'Safety Lead',
+      src: safetyLead,
+      alt: 'Nexxus Safety lead page with a shift calendar and upcoming shifts',
+      caption: 'Shift calendar and upcoming shifts.',
     },
   ]}
 />
 
-## The Process & Iteration
+### The physical touchpoints
 
-### Development
+#### Wearable monitor
 
-We translated the concept into a detailed information architecture, built interactive prototypes and ran usability tests.
+A soft, lightweight elastic band that shouldn't read as a medical device or a symbol of constant tracking. Its role is deliberately limited to the two default vitals. The monitor detaches so the band can be cleaned.
 
-### Refinement
+#### Activation pole
 
-Insights from those sessions fed back into the design, strengthening the flow and the overall usability.
+Residents scan a QR code to start their shift. It sits at knuckle height (735 mm, the adult average) on a surface tilted 20 to 30°, so you can scan without lifting your arm.
 
-## Final Results
+{/* Visual: wearable diagram, and the activation pole with height and angle (Figma: microsite, Prototype early bird, IA) */}
 
-The full design process, the prototype and the demonstration video are documented on Behance.
+### How testing shaped it
+
+<RuledTable
+  heads={['Part', 'First iteration', 'Final iteration']}
+  rows={[
+    [
+      'Help',
+      'Report form only, with a reply in about a day',
+      'Emergency Help button in the centre of the menu; report moved to Home (see the deep dive)',
+    ],
+    [
+      'Dashboard & shift calendar',
+      'Information harder to scan; next steps not always obvious',
+      'Clearer hierarchy, faster access to everyday actions',
+    ],
+    [
+      'Data deletion',
+      'History first, all data types mixed; settings at the bottom of a separate screen',
+      'One settings screen per data type, with history and settings together',
+    ],
+    [
+      'Safety Lead shift',
+      'Instructions, timer and tasks in one long scroll; tasks as pop-ups, ticked off by hand',
+      'Timer on top, instructions and tasks in tabs, extra-help buttons; each task gets its own page with a confirm button and ticks itself off',
+    ],
+    [
+      'Activation pole',
+      'Bare QR code with a weak instruction hierarchy',
+      'One clear action (scan and activate): QR code given visual priority, clearer instructions, plus context and location so you know you’re at the right pole',
+    ],
+    [
+      'Wearable',
+      'Rough functional prototype; Velcro came loose during testing',
+      'A more deliberate, lightweight object; extra Velcro, glued in place',
+    ],
+  ]}
+/>
+
+## What we tried and dropped
+
+Most cuts came from the same rule: if it felt like control, it went.
+
+<RuledTable
+  heads={['What we dropped', 'Why']}
+  rows={[
+    [
+      'Penalties in the reputation system (restricting perks for anti-social behaviour)',
+      'It turned support into punishment. In our ethics discussion (consequentialism vs. deontology) we chose rewards that stay private, optional and positive-only.',
+    ],
+    [
+      '“Report” as the only safety channel',
+      'Testers needed instant help, not a reply in a day. Replaced by the Help button.',
+    ],
+    [
+      'History-first data deletion screen',
+      'Testers couldn’t find the settings or see the point of a list of deleted items.',
+    ],
+  ]}
+/>
+
+One thing we deliberately didn't drop: we kept every feature in the first prototype, so testing could show what users understood before we simplified anything.
+
+## What I'd do differently
+
+I started this project assuming a closed habitat needs monitoring to stay safe. I ended it asking how little monitoring a community can rely on and still feel supported. We fixed the screens faster than we fixed the meaning behind them: testers rated their comfort between 5 and 7 out of 10, and the reasons were rarely about buttons.
+
+- **Test the concept, not just the flow.** The reputation system still gave a tester “dystopian vibes” in round 2, after we had polished its UI.
+- **Usable isn’t the same as understood.** Testers found the data deletion settings, yet some didn’t see why deletion mattered. Explain the why in onboarding.
+- **Widen the circle, and pilot every round.** A small, friendly sample and broken prototypes both kept the feedback away from the experience.
+
+## Final results
+
+The prototype video and the full case study are on Behance. For anyone who wants the research, task flows, testing material and iterations, the full process board lives in FigJam: XD4-ENG Team 14.
+
+{/* Visual: prototype video (already on the site) and a link to the FigJam process board */}

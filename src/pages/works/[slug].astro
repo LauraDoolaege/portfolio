@@ -52,8 +52,10 @@ const meta = [
 const caseFacts = facts
   ? [
       { label: 'Role', value: role },
-      { label: 'Scope', value: facts.scope },
+      ...(team?.length ? [{ label: 'Team', value: team.join(', ') }] : []),
       { label: 'Context', value: facts.context },
+      ...(facts.deliverables ? [{ label: 'Deliverables', value: facts.deliverables }] : []),
+      ...(facts.scope ? [{ label: 'Scope', value: facts.scope }] : []),
     ]
   : [];
 ---
@@ -190,7 +192,7 @@ const caseFacts = facts
                 </div>
                 <h3 class="more__title">{w.data.title}</h3>
                 <p class="more__type tag">
-                  {w.data.type === 'ux' ? 'UX Strategy' : 'Visual Exploration'}
+                  {w.data.type === 'ux' ? 'Case study' : 'Visual Exploration'}
                 </p>
               </a>
             </li>
@@ -456,12 +458,16 @@ const caseFacts = facts
 
   @media (min-width: 700px) {
     .facts {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      column-gap: var(--grid-gutter);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem var(--grid-gutter);
     }
   }
 
   @media (min-width: 1000px) {
+    .facts {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
     .case {
       grid-template-columns: 15rem minmax(0, 1fr);
       column-gap: clamp(3rem, 2rem + 5vw, 8rem);
@@ -494,6 +500,25 @@ const caseFacts = facts
     color: var(--text-muted);
   }
 
+  /* A step down from h3: a named part inside a section (a feature, a touchpoint) */
+  .case__main :global(h4) {
+    margin-top: 2.25rem;
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .case__main :global(h4 + p) {
+    margin-top: 0.5rem;
+  }
+
+  /* Text that follows a timeline needs air, since the timeline's last step has no bottom padding */
+  .case__main :global(.timeline + p) {
+    margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
   .case__main :global(h2 + p),
   .case__main :global(h2 + h3) {
     margin-top: 1.5rem;
@@ -509,6 +534,47 @@ const caseFacts = facts
 
   .case__main :global(p + p) {
     margin-top: 0.9em;
+  }
+
+  /* Lists from the .mdx: one soft rule between items, like the About ledger. Bold lead-ins carry the scan.
+     Ordered lists get a quiet terracotta count. */
+  .case__main > :global(:is(ul, ol):not([class])) {
+    margin-top: 1.25rem;
+    counter-reset: item;
+  }
+
+  .case__main > :global(:is(ul, ol):not([class]) > li) {
+    max-width: 62ch;
+    padding-block: 0.9rem;
+    font-size: var(--text-paragraph);
+    font-weight: var(--weight-light);
+    line-height: var(--leading-paragraph);
+    text-wrap: pretty;
+  }
+
+  .case__main > :global(:is(ul, ol):not([class]) > li + li) {
+    border-top: var(--hairline);
+  }
+
+  .case__main > :global(ol:not([class]) > li) {
+    position: relative;
+    padding-left: 2.25rem;
+    counter-increment: item;
+  }
+
+  .case__main > :global(ol:not([class]) > li::before) {
+    content: counter(item, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    font-size: 0.75rem;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.08em;
+    line-height: 2.2;
+    color: var(--accent-text);
+  }
+
+  .case__main :global(strong) {
+    font-weight: var(--weight-bold);
   }
 
   /* Closing CTA: a hairline, one line, one button. Same Button as the hero, nothing louder. */

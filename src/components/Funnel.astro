@@ -1,0 +1,64 @@
+---
+// A row of big numbers that narrow down ("89 questions, 78 ideas, 19 concepts, 3 front-runners, 1 concept").
+// The last one is the survivor, in terracotta. Wraps on small screens.
+interface Props {
+  items: { n: string; label: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<ol class="funnel" aria-label="How the field narrowed">
+  {items.map((it) => (
+    <li class="funnel__item">
+      <span class="funnel__n">{it.n}</span>
+      <span class="funnel__label tag">{it.label}</span>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .funnel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+    gap: 1.75rem 1rem;
+    margin-block: clamp(1.75rem, 1.25rem + 2vw, 3rem);
+    padding-block: 1.5rem;
+    border-block: var(--hairline);
+  }
+
+  /* Neutralise the case page's list styling: this is a row of figures, not a list of paragraphs */
+  @media (max-width: 599px) {
+    .funnel {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .funnel > .funnel__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0;
+    border: 0;
+  }
+
+  .funnel > .funnel__item::before {
+    content: none;
+  }
+
+  .funnel__n {
+    font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
+    font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-display);
+    line-height: 1;
+  }
+
+  .funnel__item:last-child .funnel__n {
+    color: var(--accent);
+  }
+
+  .funnel__label {
+    padding: 0;
+    color: var(--text-muted);
+  }
+</style>

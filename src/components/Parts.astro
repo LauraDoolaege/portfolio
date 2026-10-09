@@ -1,0 +1,56 @@
+---
+// The parts of a solution side by side: a name and one line each, under a hairline. Three columns from tablet up,
+// stacked on phones. Not numbered: the parts are peers, not a sequence.
+interface Props {
+  items: { title: string; text: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="parts" aria-label="The parts of the solution">
+  {items.map((it) => (
+    <li class="parts__item">
+      <h4 class="parts__title">{it.title}</h4>
+      <p class="parts__text">{it.text}</p>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .parts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 var(--grid-gutter);
+    margin-block: clamp(1.75rem, 1.25rem + 2vw, 3rem);
+    padding: 0;
+  }
+
+  /* The case page styles bare list items as ruled paragraphs; each part here is its own column */
+  .parts > .parts__item {
+    max-width: none;
+    padding: 1.25rem 0 1.5rem;
+    border-top: var(--hairline);
+  }
+
+  .parts .parts__title {
+    margin: 0;
+    font-size: var(--text-h3);
+  }
+
+  .parts .parts__text {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 700px) {
+    .parts {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .parts > .parts__item + .parts__item {
+      border-top: var(--hairline);
+    }
+  }
+</style>

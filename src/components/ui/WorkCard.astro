@@ -13,7 +13,7 @@ interface Props {
 }
 
 const { project: p, sizes } = Astro.props;
-const TYPE_LABEL = { ux: 'UX Strategy', visual: 'Visual Exploration' } as const;
+const TYPE_LABEL = { ux: 'Case study', visual: 'Visual Exploration' } as const;
 const cover = p.data.coverImage;
 const href = withBase(`/works/${p.id}`);
 const tools = p.data.tools.slice(0, 3);

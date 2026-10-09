@@ -1,13 +1,29 @@
 ---
 // One step inside <Timeline>. Styles live in Timeline.astro.
+// `methods` and `result` are optional quiet lines under the title (what we did, what it gave us);
+// anything in the slot follows them.
 interface Props {
   title: string;
+  methods?: string;
+  result?: string;
 }
 
-const { title } = Astro.props;
+const { title, methods, result } = Astro.props;
 ---
 
 <li class="tl-step">
   <h3 class="tl-step__title">{title}</h3>
+  {methods && (
+    <p class="tl-step__line">
+      <span class="tl-step__key">Methods</span>
+      {methods}
+    </p>
+  )}
+  {result && (
+    <p class="tl-step__line">
+      <span class="tl-step__key">Gave us</span>
+      {result}
+    </p>
+  )}
   <slot />
 </li>

@@ -1,22 +1,25 @@
 ---
 title: 'Plan A'
-description: 'Plan A makes Antwerp the city where plans actually make it out of the group chat: a website where a friend group plans a trip while playing an Antwerp-themed game.'
+description: 'A game that gets friend-group plans made: Antwerp becomes the city where plans finally make it out of the group chat.'
 type: 'ux'
 coverImage: '../../assets/images/frame_antwerp.png'
 behanceUrl: 'https://www.behance.net/gallery/251471625/Plan-A?oid=9N_guszkxgjDpPEMp68gOg'
-role: 'UX Designer, Digital Designer'
-timeline: '4 Weeks (Devine)'
+role: 'UX/UI Designer, UX Researcher'
+timeline: '5 Weeks (Devine)'
 tools: ['Game Design', 'User Journey', 'Digital Design']
-team: ['Huyen Pham', 'Laura Doolaege']
+team: ['Laura Doolaege', 'Huyen Pham', 'Dmytro Anastasiy', 'Keanu (developer)']
 facts:
-  scope: 'UX · Digital design · Game concept'
-  context: 'Devine project, 4 weeks'
+  context: 'Visit Antwerp · DEVINE Team 10, Howest, 2026 · 5 weeks'
+  deliverables: 'Web app (game + group planning), email, TikTok and Instagram content, out-of-home posters, case movie'
 ---
 
 import CaseImage from '../../components/CaseImage.astro';
 import Timeline from '../../components/Timeline.astro';
 import TimelineStep from '../../components/TimelineStep.astro';
 import VideoPlayer from '../../components/VideoPlayer.astro';
+import PullQuote from '../../components/PullQuote.astro';
+import RuledTable from '../../components/RuledTable.astro';
+import Parts from '../../components/Parts.astro';
 import cover from '../../assets/images/frame_antwerp.png';
 import onboarding from '../../assets/images/plan-a_onboarding.webp';
 import planning from '../../assets/images/plan-a_planning.webp';
@@ -25,13 +28,7 @@ import touchpoints from '../../assets/images/plan-a_touchpoints.png';
 
 ## Overview
 
-Antwerp draws plenty of shoppers and tourists but few Gen Z visitors. The brief was to conceptualise and build a digital solution that changes that. The result is Plan A: a website where a friend group plans a trip to Antwerp while playing an Antwerp-themed game, and the highest score wins a free drink at a local bar.
-
-The project brought UX, design and development together, and I worked on it as UX designer and digital designer.
-
-### How Might We
-
-How might we get a friend group's trip idea out of the group chat and into a real plan, without relying on one person to chase everyone?
+**In short:** young travellers don't pick a city, they follow the one friend who suggests a trip, and most of those plans die in the group chat. We designed a quick Antwerp-themed game the initiator shares with their friends. Playing it collects everyone's dates, and the highest score wins a free drink at a local Antwerp bar.
 
 <VideoPlayer
   title="Plan A: case movie"
@@ -39,25 +36,160 @@ How might we get a friend group's trip idea out of the group chat and into a rea
   poster={cover}
 />
 
-## The Challenge & Research
+## The problem
 
-### The Brief
+Visit Antwerp struggles to reach young urban travellers, and wants them to stay longer than a day trip. Classic tourism campaigns don't work on this group: they trust friends and creators, not official channels.
 
-Antwerp attracts plenty of shoppers and tourists but lacks a strong Gen Z presence. The task was to conceptualise and build a digital solution to fix this.
+Our research showed the deeper problem. Young people barely care where they go; it's about the vibe and being together. Antwerp ticks every box, but so do many other cities. And when someone does suggest a trip, the plan often stalls because nobody else takes the next step.
 
-### The Insight
+<PullQuote size="md">
+  How might we help Antwerp's local flavours and 24/7 pulse stand out naturally for the Gen Z
+  initiative-taker, so exploring the city becomes a shared experience, from interest to action?
+</PullQuote>
 
-Gen Z values the company of friends over the actual destination. But friend group plans frequently fail because the designated initiative taker often gets left on read in the group chat.
+### Who faces this problem
 
-## The Hook & Solution
+Every friend group has two roles, and the problem looks different for each.
 
-### The Concept
+<RuledTable
+  heads={['', 'The initiator (Nina, 27)', 'The follower (Tom, 24)']}
+  rows={[
+    ['Role', 'Sends the first message: “who’s in?”', 'Says yes once a plan exists'],
+    [
+      'Pain point',
+      'Ends up as the default planner; the chat is active but nobody commits',
+      'Drops out if it gets complicated or expensive',
+    ],
+    [
+      'What moves them',
+      'Low-effort ways to get the group to commit',
+      'Clear dates, clear costs, a friend’s recommendation',
+    ],
+  ]}
+/>
 
-Make Antwerp the city where plans actually make it out of the group chat.
+Desk research backed this up: groups pick what keeps them together, not the “best” option, and initiators feel under-appreciated and burned out from always texting first. We started with Gen Z (18 to 24). After the pitch, the client asked us to include millennials, so the personas span 18 to 35.
 
-### The Product
+## Scope & constraints
 
-Plan A is a website where a friend group plans a trip to Antwerp while playing an Antwerp-themed game. The player with the highest score wins a free drink from a local bar.
+- **The brief.** A digital-first concept from Visit Antwerp that feels authentic, not like a classic campaign. It had to combine at least two of: a digital app, a physical activation, a social media format.
+- **A city theme.** Interviewees picked Flavours and 24/7 Pulse most, so we built on those. No landmark-showcasing: the client wanted experiences, niche interests and subcultures.
+- **A tight timeline.** Concept pitch on 22 May, five weekly sprints, final exhibition in Kortrijk on 24 June.
+- **Research abroad, in a day.** Field research happened in Rotterdam, with about 15 interviewees aged 18 to 21.
+- **Two light testing rounds.** A wireframe form (4 initiators, 4 followers), then a clickable Figma prototype with 5 testers. Neither tested a real friend group planning a real trip.
+
+## Thought process
+
+The turning point was realising we didn't need to sell Antwerp at all. We needed to help the one friend who starts plans, and make Antwerp the city where those plans finally happen.
+
+<Timeline>
+  <TimelineStep
+    title="1. Understand the brief and the audience"
+    methods="Briefing analysis, 13 early HMWs, trend and academic desk research, competitor inspiration"
+    result="The client wants awareness, longer stays and trust from a group that ignores official channels. Gen Z trusts peers and creators; one person often carries the planning."
+  />
+  <TimelineStep
+    title="2. Field research"
+    methods="~15 structured interviews in Rotterdam, then follow-ups with initiators (25 questions, 6 themes)"
+    result="Friends are the #1 reason for a city trip, and TikTok and Google are where inspiration starts. We learned what makes a spot share-worthy and what stops people hitting send."
+  />
+  <TimelineStep
+    title="3. Define"
+    methods="3 key insights, initiator vs. follower comparison, issue tree"
+    result="The final HMW, focused on the initiator, and three principles: desire instead of persuasion, experience as the priority, design for group momentum."
+  />
+  <TimelineStep
+    title="4. Ideate, pitch and validate"
+    methods="Whiteboard brainstorms, storyboard, concept pitch, Six Thinking Hats"
+    result="“Out of the Group Chat” (later Plan A): a game and a group planner. The client liked the focus on the initiator and the gamification. The Six Hats produced the second iteration."
+  />
+  <TimelineStep
+    title="5. Activate and test the concept"
+    methods="Personas, experience maps, user flows, lo-fi wireframe survey (4 initiators, 4 followers)"
+    result="Everyone found it more fun than planning in the chat, but the reward and the planning step weren't clear enough."
+  />
+  <TimelineStep
+    title="6. Visual direction and hi-fi design"
+    methods="Mood and style boards, design system, weekly tutor consults"
+    result="Tutors found the first style “like a museum”. I set up the colour system from the Antwerp palette and wrote the UI guidelines; calmer inputs with playful details followed."
+  />
+  <TimelineStep
+    title="7. Prototype test and touchpoints"
+    methods="Clickable Figma prototype, 5 testers, channel planning"
+    result="A clearer start screen, a better order of questions and clearer wording. TikTok gets people into the app, Instagram carries the tone, posters give reach."
+  />
+</Timeline>
+
+## Deep dive: the Six Thinking Hats
+
+After the pitch we wrote the concept out in full and looked at it through each hat in turn. The Black Hat questions turned into the rules of the second iteration.
+
+<RuledTable
+  heads={['Risk we found', 'Change in the 2nd iteration']}
+  rows={[
+    [
+      'With only one try, players might mess up their first run',
+      'Unlimited practice rounds before the real game',
+    ],
+    [
+      'What if fewer friends play than planned? The plan would never be sent',
+      'The initiator sets a response window; the plan goes out when everyone has played or the timer runs out',
+    ],
+    [
+      'What if the winner can’t make the chosen date?',
+      'The final date is the one most players picked. If the winner didn’t pick it, the coupon goes to the highest scorer who did',
+    ],
+    [
+      'Big groups could split up to collect more free drinks',
+      'The coupon links to a random bar matching the group’s vibe, and only one person wins per group',
+    ],
+  ]}
+/>
+
+The Red Hat added a gut feeling: something Antwerp-specific was missing beyond a free drink. That led to story-driven collectibles in the game, like a beer for Antwerp's bar culture or a camera for capturing moments. The concept went from a fun idea to one that holds up with real friend groups, real bars and real schedules.
+
+## The solution
+
+**Plan A** is a web app that turns planning a trip into a quick game between friends. Antwerp becomes the city where plans finally make it out of the group chat.
+
+<Parts
+  items={[
+    { title: 'Web app', text: 'A game, then a planner, for the whole group.' },
+    { title: 'The plan email', text: 'Leaderboard, date and a bar matched to your vibe.' },
+    { title: 'Channels', text: 'TikTok, Instagram and posters bring people in.' },
+  ]}
+/>
+
+### How it works
+
+<Timeline>
+  <TimelineStep title="The hook">
+    A micro-influencer or paid creator shares a POV video about always being the one who plans, with
+    a link to the game. Testers trusted micro-influencers more than big ones.
+  </TimelineStep>
+  <TimelineStep title="Onboarding">
+    Four short screens explain the idea: compete to win, you're the main character, plan with ease.
+    Skippable, with a start screen that sums up the concept.
+  </TimelineStep>
+  <TimelineStep title="Your character">
+    Snap a photo to put your face on the in-game character, or continue with a default one.
+  </TimelineStep>
+  <TimelineStep title="The game">
+    A one-tap runner through Antwerp scenes. Three tries; your best score is the one to beat.
+  </TimelineStep>
+  <TimelineStep title="The planning">
+    One question per screen: nickname, possible dates, players (2 to 10), budget, the group's vibe,
+    a deadline for friends to respond, and email. A summary screen lets you check everything.
+  </TimelineStep>
+  <TimelineStep title="Share and join">
+    One tap sends it to Instagram, TikTok or any chat. Friends vote on the dates, play the game and
+    see the leaderboard.
+  </TimelineStep>
+  <TimelineStep title="The plan lands">
+    Everyone gets an email with the leaderboard, the date and a local bar matched to the group's
+    vibe. The winner gets a QR coupon for a free drink, plus small Antwerp detours nearby.
+  </TimelineStep>
+</Timeline>
 
 <CaseImage
   label="Onboarding"
@@ -68,32 +200,14 @@ Plan A is a website where a friend group plans a trip to Antwerp while playing a
   caption="Onboarding: clear instruction before the game starts."
 />
 
-## Discovery & The Initiator's Journey
-
 <CaseImage
-  label="Touch Points"
-  src={touchpoints}
-  alt="Plan A touch points: social videos, a landing page, and posters and screens around Antwerp"
+  label="Personalise Your Game"
+  src={personalize}
+  alt="Plan A: take a photo, name your character, then run through the Antwerp game"
   size="wide"
-  ratio="861 / 408"
-  caption="How people find Plan A: social videos, a landing page, and posters and screens around the city."
+  ratio="16 / 9"
+  caption="Personalising the game: a photo, a character name, then the Antwerp run."
 />
-
-<Timeline>
-  <TimelineStep title="Discovery">
-    Travel influencers promote the platform through short videos on TikTok, Instagram and other
-    social media.
-  </TimelineStep>
-  <TimelineStep title="Taking Action">
-    The initiative taker sets an initial game score and fills in the trip details: dates, length of
-    stay, budget, preferences and group size.
-  </TimelineStep>
-  <TimelineStep title="Sharing">
-    They enter their email, set a time limit for friends to play, and share the link in the group
-    chat. If every invited player joins, the planning is sent automatically. Otherwise it is sent
-    when the timer ends.
-  </TimelineStep>
-</Timeline>
 
 <CaseImage
   label="Quick Planning Steps"
@@ -104,35 +218,85 @@ Plan A is a website where a friend group plans a trip to Antwerp while playing a
   caption="The initiator's quick planning steps: dates, players, budget and preferences."
 />
 
-## The Game Mechanics
+### Around the app
 
-### Gameplay
-
-The game works like the Google dinosaur game: players tap to jump over obstacles and can practise as often as they like.
-
-### Design
-
-The background shows Antwerp eras, diamonds and historic scenes. Extra points become collectibles (a smiley, a coupon, a camera, a beer) that point to things to do in Antwerp.
+Each channel has its own job. TikTok gets people into the app through POV videos, Instagram shows Antwerp's playful side, and posters at bus stops, tram stations and universities give reach where Gen Z actually moves.
 
 <CaseImage
-  label="Personalise Your Game"
-  src={personalize}
-  alt="Plan A: take a photo, name your character, then run through the Antwerp game"
+  label="Touch Points"
+  src={touchpoints}
+  alt="Plan A touch points: social videos, a landing page, and posters and screens around Antwerp"
   size="wide"
-  ratio="16 / 9"
-  caption="Personalising the game: a photo, a character name, then the Antwerp run."
+  ratio="861 / 408"
+  caption="How people find Plan A: social videos, a landing page, and posters and screens around the city."
 />
 
-## The Friends' Experience & Reward
+### How prototype testing shaped it
 
-### Joining In
+<RuledTable
+  heads={['What testers said', 'What we changed']}
+  rows={[
+    [
+      'Testers who skipped onboarding didn’t understand they had to play together',
+      'Added a start screen with a short summary of the concept',
+    ],
+    [
+      'Nickname and email together made the nickname less fun; email up front felt too personal',
+      'Nickname before the game, email at the end',
+    ],
+    [
+      '“Timer” was confusing: a timer for what?',
+      'Renamed it to a deadline, with clearer wording about who it’s for',
+    ],
+    [
+      'Some thought reaching a score would win a drink, not that only the top player wins',
+      'Made the single winner explicit in the onboarding and game copy',
+    ],
+    [
+      'Tutors: the planning screens were over-styled and distracted from the input',
+      'Simplified the inputs and kept playful details around them',
+    ],
+    [
+      'Tutors: mostly alcohol, budget in dollars, and “Welcome to Antwerp” looked like the city website',
+      'More non-alcoholic options, euro ranges, and a hero about the group chat',
+    ],
+  ]}
+/>
 
-Friends open the link, view the initiator's plan, add their own availability and play the game to beat the score.
+## What we tried and dropped
 
-### Choosing the Winner
+We cut anything that made the concept heavier, more promotional, or less of a game.
 
-The final trip date is the one most players chose. The highest score wins a coupon for a free drink, as long as they picked the final date. If not, the coupon goes to the highest-scoring player who did.
+<RuledTable
+  heads={['What we dropped', 'Why']}
+  rows={[
+    [
+      'Designing the whole trip experience inside Antwerp',
+      'Our first consult showed we could focus on one moment. We chose the planning phase, where plans die.',
+    ],
+    [
+      'Turning the game into a form or a “who of us” quiz',
+      'It would break the simple, competitive flow the client liked. We kept it a real game and didn’t use it to collect data.',
+    ],
+    [
+      'Gen Z only',
+      'The client pointed out the problem is just as real for millennials, so we widened the personas to 18 to 35.',
+    ],
+    [
+      'Hashtag campaigns and highway billboards',
+      'Hashtags feel overdone, and many Gen Z travellers don’t drive. Campus and bus-stop posters reach them where they are.',
+    ],
+  ]}
+/>
 
-### The Coupon
+## What I'd do differently
 
-A QR code links to a random bar based on the selected preference tags, drawn from a database of three places per tag.
+A fun hook only works if people understand what it's for. Every tester found the concept more fun than planning in the chat, but not everyone found it more practical.
+
+- **Test the order, don't debate it.** Initiators felt the game took the focus, and tutors later asked for planning first. Test two versions side by side, early.
+- **Make the reward impossible to miss.** Followers didn't notice they could win anything, and some thought any good score earned a drink. Put the rules on the first screen.
+- **Test real behaviour, with a wider circle.** A wireframe survey and a prototype don't show whether a friend group commits. A live pilot with real group chats, beyond students aged 18 to 21, would have told us more.
+
+## Final results
+
+The case movie and the full case study are on Behance. For anyone who wants the research, interviews, testing material and iterations, the full process board lives in FigJam.

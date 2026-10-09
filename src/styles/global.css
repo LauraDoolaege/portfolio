@@ -771,6 +771,18 @@ img.media-frame__img {
   background: linear-gradient(150deg, #9fb0b8, #7a8f99);
 }
 
+/* The drag trail's canvas (src/scripts/tactile.ts): fixed over the page so the trail can leave the image's borders */
+.dust-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  /* The same filter as the buttons' sweep: soft edges break into fine grain */
+  filter: url(#sand-dispersion);
+}
+
 /* ---------- Theme toggle ---------- */
 
 /* Quiet text control, fixed bottom-right. Underline draws in on hover like .btn-link. */
@@ -902,4 +914,78 @@ img.media-frame__img {
     opacity: 0;
     transform: translateY(0.75rem);
   }
+}
+
+/* ---------- Page transition (src/scripts/pagetransition.ts) ---------- */
+
+/* The cover: paper-coloured, its edge broken into grain by the same filter family as the card hover. Leaving a page,
+   it grows from the centre outwards (--cover); arriving, a hole opens from the centre and the new page appears through it (--hole). */
+@property --cover {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: -60%;
+}
+
+@property --hole {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: -60%;
+}
+
+.pt {
+  /* Half size, scaled up 2x: the grain filter re-runs every frame while the cover moves, and at a quarter of the
+     pixels it stays smooth. The grain comes out a little coarser, like sand. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9990;
+  display: none;
+  width: 50vw;
+  height: 50vh;
+  transform: scale(2);
+  transform-origin: 0 0;
+  pointer-events: none;
+  filter: url(#sand-edge);
+  will-change: filter;
+}
+
+.pt.is-on {
+  display: block;
+}
+
+.pt[data-state='cover0'],
+.pt[data-state='covering'] {
+  background: radial-gradient(
+    circle farthest-corner at 50% 50%,
+    var(--bg-primary) var(--cover),
+    transparent calc(var(--cover) + 60%)
+  );
+  transition: --cover 0.45s cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.pt[data-state='covering'] {
+  --cover: 100%;
+}
+
+.pt[data-state='covered'],
+.pt[data-state='clearing'] {
+  background: radial-gradient(
+    circle farthest-corner at 50% 50%,
+    transparent var(--hole),
+    var(--bg-primary) calc(var(--hole) + 60%)
+  );
+}
+
+.pt[data-state='clearing'] {
+  --hole: 100%;
+  transition: --hole 0.7s cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+/* Until the script takes over, a plain cover so the new page never flashes */
+html.pt-arriving::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9989;
+  background: var(--bg-primary);
 }

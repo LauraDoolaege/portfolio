@@ -41,6 +41,11 @@ const { title, description = "Laura's portfolio: digital development & design." 
           t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
         document.documentElement.dataset.theme = t;
+        // Arriving from a project link: hold a paper-coloured cover until the page transition script takes over
+        try {
+          if (sessionStorage.getItem('pt') === '1')
+            document.documentElement.classList.add('pt-arriving');
+        } catch (e) {}
       })();
     </script>
     <style is:inline set:html={fontFaces}></style>
@@ -86,6 +91,43 @@ const { title, description = "Laura's portfolio: digital development & design." 
         </feComponentTransfer>
         <feComposite in="SourceGraphic" in2="cut" operator="in" />
       </filter>
+      <!-- Same grain, but fully opaque pixels stay opaque: for dissolving the edges of a solid image (card hover) -->
+      <filter
+        id="sand-edge"
+        x="-5%"
+        y="-5%"
+        width="110%"
+        height="110%"
+        color-interpolation-filters="sRGB"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.9"
+          numOctaves="2"
+          seed="7"
+          result="noise"
+        />
+        <feColorMatrix
+          in="noise"
+          type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0"
+          result="grain"
+        />
+        <feComposite
+          in="SourceAlpha"
+          in2="grain"
+          operator="arithmetic"
+          k1="0"
+          k2="1"
+          k3="0.8"
+          k4="-0.4"
+          result="noisy"
+        />
+        <feComponentTransfer in="noisy" result="cut">
+          <feFuncA type="linear" slope="9" intercept="-4" />
+        </feComponentTransfer>
+        <feComposite in="SourceGraphic" in2="cut" operator="in" />
+      </filter>
     </svg>
     <a class="skip-link" href="#main">
       Skip to content
@@ -95,6 +137,7 @@ const { title, description = "Laura's portfolio: digital development & design." 
     <script>
       import '../scripts/tactile';
       import '../scripts/theme';
+      import '../scripts/pagetransition';
     </script>
   </body>
 </html>

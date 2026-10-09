@@ -241,17 +241,232 @@ function grainOnly(frame: HTMLElement) {
   frame.addEventListener('mouseleave', () => frame.classList.remove('is-hover'));
 }
 
+// Images with no Enlarge or View option (the About photos, the home portrait) get a drag trail instead of the
+// spotlight: moving over the print is like drawing a hand through sand. Soft blobs are stamped along the path,
+// one that wears the print away to paper inside the frame, one in the print's own colours that is pushed along
+// and spreads out past the frame's edges. A fixed canvas draws them, and the same #sand-dispersion filter as the
+// buttons' sweep (see .dust-canvas) breaks the soft edges into fine grain, so the trail has their texture.
+function dustTrail(frames: HTMLElement[]) {
+  if (!frames.length) return;
+  const canvas = document.createElement('canvas');
+  canvas.className = 'dust-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const resize = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
+  resize();
+  window.addEventListener('resize', resize);
+
+  type RGB = [number, number, number];
+  interface Stamp {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    born: number;
+    life: number;
+    r: number;
+    peak: number;
+    color: RGB;
+    /** Wearing the print away: paper-coloured, stays put, only drawn inside its frame */
+    clip: DOMRect | null;
+    /** The frame the sand came from: it is only drawn outside it, so the print itself is never smeared */
+    from?: DOMRect;
+  }
+  let stamps: Stamp[] = [];
+  let running = false;
+  const MAX = 360;
+
+  const paperRgb = (): RGB => {
+    const hex = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim();
+    const m = /^#([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return [243, 242, 238];
+    const n = parseInt(m[1], 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+
+  // The print's pixels, read once per frame size, so a stamp can take the colour of the spot it was lifted from
+  const prints = new WeakMap<
+    HTMLElement,
+    { w: number; h: number; data: Uint8ClampedArray | null }
+  >();
+  const printOf = (frame: HTMLElement, r: DOMRect) => {
+    const k = Math.min(1, 480 / Math.max(r.width, r.height));
+    const w = Math.max(1, Math.round(r.width * k));
+    const h = Math.max(1, Math.round(r.height * k));
+    const known = prints.get(frame);
+    if (known && known.w === w && known.h === h) return known;
+    let data: Uint8ClampedArray | null = null;
+    const img = frame.querySelector<HTMLImageElement>('img.media-frame__img');
+    if (img && img.complete && img.naturalWidth) {
+      try {
+        const off = document.createElement('canvas');
+        off.width = w;
+        off.height = h;
+        const c = off.getContext('2d', { willReadFrequently: true })!;
+        // object-fit: cover, as the frame shows it
+        const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+        const dw = img.naturalWidth * scale;
+        const dh = img.naturalHeight * scale;
+        c.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+        data = c.getImageData(0, 0, w, h).data;
+      } catch {
+        data = null;
+      }
+    }
+    const entry = { w, h, data };
+    prints.set(frame, entry);
+    return entry;
+  };
+  const colorAt = (frame: HTMLElement, r: DOMRect, x: number, y: number): RGB => {
+    const p = printOf(frame, r);
+    if (!p.data) return [168, 106, 85];
+    const px = Math.min(p.w - 1, Math.max(0, Math.round(((x - r.left) / r.width) * p.w)));
+    const py = Math.min(p.h - 1, Math.max(0, Math.round(((y - r.top) / r.height) * p.h)));
+    const i = (py * p.w + px) * 4;
+    return [p.data[i], p.data[i + 1], p.data[i + 2]];
+  };
+
+  let last = 0;
+  const tick = (now: number) => {
+    const dt = Math.min(now - last, 48) / 16.67;
+    last = now;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stamps = stamps.filter((g) => now - g.born < g.life);
+    // Worn-away patches first, then the displaced sand on top of them
+    for (const wear of [true, false]) {
+      for (const g of stamps) {
+        if ((g.clip !== null) !== wear) continue;
+        const t = (now - g.born) / g.life;
+        let r = g.r;
+        if (!g.clip) {
+          // Pushed along the path: slows to a stop, and spreads as it goes
+          g.x += g.vx * dt;
+          g.y += g.vy * dt;
+          const damp = Math.pow(0.95, dt);
+          g.vx *= damp;
+          g.vy *= damp;
+          r *= 1 + t * 0.5;
+        }
+        const a = g.peak * Math.pow(1 - t, 1.6);
+        const [cr, cg, cb] = g.color;
+        const grad = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, r);
+        grad.addColorStop(0, `rgba(${cr},${cg},${cb},${a})`);
+        grad.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+        ctx.save();
+        if (g.clip) {
+          ctx.beginPath();
+          ctx.rect(g.clip.left, g.clip.top, g.clip.width, g.clip.height);
+          ctx.clip();
+        } else if (g.from) {
+          ctx.beginPath();
+          ctx.rect(0, 0, canvas.width, canvas.height);
+          ctx.rect(g.from.left, g.from.top, g.from.width, g.from.height);
+          ctx.clip('evenodd');
+        }
+        ctx.fillStyle = grad;
+        ctx.fillRect(g.x - r, g.y - r, r * 2, r * 2);
+        ctx.restore();
+      }
+    }
+    if (stamps.length) requestAnimationFrame(tick);
+    else running = false;
+  };
+
+  // Stamps are laid along the segment the pointer just travelled, so a fast drag is as smooth as a slow one
+  const lay = (frame: HTMLElement, x0: number, y0: number, x1: number, y1: number) => {
+    const r = frame.getBoundingClientRect();
+    const now = performance.now();
+    const dist = Math.hypot(x1 - x0, y1 - y0);
+    const steps = Math.min(10, Math.max(1, Math.round(dist / 9)));
+    const paper = paperRgb();
+    for (let i = 1; i <= steps && stamps.length < MAX; i++) {
+      const f = i / steps;
+      const x = x0 + (x1 - x0) * f;
+      const y = y0 + (y1 - y0) * f;
+      stamps.push({
+        x,
+        y,
+        vx: 0,
+        vy: 0,
+        born: now,
+        life: 850,
+        r: 23,
+        peak: 0.46,
+        color: paper,
+        clip: r,
+      });
+      // The sand follows the hand: it is carried a little way in the direction of travel
+      const dir = dist || 1;
+      stamps.push({
+        x,
+        y,
+        vx: ((x1 - x0) / dir) * 1.8,
+        vy: ((y1 - y0) / dir) * 1.8,
+        born: now,
+        life: 1600,
+        r: 30,
+        peak: 0.46,
+        color: colorAt(frame, r, x, y),
+        clip: null,
+        from: r,
+      });
+    }
+    if (!running) {
+      running = true;
+      last = now;
+      requestAnimationFrame(tick);
+    }
+  };
+
+  frames.forEach((frame) => {
+    let lx = 0;
+    let ly = 0;
+    let seen = false;
+    frame.addEventListener('pointerenter', () => (seen = false));
+    frame.addEventListener(
+      'pointermove',
+      (e) => {
+        if (seen && (e.clientX !== lx || e.clientY !== ly))
+          lay(frame, lx, ly, e.clientX, e.clientY);
+        lx = e.clientX;
+        ly = e.clientY;
+        seen = true;
+      },
+      { passive: true },
+    );
+  });
+}
+
 if (finePointer) {
   cursor();
   // `[data-plain]` (a gallery item set to `plain`) opts out of the grain and sand hover
-  document.querySelectorAll<HTMLElement>('.media-frame:not([data-plain] .media-frame)').forEach(spotlight);
+  // Frames with an Enlarge or View option keep the sand spotlight; the rest get the drag trail (not under reduced motion)
+  const WITH_OPTION = '[data-plain] .media-frame, [data-lightbox] .media-frame, .card .media-frame';
+  const bare = Array.from(
+    document.querySelectorAll<HTMLElement>(`.media-frame:not(:is(${WITH_OPTION}))`),
+  );
+  document
+    .querySelectorAll<HTMLElement>(
+      `.media-frame:is([data-lightbox] .media-frame, .card .media-frame):not([data-plain] .media-frame)`,
+    )
+    .forEach(spotlight);
+  bare.forEach(grainOnly);
+  if (!reduceMotion) dustTrail(bare);
   document.querySelectorAll<HTMLElement>('.card__media').forEach(grainOnly);
   if (!reduceMotion) {
     document
       .querySelectorAll<HTMLElement>('[data-magnetic], .btn, .btn-link')
       .forEach((el) => magnetic(el));
     document
-      .querySelectorAll<HTMLElement>('.card__media, .media-frame:not([data-no-pan]):not([data-no-pan] .media-frame)')
+      .querySelectorAll<HTMLElement>(
+        '.card__media, .media-frame:not([data-no-pan]):not([data-no-pan] .media-frame)',
+      )
       .forEach(pan);
   }
 }

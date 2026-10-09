@@ -5,37 +5,7 @@
 // where every segment goes dark. Below 1000px it is a plain stack.
 import SectionLabel from '../ui/SectionLabel.astro';
 
-// Hand-drawn accents in the signature's ink, drawn as clean single strokes: each one is a list of pen strokes
-// (paths in a small viewBox, stretched to fit their word) that draw one after another when the block becomes active.
-// `off` is each mark's start (seconds after its block becomes active), so they play in order: first block the ring
-// round "design", the arrow towards "people", then the underline; second block the heart, then the ring round it.
-const shapes = {
-  // An overshooting loop, the way a pen circles a word
-  ring: {
-    box: '0 0 200 80',
-    d: ['M 176 22 C 140 6, 72 4, 36 18 C 8 30, 10 58, 50 67 C 98 77, 168 68, 190 46 C 202 33, 192 20, 168 22'],
-  },
-  // Underline that runs out, doubles back down-left and lands in a short flick
-  underline: {
-    box: '0 0 200 60',
-    d: [
-      'M 4 8 C 50 5, 130 9, 192 4',
-      'M 192 4 C 150 14, 90 20, 38 30 C 80 34, 130 40, 172 36',
-    ],
-  },
-  // Loose arrow leaning in toward the word
-  arrow: {
-    box: '0 0 60 70',
-    d: ['M 54 6 C 42 24, 26 42, 10 58', 'M 6 38 C 8 46, 9 52, 10 60 C 18 58, 26 57, 32 58'],
-  },
-  heart: {
-    box: '0 0 60 56',
-    d: ['M 30 52 C 8 36, 2 18, 14 8 C 24 0, 30 10, 30 16 C 30 10, 38 0, 48 8 C 60 18, 52 36, 30 52'],
-  },
-} as const;
-
-type Mark = { shape: keyof typeof shapes; off: number; float?: boolean };
-type Part = string | { word: string; marks: Mark[]; tail?: string };
+type Part = string | { word: string; tail?: string };
 
 const columns: { parts: Part[]; approach: string; value: string }[] = [
   {
@@ -43,18 +13,11 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       'How do we ',
       {
         word: 'design',
-        marks: [
-          { shape: 'ring', off: 0 },
-          { shape: 'arrow', off: 1, float: true },
-        ],
       },
       ' an experience people actually ',
       {
         word: 'need',
         tail: '?',
-        marks: [
-          { shape: 'underline', off: 2.9 },
-        ],
       },
     ],
     approach: 'Devine (UX Major)',
@@ -62,12 +25,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       'Human-centered research, mapping user journeys, and prototyping interactions across physical and digital touchpoints.',
   },
   {
-    parts: [
-      'How do we make sure ',
-      { word: 'people', marks: [{ shape: 'heart', off: 0, float: true }] },
-      ' ',
-      { word: 'discover', marks: [{ shape: 'ring', off: 1.1 }], tail: ' it?' },
-    ],
+    parts: ['How do we make sure ', { word: 'people' }, ' ', { word: 'discover', tail: ' it?' }],
     approach: 'Bachelor in Marketing Communication (Cum Laude)',
     value:
       'Content strategy, persuasion, nudging, and understanding human behavior to bridge user needs with business goals.',
@@ -77,34 +35,21 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
 
 <section class="sec why" aria-labelledby="why-how-title" data-why>
   <div class="container why__grid">
-    <!-- The signature's grain, for every mark: a ragged edge and a few dropped speckles. The script roughens it
-         while a mark is being thrown around, like the rope in the hero. -->
-    <svg class="why__defs" width="0" height="0" aria-hidden="true" focusable="false">
-      <defs>
-        <filter id="why-grain" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5" result="noise"></feTurbulence>
-          <feDisplacementMap data-grain-disp in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="ragged"></feDisplacementMap>
-          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0" result="speckle"></feColorMatrix>
-          <feComponentTransfer in="speckle" result="mask">
-            <feFuncA data-grain-cut type="linear" slope="8" intercept="-1.1"></feFuncA>
-          </feComponentTransfer>
-          <feComposite in="ragged" in2="mask" operator="in"></feComposite>
-        </filter>
-      </defs>
-    </svg>
-    <!-- Hazy trail left behind a heart or arrow while it moves (painted by the script, grainy via CSS mask) -->
-    <canvas class="why__trail" aria-hidden="true" data-why-trail></canvas>
     <div class="why__pin">
       <SectionLabel num="01" text="The big idea" data-reveal />
       <h2 id="why-how-title" class="sec-title" data-reveal>
         Every company has 2 questions...
       </h2>
       <div class="why__bars" aria-hidden="true">
-        {[...columns, null].map(() => <span class="why__bar"></span>)}
+        {[...columns, null].map(() => (
+          <span class="why__bar"></span>
+        ))}
       </div>
       <!-- The closing line, set in the headline's own type and lined up with its last line by the script, so on the
            last step the two read as one quote. The list item below keeps the real text for assistive tech. -->
-      <p class="why__merge" aria-hidden="true" data-why-merge>and I want to answer both!</p>
+      <p class="why__merge" aria-hidden="true" data-why-merge>
+        and I want to answer both!
+      </p>
     </div>
 
     <ol class="why__list">
@@ -116,14 +61,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
                 part
               ) : (
                 <span class="why__nw">
-                  <span class="why__host">
-                    {part.word}
-                    {part.marks.map((m) => (
-                      <svg class:list={['why__mark', `why__mark--${m.shape}`, m.float && 'why__float']} viewBox={shapes[m.shape].box} preserveAspectRatio="none" aria-hidden="true" focusable="false" style={`--off:${m.off}s`} data-why-mark>
-                        {shapes[m.shape].d.map((d) => <path pathLength="1" d={d}></path>)}
-                      </svg>
-                    ))}
-                  </span>
+                  <mark class="hl">{part.word}</mark>
                   {part.tail}
                 </span>
               ),
@@ -136,21 +74,41 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
         </li>
       ))}
       <li class="why__item why__item--close" data-why-item>
-        <p class="why__close" data-reveal>and I want to answer both!</p>
+        <p class="why__close" data-reveal>
+          and I want to answer both!
+        </p>
       </li>
     </ol>
     <!-- Phones: the answers swipe sideways. Counter, progress and previous/next sit under the track, so the row can
          also be driven with a thumb tap or the keyboard. -->
     <div class="why__controls" role="group" aria-label="Browse the answers">
       <button class="why__nav" type="button" data-why-prev aria-label="Previous">
-        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M9 6H2.5M5.5 3L2.5 6l3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="square" /></svg>
+        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path
+            d="M9 6H2.5M5.5 3L2.5 6l3 3"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="square"
+          />
+        </svg>
       </button>
-      <p class="why__count" aria-live="polite" data-why-count>1 / {columns.length + 1}</p>
+      <p class="why__count" aria-live="polite" data-why-count>
+        1 / {columns.length + 1}
+      </p>
       <div class="why__bars why__bars--below" aria-hidden="true">
-        {[...columns, null].map(() => <span class="why__bar"></span>)}
+        {[...columns, null].map(() => (
+          <span class="why__bar"></span>
+        ))}
       </div>
       <button class="why__nav" type="button" data-why-next aria-label="Next">
-        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 6h6.5M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="square" /></svg>
+        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path
+            d="M3 6h6.5M6.5 3l3 3-3 3"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="square"
+          />
+        </svg>
       </button>
     </div>
   </div>
@@ -171,7 +129,6 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     padding-top: 1.75rem;
   }
 
-  /* A stacking context of its own, so the marks (z-index -1) sit behind the letters, never over them */
   .why__question {
     position: relative;
     isolation: isolate;
@@ -190,113 +147,9 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     max-width: 46ch;
   }
 
-  /* Nowrap keeps the question mark with its word; the host is inline so the marks can overshoot it freely */
+  /* Nowrap keeps the question mark with its word */
   .why__nw {
     white-space: nowrap;
-  }
-
-  .why__host {
-    position: relative;
-  }
-
-  .why__defs {
-    position: absolute;
-  }
-
-  /* Behind everything in the section; the grid is its own stacking context so -1 never leaves it */
-  .why__trail {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    display: none;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    pointer-events: none;
-    /* Soft first, then broken into speckle by a noise mask: a haze made of grains (same as the hero) */
-    filter: blur(2.5px);
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    -webkit-mask-size: 220px 220px;
-    mask-size: 220px 220px;
-  }
-
-  .why__mark {
-    position: absolute;
-    z-index: -1;
-    filter: url(#why-grain);
-    display: block;
-    max-width: none;
-    overflow: visible;
-    pointer-events: none;
-  }
-
-  .why__mark path {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 5px;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .why__mark--ring {
-    left: -10%;
-    top: -0.06em;
-    width: 122%;
-    height: 1.2em;
-  }
-
-  .why__mark--underline {
-    left: -3%;
-    top: 1.1em;
-    width: 160%;
-    height: 0.62em;
-  }
-
-  .why__mark--arrow {
-    /* Sits in the gap right of "design an", its tip leaning down-left toward "people" on the next line */
-    left: calc(100% + 3.4em);
-    top: 0.05em;
-    width: 0.85em;
-    height: 0.95em;
-  }
-
-  .why__mark--heart {
-    left: calc(100% + 0.5em);
-    top: 0.02em;
-    width: 0.85em;
-    height: 0.8em;
-  }
-
-  /* Only the marks that are not tied to a word sit beside it, and their place depends on the line breaks:
-     on narrow screens they are left out */
-  .why__float {
-    display: none;
-  }
-
-  /* Armed by script (so no-JS visitors see them finished). Each pen stroke is drawn in turn after its mark's --off;
-     opacity flips with the same delay so no stray round-cap dot shows while a stroke waits. */
-  .why__mark.is-armed path {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    opacity: 0;
-  }
-
-  .why__mark.is-drawn path {
-    stroke-dashoffset: 0;
-    opacity: 1;
-    transition:
-      stroke-dashoffset 1s cubic-bezier(0.35, 0.1, 0.25, 1) var(--delay, 0s),
-      opacity 0s linear var(--delay, 0s);
-  }
-
-  .why__mark path:nth-child(1) {
-    --delay: var(--off, 0s);
-  }
-
-  .why__mark path:nth-child(2) {
-    --delay: calc(var(--off, 0s) + 0.9s);
   }
 
   .why__close {
@@ -320,26 +173,6 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     .why__grid {
       position: relative;
       isolation: isolate;
-    }
-
-    .why__trail {
-      display: block;
-    }
-
-    /* The question lets pointers through so the heart and arrow behind it can be grabbed and thrown */
-    .why__question {
-      pointer-events: none;
-    }
-
-    .why__float {
-      display: block;
-      pointer-events: auto;
-      cursor: grab;
-      touch-action: none;
-    }
-
-    .why__mark path {
-      stroke-width: 6px;
     }
 
     .why__grid {
@@ -382,7 +215,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     }
 
     /* Same type as the headline, so the two are one voice. The script places it beside the headline's last line:
-       --merge-left is the list's left edge, --merge-top the top of that line (both measured, never guessed). */
+           --merge-left is the list's left edge, --merge-top the top of that line (both measured, never guessed). */
     .why__grid.is-armed .why__merge {
       position: absolute;
       left: var(--merge-left, 100%);
@@ -417,6 +250,11 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
 
     .why__grid.is-armed .why__item.is-active {
       opacity: 1;
+    }
+
+    /* The closing line stands alone: the answers above it are gone, not dimmed behind it */
+    .why__grid.is-closing .why__item:not(.why__item--close) {
+      opacity: 0;
     }
 
     /* Progress in the pinned column: one segment per answer, the active one in ink */
@@ -552,13 +390,6 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       background: var(--text-main);
     }
   }
-
-  /* Phones: the marks are drawn small, so the pen is lighter */
-  @media (max-width: 699px) {
-    .why__mark path {
-      stroke-width: 3px;
-    }
-  }
 </style>
 
 <script>
@@ -572,10 +403,9 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     // Armed by script, so no-JS visitors and narrow screens just see everything at full strength
     const activate = (index: number) => {
       items.forEach((el, i) => el.classList.toggle('is-active', i === index));
-      // On the closing step every segment goes dark: both answers
-      const closing = index === items.length - 1;
-      grid.classList.toggle('is-closing', closing);
-      bars.forEach((el, i) => el.classList.toggle('is-active', closing || i % items.length === index));
+      // The closing line also comes in beside the headline; each step darkens only its own stripe
+      grid.classList.toggle('is-closing', index === items.length - 1);
+      bars.forEach((el, i) => el.classList.toggle('is-active', i % items.length === index));
     };
 
     // Phones: counter, progress and buttons follow the card the swipe has settled on
@@ -671,21 +501,12 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       }
     }
 
-    // The marks in a block are drawn the first time it becomes active, and stay
-    const marks = Array.from(document.querySelectorAll<SVGElement>('[data-why-mark]'));
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      marks.forEach((m) => m.classList.add('is-armed'));
-    }
-    const draw = (item: HTMLElement) =>
-      item.querySelectorAll<SVGElement>('[data-why-mark]').forEach((m) => m.classList.add('is-drawn'));
-
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           // On phones the active card follows the sideways swipe (below), not the vertical position
           if (!phone.matches) activate(items.indexOf(entry.target as HTMLElement));
-          draw(entry.target as HTMLElement);
         }
       },
       // A thin band across the middle of the screen: whichever block crosses it is the active one
@@ -717,144 +538,5 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     desktop.addEventListener('change', arm);
     activate(0);
     items.forEach((el) => io.observe(el));
-  }
-</script>
-
-<script>
-  // The heart and the arrow can be grabbed and thrown. They carry the signature's grain, which roughens while they
-  // move, and leave the same hazy grain trail the hero rope does. After a pause they ease back to their word.
-  import { gsap, prefersReducedMotion } from '../../utils/motion';
-  import { Draggable } from 'gsap/Draggable';
-  import { InertiaPlugin } from 'gsap/InertiaPlugin';
-
-  gsap.registerPlugin(Draggable, InertiaPlugin);
-
-  const grid = document.querySelector<HTMLElement>('[data-why] .why__grid');
-  const trail = grid?.querySelector<HTMLCanvasElement>('[data-why-trail]');
-  const floats = Array.from(document.querySelectorAll<SVGSVGElement>('.why__float'));
-  const filter = document.querySelector('#why-grain');
-  const disp = filter?.querySelector<SVGFEDisplacementMapElement>('[data-grain-disp]');
-  const cut = filter?.querySelector<SVGFEFuncAElement>('[data-grain-cut]');
-  const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-  if (grid && trail && disp && cut && floats.length && finePointer && !prefersReducedMotion()) {
-    const ctx = trail.getContext('2d')!;
-    const SCALE = 0.5; // painted at half size: it is blurred anyway
-    const FADE = 0.05;
-    const GRAIN_REST = 0.5;
-
-    const resize = () => {
-      trail.width = Math.max(1, Math.round(grid.clientWidth * SCALE));
-      trail.height = Math.max(1, Math.round(grid.clientHeight * SCALE));
-    };
-    resize();
-    new ResizeObserver(resize).observe(grid);
-
-    // Each float's strokes as Path2D in its own viewBox units, so the trail can repaint the exact shape anywhere
-    const shapes = floats.map((el) => {
-      const vb = el.viewBox.baseVal;
-      return {
-        el,
-        vb,
-        paths: Array.from(el.querySelectorAll('path')).map((p) => new Path2D(p.getAttribute('d')!)),
-        last: { x: 0, y: 0 },
-        motion: 0,
-      };
-    });
-
-    let accent = '#c25e3e';
-    let grain = -1;
-    let quiet = 0;
-    let frameNo = 0;
-
-    const tick = () => {
-      frameNo++;
-      const gr = trail.getBoundingClientRect();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = `rgba(0,0,0,${FADE})`;
-      ctx.fillRect(0, 0, trail.width, trail.height);
-
-      let fastest = 0;
-      let painted = false;
-      if (frameNo % 60 === 1) accent = getComputedStyle(grid).getPropertyValue('--accent').trim() || accent;
-
-      for (const s of shapes) {
-        if (getComputedStyle(s.el).display === 'none') continue; // hidden on narrow screens
-        const r = s.el.getBoundingClientRect();
-        const speed = Math.hypot(r.left - s.last.x, r.top - s.last.y);
-        s.last.x = r.left;
-        s.last.y = r.top;
-        const target = Math.min(1, speed / 14);
-        s.motion += (target - s.motion) * (target > s.motion ? 0.25 : 0.05);
-        fastest = Math.max(fastest, s.motion);
-        if (s.motion < 0.03) continue;
-
-        painted = true;
-        const sx = r.width / s.vb.width;
-        const sy = r.height / s.vb.height;
-        ctx.setTransform(SCALE * sx, 0, 0, SCALE * sy, (r.left - gr.left) * SCALE, (r.top - gr.top) * SCALE);
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = accent;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        const unit = 2 / (sx + sy); // one CSS pixel in the shape's own units
-        ctx.globalAlpha = 0.1 * s.motion;
-        ctx.lineWidth = 16 * unit;
-        s.paths.forEach((p) => ctx.stroke(p));
-        ctx.globalAlpha = 0.16 * s.motion;
-        ctx.lineWidth = 5 * unit;
-        s.paths.forEach((p) => ctx.stroke(p));
-      }
-      ctx.globalAlpha = 1;
-
-      // Fully clear once still for a while, so faint 8-bit residue never lingers
-      if (!painted && ++quiet > 120) {
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, trail.width, trail.height);
-        quiet = 120;
-      } else if (painted) quiet = 0;
-
-      // Rougher grain while anything is moving, back to the resting level when it stops
-      const level = GRAIN_REST + (1 - GRAIN_REST) * fastest;
-      if (Math.abs(level - grain) > 0.004) {
-        grain = level;
-        disp.setAttribute('scale', (level * 5).toFixed(2));
-        cut.setAttribute('intercept', (1 - level * 4.2).toFixed(3));
-      }
-    };
-    gsap.ticker.add(tick);
-
-    shapes.forEach(({ el }) => {
-      let back: gsap.core.Tween | undefined;
-      let wait: gsap.core.Tween | undefined;
-      const goHome = () => {
-        back = gsap.to(el, { x: 0, y: 0, duration: 1.6, ease: 'elastic.out(1, 0.55)' });
-      };
-      const later = () => {
-        wait?.kill();
-        wait = gsap.delayedCall(2.4, goHome);
-      };
-
-      Draggable.create(el, {
-        type: 'x,y',
-        inertia: true,
-        // The block it belongs to is its playground, so a throw never sends it off-screen
-        bounds: el.closest('.why__item') ?? grid,
-        edgeResistance: 0.75,
-        minimumMovement: 2,
-        onPress() {
-          wait?.kill();
-          back?.kill();
-          gsap.killTweensOf(el);
-          el.style.cursor = 'grabbing';
-        },
-        onRelease() {
-          el.style.cursor = '';
-          later();
-        },
-        onThrowComplete: later,
-      });
-    });
   }
 </script>

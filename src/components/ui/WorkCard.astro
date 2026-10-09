@@ -34,7 +34,6 @@ const tools = p.data.tools.slice(0, 3);
         ) : (
           <div class="card__img card__img--empty" aria-hidden="true"></div>
         )}
-        <span class="card__cta" aria-hidden="true"></span>
       </div>
     </div>
     <div class="card__body">
@@ -97,33 +96,6 @@ const tools = p.data.tools.slice(0, 3);
     background: var(--frame-bg);
   }
 
-  /* Hover veil: dark ink arriving as sand, the same wipe, opening from the centre outwards, through
-     #sand-dispersion as the button fill (--fill is registered in global.css). No text: the cursor says "View"
-     (see tactile.ts). Hover-capable devices only. */
-  .card__cta {
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    display: none;
-    place-items: center;
-    pointer-events: none;
-  }
-
-  .card__cta::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    /* Opens from the centre outwards, and its leading edge is a wide, grainy band rather than a line */
-    --fill: -60%;
-    background: radial-gradient(
-      circle farthest-corner at 50% 50%,
-      color-mix(in srgb, #14130f 58%, transparent) var(--fill),
-      transparent calc(var(--fill) + 60%)
-    );
-    filter: url(#sand-dispersion);
-    transition: --fill 1s var(--ease-out);
-  }
-
   /* On hover the image's outer border crumbles. The media is feathered with a mask (--feather grows on hover), and
      its frame, one element up, runs through the same grain filter: the filter reads that soft alpha and breaks it into
      grain, so the print dissolves into the page itself, with no edge left behind. (A filter runs before a mask on the
@@ -147,10 +119,6 @@ const tools = p.data.tools.slice(0, 3);
   }
 
   @media (hover: hover) {
-    .card__cta {
-      display: grid;
-    }
-
     .card__frame:hover,
     .card__link:focus-visible .card__frame {
       filter: url(#sand-edge);
@@ -159,12 +127,6 @@ const tools = p.data.tools.slice(0, 3);
     .card__frame:hover .card__media,
     .card__link:focus-visible .card__media {
       --feather: 64px;
-    }
-
-    /* Only the image itself sands over; the cursor's "View" follows the whole card */
-    .card__media:hover .card__cta::before,
-    .card__link:focus-visible .card__cta::before {
-      --fill: 100%;
     }
   }
 

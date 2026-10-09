@@ -130,7 +130,7 @@ function cursor() {
     }
   };
 
-  const MEDIA = '.card__link, .card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
+  const MEDIA = '.card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
   const INTERACTIVE = 'a, button, [data-magnetic]';
 
   let shown = false;
@@ -155,7 +155,7 @@ function cursor() {
     if (!t) return;
     const media = t.closest<HTMLElement>(MEDIA);
     if (media) {
-      // Anywhere over a project card (not just its image) the cursor turns into an orange "View" disc, as big as the hero's "Grab"; decorative floating images just get the arrow
+      // Over a project card's image the cursor turns into the "View" disc, as big as the hero's "Grab"; the rest of the card is a plain link; decorative floating images just get the arrow
       if (media.closest('[data-lightbox]')) set('media', '<span class="cursor__sm">Enlarge</span>');
       else if (media.closest('.card')) set('media', 'View');
       else set('media', ARROW);

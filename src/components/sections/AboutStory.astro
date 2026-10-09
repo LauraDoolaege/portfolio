@@ -13,63 +13,13 @@ const paragraphs = [
 ---
 
 <section class="sec" aria-labelledby="story-title">
-  <!-- The signature's grain: a ragged edge and a few dropped speckles, same filter as the homepage marks -->
-  <svg class="story__defs" width="0" height="0" aria-hidden="true" focusable="false">
-    <defs>
-      <filter
-        id="story-grain"
-        x="-30%"
-        y="-30%"
-        width="160%"
-        height="160%"
-        color-interpolation-filters="sRGB"
-      >
-        <feTurbulence
-          type="fractalNoise"
-          baseFrequency="0.9"
-          numOctaves="2"
-          seed="5"
-          result="noise"
-        ></feTurbulence>
-        <feDisplacementMap
-          in="SourceGraphic"
-          in2="noise"
-          scale="2.5"
-          xChannelSelector="R"
-          yChannelSelector="G"
-          result="ragged"
-        ></feDisplacementMap>
-        <feColorMatrix
-          in="noise"
-          type="matrix"
-          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0"
-          result="speckle"
-        ></feColorMatrix>
-        <feComponentTransfer in="speckle" result="mask">
-          <feFuncA type="linear" slope="8" intercept="-1.1"></feFuncA>
-        </feComponentTransfer>
-        <feComposite in="ragged" in2="mask" operator="in"></feComposite>
-      </filter>
-    </defs>
-  </svg>
   <div class="container">
     <header class="sec__head">
       <SectionLabel text="The journey" data-reveal />
       <h2 id="story-title" class="sec-title" data-reveal>
         From{' '}
         <span class="story__word">
-          stories
-          <svg
-            class="story__mark"
-            viewBox="0 0 200 60"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-            focusable="false"
-            data-story-mark
-          >
-            <path pathLength="1" d="M 4 10 C 50 6, 130 12, 194 5"></path>
-            <path pathLength="1" d="M 194 5 C 150 16, 90 24, 36 34 C 80 38, 130 44, 170 40"></path>
-          </svg>
+          <mark class="hl">stories</mark>
         </span>{' '}
         to experiences
       </h2>
@@ -118,65 +68,11 @@ const paragraphs = [
     width: min(100%, 10rem);
   }
 
-  .story__defs {
-    position: absolute;
-  }
-
   /* The one hand-made moment on this page: a terracotta double underline under "stories", drawn in once */
   .story__word {
     position: relative;
     display: inline-block;
     white-space: nowrap;
-  }
-
-  .story__mark {
-    position: absolute;
-    left: -2%;
-    bottom: -0.16em;
-    width: 104%;
-    height: 0.3em;
-    overflow: visible;
-    pointer-events: none;
-    filter: url(#story-grain);
-  }
-
-  .story__mark path {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 5px;
-    vector-effect: non-scaling-stroke;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  @media (min-width: 1000px) {
-    .story__mark path {
-      stroke-width: 6px;
-    }
-  }
-
-  /* Armed by the script, so no-JS and reduced-motion visitors see the finished mark. Each pass is its own pen
-     stroke, quick at first and slowing as it lands. */
-  [data-story-mark].is-armed path {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    opacity: 0;
-  }
-
-  [data-story-mark].is-drawn path {
-    stroke-dashoffset: 0;
-    opacity: 1;
-    transition:
-      stroke-dashoffset 0.6s cubic-bezier(0.35, 0.1, 0.25, 1) var(--delay, 0s),
-      opacity 0s linear var(--delay, 0s);
-  }
-
-  [data-story-mark] path:nth-child(1) {
-    --delay: 0.5s;
-  }
-
-  [data-story-mark] path:nth-child(2) {
-    --delay: 1.2s;
   }
 
   .story__figure :global(.story__photo) {
@@ -232,29 +128,4 @@ const paragraphs = [
   }
 
   /* Phones: the marks are drawn small, so the pen is lighter */
-  @media (max-width: 699px) {
-    .story__mark path {
-      stroke-width: 3px;
-    }
-  }
 </style>
-
-<script>
-  const marks = document.querySelectorAll<SVGElement>('[data-story-mark]');
-  if (marks.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          entry.target.classList.add('is-drawn');
-          io.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.6 },
-    );
-    marks.forEach((m) => {
-      m.classList.add('is-armed');
-      io.observe(m);
-    });
-  }
-</script>

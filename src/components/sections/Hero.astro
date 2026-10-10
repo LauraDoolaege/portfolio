@@ -21,7 +21,6 @@ import portrait from '../../assets/images/hero_portrait.png';
           <span class="hero__dot" aria-hidden="true"></span>
           Open to internships · Feb 2027
         </span>
-        <span class="hero__label-wide">Portfolio 2026</span>
       </p>
     </div>
 
@@ -67,21 +66,12 @@ import portrait from '../../assets/images/hero_portrait.png';
       <p class="hero__intro" data-line>
         I detangle briefings into intuitive concepts, creative and grounded in marketing.
       </p>
-      <!-- Below the desktop split: "View my work" is the filled primary and Resume a quiet link. On desktop it is
-           the other way round: Resume the outlined button, the case studies a link. -->
-      <div class="hero__ctas hero__ctas--small" data-line>
-        <Button href="#work" icon="none">
-          View my work
-        </Button>
-        <Button variant="link" size="sm" href={withBase('/resume.pdf')} icon="down" download>
-          Resume
-        </Button>
-      </div>
-      <div class="hero__ctas hero__ctas--wide" data-line>
+      <!-- Resume is the button, the case studies a link. Below the desktop split the button is filled. -->
+      <div class="hero__ctas" data-line>
         <Button href={withBase('/resume.pdf')} icon="down" download>
           Resume
         </Button>
-        <Button variant="link" size="sm" href="#work" icon="down">
+        <Button variant="link" size="sm" href="#work">
           View my work
         </Button>
       </div>
@@ -179,7 +169,7 @@ import portrait from '../../assets/images/hero_portrait.png';
 <style>
   .hero {
     /* Its own stacking context above the sections that follow, so the signature stays on top when it is dragged
-                               out of the header instead of being cut off by the next section */
+                                           out of the header instead of being cut off by the next section */
     position: relative;
     z-index: 20;
     /* Fills the first viewport under the nav (~4.1rem): the strip sits on the fold */
@@ -224,16 +214,8 @@ import portrait from '../../assets/images/hero_portrait.png';
     gap: 0.7em;
   }
 
-  .hero__label-wide {
-    display: none;
-  }
-
   /* The availability sits in the strip on desktop, and in the eyebrow everywhere else */
   .hero__cell.hero__cell--status {
-    display: none;
-  }
-
-  .hero__ctas.hero__ctas--wide {
     display: none;
   }
 
@@ -362,11 +344,12 @@ import portrait from '../../assets/images/hero_portrait.png';
   }
 
   /* The secondary CTA is the text + arrow link: it hugs its text instead of stretching with the column */
-  /* The primary action is always filled (the shared button is an outline until hovered on a mouse), so it never
-     reads as the secondary one next to the Resume link */
-  .hero__ctas--small :global(.btn) {
-    background: var(--text-main);
-    color: var(--bg-primary);
+  /* The shared button is an outline until hovered on a mouse; below the desktop split it is filled */
+  @media (max-width: 999px) {
+    .hero__ctas :global(.btn) {
+      background: var(--text-main);
+      color: var(--bg-primary);
+    }
   }
 
   .hero__ctas :global(.btn) {
@@ -542,20 +525,50 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
   }
 
+  /* ---------- Tablets: the same single left edge as phones, with the title kept on one line ---------- */
+  @media (min-width: 700px) and (max-width: 999px) {
+    .hero__field {
+      align-items: stretch;
+    }
+
+    .hero__stage {
+      align-items: flex-start;
+    }
+
+    .hero__block {
+      margin-inline: 0;
+    }
+
+    .hero__top {
+      justify-content: flex-start;
+    }
+
+    .hero__lede {
+      align-items: flex-start;
+    }
+
+    .hero__intro {
+      max-width: 38ch;
+      font-size: 1rem;
+      text-align: left;
+    }
+
+    .hero__ctas {
+      justify-content: flex-start;
+    }
+
+    /* A little shorter than the phone crop: the column is wide here */
+    .hero__portrait {
+      aspect-ratio: 2 / 1;
+    }
+  }
+
   /* ---------- Desktop: title left, hairline, intro + CTAs right ---------- */
 
   @media (min-width: 1000px) {
-    .hero__label-small,
-    .hero__ctas.hero__ctas--small {
+    /* The eyebrow is the availability line, which lives in the strip on desktop */
+    .hero__label {
       display: none;
-    }
-
-    .hero__label-wide {
-      display: inline;
-    }
-
-    .hero__ctas.hero__ctas--wide {
-      display: flex;
     }
 
     .hero__cell.hero__cell--status {
@@ -564,7 +577,7 @@ import portrait from '../../assets/images/hero_portrait.png';
 
     .hero {
       /* One inset runs all the way round: page edge, divider, nav rule, strip rule. The right column
-                                                                             (--col) is shared with the strip below, so the divider is one unbroken line. */
+                                                                                                     (--col) is shared with the strip below, so the divider is one unbroken line. */
       --inset: var(--page-margin);
       --col: clamp(18rem, 26vw, 26rem);
     }
@@ -598,7 +611,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* "Designer" is the widest line: the font is sized so it runs almost to the divider.
-                                         It measures 4.51em wide at this tracking; the divisor leaves a little air before the divider. */
+                                                     It measures 4.51em wide at this tracking; the divisor leaves a little air before the divider. */
     .hero__big {
       font-size: clamp(52px, calc((100vw - var(--col) - 2 * var(--inset)) / 4.62), 340px);
       /* Pulls the box up to the baseline so the glyph bottoms, not the line box, meet the button */
@@ -610,7 +623,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* Optical alignment: the U and the D start ~0.06em inside their box, so pull them (and the
-                                       light words above) back so every left edge lands on the page margin, in line with the strip */
+                                                   light words above) back so every left edge lands on the page margin, in line with the strip */
     .hero__big-line:first-child {
       margin-left: -0.055em;
     }
@@ -624,7 +637,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* Right column: the vertical hairline runs the full height of the hero and on through the strip.
-                                         Everything inside keeps the same inset from the divider, the nav rule, the right edge and the strip rule. */
+                                                     Everything inside keeps the same inset from the divider, the nav rule, the right edge and the strip rule. */
     .hero__aside {
       align-self: stretch;
       justify-content: flex-start;
@@ -696,7 +709,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* Room above the words for the signature: it rests centred above the "Marketer turned" row.
-                                         At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+                                                     At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
     .hero__stage {
       padding-top: 0;
     }
@@ -823,12 +836,28 @@ import portrait from '../../assets/images/hero_portrait.png';
   /* Desktop: exactly the hero's split. The strip runs to the page edge, like the field above it,
      and the status starts where the portrait starts. */
   @media (min-width: 1000px) {
+    /* Three items, two equal gaps: the first link at the left edge, the status where the portrait starts, and the
+           second link centred between them by two matching flexible columns. The links' cell dissolves into the grid. */
     .hero__cells {
-      grid-template-columns: minmax(0, 1fr) var(--col);
+      grid-template-columns: auto minmax(1.5rem, 1fr) auto minmax(1.5rem, 1fr) var(--col);
       padding-right: 0;
     }
 
-    .hero__cell + .hero__cell {
+    .hero__cell--links {
+      display: contents;
+    }
+
+    .hero__cell--links .hero__item:nth-child(1) {
+      grid-column: 1;
+    }
+
+    /* The padding-left it keeps (the same as the status cell's) is what makes the two visible gaps equal */
+    .hero__cell--links .hero__item:nth-child(2) {
+      grid-column: 3;
+    }
+
+    .hero__cell.hero__cell--status {
+      grid-column: 5;
       padding-left: var(--inset);
     }
   }

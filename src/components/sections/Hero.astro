@@ -16,7 +16,13 @@ import portrait from '../../assets/images/hero_portrait.png';
     <canvas class="hero__trail" aria-hidden="true" data-trail></canvas>
 
     <div class="hero__label">
-      <p class="tag hero__label-text">Portfolio 2026</p>
+      <p class="tag hero__label-text">
+        <span class="hero__label-small">
+          <span class="hero__dot" aria-hidden="true"></span>
+          Open to internships · Feb 2027
+        </span>
+        <span class="hero__label-wide">Portfolio 2026</span>
+      </p>
     </div>
 
     <div class="hero__stage">
@@ -54,23 +60,31 @@ import portrait from '../../assets/images/hero_portrait.png';
           src={portrait}
           alt="Portrait of Laura Doolaege in profile, looking to the left"
           widths={[320, 480, 640]}
-          sizes="(min-width: 1000px) 22rem, 36vw"
+          sizes="(min-width: 1000px) 22rem, 100vw"
           loading="eager"
         />
       </figure>
       <p class="hero__intro" data-line>
         I detangle briefings into intuitive concepts, creative and grounded in marketing.
       </p>
-      <div class="hero__ctas" data-line>
-        <Button href={withBase('/resume.pdf')} icon="down" download>
+      <!-- Below the desktop split: "View my work" is the filled primary and Resume a quiet link. On desktop it is
+           the other way round: Resume the outlined button, the case studies a link. -->
+      <div class="hero__ctas hero__ctas--small" data-line>
+        <Button href="#work" icon="none">
+          View my work
+        </Button>
+        <Button variant="link" size="sm" href={withBase('/resume.pdf')} icon="down" download>
           Resume
         </Button>
       </div>
-      <!-- Phones: the availability sits right under the Resume button (above the fold); the strip's own copy is hidden there -->
-      <p class="hero__status-phone" data-line>
-        <span class="hero__dot" aria-hidden="true"></span>
-        Seeking internship (Feb 2027)
-      </p>
+      <div class="hero__ctas hero__ctas--wide" data-line>
+        <Button href={withBase('/resume.pdf')} icon="down" download>
+          Resume
+        </Button>
+        <Button variant="link" size="sm" href="#work" icon="down">
+          View my work
+        </Button>
+      </div>
     </div>
 
     <!-- The signature: one overlay over the whole field. aria-hidden, the CTAs carry the meaning. -->
@@ -165,7 +179,7 @@ import portrait from '../../assets/images/hero_portrait.png';
 <style>
   .hero {
     /* Its own stacking context above the sections that follow, so the signature stays on top when it is dragged
-                     out of the header instead of being cut off by the next section */
+                               out of the header instead of being cut off by the next section */
     position: relative;
     z-index: 20;
     /* Fills the first viewport under the nav (~4.1rem): the strip sits on the fold */
@@ -202,6 +216,25 @@ import portrait from '../../assets/images/hero_portrait.png';
 
   .hero__label-text {
     font-weight: var(--weight-regular);
+  }
+
+  .hero__label-small {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+  }
+
+  .hero__label-wide {
+    display: none;
+  }
+
+  /* The availability sits in the strip on desktop, and in the eyebrow everywhere else */
+  .hero__cell.hero__cell--status {
+    display: none;
+  }
+
+  .hero__ctas.hero__ctas--wide {
+    display: none;
   }
 
   /* ---------- Composition ---------- */
@@ -299,8 +332,9 @@ import portrait from '../../assets/images/hero_portrait.png';
   .hero__ctas {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    gap: 1rem clamp(1rem, 0.5rem + 3vw, 3.5rem);
+    gap: 1rem clamp(1.25rem, 0.5rem + 3vw, 2.5rem);
   }
 
   /* Small phones: the buttons stack at one shared width instead of wrapping unevenly */
@@ -328,6 +362,13 @@ import portrait from '../../assets/images/hero_portrait.png';
   }
 
   /* The secondary CTA is the text + arrow link: it hugs its text instead of stretching with the column */
+  /* The primary action is always filled (the shared button is an outline until hovered on a mouse), so it never
+     reads as the secondary one next to the Resume link */
+  .hero__ctas--small :global(.btn) {
+    background: var(--text-main);
+    color: var(--bg-primary);
+  }
+
   .hero__ctas :global(.btn) {
     min-height: 44px;
     padding: 0.9em 1.5em;
@@ -414,26 +455,28 @@ import portrait from '../../assets/images/hero_portrait.png';
 
   /* ---------- Portrait ---------- */
 
-  /* Below the desktop split the portrait is a small print tucked into the top-right corner, level with the signature
-     on the left: the rope and the photo are the two things above the words. Sized so it clears the first row of
-     the title (the signature's 192px of room sets that height). */
+  /* Below the desktop split the portrait comes last in the column: after the tagline and the buttons, as a wide
+     crop, so the headline and what to do next are what the first screen is made of. */
   .hero__portrait {
-    position: absolute;
-    top: 4.25rem;
-    right: var(--page-margin);
-    z-index: 0;
+    position: relative;
+    order: 3;
     display: block;
     overflow: hidden;
-    width: clamp(8.5rem, 36vw, 11rem);
-    aspect-ratio: 3 / 4;
+    width: 100%;
+    aspect-ratio: 3 / 2;
     background: var(--frame-bg);
   }
 
-  @media (min-width: 700px) and (max-width: 999px) {
-    .hero__portrait {
-      top: 4.5rem;
-      width: 10.5rem;
-    }
+  .hero__portrait-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 45% 28%;
+    filter: contrast(0.96) brightness(1.02);
+  }
+
+  :global(:root[data-theme='dark']) .hero__portrait-img {
+    filter: contrast(0.96) brightness(0.85);
   }
 
   /* ---------- Phones: one left edge ----------
@@ -493,14 +536,35 @@ import portrait from '../../assets/images/hero_portrait.png';
     .hero__ctas :global(.btn) {
       width: 100%;
     }
+
+    .hero__ctas :global(.btn-link) {
+      align-self: flex-start;
+    }
   }
 
   /* ---------- Desktop: title left, hairline, intro + CTAs right ---------- */
 
   @media (min-width: 1000px) {
+    .hero__label-small,
+    .hero__ctas.hero__ctas--small {
+      display: none;
+    }
+
+    .hero__label-wide {
+      display: inline;
+    }
+
+    .hero__ctas.hero__ctas--wide {
+      display: flex;
+    }
+
+    .hero__cell.hero__cell--status {
+      display: flex;
+    }
+
     .hero {
       /* One inset runs all the way round: page edge, divider, nav rule, strip rule. The right column
-                                                         (--col) is shared with the strip below, so the divider is one unbroken line. */
+                                                                             (--col) is shared with the strip below, so the divider is one unbroken line. */
       --inset: var(--page-margin);
       --col: clamp(18rem, 26vw, 26rem);
     }
@@ -534,7 +598,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* "Designer" is the widest line: the font is sized so it runs almost to the divider.
-                               It measures 4.51em wide at this tracking; the divisor leaves a little air before the divider. */
+                                         It measures 4.51em wide at this tracking; the divisor leaves a little air before the divider. */
     .hero__big {
       font-size: clamp(52px, calc((100vw - var(--col) - 2 * var(--inset)) / 4.62), 340px);
       /* Pulls the box up to the baseline so the glyph bottoms, not the line box, meet the button */
@@ -546,7 +610,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* Optical alignment: the U and the D start ~0.06em inside their box, so pull them (and the
-                             light words above) back so every left edge lands on the page margin, in line with the strip */
+                                       light words above) back so every left edge lands on the page margin, in line with the strip */
     .hero__big-line:first-child {
       margin-left: -0.055em;
     }
@@ -560,7 +624,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* Right column: the vertical hairline runs the full height of the hero and on through the strip.
-                               Everything inside keeps the same inset from the divider, the nav rule, the right edge and the strip rule. */
+                                         Everything inside keeps the same inset from the divider, the nav rule, the right edge and the strip rule. */
     .hero__aside {
       align-self: stretch;
       justify-content: flex-start;
@@ -573,7 +637,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     /* The portrait takes whatever height is left, so the column runs evenly from top to bottom */
     .hero__portrait {
       position: relative;
-      inset: auto;
+      order: 0;
       aspect-ratio: auto;
       display: block;
       isolation: isolate;
@@ -632,9 +696,9 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
 
     /* Room above the words for the signature: it rests centred above the "Marketer turned" row.
-                               At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
+                                         At its 150px minimum width the rope is ~167px tall, plus a 14px gap to the words. */
     .hero__stage {
-      padding-top: 192px;
+      padding-top: 0;
     }
   }
 
@@ -697,26 +761,8 @@ import portrait from '../../assets/images/hero_portrait.png';
     padding-left: clamp(1rem, 0.5rem + 1.5vw, 2rem);
   }
 
-  .hero__status-phone {
-    display: none;
-  }
-
   /* Phones: stacked, the rule becomes a line above the second link */
   @media (max-width: 719px) {
-    .hero__status-phone {
-      display: flex;
-      align-items: center;
-      gap: 0.7em;
-      font-size: var(--text-small);
-      font-weight: var(--weight-medium);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .hero__cell--status {
-      display: none;
-    }
-
     /* The whole row is the link (44px+), not just its text */
     .hero__item {
       padding-block: 0;
@@ -866,6 +912,10 @@ import portrait from '../../assets/images/hero_portrait.png';
     left: 0,
     right: 0,
     capTop: 0,
+    rowRight: 0,
+    underlineY: 0,
+    titleLeft: 0,
+    titleRight: 0,
     centerX: 0,
     dividerX: 0,
     titleBottom: 0,
@@ -903,6 +953,12 @@ import portrait from '../../assets/images/hero_portrait.png';
     const t = rel(turned.getBoundingClientRect());
     const baseline = rel(baselineMark.getBoundingClientRect()).bottom;
     const fontSize = parseFloat(getComputedStyle(marketer).fontSize) || 24;
+    const lastEl = bigLines[bigLines.length - 1];
+    const lastLine = rel(lastEl.getBoundingClientRect());
+    // The line's block can be as wide as the screen; the text itself is what the underline should match
+    const range = document.createRange();
+    range.selectNodeContents(lastEl);
+    const lastText = rel(range.getBoundingClientRect());
     layout = {
       baseline,
       midY: baseline - fontSize * 0.36,
@@ -910,6 +966,13 @@ import portrait from '../../assets/images/hero_portrait.png';
       right: t.left,
       // Top of the capital letters, and the middle of the whole row
       capTop: baseline - fontSize * 0.72,
+      // Where the "Marketer to" row ends, and the text box of the title's last line: the signature leaves the
+      // first and settles beneath the second
+      rowRight: t.right,
+      underlineY:
+        lastLine.bottom - (parseFloat(getComputedStyle(bigLines[0]).fontSize) || 60) * 0.02,
+      titleLeft: lastText.left,
+      titleRight: lastText.right,
       centerX: (m.left + t.right) / 2,
       // Desktop: the vertical divider, and where the last line of the title sits on its baseline
       dividerX: rel(aside.getBoundingClientRect()).left,
@@ -919,18 +982,82 @@ import portrait from '../../assets/images/hero_portrait.png';
     };
   }
 
+  /**
+   * Tablet and phone: the signature tells the tagline. It starts as a tangle that loops out of the end of
+   * "Marketer to", runs down the free space beside the title, and straightens into an underline beneath
+   * the last word. Built as a polyline, then resampled to N points evenly spaced along its length.
+   */
+  function tangleToUnderline() {
+    const fs = parseFloat(getComputedStyle(marketer).fontSize) || 20;
+    // Three loops of a prolate cycloid, leaving the row at its mid-height; sized to the free room beside the row
+    const x0 = layout.rowRight + fs * 0.6;
+    const y0 = layout.midY;
+    const loops = 3;
+    const avail = Math.max(60, width - x0 - fs * 3.2 - 24);
+    const R = Math.min(fs * 0.95, avail / (0.45 * Math.PI * 2 * loops));
+    const c = R * 0.45;
+    const raw: { x: number; y: number }[] = [];
+    for (let k = 0; k <= 96; k++) {
+      const th = (k / 96) * Math.PI * 2 * loops;
+      raw.push({ x: x0 + c * th - R * Math.sin(th), y: y0 + R * (1 - Math.cos(th)) });
+    }
+    const xe = raw[raw.length - 1].x;
+    const ye = raw[raw.length - 1].y;
+    // Down the right of the title, round the corner, and along the underline from its right end to its left
+    const xr = Math.max(layout.titleRight + fs * 0.9, xe + fs * 2);
+    const yu = layout.underlineY + fs * 0.5;
+    const bez = (p0: number[], p1: number[], p2: number[], p3: number[], n: number) => {
+      for (let k = 1; k <= n; k++) {
+        const t = k / n;
+        const u = 1 - t;
+        raw.push({
+          x: u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0],
+          y: u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1],
+        });
+      }
+    };
+    bez(
+      [xe, ye],
+      [xe + (xr - xe) * 0.7, ye - fs * 0.4],
+      [xr + fs * 0.3, yu - (yu - ye) * 0.55],
+      [xr, yu - fs * 0.2],
+      40,
+    );
+    bez(
+      [xr, yu - fs * 0.2],
+      [xr - fs * 0.2, yu + fs * 0.25],
+      [xr - fs * 0.8, yu + fs * 0.05],
+      [xr - fs * 1.4, yu],
+      14,
+    );
+    const left = layout.titleLeft;
+    raw.push({ x: left, y: yu + fs * 0.12 });
+
+    // Resample to N points evenly spaced along the length
+    const cum = [0];
+    for (let i = 1; i < raw.length; i++)
+      cum.push(cum[i - 1] + Math.hypot(raw[i].x - raw[i - 1].x, raw[i].y - raw[i - 1].y));
+    const total = cum[cum.length - 1];
+    const out: { x: number; y: number }[] = [];
+    let j = 1;
+    for (let i = 0; i < N; i++) {
+      const target = (total * i) / (N - 1);
+      while (j < cum.length - 1 && cum[j] < target) j++;
+      const seg = cum[j] - cum[j - 1] || 1;
+      const f = (target - cum[j - 1]) / seg;
+      out.push({
+        x: raw[j - 1].x + (raw[j].x - raw[j - 1].x) * f,
+        y: raw[j - 1].y + (raw[j].y - raw[j - 1].y) * f,
+      });
+    }
+    return out;
+  }
+
   function buildRestSignature() {
     const total = source.getTotalLength();
     restSig = [];
     if (stacked.matches) {
-      // Tablet and phone: centred above the "Marketer turned" row, its lowest point a little clear of the capitals
-      const s = Math.min(230, Math.max(150, width * 0.14)) / SIG_W;
-      const cx = layout.centerX;
-      const cy = layout.capTop - 14 - SIG_BASE * s;
-      for (let i = 0; i < N; i++) {
-        const p = source.getPointAtLength((total * i) / (N - 1));
-        restSig.push({ x: cx + (p.x - SIG_CENTER.x) * s, y: cy + (p.y - SIG_CENTER.y) * s });
-      }
+      restSig = tangleToUnderline();
       return;
     }
     // Desktop: a big signature that ties the two columns together. Its right loop reaches across the

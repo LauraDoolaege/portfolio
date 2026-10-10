@@ -48,7 +48,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       <!-- The closing line, set in the headline's own type and lined up with its last line by the script, so on the
            last step the two read as one quote. The list item below keeps the real text for assistive tech. -->
       <p class="why__merge" aria-hidden="true" data-why-merge>
-        and I want to answer both!
+        and I want to <mark class="hl">answer both</mark>!
       </p>
     </div>
 
@@ -75,7 +75,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       ))}
       <li class="why__item why__item--close" data-why-item>
         <p class="why__close" data-reveal>
-          and I want to answer both!
+          and I want to <mark class="hl">answer both</mark>!
         </p>
       </li>
     </ol>
@@ -184,7 +184,8 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     .why__pin {
       grid-column: 1 / 6;
       position: sticky;
-      top: clamp(5rem, 14vh, 9rem);
+      /* Centred on the screen like the answer beside it, so headline and answer line up while they are read */
+      top: var(--pin-top, clamp(5rem, 14vh, 9rem));
       align-self: start;
     }
 
@@ -199,13 +200,13 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 85vh;
+      min-height: 66vh;
       padding-block: 3rem;
       transition: opacity 0.6s var(--ease-out);
     }
 
     .why__item--close {
-      min-height: 70vh;
+      min-height: 52vh;
     }
 
     /* The list's own copy only holds the scroll distance (and the text for screen readers) */
@@ -215,7 +216,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     }
 
     /* Same type as the headline, so the two are one voice. The script places it beside the headline's last line:
-           --merge-left is the list's left edge, --merge-top the top of that line (both measured, never guessed). */
+             --merge-left is the list's left edge, --merge-top the top of that line (both measured, never guessed). */
     .why__grid.is-armed .why__merge {
       position: absolute;
       left: var(--merge-left, 100%);
@@ -526,6 +527,10 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       merge.style.setProperty('--merge-top', `${title.offsetTop + (lines - 1) * lh}px`);
       merge.style.setProperty('--merge-left', `${list.offsetLeft - pin.offsetLeft}px`);
       merge.style.setProperty('--merge-width', `${list.offsetWidth}px`);
+      pin.style.setProperty(
+        '--pin-top',
+        `${Math.max(72, (window.innerHeight - pin.offsetHeight) / 2)}px`,
+      );
     };
 
     const arm = () => {
@@ -533,6 +538,7 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
       place();
     };
     new ResizeObserver(place).observe(grid);
+    window.addEventListener('resize', place, { passive: true });
     document.fonts?.ready.then(place);
     arm();
     desktop.addEventListener('change', arm);

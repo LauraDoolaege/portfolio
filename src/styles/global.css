@@ -995,7 +995,12 @@ html.pt-arriving::before {
 .hl {
   padding: 0 0.14em;
   margin-inline: -0.14em;
-  background: var(--accent);
+  /* A marker of fixed height behind the word, not the whole line box, so highlights on neighbouring lines never touch */
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-size: 100% 0.92em;
+  background-position: 0 62%;
+  background-color: transparent;
   color: #1a1a1a;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;

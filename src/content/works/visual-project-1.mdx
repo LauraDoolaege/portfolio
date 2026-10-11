@@ -12,10 +12,22 @@ hook: "Working Nine to Thrive: Recovering from the workouts you didn't know you 
 ---
 
 import Gallery from '../../components/Gallery.astro';
+import CaseImage from '../../components/CaseImage.astro';
 import thrive from '../../assets/images/frame_thrive.png';
 import tom from '../../assets/images/Tom_thriver.png';
 import dash from '../../assets/images/Thrive_2.png';
 import crunch from '../../assets/images/Thrive_3.png';
+
+<div class="hero-art" style="--item-bg: #EAEAE7">
+  <CaseImage
+    label="Working 9 to Thrive"
+    src={thrive}
+    alt="Working 9 to Thrive: a man with a beer can for a head cycles to work"
+    ratio="1440 / 1141"
+    size="wide"
+    caption="The campaign opener: a man with a beer can for a head, off to work by bike."
+  />
+</div>
 
 <h2 class="tag">The brief</h2>
 
@@ -26,14 +38,8 @@ Thrive, **Belgium's first sports beer**, needed a **concept for a campaign websi
 Working Nine to Thrive treats **everyday life as the workout.** Photo-bashed puns follow **Tom, a man with a beer can for a head,** as he recovers from a 500m dash to catch the train, crunching numbers and pitching ideas. Life takes a toll on the body, so **Thrive Unwind is for everyone.**
 
 <Gallery
+  startSlot={2}
   items={[
-    {
-      label: 'Working 9 to Thrive',
-      src: thrive,
-      ratio: '1440 / 1141',
-      background: '#EAEAE7',
-      caption: 'The campaign opener: a man with a beer can for a head, off to work by bike.',
-    },
     {
       label: 'Tom the Thriver',
       src: tom,

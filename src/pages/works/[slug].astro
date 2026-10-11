@@ -391,8 +391,8 @@ const caseFacts = facts
 
   .vhead__hook {
     max-width: 30ch;
-    margin-top: clamp(2rem, 1.5rem + 3vw, 4rem);
-    font-size: clamp(1.75rem, 1rem + 2.6vw, 3.5rem);
+    margin-top: clamp(1.25rem, 0.75rem + 3vw, 4rem);
+    font-size: clamp(1.5rem, 1rem + 2.6vw, 3.5rem);
     font-weight: var(--weight-medium);
     letter-spacing: -0.02em;
     line-height: 1.12;
@@ -412,6 +412,15 @@ const caseFacts = facts
 
   .vbody > :global(p + p) {
     margin-top: 1.1em;
+  }
+
+  /* The lead image of a design page: the artwork under the header, on its own background when it has one */
+  .vbody > :global(.hero-art) {
+    margin-top: clamp(2rem, 1.5rem + 2.5vw, 4rem);
+  }
+
+  .vbody > :global(.hero-art .media-frame) {
+    background: var(--item-bg, transparent);
   }
 
   /* Brief / idea labels: sit right above their paragraph, on the same left edge */
@@ -495,10 +504,11 @@ const caseFacts = facts
     margin-top: 0;
   }
 
+  /* Sub-sections have to stand out on a long scroll: a clear step above the body text and above h4 */
   .case__main :global(h3) {
-    margin-top: 2.5rem;
+    margin-top: 3rem;
     margin-bottom: 0.5rem;
-    font-size: var(--text-h3);
+    font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
     font-weight: var(--weight-bold);
     letter-spacing: var(--tracking-display);
     line-height: 1.15;
@@ -508,7 +518,7 @@ const caseFacts = facts
   /* A step down from h3: a named part inside a subsection (a feature, a touchpoint) */
   .case__main :global(h4) {
     margin-top: 2rem;
-    font-size: 1.0625rem;
+    font-size: 1.1875rem;
     font-weight: var(--weight-bold);
     line-height: 1.3;
     text-wrap: balance;

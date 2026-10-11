@@ -12,7 +12,7 @@ import { fadeUp, grainIn, hideForFadeUp, hideForGrain } from '../utils/reveal';
     '.chead > *',
     '.facts__item',
     '.vhead > *',
-    '.case__main > :is(h2, h3, h4, p, ul, ol, .pullquote, .funnel, .ruled, .parts)',
+    '.case__main > :is(h2, h3, h4, p, ul, ol, .pullquote, .funnel, .ruled, .parts, .disclosure)',
     '.vbody > :is(p, h2)',
     '.card__body',
     '.card__tags',

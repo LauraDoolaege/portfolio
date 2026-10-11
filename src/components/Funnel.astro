@@ -54,7 +54,8 @@ const { items } = Astro.props;
   }
 
   .funnel__item:last-child .funnel__n {
-    color: var(--accent);
+    /* The bright accent is under 3:1 on the paper, even at this size */
+    color: var(--accent-text);
   }
 
   .funnel__label {

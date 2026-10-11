@@ -1,9 +1,9 @@
 ---
 // Footer: one-line massive greeting sized to the container, the ask, and a links row.
-// TODO: replace the "#" hrefs with the real LinkedIn URL and CV PDF path.
+// Links come from utils/contact.ts (CV path and LinkedIn URL are placeholders until the real ones exist).
 import Button from '../ui/Button.astro';
 import Signature from '../ui/Signature.astro';
-const email = 'laura.doolaege@student.howest.be';
+import { email, linkedin, cvHref } from '../../utils/contact';
 ---
 
 <footer class="footer" id="contact">
@@ -28,10 +28,10 @@ const email = 'laura.doolaege@student.howest.be';
       <Button variant="link" href={`mailto:${email}`}>
         {email}
       </Button>
-      <Button variant="link" href="#" target="_blank" rel="noopener">
+      <Button variant="link" href={linkedin} target="_blank" rel="noopener">
         LinkedIn
       </Button>
-      <Button href="#" icon="down" data-magnetic>
+      <Button href={cvHref} icon="down" download data-magnetic>
         Download CV
       </Button>
       <p class="footer__legal">© Laura Doolaege, 2026</p>
@@ -53,7 +53,7 @@ const email = 'laura.doolaege@student.howest.be';
           />
         </svg>
       </a>
-      <a class="tile" href="#" target="_blank" rel="noopener">
+      <a class="tile" href={linkedin} target="_blank" rel="noopener">
         <span class="tile__text">
           <span class="tile__label tag">Say hi</span>
           <span class="tile__value">LinkedIn</span>
@@ -67,7 +67,7 @@ const email = 'laura.doolaege@student.howest.be';
           />
         </svg>
       </a>
-      <a class="tile" href="#">
+      <a class="tile" href={cvHref} download>
         <span class="tile__text">
           <span class="tile__label tag">PDF</span>
           <span class="tile__value">Download CV</span>

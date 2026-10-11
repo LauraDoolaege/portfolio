@@ -461,7 +461,6 @@ if (finePointer) {
     .forEach(spotlight);
   bare.forEach(grainOnly);
   if (!reduceMotion) dustTrail(bare);
-  document.querySelectorAll<HTMLElement>('.card__media').forEach(grainOnly);
   if (!reduceMotion) {
     // Boxed buttons only: a text link carries its underline on the outer element, so letting the label drift
     // toward the cursor pulls it off its own underline

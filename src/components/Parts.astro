@@ -16,7 +16,7 @@ const { items } = Astro.props;
       {it.image && (
         <Image class="parts__image" src={it.image} alt={it.alt ?? ''} widths={[320, 640]} sizes="(min-width: 700px) 20rem, 90vw" />
       )}
-      <h4 class="parts__title">{it.title}</h4>
+      <h3 class="parts__title">{it.title}</h3>
       <p class="parts__text">{it.text}</p>
     </li>
   ))}

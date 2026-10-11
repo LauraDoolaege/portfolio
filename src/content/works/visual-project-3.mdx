@@ -12,11 +12,23 @@ hook: 'An interactive digital court case to acquit Miss Chocolate of causing acn
 ---
 
 import Gallery from '../../components/Gallery.astro';
+import CaseImage from '../../components/CaseImage.astro';
 import courtroom from '../../assets/images/chocolate_2.png';
 import miss from '../../assets/images/frame_miss.png';
 import characters from '../../assets/images/chocolate_1.png';
 import desk from '../../assets/images/chocolate_3.png';
 import board from '../../assets/images/chocolate_4.png';
+
+<div class="hero-art">
+  <CaseImage
+    label="Miss Chocolate"
+    src={miss}
+    alt="Miss Chocolate, the defendant, with the three chapters of the case: history, proof, verdict"
+    ratio="1440 / 1014"
+    size="wide"
+    caption="The defendant, and the three chapters: history, proof, verdict."
+  />
+</div>
 
 <h2 class="tag">The brief</h2>
 
@@ -27,13 +39,8 @@ import board from '../../assets/images/chocolate_4.png';
 Miss Chocolate is an **interactive digital court case** with one goal: to **acquit her of causing acne in the first degree.** The story is told as a **case file**, from her history to the proof to the verdict, using illustration and digital storytelling to **turn a skincare myth into a trial.**
 
 <Gallery
+  startSlot={2}
   items={[
-    {
-      label: 'Miss Chocolate',
-      src: miss,
-      ratio: '1440 / 1014',
-      caption: 'The defendant, and the three chapters: history, proof, verdict.',
-    },
     {
       label: 'Courtroom Intro',
       src: courtroom,

@@ -2,7 +2,7 @@
   /* Color (light default; [data-theme='dark'] below overrides the same tokens) */
   --bg-primary: #f3f2ee; /* Warm alabaster / newsprint */
   --text-main: #1a1a1a; /* Deep charcoal */
-  --text-muted: #6b6a68; /* Warm grey */
+  --text-muted: #5c5b59; /* Warm grey, ~6:1 on the paper so small labels and captions have margin over AA */
   --border-color: #d1cfc7; /* 1px architectural grid lines */
   --accent: #b4c033; /* Bright olive: dot, lines, fills (not for small text) */
   --accent-text: #6b7320; /* Darker, muted olive for small text/hover (4.6:1 on alabaster) */
@@ -549,6 +549,28 @@ button:focus-visible {
 
 /* Tags: the one label style. Phase markers, section labels, meta labels, categories and pills all
    use it. Uppercase, generously tracked, plain text (no fill or ring), so it sits flush with the grid. */
+/* Hit areas: links are small on purpose, so an invisible box makes the tappable area at least 44px tall without
+   moving anything on the page */
+.btn-link,
+.nav-link,
+.theme-toggle,
+.site-header__name {
+  position: relative;
+}
+
+.btn-link::before,
+.nav-link::before,
+.theme-toggle::before,
+.site-header__name::before {
+  content: '';
+  position: absolute;
+  left: -0.5rem;
+  right: -0.5rem;
+  top: 50%;
+  height: max(100%, 44px);
+  transform: translateY(-50%);
+}
+
 .tag {
   display: inline-block;
   /* In a grid cell, hug the text instead of stretching to the column */
@@ -556,7 +578,7 @@ button:focus-visible {
   align-self: start;
   padding: 0.45em 0;
   border-radius: 0;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: var(--weight-medium);
   letter-spacing: 0.08em;
   text-transform: uppercase;

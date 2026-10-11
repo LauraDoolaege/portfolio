@@ -1,6 +1,7 @@
 ---
 import Button from '../ui/Button.astro';
 import { withBase } from '../../utils/url';
+import { cvHref } from '../../utils/contact';
 import { Image } from 'astro:assets';
 import portrait from '../../assets/images/hero_portrait.png';
 // Hero: an editorial composition ("Marketer ... Turned / UX Designer") with one playful element, the
@@ -68,7 +69,7 @@ import portrait from '../../assets/images/hero_portrait.png';
       </p>
       <!-- Resume is the button, the case studies a link. Below the desktop split the button is filled. -->
       <div class="hero__ctas" data-line>
-        <Button href={withBase('/resume.pdf')} icon="down" download>
+        <Button href={cvHref} icon="down" download>
           Resume
         </Button>
         <Button variant="link" size="sm" href="#work">
@@ -529,6 +530,11 @@ import portrait from '../../assets/images/hero_portrait.png';
   @media (min-width: 700px) and (max-width: 999px) {
     .hero__field {
       align-items: stretch;
+    }
+
+    /* The column is wide here: let the headline fill most of it instead of stopping at the phone cap */
+    .hero__big {
+      font-size: clamp(88px, 14vw, 140px);
     }
 
     .hero__stage {

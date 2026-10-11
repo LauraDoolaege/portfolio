@@ -175,6 +175,10 @@ const details = p.data.discipline ?? p.data.role;
     transition: transform 0.5s var(--ease-out);
   }
 
+  .wrow-item {
+    transition: opacity 0.5s var(--ease-out);
+  }
+
   /* Desktop with hover: no thumbnail at rest (it was too small to say anything); the title carries the row, and a
      larger preview follows the pointer while it is over the row (see the script below). The details open on hover. */
   @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
@@ -308,6 +312,14 @@ const details = p.data.discipline ?? p.data.role;
 </script>
 
 <style is:global>
+  /* While one row is hovered or focused, the others step back */
+  @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
+    .work__list:has(.wrow:hover, .wrow:focus-visible) .wrow-item:not(:hover):not(:focus-within) {
+      /* !important: the scroll reveal leaves an inline opacity on each row */
+      opacity: 0.35 !important;
+    }
+  }
+
   .row-preview {
     position: fixed;
     top: 0;

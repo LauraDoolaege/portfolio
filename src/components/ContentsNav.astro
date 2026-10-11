@@ -1,12 +1,38 @@
 ---
-// Sticky contents list for case studies: the article's h2s, with the one being read highlighted.
-// Hidden below 1000px, where the page is a single column. The highlight is set by the script below.
+// Contents for case studies: the article's h2s, with the one being read highlighted.
+// From 1000px a sticky list in the left rail; below that, a slim sticky bar that names the section you are in,
+// shows how far through the article you are, and opens the full list on tap. Both are set by the script below.
 interface Props {
   items: { slug: string; text: string }[];
 }
 
 const { items } = Astro.props;
 ---
+
+<div class="tocbar" data-tocbar>
+  <button
+    class="tocbar__btn"
+    type="button"
+    aria-expanded="false"
+    aria-controls="tocbar-list"
+    data-tocbar-btn
+  >
+    <span class="tocbar__label" data-tocbar-label>{items[0]?.text}</span>
+    <svg class="tocbar__chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="square"></path>
+    </svg>
+  </button>
+  <span class="tocbar__progress" aria-hidden="true"><span data-tocbar-fill></span></span>
+  <ol class="tocbar__list" id="tocbar-list" hidden data-tocbar-list>
+    {items.map((h) => (
+      <li>
+        <a class="tocbar__link" href={`#${h.slug}`} data-tocbar-link>
+          {h.text}
+        </a>
+      </li>
+    ))}
+  </ol>
+</div>
 
 <nav class="toc" aria-label="Contents">
   <p class="toc__title tag">Contents</p>
@@ -29,6 +55,29 @@ const { items } = Astro.props;
     .map((a) => document.getElementById(a.hash.slice(1)))
     .filter((el): el is HTMLElement => Boolean(el));
 
+  const bar = document.querySelector<HTMLElement>('[data-tocbar]');
+  const btn = bar?.querySelector<HTMLButtonElement>('[data-tocbar-btn]');
+  const list = bar?.querySelector<HTMLElement>('[data-tocbar-list]');
+  const label = bar?.querySelector<HTMLElement>('[data-tocbar-label]');
+  const fill = bar?.querySelector<HTMLElement>('[data-tocbar-fill]');
+  const main = document.querySelector<HTMLElement>('.case__main');
+
+  const setOpen = (open: boolean) => {
+    if (!btn || !list) return;
+    btn.setAttribute('aria-expanded', String(open));
+    list.hidden = !open;
+  };
+  btn?.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
+  list?.addEventListener('click', (e) => {
+    if ((e.target as Element).closest('a')) setOpen(false);
+  });
+  document.addEventListener('click', (e) => {
+    if (bar && !bar.contains(e.target as Node)) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+
   if (targets.length) {
     let shown = -1;
     onScrollFrame(() => {
@@ -40,9 +89,16 @@ const { items } = Astro.props;
         const reach = i === targets.length - 1 ? window.innerHeight * 0.6 : line;
         if (t.getBoundingClientRect().top <= reach) current = i;
       });
-      if (current === shown) return;
+      // How far through the article the reading line has travelled
+      if (fill && main) {
+        const r = main.getBoundingClientRect();
+        const p = Math.min(Math.max((line - r.top) / r.height, 0), 1);
+        fill.style.transform = `scaleX(${p})`;
+      }
       // Then write, and only when the active heading actually changed
+      if (current === shown) return;
       shown = current;
+      if (label) label.textContent = targets[current].textContent;
       links.forEach((a, i) => {
         if (i === current) a.setAttribute('aria-current', 'true');
         else a.removeAttribute('aria-current');
@@ -56,7 +112,92 @@ const { items } = Astro.props;
     display: none;
   }
 
+  /* Below 1000px: the slim bar. Solid, not glass: it sits over text the whole way down the article. */
+  .tocbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    margin-bottom: 2rem;
+    background: var(--bg-primary);
+    border-bottom: var(--hairline);
+  }
+
+  .tocbar__btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: var(--text-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .tocbar__chevron {
+    flex-shrink: 0;
+    width: 0.85rem;
+    height: 0.85rem;
+    transition: transform 0.4s var(--ease-out);
+  }
+
+  .tocbar__btn[aria-expanded='true'] .tocbar__chevron {
+    transform: rotate(180deg);
+  }
+
+  .tocbar__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    pointer-events: none;
+  }
+
+  .tocbar__progress > span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .tocbar__list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0.25rem 0;
+    list-style: none;
+    background: var(--bg-primary);
+    border-bottom: var(--hairline);
+  }
+
+  .tocbar__link {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: var(--text-body);
+    color: var(--text-muted);
+  }
+
+  .tocbar__link:hover,
+  .tocbar__link:focus-visible {
+    color: var(--text-main);
+  }
+
   @media (min-width: 1000px) {
+    .tocbar {
+      display: none;
+    }
+
     .toc {
       display: block;
       position: sticky;

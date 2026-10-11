@@ -99,53 +99,20 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
     width: min(100%, 15rem);
   }
 
-  /* Same behaviour as the project covers (devices with hover): at rest the portrait sits a little smaller, soft, with its
-     border crumbled into grain; on hover it comes to full size, sharp and whole. The figure is feathered with a mask
-     (--feather), and its link, one element up, runs the soft edge through the grain filter. Touch gets the clean photo. */
-  @property --feather {
-    syntax: '<length>';
-    inherits: false;
-    initial-value: 0px;
-  }
-
+  /* The same hover as the project covers (mouse, wide screens): a touch smaller at rest, full size on hover. No blur,
+     no grain. Touch and phones get the full-size photo. */
   .about__portrait .about__figure {
-    --feather: 0px;
-    mask-image:
-      linear-gradient(to right, transparent, #000 var(--feather)),
-      linear-gradient(to left, transparent, #000 var(--feather)),
-      linear-gradient(to bottom, transparent, #000 var(--feather)),
-      linear-gradient(to top, transparent, #000 var(--feather));
-    mask-composite: intersect;
-    -webkit-mask-composite: source-in;
-    transition:
-      --feather 1s var(--ease-out),
-      transform 1s var(--ease-out);
+    transition: transform 0.9s var(--ease-out);
   }
 
   @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
-    .about__portrait {
-      filter: url(#sand-edge);
-    }
-
     .about__portrait .about__figure {
-      --feather: 40px;
-      transform: scale(0.93);
-    }
-
-    .about__portrait .about__figure :global(.about__photo) {
-      filter: grayscale(1) contrast(1.05) blur(3px);
-      transition: filter 0.9s var(--ease-out);
+      transform: scale(0.97);
     }
 
     .about__portrait:hover .about__figure,
     .about__portrait:focus-visible .about__figure {
-      --feather: 0px;
       transform: scale(1);
-    }
-
-    .about__portrait:hover .about__figure :global(.about__photo),
-    .about__portrait:focus-visible .about__figure :global(.about__photo) {
-      filter: grayscale(1) contrast(1.05) blur(0);
     }
   }
 

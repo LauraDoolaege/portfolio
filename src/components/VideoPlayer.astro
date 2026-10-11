@@ -128,14 +128,18 @@ const { title, embed, src, poster, ratio = '16 / 9' } = Astro.props;
     color: #f3f2ee;
   }
 
+  /* The ring scales with --size; the glyph's padding is a share of it, so the triangle stays centred and
+     readable from phone to desktop (fixed padding left almost no room for it on small screens) */
   .theater__play svg {
-    width: clamp(3rem, 2rem + 4vw, 5.5rem);
-    height: clamp(3rem, 2rem + 4vw, 5.5rem);
-    padding: 1.1rem 1.1rem 1.1rem 1.35rem;
+    --size: clamp(3.25rem, 2.25rem + 4vw, 5.5rem);
+    box-sizing: border-box;
+    width: var(--size);
+    height: var(--size);
+    padding: calc(var(--size) * 0.27) calc(var(--size) * 0.23) calc(var(--size) * 0.27) calc(var(--size) * 0.31);
     border: 1px solid rgba(243, 242, 238, 0.7);
     border-radius: 50%;
     /* A dark disc behind the ring, so the button reads on any poster */
-    background: rgba(14, 13, 12, 0.55);
+    background: rgba(14, 13, 12, 0.7);
   }
 
   .theater__facade {

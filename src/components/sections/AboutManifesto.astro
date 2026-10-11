@@ -40,7 +40,6 @@
 
   .mask {
     display: block;
-    overflow: hidden;
     padding-bottom: 0.14em;
     margin-bottom: -0.14em;
   }
@@ -59,19 +58,16 @@
 </style>
 
 <script>
-  import { gsap, prefersReducedMotion } from '../../utils/motion';
+  import { prefersReducedMotion } from '../../utils/motion';
+  import { fadeUp, hideForFadeUp } from '../../utils/reveal';
 
-  const lines = gsap.utils.toArray<HTMLElement>('.manifesto-hero .line');
+  const items = Array.from(
+    document.querySelectorAll<HTMLElement>('.manifesto-hero .line, .manifesto-hero__sub'),
+  );
 
-  if (lines.length && !prefersReducedMotion()) {
-    // Start state set in JS so no-JS visitors still see the text.
-    gsap.set(lines, { yPercent: 105 });
-    gsap.to(lines, { yPercent: 0, duration: 1.2, ease: 'power4.out', stagger: 0.16 });
-
-    const sub = document.querySelector<HTMLElement>('.manifesto-hero__sub');
-    if (sub) {
-      gsap.set(sub, { y: 16, opacity: 0 });
-      gsap.to(sub, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', delay: 0.5 });
-    }
+  // The same rise and fade as everything else, on load because this sits at the top of the page
+  if (items.length && !prefersReducedMotion()) {
+    hideForFadeUp(items);
+    fadeUp(items, 0.1);
   }
 </script>

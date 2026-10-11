@@ -90,6 +90,27 @@
     background: var(--accent);
   }
 
+  /* A gentle snap into place as the line reaches the dot: it swells a little, then settles back to its size */
+  @media (prefers-reduced-motion: no-preference) {
+    .tl-step.is-reached::before {
+      animation: tl-snap 0.7s linear;
+    }
+  }
+
+  @keyframes tl-snap {
+    0% {
+      transform: scale(1);
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+    }
+    38% {
+      transform: scale(1.55);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
   /* Methods / result lines: a small muted key, then the text */
   .timeline .tl-step .tl-step__line {
     display: grid;

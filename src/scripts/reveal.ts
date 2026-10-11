@@ -1,24 +1,58 @@
-// Every [data-reveal] inside a .sec slides up as it enters the viewport (homepage below the hero, About).
+// Scroll reveals, site-wide. One language (see utils/reveal.ts):
+//   text and content  ->  rise + fade
+//   images            ->  dissolve in from grain
 // Start states are set in JS so no-JS visitors still see everything.
-import { gsap, ScrollTrigger, prefersReducedMotion } from '../utils/motion';
+import { ScrollTrigger, prefersReducedMotion } from '../utils/motion';
+import { fadeUp, grainIn, hideForFadeUp, hideForGrain } from '../utils/reveal';
 
-const items = gsap.utils.toArray<HTMLElement>('.sec [data-reveal]');
+if (!prefersReducedMotion()) {
+  // Authored opt-ins (homepage and About sections), plus the blocks of a case study or design page
+  const TEXT = [
+    '[data-reveal]:not([data-reveal="grain"])',
+    '.chead > *',
+    '.facts__item',
+    '.vhead > *',
+    '.case__main > :is(h2, h3, h4, p, ul, ol, .pullquote, .funnel, .ruled, .parts)',
+    '.vbody > :is(p, h2)',
+    '.card__body',
+    '.card__tags',
+  ].join(', ');
 
-if (items.length && !prefersReducedMotion()) {
-  gsap.set(items, { y: 28, opacity: 0 });
+  // Frames that hold only a picture
+  const IMAGES = [
+    '[data-reveal="grain"]',
+    '.case-image__frame',
+    '.parts__image',
+    '.card__frame',
+    '.theater__frame',
+  ].join(', ');
 
-  ScrollTrigger.batch(items, {
-    start: 'top 90%',
-    once: true,
-    onEnter: (batch) =>
-      gsap.to(batch, {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        ease: 'power3.out',
-        // A long batch (e.g. after a jump link) never takes longer than ~0.5s to stagger in
-        stagger: Math.min(0.12, 0.5 / batch.length),
-        overwrite: true,
-      }),
-  });
+  const unique = (list: HTMLElement[]) => Array.from(new Set(list));
+  const images = unique(Array.from(document.querySelectorAll<HTMLElement>(IMAGES)));
+  // A card's text is revealed separately from its image, so the card itself is not a text item
+  const text = unique(Array.from(document.querySelectorAll<HTMLElement>(TEXT))).filter(
+    (el) => !images.includes(el) && !el.matches('.card') && !el.closest('.timeline'),
+  );
+
+  if (text.length) {
+    hideForFadeUp(text);
+    ScrollTrigger.batch(text, {
+      start: 'top 92%',
+      once: true,
+      onEnter: (batch) => fadeUp(batch as HTMLElement[]),
+    });
+  }
+
+  if (images.length) {
+    hideForGrain(images);
+    ScrollTrigger.batch(images, {
+      start: 'top 90%',
+      once: true,
+      onEnter: (batch) =>
+        (batch as HTMLElement[]).forEach((el, i) => grainIn(el, Math.min(i * 0.12, 0.4))),
+    });
+  }
+
+  // Images and fonts settle after first paint and move the triggers
+  window.addEventListener('load', () => ScrollTrigger.refresh());
 }

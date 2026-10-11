@@ -108,7 +108,6 @@ const email = 'laura.doolaege@student.howest.be';
 
   .footer__mask {
     display: block;
-    overflow: hidden;
     padding-bottom: 0.14em;
     margin-bottom: -0.14em;
   }
@@ -228,19 +227,20 @@ const email = 'laura.doolaege@student.howest.be';
 </style>
 
 <script>
-  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+  import { ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+  import { fadeUp, hideForFadeUp } from '../../utils/reveal';
 
   const line = document.querySelector<HTMLElement>('.footer__line');
 
   if (line && !prefersReducedMotion()) {
     // Set in JS so no-JS visitors still see the greeting.
-    gsap.set(line, { yPercent: 105 });
+    hideForFadeUp([line]);
 
     ScrollTrigger.create({
       trigger: '.footer__greeting',
       start: 'top 98%',
       once: true,
-      onEnter: () => gsap.to(line, { yPercent: 0, duration: 1.4, ease: 'expo.out' }),
+      onEnter: () => fadeUp(line),
     });
   }
 </script>

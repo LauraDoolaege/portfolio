@@ -130,7 +130,7 @@ function cursor() {
     }
   };
 
-  const MEDIA = '.card__media, .manifesto__img, .about-hero__frame, [data-cursor]';
+  const MEDIA = '.card__media, .manifesto__img, .about-hero__frame, [data-cursor], [data-cursor-label]';
   const INTERACTIVE = 'a, button, [data-magnetic]';
 
   let shown = false;
@@ -156,7 +156,9 @@ function cursor() {
     const media = t.closest<HTMLElement>(MEDIA);
     if (media) {
       // Over a project card's image the cursor turns into the "View" disc, as big as the hero's "Grab"; the rest of the card is a plain link; decorative floating images just get the arrow
-      if (media.closest('[data-lightbox]')) set('media', '<span class="cursor__sm">Enlarge</span>');
+      const named = media.closest<HTMLElement>('[data-cursor-label]');
+      if (named) set('media', named.dataset.cursorLabel ?? '');
+      else if (media.closest('[data-lightbox]')) set('media', '<span class="cursor__sm">Enlarge</span>');
       else if (media.closest('.card')) set('media', 'View');
       else set('media', ARROW);
     } else if (t.closest(INTERACTIVE)) {
@@ -447,7 +449,8 @@ if (finePointer) {
   cursor();
   // `[data-plain]` (a gallery item set to `plain`) opts out of the grain and sand hover
   // Frames with an Enlarge or View option keep the sand spotlight; the rest get the drag trail (not under reduced motion)
-  const WITH_OPTION = '[data-plain] .media-frame, [data-lightbox] .media-frame, .card .media-frame';
+  const WITH_OPTION =
+    '[data-plain] .media-frame, .media-frame[data-plain], [data-lightbox] .media-frame, .card .media-frame';
   const bare = Array.from(
     document.querySelectorAll<HTMLElement>(`.media-frame:not(:is(${WITH_OPTION}))`),
   );
@@ -460,8 +463,10 @@ if (finePointer) {
   if (!reduceMotion) dustTrail(bare);
   document.querySelectorAll<HTMLElement>('.card__media').forEach(grainOnly);
   if (!reduceMotion) {
+    // Boxed buttons only: a text link carries its underline on the outer element, so letting the label drift
+    // toward the cursor pulls it off its own underline
     document
-      .querySelectorAll<HTMLElement>('[data-magnetic], .btn, .btn-link')
+      .querySelectorAll<HTMLElement>('[data-magnetic], .btn')
       .forEach((el) => magnetic(el));
     document
       .querySelectorAll<HTMLElement>(

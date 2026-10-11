@@ -53,7 +53,7 @@ import portrait from '../../assets/images/hero_portrait.png';
 
     <div class="hero__lede hero__aside">
       <!-- Portrait: the black-and-white photo as it is -->
-      <figure class="hero__portrait media-frame" data-line>
+      <figure class="hero__portrait media-frame" data-plain>
         <Image
           class="hero__portrait-img media-frame__img"
           src={portrait}
@@ -865,6 +865,7 @@ import portrait from '../../assets/images/hero_portrait.png';
 
 <script>
   import { gsap, prefersReducedMotion } from '../../utils/motion';
+  import { REVEAL, grainIn, hideForFadeUp, hideForGrain } from '../../utils/reveal';
 
   const hero = document.querySelector<HTMLElement>('.hero')!;
   const field = hero.querySelector<HTMLElement>('[data-hero-field]')!;
@@ -890,6 +891,7 @@ import portrait from '../../assets/images/hero_portrait.png';
   const baselineMark = hero.querySelector<HTMLElement>('.hero__baseline')!;
   const strip = hero.querySelector<HTMLElement>('.reveal--strip');
   const lines = gsap.utils.toArray<HTMLElement>('[data-line]', hero);
+  const portraitFrame = hero.querySelector<HTMLElement>('.hero__portrait');
 
   const N = 110;
   const GRAB_RADIUS = 30;
@@ -1390,12 +1392,14 @@ import portrait from '../../assets/images/hero_portrait.png';
     linePath.classList.add('is-drawn');
     window.setTimeout(() => linePath.classList.add('is-live'), 2700);
     // Start states are set in JS, not CSS, so no-JS visitors still see everything
-    gsap.set(lines, { y: '0.12em', opacity: 0 });
-    if (strip) gsap.set(strip, { y: 24, opacity: 0 });
+    hideForFadeUp(lines);
+    if (strip) hideForFadeUp([strip]);
+    if (portraitFrame) hideForGrain([portraitFrame]);
     gsap
       .timeline({ onComplete: relayout })
-      .to(lines, { y: 0, opacity: 1, duration: 1, ease: 'expo.out', stagger: 0.12 })
-      .to(strip, { y: 0, opacity: 1, duration: 1, ease: 'expo.out' }, '-=0.9');
+      .to(lines, { y: 0, opacity: 1, duration: REVEAL.duration, ease: REVEAL.ease, stagger: REVEAL.stagger })
+      .to(strip, { y: 0, opacity: 1, duration: REVEAL.duration, ease: REVEAL.ease }, '-=0.8')
+      .add(() => portraitFrame && grainIn(portraitFrame), 0.3);
   }
   // Layout settles once the entrance has finished
   window.setTimeout(relayout, 1300);

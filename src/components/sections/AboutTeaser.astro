@@ -12,7 +12,7 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
 <section class="sec" id="about" aria-labelledby="about-title">
   <div class="container">
     <header class="sec__head">
-      <SectionLabel num="04" text="About" data-reveal />
+      <SectionLabel text="About" data-reveal />
       <h2 id="about-title" class="sec-title" data-reveal>
         Who am I
       </h2>
@@ -99,8 +99,9 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
     width: min(100%, 15rem);
   }
 
-  /* Same hover as the project covers: the portrait is feathered with a mask (--feather grows), and its link,
-     one element up, runs the soft edge through the grain filter, so the border crumbles into the page */
+  /* Same behaviour as the project covers (devices with hover): at rest the portrait sits a little smaller, soft, with its
+     border crumbled into grain; on hover it comes to full size, sharp and whole. The figure is feathered with a mask
+     (--feather), and its link, one element up, runs the soft edge through the grain filter. Touch gets the clean photo. */
   @property --feather {
     syntax: '<length>';
     inherits: false;
@@ -116,16 +117,35 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
       linear-gradient(to top, transparent, #000 var(--feather));
     mask-composite: intersect;
     -webkit-mask-composite: source-in;
-    transition: --feather 1s var(--ease-out);
+    transition:
+      --feather 1s var(--ease-out),
+      transform 1s var(--ease-out);
   }
 
-  @media (hover: hover) {
-    .about__portrait:hover {
+  @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
+    .about__portrait {
       filter: url(#sand-edge);
     }
 
-    .about__portrait:hover .about__figure {
-      --feather: 64px;
+    .about__portrait .about__figure {
+      --feather: 40px;
+      transform: scale(0.93);
+    }
+
+    .about__portrait .about__figure :global(.about__photo) {
+      filter: grayscale(1) contrast(1.05) blur(3px);
+      transition: filter 0.9s var(--ease-out);
+    }
+
+    .about__portrait:hover .about__figure,
+    .about__portrait:focus-visible .about__figure {
+      --feather: 0px;
+      transform: scale(1);
+    }
+
+    .about__portrait:hover .about__figure :global(.about__photo),
+    .about__portrait:focus-visible .about__figure :global(.about__photo) {
+      filter: grayscale(1) contrast(1.05) blur(0);
     }
   }
 

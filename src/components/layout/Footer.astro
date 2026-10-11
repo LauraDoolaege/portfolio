@@ -227,12 +227,12 @@ const email = 'laura.doolaege@student.howest.be';
 </style>
 
 <script>
-  import { ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
+  import { ScrollTrigger } from '../../utils/motion';
   import { fadeUp, hideForFadeUp } from '../../utils/reveal';
 
   const line = document.querySelector<HTMLElement>('.footer__line');
 
-  if (line && !prefersReducedMotion()) {
+  if (line) {
     // Set in JS so no-JS visitors still see the greeting.
     hideForFadeUp([line]);
 

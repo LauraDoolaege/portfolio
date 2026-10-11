@@ -41,7 +41,7 @@ const { title, embed, src, poster, ratio = '16 / 9' } = Astro.props;
             />
           )}
           <span class="theater__play" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor">
+            <svg viewBox="8 5.5 11 13" fill="currentColor">
               <path d="M8 5.5v13l11-6.5z"></path>
             </svg>
           </span>
@@ -71,7 +71,7 @@ const { title, embed, src, poster, ratio = '16 / 9' } = Astro.props;
           />
         )}
         <span class="theater__play" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="currentColor">
+          <svg viewBox="8 5.5 11 13" fill="currentColor">
             <path d="M8 5.5v13l11-6.5z"></path>
           </svg>
         </span>
@@ -135,7 +135,8 @@ const { title, embed, src, poster, ratio = '16 / 9' } = Astro.props;
     box-sizing: border-box;
     width: var(--size);
     height: var(--size);
-    padding: calc(var(--size) * 0.27) calc(var(--size) * 0.23) calc(var(--size) * 0.27) calc(var(--size) * 0.31);
+    /* A triangle looks centred a little right of its bounding box: its weight sits at the flat side */
+    padding: calc(var(--size) * 0.31) calc(var(--size) * 0.29) calc(var(--size) * 0.31) calc(var(--size) * 0.35);
     border: 1px solid rgba(243, 242, 238, 0.7);
     border-radius: 50%;
     /* A dark disc behind the ring, so the button reads on any poster */

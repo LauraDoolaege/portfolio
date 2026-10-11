@@ -3,7 +3,19 @@
 //   Images:            grainIn, the picture resolves out of the same grain as the hover and page-transition effects
 import { gsap, prefersReducedMotion } from './motion';
 
-export const REVEAL = { dy: 24, duration: 0.9, ease: 'power3.out', stagger: 0.12 } as const;
+const calm = () => prefersReducedMotion();
+
+// Visitors who prefer reduced motion still get every reveal, as a plain, short fade: no travel, no grain
+export const REVEAL = {
+  get dy() {
+    return calm() ? 0 : 24;
+  },
+  get duration() {
+    return calm() ? 0.5 : 0.9;
+  },
+  ease: 'power3.out',
+  stagger: 0.12,
+} as const;
 
 /** Start state for text, set in JS so visitors without JS still see everything */
 export function hideForFadeUp(items: HTMLElement[]) {
@@ -62,6 +74,10 @@ export function hideForGrain(items: HTMLElement[]) {
  * picture is whole. The filter is removed afterwards, so the finished image is untouched.
  */
 export function grainIn(el: HTMLElement, delay = 0, duration = 1.5) {
+  if (calm()) {
+    gsap.to(el, { opacity: 1, duration: 0.5, delay, ease: 'power2.out' });
+    return;
+  }
   const id = `grain-reveal-${seq++}`;
   const filter = node('filter', {
     id,

@@ -58,7 +58,6 @@
 </style>
 
 <script>
-  import { prefersReducedMotion } from '../../utils/motion';
   import { fadeUp, hideForFadeUp } from '../../utils/reveal';
 
   const items = Array.from(
@@ -66,7 +65,7 @@
   );
 
   // The same rise and fade as everything else, on load because this sits at the top of the page
-  if (items.length && !prefersReducedMotion()) {
+  if (items.length) {
     hideForFadeUp(items);
     fadeUp(items, 0.1);
   }

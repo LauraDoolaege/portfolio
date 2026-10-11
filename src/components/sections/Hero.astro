@@ -1391,6 +1391,8 @@ import portrait from '../../assets/images/hero_portrait.png';
     // Draw the signature in, then hand the path over to the physics
     linePath.classList.add('is-drawn');
     window.setTimeout(() => linePath.classList.add('is-live'), 2700);
+  }
+  {
     // Start states are set in JS, not CSS, so no-JS visitors still see everything
     hideForFadeUp(lines);
     if (strip) hideForFadeUp([strip]);

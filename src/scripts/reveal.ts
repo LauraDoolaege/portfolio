@@ -2,10 +2,10 @@
 //   text and content  ->  rise + fade
 //   images            ->  dissolve in from grain
 // Start states are set in JS so no-JS visitors still see everything.
-import { ScrollTrigger, prefersReducedMotion } from '../utils/motion';
+import { ScrollTrigger } from '../utils/motion';
 import { fadeUp, grainIn, hideForFadeUp, hideForGrain } from '../utils/reveal';
 
-if (!prefersReducedMotion()) {
+{
   // Authored opt-ins (homepage and About sections), plus the blocks of a case study or design page
   const TEXT = [
     '[data-reveal]:not([data-reveal="grain"])',

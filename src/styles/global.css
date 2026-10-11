@@ -644,7 +644,7 @@ button:focus-visible {
   width: 60px;
   height: 60px;
   margin: -30px 0 0 -30px;
-  background: var(--accent-text);
+  background: var(--accent);
 }
 
 .cursor__sm {
@@ -658,7 +658,8 @@ button:focus-visible {
   margin: -30px 0 0 -30px;
   display: grid;
   place-items: center;
-  color: var(--bg-primary);
+  /* Black on the bright accent, in both themes */
+  color: #1a1a1a;
   font-size: var(--text-small);
   font-weight: var(--weight-bold);
   letter-spacing: 0.02em;

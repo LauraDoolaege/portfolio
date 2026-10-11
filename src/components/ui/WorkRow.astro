@@ -175,26 +175,20 @@ const details = p.data.discipline ?? p.data.role;
     transition: transform 0.5s var(--ease-out);
   }
 
-  /* Desktop with hover: details collapsed at rest, the row and its thumbnail open on hover/focus */
-  @media (hover: hover) and (min-width: 700px) {
+  /* Desktop with hover: no thumbnail at rest (it was too small to say anything); the title carries the row, and a
+     larger preview follows the pointer while it is over the row (see the script below). The details open on hover. */
+  @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
     .wrow {
       --title-size: clamp(1.75rem, 1.1rem + 2.8vw, 4.75rem);
-      --thumb-rest: 4.5rem;
-      /* The open thumbnail is as tall as the text block beside it (title + details), so the number and details sit level with its bottom edge */
-      --thumb-open: max(6rem, calc(var(--title-size) * 1.02 + 2.1rem));
-      grid-template-columns: var(--thumb-open) minmax(0, 1fr);
-      /* Spare height from the growing thumbnail goes to the second row, so the details stay tight under the title */
-      grid-template-rows: auto 1fr;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto;
       grid-template-areas:
-        'thumb title'
-        'thumb more';
-      column-gap: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
+        'title'
+        'more';
     }
 
     .wrow__thumb {
-      transition:
-        width 0.7s var(--ease-out),
-        aspect-ratio 0.7s var(--ease-out);
+      display: none;
     }
 
     .wrow__more {
@@ -205,12 +199,6 @@ const details = p.data.discipline ?? p.data.role;
     .wrow__more-inner {
       opacity: 0;
       transition: opacity 0.4s var(--ease-out);
-    }
-
-    .wrow:hover .wrow__thumb,
-    .wrow:focus-visible .wrow__thumb {
-      width: var(--thumb-open);
-      aspect-ratio: 1;
     }
 
     .wrow:hover .wrow__more,
@@ -231,7 +219,6 @@ const details = p.data.discipline ?? p.data.role;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .wrow__thumb,
     .wrow__more,
     .wrow__more-inner,
     .wrow__arrow {
@@ -254,5 +241,91 @@ const details = p.data.discipline ?? p.data.role;
     .wrow__thumb {
       border-radius: var(--radius-sm);
     }
+  }
+</style>
+
+<script>
+  // The floating preview for the visual-work list: one image that follows the pointer while it is over a row.
+  // Desktop with hover only; elsewhere the row keeps its small thumbnail.
+  import { gsap } from 'gsap';
+
+  const desktop = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 700px)');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rows = document.querySelectorAll<HTMLAnchorElement>('.wrow');
+
+  if (rows.length && desktop.matches) {
+    const box = document.createElement('div');
+    box.className = 'row-preview';
+    box.setAttribute('aria-hidden', 'true');
+    const img = document.createElement('img');
+    img.alt = '';
+    box.appendChild(img);
+    document.body.appendChild(box);
+
+    gsap.set(box, { xPercent: 0, yPercent: -50, opacity: 0, scale: 0.94 });
+    const moveX = gsap.quickTo(box, 'x', { duration: 0.55, ease: 'power3.out' });
+    const moveY = gsap.quickTo(box, 'y', { duration: 0.55, ease: 'power3.out' });
+
+    // The widest candidate of the row's own thumbnail, so the larger preview stays sharp
+    const biggest = (el: HTMLImageElement) => {
+      const set = el.getAttribute('srcset');
+      if (!set) return el.currentSrc || el.src;
+      const parts = set.split(',').map((p) => p.trim().split(/\s+/));
+      return parts[parts.length - 1][0];
+    };
+
+    let showing = false;
+    const place = (e: PointerEvent) => {
+      const w = box.offsetWidth;
+      const h = box.offsetHeight;
+      // To the right of the pointer, flipped to the left near the edge, and never off the top or bottom
+      const x = e.clientX + 32 + w > window.innerWidth ? e.clientX - 32 - w : e.clientX + 32;
+      const y = Math.min(Math.max(e.clientY, h / 2 + 12), window.innerHeight - h / 2 - 12);
+      moveX(x);
+      moveY(y);
+      return { x, y };
+    };
+
+    rows.forEach((row) => {
+      const thumb = row.querySelector<HTMLImageElement>('.wrow__img');
+      if (!thumb || !(thumb instanceof HTMLImageElement)) return;
+      row.addEventListener('pointerenter', (e) => {
+        img.src = biggest(thumb);
+        const p = place(e);
+        if (!showing) {
+          gsap.set(box, { x: p.x, y: p.y });
+          showing = true;
+        }
+        gsap.to(box, { opacity: 1, scale: 1, duration: reduce ? 0 : 0.45, ease: 'power3.out', overwrite: 'auto' });
+      });
+      row.addEventListener('pointermove', place);
+      row.addEventListener('pointerleave', () => {
+        showing = false;
+        gsap.to(box, { opacity: 0, scale: 0.94, duration: reduce ? 0 : 0.3, ease: 'power2.out', overwrite: 'auto' });
+      });
+    });
+  }
+</script>
+
+<style is:global>
+  .row-preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 40;
+    width: clamp(15rem, 22vw, 24rem);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--frame-bg);
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  .row-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 </style>

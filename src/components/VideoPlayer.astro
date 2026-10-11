@@ -96,7 +96,8 @@ const { title, embed, src, poster } = Astro.props;
     background: #0e0d0c;
   }
 
-  .theater__media {
+  /* :global because the click script creates the iframe, and scoped styles don't reach elements made at runtime */
+  .theater__frame :global(.theater__media) {
     position: absolute;
     inset: 0;
     width: 100%;

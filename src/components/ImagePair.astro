@@ -1,0 +1,66 @@
+---
+// Two or three images of different shapes side by side at the same height (columns share the width in
+// proportion to each image's aspect ratio). Each is a CaseImage, so it opens in the lightbox. Stacks on phones.
+import CaseImage from './CaseImage.astro';
+
+interface Item {
+  label: string;
+  src: ImageMetadata | string;
+  /** Width / height as two numbers, e.g. [1688, 1125] */
+  ratio: [number, number];
+  alt?: string;
+  caption?: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+const columns = items.map((it) => `${(it.ratio[0] / it.ratio[1]).toFixed(3)}fr`).join(' ');
+---
+
+<div class="pair" style={`--cols:${columns}`}>
+  {items.map((it) => (
+    <div class="pair__item" data-no-pan>
+      <CaseImage
+        label={it.label}
+        src={it.src}
+        alt={it.alt}
+        caption={it.caption}
+        ratio={`${it.ratio[0]} / ${it.ratio[1]}`}
+        size="wide"
+      />
+    </div>
+  ))}
+</div>
+
+<style>
+  .pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem var(--grid-gutter);
+    margin-block: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  }
+
+  .pair__item {
+    min-width: 0;
+  }
+
+  .pair :global(.case-image) {
+    margin-block: 0;
+  }
+
+  @media (max-width: 699px) {
+    .pair__item:not(:first-child) {
+      width: min(100%, 13rem);
+    }
+  }
+
+  @media (min-width: 700px) {
+    .pair {
+      grid-template-columns: var(--cols);
+      align-items: start;
+    }
+  }
+</style>

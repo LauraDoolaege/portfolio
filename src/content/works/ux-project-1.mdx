@@ -24,7 +24,13 @@ import cover from '../../assets/images/frame_antwerp.png';
 import onboarding from '../../assets/images/plan-a_onboarding.webp';
 import planning from '../../assets/images/plan-a_planning.webp';
 import personalize from '../../assets/images/plan-a_personalize.webp';
-import touchpoints from '../../assets/images/plan-a_touchpoints.png';
+import experienceMap from '../../assets/images/plan-a_experience-map-initiator.png';
+import iterations from '../../assets/images/iterations_antwerp.png';
+import feedbackMatrix from '../../assets/images/plan-a_feedback-matrix.png';
+import blackHat from '../../assets/images/Black_hat.png';
+import ImagePair from '../../components/ImagePair.astro';
+import poster from '../../assets/images/poster-final.png';
+import socials from '../../assets/images/socials.png';
 
 ## Overview
 
@@ -38,13 +44,13 @@ import touchpoints from '../../assets/images/plan-a_touchpoints.png';
 
 ## The problem
 
-Visit Antwerp struggles to reach young urban travellers, and wants them to stay longer than a day trip. Classic tourism campaigns don't work on this group: they trust friends and creators, not official channels.
+Visit Antwerp struggles to reach **young urban travellers**, and wants them to stay longer than a day trip. Classic tourism campaigns don't work on this group: **they trust friends and creators, not official channels.**
 
-Our research showed the deeper problem. Young people barely care where they go; it's about the vibe and being together. Antwerp ticks every box, but so do many other cities. And when someone does suggest a trip, the plan often stalls because nobody else takes the next step.
+Our research showed the deeper problem. **Young people barely care where they go; it's about the vibe and being together.** Antwerp ticks every box, but so do many other cities. And when someone does suggest a trip, **the plan often stalls because nobody else takes the next step.**
 
 <PullQuote size="md">
-  How might we help Antwerp's local flavours and 24/7 pulse stand out naturally for the Gen Z
-  initiative-taker, so exploring the city becomes a shared experience, from interest to action?
+  How might we help Antwerp's local flavours and 24/7 pulse stand out naturally for the <mark class="hl">Gen Z
+  initiative-taker</mark>, so exploring the city becomes a shared experience, from interest to action?
 </PullQuote>
 
 ### Who faces this problem
@@ -68,14 +74,7 @@ Every friend group has two roles, and the problem looks different for each.
   ]}
 />
 
-<CaseImage
-  label="Experience Maps"
-  size="wide"
-  ratio="16 / 9"
-  caption="Experience maps for the initiator and the follower, with the “danger zones” where users get stuck."
-/>
-
-Desk research backed this up: groups pick what keeps them together, not the “best” option, and initiators feel under-appreciated and burned out from always texting first. We started with Gen Z (18 to 24). After the pitch, the client asked us to include millennials, so the personas span 18 to 35.
+Desk research backed this up: **groups pick what keeps them together, not the “best” option**, and **initiators feel under-appreciated and burned out** from always texting first. We started with Gen Z (18 to 24). After the pitch, the client asked us to include millennials, so the personas span 18 to 35.
 
 ## Scope & constraints
 
@@ -87,7 +86,7 @@ Desk research backed this up: groups pick what keeps them together, not the “b
 
 ## Thought process
 
-The turning point was realising we didn't need to sell Antwerp at all. We needed to help the one friend who starts plans, and make Antwerp the city where those plans finally happen.
+The turning point was realising **we didn't need to sell Antwerp at all.** We needed to **help the one friend who starts plans**, and make Antwerp the city where those plans finally happen.
 
 <Timeline>
   <TimelineStep
@@ -117,7 +116,7 @@ The turning point was realising we didn't need to sell Antwerp at all. We needed
   />
   <TimelineStep
     title="6. Visual direction and hi-fi design"
-    methods="Mood and style boards, design system, weekly tutor consults"
+    methods="Mood boards, style directions, design system, weekly tutor consults"
     result="Tutors found the first style “like a museum”. I set up the colour system from the Antwerp palette and wrote the UI guidelines; calmer inputs with playful details followed."
   />
   <TimelineStep
@@ -127,30 +126,18 @@ The turning point was realising we didn't need to sell Antwerp at all. We needed
   />
 </Timeline>
 
-<CaseImage
-  label="Style Boards"
-  size="wide"
-  ratio="16 / 9"
-  caption="From the museum-like first style to the playful final look: mood boards, colour system and UI guidelines."
-/>
+### Step 5 in detail: mapping the initiator's journey
 
-## Deep dive: the Six Thinking Hats
-
-After the pitch we wrote the concept out in full and looked at it through each hat in turn. The Black Hat questions turned into the rules of the second iteration.
+Once the concept existed, we walked the initiator through it, from first seeing the link to sending it to the group chat. The map shows three **danger zones** where they are most likely to drop out: **doubting whether the link is legit**, **feeling overwhelmed by the planning questions**, and **hesitating to send it to friends** for fear of looking cringe. Each one became a design priority.
 
 <CaseImage
-  label="Six Thinking Hats"
+  label="Experience map: initiator"
+  src={experienceMap}
+  alt="Experience map of the initiator's journey across five stages, with feelings, thoughts, touchpoints, pain points and opportunities. Three danger zones are circled."
   size="wide"
-  ratio="16 / 9"
-  caption="The concept seen through each hat: facts, feelings, benefits, risks, alternatives, next steps."
+  ratio="13248 / 8800"
+  caption="The initiator’s journey in five stages: awareness, onboarding, game, planning and sharing. The circled “danger zones” are where they doubt or get overwhelmed."
 />
-
-1. **Only one try.** Players might mess up their first run. Now: unlimited practice rounds before the real game.
-2. **Fewer friends play than planned.** The plan would never be sent. Now: the initiator sets a response window, and the plan goes out when everyone has played or the timer runs out.
-3. **The winner can't make the chosen date.** Now: the final date is the one most players picked, and if the winner didn't pick it, the coupon goes to the highest scorer who did.
-4. **Big groups could split up to collect more free drinks.** Now: the coupon links to a random bar matching the group's vibe, and only one person wins per group.
-
-The Red Hat added a gut feeling: something Antwerp-specific was missing beyond a free drink. That led to story-driven collectibles in the game, like a beer for Antwerp's bar culture or a camera for capturing moments. The concept went from a fun idea to one that holds up with real friend groups, real bars and real schedules.
 
 ## The solution
 
@@ -222,20 +209,60 @@ The Red Hat added a gut feeling: something Antwerp-specific was missing beyond a
   caption="The initiator's quick planning steps: dates, players, budget and preferences."
 />
 
+<CaseImage
+  label="Style directions"
+  src={iterations}
+  alt="The three style directions for the Antwerp game in order: dark and green, vibrant start, final"
+  size="wide"
+  ratio="250 / 157"
+/>
+
 ### Around the app
 
 Each channel has its own job. TikTok gets people into the app through POV videos, Instagram shows Antwerp's playful side, and posters at bus stops, tram stations and universities give reach where Gen Z actually moves.
 
-<CaseImage
-  label="Touch Points"
-  src={touchpoints}
-  alt="Plan A touch points: social videos, a landing page, and posters and screens around Antwerp"
-  size="wide"
-  ratio="861 / 408"
-  caption="How people find Plan A: social videos, a landing page, and posters and screens around the city."
+<ImagePair
+  items={[
+    { label: 'Posters', src: poster, ratio: [1688, 1125], alt: 'Four Plan A posters on a brick wall: Exams are over, Summer is here, Any plans for the weekend, How about a hangout', caption: 'Posters around the city bring people to the link.' },
+    { label: 'Social media', src: socials, ratio: [60, 129], alt: 'Plan A social media post: “Groupchat looking empty?”', caption: 'A social post that carries the tone.' },
+  ]}
 />
 
-### How prototype testing shaped it
+## Testing and iteration
+
+The concept changed twice before it got its final shape: **once after the pitch**, through a structured critique, and **again after testing the prototype.**
+
+### Six Thinking Hats: stress-testing the concept
+
+After the pitch we wrote the concept out in full and looked at it through each hat in turn. The Black Hat questions turned into the rules of the second iteration.
+
+<CaseImage
+  label="Black Hat: what could go wrong"
+  src={blackHat}
+  alt="Board of the Black Hat session: risks in the concept and the changes they led to"
+  size="wide"
+  ratio="4756 / 3592"
+  caption="The Black Hat session: the risks we found in the concept and what we changed."
+/>
+
+1. **Only one try.** Players might mess up their first run. Now: unlimited practice rounds before the real game.
+2. **Fewer friends play than planned.** The plan would never be sent. Now: the initiator sets a response window, and the plan goes out when everyone has played or the timer runs out.
+3. **The winner can't make the chosen date.** Now: the final date is the one most players picked, and if the winner didn't pick it, the coupon goes to the highest scorer who did.
+4. **Big groups could split up to collect more free drinks.** Now: the coupon links to a random bar matching the group's vibe, and only one person wins per group.
+
+The Red Hat added a gut feeling: **something Antwerp-specific was missing beyond a free drink.** That led to **story-driven collectibles** in the game, like a beer for Antwerp's bar culture or a camera for capturing moments. The concept went from a fun idea to **one that holds up with real friend groups, real bars and real schedules.**
+
+### Prototype testing: what testers said
+
+To sort the feedback I plotted every remark on a simple grid: **positive or negative, and whether we could change it or not.** Everything in the “negative, we can change it” corner went on the to-do list.
+
+<CaseImage
+  label="Sorting the feedback"
+  src={feedbackMatrix}
+  alt="Sticky notes with tester remarks sorted on a grid: positive to negative, and outside our control to we can change it"
+  size="wide"
+  ratio="5700 / 4200"
+/>
 
 <RuledTable
   heads={['What testers said', 'What we changed']}
@@ -278,7 +305,7 @@ We cut anything that made the concept heavier, more promotional, or less of a ga
 
 ## What I'd do differently
 
-A fun hook only works if people understand what it's for. Every tester found the concept more fun than planning in the chat, but not everyone found it more practical.
+**A fun hook only works if people understand what it's for.** Every tester found the concept more fun than planning in the chat, but **not everyone found it more practical.**
 
 - **Test the order, don't debate it.** Initiators felt the game took the focus, and tutors later asked for planning first. Test two versions side by side, early.
 - **Make the reward impossible to miss.** Followers didn't notice they could win anything, and some thought any good score earned a drink. Put the rules on the first screen.
@@ -286,4 +313,4 @@ A fun hook only works if people understand what it's for. Every tester found the
 
 ## Final results
 
-The case movie and the full case study are on Behance. For anyone who wants the research, interviews, testing material and iterations, the full process board lives in FigJam.
+The case movie and the full case study are on **Behance**. For anyone who wants the research, interviews, testing material and iterations, **the full process board lives in FigJam.**

@@ -17,7 +17,7 @@ interface Props {
 const items = Astro.props.items.slice(0, 6);
 ---
 
-<div class="frames">
+<div class:list={['frames', { 'frames--three': items.length === 3 }]}>
   {items.map((it, i) => (
     <CaseImage
       label={it.label}
@@ -45,6 +45,13 @@ const items = Astro.props.items.slice(0, 6);
   @media (min-width: 700px) {
     .frames {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* Three frames: one row of three, so none is left over on its own */
+  @media (min-width: 900px) {
+    .frames--three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 </style>

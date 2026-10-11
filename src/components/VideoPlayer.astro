@@ -12,13 +12,15 @@ interface Props {
   embed?: string;
   src?: string;
   poster?: ImageMetadata;
+  /** CSS aspect-ratio of the frame, default 16 / 9 (use "4 / 3" for a 4:3 film) */
+  ratio?: string;
 }
 
-const { title, embed, src, poster } = Astro.props;
+const { title, embed, src, poster, ratio = '16 / 9' } = Astro.props;
 ---
 
 <figure class="theater">
-  <div class="theater__frame">
+  <div class="theater__frame" style={`aspect-ratio:${ratio}`}>
     {embed ? (
       <>
         <!-- Facade: the poster and a play button; the player (and Vimeo's scripts) load only on tap -->

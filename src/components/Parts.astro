@@ -1,8 +1,10 @@
 ---
 // The parts of a solution side by side: a name and one line each, under a hairline. Three columns from tablet up,
 // stacked on phones. Not numbered: the parts are peers, not a sequence.
+import { Image } from 'astro:assets';
+
 interface Props {
-  items: { title: string; text: string }[];
+  items: { title: string; text: string; image?: ImageMetadata; alt?: string }[];
 }
 
 const { items } = Astro.props;
@@ -11,6 +13,9 @@ const { items } = Astro.props;
 <ul class="parts" aria-label="The parts of the solution">
   {items.map((it) => (
     <li class="parts__item">
+      {it.image && (
+        <Image class="parts__image" src={it.image} alt={it.alt ?? ''} widths={[320, 640]} sizes="(min-width: 700px) 20rem, 90vw" />
+      )}
       <h4 class="parts__title">{it.title}</h4>
       <p class="parts__text">{it.text}</p>
     </li>
@@ -31,6 +36,16 @@ const { items } = Astro.props;
     max-width: none;
     padding: 1.25rem 0 1.5rem;
     border-top: var(--hairline);
+  }
+
+  .parts .parts__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 10;
+    object-fit: cover;
+    margin-bottom: 1.25rem;
+    border-radius: var(--radius);
   }
 
   .parts .parts__title {

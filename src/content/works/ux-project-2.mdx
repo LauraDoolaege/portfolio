@@ -16,18 +16,18 @@ facts:
 import CaseImage from '../../components/CaseImage.astro';
 import Timeline from '../../components/Timeline.astro';
 import TimelineStep from '../../components/TimelineStep.astro';
-import PhoneScreens from '../../components/PhoneScreens.astro';
+import ImagePair from '../../components/ImagePair.astro';
+import VideoPlayer from '../../components/VideoPlayer.astro';
 import PullQuote from '../../components/PullQuote.astro';
 import Funnel from '../../components/Funnel.astro';
 import RuledTable from '../../components/RuledTable.astro';
 import Parts from '../../components/Parts.astro';
+import appImg from '../../assets/images/Nexxus_app.png';
+import wearableImg from '../../assets/images/Nexxus_wearable.png';
+import poleImg from '../../assets/images/Nexxus_toucpoint.png';
+import lofi from '../../assets/images/Nexxus_lofi.png';
+import hifi from '../../assets/images/Nexxus_hifi.png';
 import cover from '../../assets/images/frame_nexxus.png';
-import home from '../../assets/images/nexxus_home.png';
-import dashboard from '../../assets/images/nexxus_dashboard.png';
-import safetyLead from '../../assets/images/nexxus_safety-lead.png';
-import pointsIntro from '../../assets/images/nexxus_helper-points-intro.png';
-import rewards from '../../assets/images/nexxus_helper-points.png';
-import emergency from '../../assets/images/nexxus_emergency.png';
 
 ## Overview
 
@@ -47,11 +47,11 @@ import emergency from '../../assets/images/nexxus_emergency.png';
 
 A closed community needs strong safety, but the usual answer (more cameras, more tracking) makes people feel watched. On a generation ship that tension never goes away: there is no exit, limited privacy, and the same few thousand neighbours for life.
 
-Our research showed that perceived monitoring often harms people more than what is actually tracked. So the challenge wasn't only technical. It was about how safety feels.
+Our research showed that **perceived monitoring often harms people more than what is actually tracked.** So the challenge wasn't only technical. **It was about how safety feels.**
 
 <PullQuote size="md">
-  How might we maintain social safety for a long period of time in a closed environment, without
-  creating a feeling of excessive monitoring or control?
+  How might we maintain <mark class="hl">social safety</mark> for a long period of time in a closed environment, without
+  creating a feeling of <mark class="hl">excessive monitoring</mark> or control?
 </PullQuote>
 
 ### Who faces this problem
@@ -59,13 +59,6 @@ Our research showed that perceived monitoring often harms people more than what 
 Every resident of the ship, but especially digitally fluent adults (20 to 40) who value autonomy and have low tolerance for opaque or controlling systems. They're community-minded, yet protective of their privacy.
 
 We captured them in one persona, **John Reyes**: a 34-year-old first-generation resident and garden technician. On Earth he worked with monitoring tools that never explained themselves, so anything hidden feels like surveillance to him. He accepts basic health monitoring, but wants everything beyond that to be opt-in.
-
-<CaseImage
-  label="John Reyes"
-  size="wide"
-  ratio="16 / 9"
-  caption="The persona: John Reyes, 34, garden technician."
-/>
 
 ## Scope & constraints
 
@@ -78,7 +71,7 @@ We captured them in one persona, **John Reyes**: a 34-year-old first-generation 
 
 ## Thought process
 
-We deliberately stayed in the problem space before touching solutions, then let three design principles judge every idea. Each phase narrowed the field:
+We deliberately **stayed in the problem space before touching solutions**, then let **three design principles judge every idea.** Each phase narrowed the field:
 
 <Funnel
   items={[
@@ -129,143 +122,32 @@ We deliberately stayed in the problem space before touching solutions, then let 
   <TimelineStep
     title="8. Prototype & test"
     methods="Paper to Figma prototype, wearable and activation pole, alignment matrix (objectives and KPIs), scenario-based testing, 2 rounds"
-    result="The iterations in The solution below."
+    result="Two rounds of testing and the iterations in Testing and iteration below."
   />
 </Timeline>
 
-<CaseImage
-  label="Process Artefacts"
-  size="wide"
-  ratio="16 / 9"
-  caption="From the research: Ishikawa diagram, assumption matrix, COCD matrix, decision matrix, storyboard and user journey map."
-/>
-
-One thread ran through all of it: we turned each design principle into a set of questions and used those as the scoring criteria in the decision matrix. The winning concept, the Transparency app, wasn't the most exciting idea. It was the one that best answered our HMW, so we built on it and pulled in the strongest features of the other two.
-
-## Deep dive: the Help button
-
-Scenario-based testing changed the core of the app: a slow report form became a one-tap emergency button at the centre of the navigation.
-
-We tested with scenarios instead of instructions, and measured clarity, perceived safety, trust and how watched people felt, not just task success.
-
-### What we heard
-
-In round 1 the only safety channel was a concern report, answered within about a day. One tester pointed out that urgent help and a concern are two different things, and asked for an alarm button twice. Others wanted feedback in hours, not days.
-
-### What we changed
-
-1. Split **help now** from **report a concern**.
-2. Added a large Help button in the centre of the menu. One tap opens a confirmation screen: cancel if it was an accident, confirm, or wait 5 seconds and it sends automatically.
-3. Moved the concern report to the Home page, with a status overview.
-
-<CaseImage
-  label="Old vs. New Navigation"
-  size="wide"
-  ratio="16 / 9"
-  caption="Before: Home, Score, Community, Report, Safety lead. After: the Help button at the centre."
-/>
-
-<PhoneScreens
-  items={[
-    {
-      label: 'Help',
-      src: emergency,
-      alt: 'Nexxus emergency signal confirmation with a cancel button',
-      caption: 'Help: sending an emergency signal, with a chance to cancel if it was an accident.',
-    },
-  ]}
-/>
-
-In round 2 a new scenario tested it: you hear a strange noise in the dark, press the alarm, then realise it’s just a kitten and cancel. Everyone completed it without issues. The button now carries the app’s promise: you’re never alone, and nothing happens without your control.
+One thread ran through all of it: we turned each design principle into a set of questions and used those as the scoring criteria in the decision matrix. The winning concept, the Transparency app, **wasn't the most exciting idea. It was the one that best answered our HMW,** so we built on it and pulled in the strongest features of the other two.
 
 ## The solution
 
-**Nexxus** (working name: Transparency app) is an ecosystem of three products. The insight behind it: think of the neighbourhood grandma who keeps an eye on the street. People look out for each other, and nobody feels watched.
+**Nexxus** (working name: Transparency app) is an ecosystem of three products. The insight behind it: think of the neighbourhood grandma who keeps an eye on the street. **People look out for each other, and nobody feels watched.**
 
 <Parts
   items={[
-    { title: 'Mobile app', text: 'Your data, your help, your community.' },
-    { title: 'Wearable monitor', text: 'A soft band that tracks two vitals, nothing more.' },
-    { title: 'Activation pole', text: 'A QR code that starts your safety shift.' },
+    { title: 'Mobile app', text: 'Your data, your help, your community.', image: appImg, alt: 'The Nexxus app: home with dashboard, and the community help requests' },
+    { title: 'Wearable monitor', text: 'A soft band that tracks two vitals, nothing more.', image: wearableImg, alt: 'The Nexxus wearable monitor band' },
+    { title: 'Activation pole', text: 'A QR code that starts your safety shift.', image: poleImg, alt: 'A cardboard prototype of the activation pole with a QR code' },
   ]}
 />
 
 ### The mobile app
 
-#### Dashboard & data
+A walkthrough of every screen:
 
-Only heartbeat and temperature are tracked by default, and the app explains why. Everything else is opt-in through subscriptions you can cancel anytime.
-
-<PhoneScreens
-  items={[
-    {
-      label: 'Home',
-      src: home,
-      alt: 'Nexxus home page: your points, a dashboard preview and upcoming shifts',
-      caption: 'The home page: points, a dashboard preview and upcoming shifts.',
-    },
-    {
-      label: 'Dashboard',
-      src: dashboard,
-      alt: 'Nexxus personal dashboard with heart rate and body temperature',
-      caption: 'The personal dashboard: heart rate and body temperature.',
-    },
-  ]}
-/>
-
-#### Visible data deletion
-
-Routine data is deleted every minute and you can see it happen. Data is only kept in extreme safety events, or if you choose to keep it yourself.
-
-<CaseImage
-  label="Data Deletion"
-  size="wide"
-  ratio="16 / 9"
-  caption="Data deletion: first iteration (left) and final iteration (right)."
-/>
-
-#### Helper Points
-
-An optional, private reputation space: help someone and earn points to swap for a croissant, a massage or a dinner. No public ranking.
-
-<PhoneScreens
-  items={[
-    {
-      label: 'Helper Points',
-      src: pointsIntro,
-      alt: 'Nexxus Helper Point introduction: the reputation system',
-      caption: 'The Helper Point system: welcome to the reputation system.',
-    },
-    {
-      label: 'Rewards',
-      src: rewards,
-      alt: 'Nexxus reward examples: VR experiences, massage sessions and cocktails',
-      caption: 'Reward examples to exchange points for.',
-    },
-  ]}
-/>
-
-#### Community
-
-Ask for help or offer it, individually or in groups. Moderators handle requests to resolve conflicts early, never to punish.
-
-#### Help & Report
-
-One-tap emergency help, plus a non-urgent concern report. The full story is in the deep dive above.
-
-#### Safety Lead
-
-A rotating duty, like jury duty, so safety is shared instead of owned by one authority.
-
-<PhoneScreens
-  items={[
-    {
-      label: 'Safety Lead',
-      src: safetyLead,
-      alt: 'Nexxus Safety lead page with a shift calendar and upcoming shifts',
-      caption: 'Shift calendar and upcoming shifts.',
-    },
-  ]}
+<VideoPlayer
+  title="Nexxus: app walkthrough"
+  embed="https://player.vimeo.com/video/1234831109?badge=0&autopause=0&player_id=0&app_id=58479"
+  ratio="4 / 3"
 />
 
 ### The physical touchpoints
@@ -278,14 +160,20 @@ A soft, lightweight elastic band that shouldn't read as a medical device or a sy
 
 Residents scan a QR code to start their shift. It sits at knuckle height (735 mm, the adult average) on a surface tilted 20 to 30°, so you can scan without lifting your arm.
 
-<CaseImage
-  label="Wearable & Activation Pole"
-  size="wide"
-  ratio="16 / 9"
-  caption="The wearable band, and the activation pole at 735 mm and tilted 20 to 30°."
+## Testing and iteration
+
+We tested twice, with scenarios instead of instructions, and measured **clarity, perceived safety, trust and how watched people felt**, not just task success. The first round used lo-fi wireframes; the second a hi-fi prototype with the wearable and the activation pole.
+
+### From lo-fi to hi-fi
+
+<ImagePair
+  items={[
+    { label: 'Lo-fi wireframe', src: lofi, ratio: [604, 365], alt: 'Lo-fi wireframes of the Nexxus home, calendar and community screens', caption: 'First iteration: lo-fi wireframes.' },
+    { label: 'Hi-fi', src: hifi, ratio: [604, 353], alt: 'Hi-fi Nexxus screens', caption: 'Final iteration: hi-fi design.' },
+  ]}
 />
 
-### How testing shaped it
+### What testing changed
 
 <RuledTable
   heads={['Part', 'First iteration', 'Final iteration']}
@@ -323,6 +211,23 @@ Residents scan a QR code to start their shift. It sits at knuckle height (735 mm
   ]}
 />
 
+
+### Deep dive: the Help button
+
+**Scenario-based testing changed the core of the app:** a slow report form became a one-tap emergency button at the centre of the navigation.
+
+#### What we heard
+
+In round 1 the only safety channel was a concern report, answered within about a day. One tester pointed out that urgent help and a concern are two different things, and asked for an alarm button twice. Others wanted feedback in hours, not days.
+
+#### What we changed
+
+1. Split **help now** from **report a concern**.
+2. Added a large Help button in the centre of the menu. One tap opens a confirmation screen: cancel if it was an accident, confirm, or wait 5 seconds and it sends automatically.
+3. Moved the concern report to the Home page, with a status overview.
+
+In round 2 a new scenario tested it: you hear a strange noise in the dark, press the alarm, then realise it’s just a kitten and cancel. Everyone completed it without issues. The button now carries the app’s promise: **you’re never alone, and nothing happens without your control.**
+
 ## What we tried and dropped
 
 Most cuts came from the same rule: if it felt like control, it went.
@@ -349,7 +254,7 @@ One thing we deliberately didn't drop: we kept every feature in the first protot
 
 ## What I'd do differently
 
-I started this project assuming a closed habitat needs monitoring to stay safe. I ended it asking how little monitoring a community can rely on and still feel supported. We fixed the screens faster than we fixed the meaning behind them: testers rated their comfort between 5 and 7 out of 10, and the reasons were rarely about buttons.
+I started this project assuming a closed habitat needs monitoring to stay safe. I ended it asking how little monitoring a community can rely on and still feel supported. **We fixed the screens faster than we fixed the meaning behind them:** testers rated their comfort between 5 and 7 out of 10, and the reasons were rarely about buttons.
 
 - **Test the concept, not just the flow.** The reputation system still gave a tester “dystopian vibes” in round 2, after we had polished its UI.
 - **Usable isn’t the same as understood.** Testers found the data deletion settings, yet some didn’t see why deletion mattered. Explain the why in onboarding.
@@ -357,6 +262,4 @@ I started this project assuming a closed habitat needs monitoring to stay safe. 
 
 ## Final results
 
-The prototype video and the full case study are on Behance. For anyone who wants the research, task flows, testing material and iterations, the full process board lives in FigJam: XD4-ENG Team 14.
-
-{/* Visual: prototype video (already on the site) and a link to the FigJam process board */}
+The prototype video and the full case study are on **Behance**. For anyone who wants the research, task flows, testing material and iterations, **the full process board lives in FigJam:** XD4-ENG Team 14.

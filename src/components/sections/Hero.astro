@@ -680,7 +680,10 @@ import portrait from '../../assets/images/hero_portrait.png';
       filter: contrast(0.96) brightness(0.85);
     }
 
+    /* 13px was a footnote size for the one sentence that says what Laura does: 15 to 17px reads as a sentence */
     .hero__intro {
+      font-size: clamp(0.9375rem, 0.78rem + 0.3vw, 1.0625rem);
+      line-height: 1.5;
       text-align: left;
       text-wrap: pretty;
     }

@@ -1,10 +1,8 @@
 ---
 // A ledger section for About (toolkit, background): standard section header, then groups of rows laid out like the
 // homepage's desk ledger: label in columns 1-4, details in 5-12, one soft rule between rows only.
-import SectionLabel from '../ui/SectionLabel.astro';
 
 interface Props {
-  label: string;
   title: string;
   id: string;
   groups: { title?: string; rows: { label: string; items: string }[] }[];
@@ -13,13 +11,12 @@ interface Props {
   foldLabel?: string;
 }
 
-const { label, title, id, groups, foldFrom, foldLabel = 'Show more' } = Astro.props;
+const { title, id, groups, foldFrom, foldLabel = 'Show more' } = Astro.props;
 ---
 
 <section class="sec" aria-labelledby={id}>
   <div class="container">
     <header class="sec__head">
-      <SectionLabel text={label} data-reveal />
       <h2 id={id} class="sec-title" data-reveal>
         {title}
       </h2>

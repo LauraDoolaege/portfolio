@@ -3,7 +3,6 @@
 // question blocks scroll past on the right; the block in the middle of the screen is the active one (the rest dim,
 // and the matching segment in the pinned column darkens). A third step closes it ("...and I want to answer both!"),
 // where every segment goes dark. Below 1000px it is a plain stack.
-import SectionLabel from '../ui/SectionLabel.astro';
 
 type Part = string | { word: string; tail?: string };
 
@@ -36,7 +35,6 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
 <section class="sec why" aria-labelledby="why-how-title" data-why>
   <div class="container why__grid">
     <div class="why__pin">
-      <SectionLabel text="The big idea" data-reveal />
       <h2 id="why-how-title" class="sec-title" data-reveal>
         Every company has 2 questions...
       </h2>

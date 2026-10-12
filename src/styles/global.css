@@ -3,6 +3,7 @@
   --bg-primary: #f3f2ee; /* Warm alabaster / newsprint */
   --text-main: #1a1a1a; /* Deep charcoal */
   --ink: #1a1a1a; /* Text on the bright accent: fixed in both themes */
+  --dim-text: 0.4; /* How far the other links step back while one is hovered */
   --text-muted: #5c5b59; /* Warm grey, ~6:1 on the paper so small labels and captions have margin over AA */
   --border-color: #d1cfc7; /* 1px architectural grid lines */
   --accent: #b4c033; /* Bright olive: dot, lines, fills (not for small text) */
@@ -463,7 +464,7 @@ html.menu-open button:focus-visible {
 }
 
 .btn .btn__icon {
-  transition: transform 0.4s ease-in-out;
+  transition: transform 0.4s var(--ease-out);
 }
 
 .btn:hover .btn__icon,
@@ -536,7 +537,7 @@ html.menu-open button:focus-visible {
 }
 
 .btn-link .btn__icon {
-  transition: transform 0.4s ease-in-out;
+  transition: transform 0.4s var(--ease-out);
 }
 
 .btn-link:hover .btn__icon,
@@ -1063,4 +1064,21 @@ html.pt-arriving::before {
   color: var(--ink);
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
+}
+
+/* One hover grammar for lists of choices (nav, footer links, contents): while one is hovered or focused, the others
+   step back. The visual-work rows and the two case-study cards use the same idea with their own strengths. */
+.nav-link,
+.footer__links a,
+.toc__link {
+  transition: opacity 0.45s var(--ease-out), color 0.4s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-header__links:has(.nav-link:hover, .nav-link:focus-visible) .nav-link:not(:hover):not(:focus-visible),
+  .footer__links:has(a:hover, a:focus-visible) a:not(:hover):not(:focus-visible),
+  .toc__list:has(.toc__link:hover, .toc__link:focus-visible)
+    .toc__link:not(:hover):not(:focus-visible):not([aria-current='true']) {
+    opacity: var(--dim-text);
+  }
 }

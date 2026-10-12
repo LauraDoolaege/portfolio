@@ -2,7 +2,6 @@
 // The journey: a small portrait on the left, the story on the right. Same section header as the homepage
 // (label + title), same photo treatment as the homepage teaser (whole portrait, black and white).
 import { Image } from 'astro:assets';
-import SectionLabel from '../ui/SectionLabel.astro';
 import photo from '../../assets/images/photo_aboutTeaser.png';
 
 const paragraphs = [
@@ -15,7 +14,6 @@ const paragraphs = [
 <section class="sec" aria-labelledby="story-title">
   <div class="container">
     <header class="sec__head">
-      <SectionLabel text="The journey" data-reveal />
       <h2 id="story-title" class="sec-title" data-reveal>
         From{' '}
         <span class="story__word">

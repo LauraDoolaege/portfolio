@@ -4,7 +4,6 @@
 // Hero's "Get to know me" link jumps here (#about).
 import { Image } from 'astro:assets';
 import Button from '../ui/Button.astro';
-import SectionLabel from '../ui/SectionLabel.astro';
 import { withBase } from '../../utils/url';
 import photo from '../../assets/images/photo_aboutTeaser.png';
 ---
@@ -12,7 +11,6 @@ import photo from '../../assets/images/photo_aboutTeaser.png';
 <section class="sec" id="about" aria-labelledby="about-title">
   <div class="container">
     <header class="sec__head">
-      <SectionLabel text="About" data-reveal />
       <h2 id="about-title" class="sec-title" data-reveal>
         Who am I
       </h2>

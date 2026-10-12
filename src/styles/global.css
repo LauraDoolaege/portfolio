@@ -2,6 +2,7 @@
   /* Color (light default; [data-theme='dark'] below overrides the same tokens) */
   --bg-primary: #f3f2ee; /* Warm alabaster / newsprint */
   --text-main: #1a1a1a; /* Deep charcoal */
+  --ink: #1a1a1a; /* Text on the bright accent: fixed in both themes */
   --text-muted: #5c5b59; /* Warm grey, ~6:1 on the paper so small labels and captions have margin over AA */
   --border-color: #d1cfc7; /* 1px architectural grid lines */
   --accent: #b4c033; /* Bright olive: dot, lines, fills (not for small text) */
@@ -30,7 +31,9 @@
   --leading-paragraph: 1.5;
   /* Item titles (desk rows, work-group headings): between h3 and h2 */
   --text-title: clamp(1.5rem, 1rem + 2vw, 2.75rem);
-  --tracking-display: -0.02em;
+  /* Tracking steps with size: tighter as the type gets bigger, nearly neutral for small titles */
+  --tracking-display: -0.03em;
+  --tracking-title: -0.015em;
   --leading-display: 0.95;
   --leading-body: 1.5;
 
@@ -94,6 +97,9 @@ body {
   font-weight: var(--weight-regular);
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-kerning: normal;
+  font-optical-sizing: auto;
 }
 
 h1,
@@ -103,6 +109,16 @@ h4 {
   margin: 0;
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-display);
+}
+
+h3,
+h4 {
+  letter-spacing: var(--tracking-title);
+}
+
+h1,
+h2 {
+  text-rendering: optimizeLegibility;
 }
 
 h1 {
@@ -116,6 +132,7 @@ h2 {
   font-weight: var(--weight-heavy);
   font-size: var(--text-h2);
   line-height: 1;
+  text-wrap: balance;
 }
 
 h3 {
@@ -133,6 +150,7 @@ figure {
 p {
   font-size: var(--text-paragraph);
   line-height: var(--leading-paragraph);
+  text-wrap: pretty;
 }
 
 ul,
@@ -164,9 +182,10 @@ a {
   text-decoration: none;
 }
 
+/* Ink on the bright accent: paper on it was under 2:1 */
 ::selection {
   background: var(--accent);
-  color: var(--bg-primary);
+  color: var(--ink);
 }
 
 /* Browser surfaces themed from the palette: scrollbar, caret, tabular numerals */
@@ -189,6 +208,22 @@ a:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--accent-text);
   outline-offset: 4px;
+}
+
+/* The open menu is always dark, so its focus ring uses the bright accent */
+html.menu-open a:focus-visible,
+html.menu-open button:focus-visible {
+  outline-color: var(--accent);
+}
+
+/* A pressed control moves a hair, like a physical key. The individual `scale` property never fights the magnetic
+   transforms these elements carry. */
+.btn:active,
+.btn-link:active,
+.nav-link:active,
+.theme-toggle:active,
+.tile:active {
+  scale: 0.97;
 }
 
 /* Shared 12-column page container: every section aligns to this. */
@@ -255,7 +290,8 @@ button:focus-visible {
 .sec {
   --col: clamp(16rem, 22vw, 22rem);
   --gutter: clamp(1.5rem, 3vw, 3rem);
-  padding-block: clamp(3.5rem, 2rem + 6vw, 7.5rem);
+  /* A little more air between sections: the page is a quiet one, so the rhythm is carried by space */
+  padding-block: clamp(4rem, 2.25rem + 6.5vw, 8.5rem);
 }
 
 .sec__head {
@@ -681,7 +717,7 @@ button:focus-visible {
   display: grid;
   place-items: center;
   /* Black on the bright accent, in both themes */
-  color: #1a1a1a;
+  color: var(--ink);
   font-size: var(--text-small);
   font-weight: var(--weight-bold);
   letter-spacing: 0.02em;
@@ -1024,7 +1060,7 @@ html.pt-arriving::before {
   background-size: 100% 0.92em;
   background-position: 0 62%;
   background-color: transparent;
-  color: #1a1a1a;
+  color: var(--ink);
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }

@@ -1,0 +1,299 @@
+---
+title: 'Screen time'
+description: 'A space-themed research project on how families with young children handle screens: a survey of 81 parents, 11 interviews and a cultural probe.'
+type: 'ux'
+coverImage: '../../assets/images/frame_screentime.jpg'
+behanceUrl: 'https://www.behance.net/gallery/240385549/A-Space-Journey-Through-Kids-Screen-Time'
+role: 'UX Researcher, Data Analyst, Data Visualisation'
+timeline: 'Devine XD3, 2025'
+tools: ['Survey research', 'SPSS', 'Interviews', 'Data visualisation']
+team: ['Laura Doolaege', 'Anna Van Ongeval', 'Bryan Deketelaere']
+facts:
+  context: 'DEVINE XD3 Experience Design 3 (case 2: growing up with screens, for Craftzing), Howest, 2025'
+  scope: 'I ran the survey analysis, the interviews and the data visualisation'
+  deliverables: 'Research microsite, data visualisations, two personas'
+---
+
+import CaseImage from '../../components/CaseImage.astro';
+import Disclosure from '../../components/Disclosure.astro';
+import Timeline from '../../components/Timeline.astro';
+import TimelineStep from '../../components/TimelineStep.astro';
+import ImagePair from '../../components/ImagePair.astro';
+import PullQuote from '../../components/PullQuote.astro';
+import RuledTable from '../../components/RuledTable.astro';
+import cover from '../../assets/images/frame_screentime.jpg';
+import survey from '../../assets/images/screentime_survey.png';
+import peaks from '../../assets/images/screentime_peaks.png';
+import moons from '../../assets/images/screentime_moons.png';
+import rules from '../../assets/images/screentime_rules.png';
+import statements from '../../assets/images/screentime_statements.png';
+import interviews from '../../assets/images/screentime_interviews.png';
+import probe from '../../assets/images/screentime_probe.png';
+import personas from '../../assets/images/screentime_personas.png';
+
+## Overview
+
+**In short:** how does the daily screen routine of children aged 0 to 6 change with their family situation and their parents' views? We combined a survey of 81 parents, 11 interviews and a six-day cultural probe with five families. The answer was more nuanced than we assumed: **circumstances, not intentions, drive screen time**, and family structure alone can't predict it. I ran the statistical analysis, the interviews and the data visualisation.
+
+<CaseImage
+  label="Screen time cover"
+  src={cover}
+  alt="Space journey through kids' screen time: the title slide with planets and a rocket"
+  size="wide"
+  ratio="16 / 9"
+  caption="A space journey through kids' screen time: the research is told as a trip through the solar system."
+  loading="eager"
+/>
+
+## The problem
+
+Parents of young children are told to limit screens, and many feel guilty when they don't. Yet the advice rarely fits their actual days. Our desk research gave us five starting points: **parental stress leads to more lenient rules**, children **mirror their parents' habits**, **watching together softens the effects**, parents who feel **confident** limit screens better, and **family context and culture** shape every routine.
+
+From those we shaped the question the whole project answers:
+
+<PullQuote size="md">
+  How does the <mark class="hl">digital routine</mark> of young kids (0 to 6) change depending on their{' '}
+  <mark class="hl">family environment</mark> and their <mark class="hl">parents' perspective</mark> on screen time?
+</PullQuote>
+
+### Who we looked at
+
+Young parents (20 to 40) in Flanders and Brussels, with children between 0 and 6 and many different family structures. Mostly Millennials and older Gen Z, active in the workforce, somewhere between beginner and expert at digital parenting. They use screens as a break or a distraction, **feel guilty about it, and don't know how to change it.**
+
+We split them with a nerd/noob analysis. The "nerds" actively manage their child's digital habits: clear rules, co-watching, trusted sources. The "noobs" struggle to keep a routine, don't monitor content, and use screens when they are overwhelmed.
+
+## Scope & my part
+
+- **The brief.** Case 2 of Experience Design 3, "growing up with screens", for Craftzing. The deliverable was insight, not an app: finding where design or communication could help parents find a healthier balance without adding pressure.
+- **My part.** I ran the statistical analysis of the survey in SPSS, conducted and analysed interviews, and designed the data visualisations: the planets, moons and gauges you see on the microsite and in the presentation.
+- **Parents are hard to reach.** We shared the survey through personal Facebook pages and groups, Instagram stories, word of mouth and a school. That gave us 81 respondents in 3 weeks, and a sample that skews: **91% mothers and 82% nuclear families.**
+- **Dutch-speaking families only.** The cultural probe boxes and their logbooks were written in Dutch, so the findings come from Flemish households.
+
+## Thought process
+
+We started by **splitting the question into what a survey can answer and what needs a conversation.** Closed, countable questions went to the survey. Open, emotional ones went to interviews and the probe.
+
+<Timeline>
+  <TimelineStep
+    title="1. Understand the topic"
+    methods="Desk research, issue tree, Ishikawa diagram, problem scoping canvas"
+    result="Five insights and the research question."
+  />
+  <TimelineStep
+    title="2. Define the audience"
+    methods="User group definition, nerd/noob analysis, ecosystem mapping (the user, the community, services, institutions)"
+    result="Who we recruit, and twelve shifts we hoped parents could make, e.g. from guessing about screen time to making informed choices."
+  />
+  <TimelineStep
+    title="3. Test our assumptions"
+    methods="Individual brainstorm, merged assumption matrix, certain versus uncertain"
+    result="10 high-risk assumptions and 6 questions left to answer."
+  />
+  <TimelineStep
+    title="4. Survey"
+    methods="45 questions in four parts: family context, screens and activities, rules and conflict, “I feel like…” statements. Coded in a codebook, tested in SPSS with chi-square tests"
+    result="81 responses and a set of statistically backed links."
+  />
+  <TimelineStep
+    title="5. Interviews"
+    methods="11 interviews, transcribed, coded in a quote matrix, clustered into themes"
+    result="The reasons behind the numbers."
+  />
+  <TimelineStep
+    title="6. Cultural probe"
+    methods="A box for each family, a six-day logbook, reflection questions"
+    result="What families notice when they look at their own routine."
+  />
+  <TimelineStep
+    title="7. Synthesise"
+    methods="Overlap of the three methods, two personas, quote cards"
+    result="One conclusion, and what it means for design."
+  />
+</Timeline>
+
+## What the survey showed
+
+The survey is where my analysis went deepest. I recoded all the data after closing the survey, sorted the open answers into categories, and built a codebook. Because the data was nominal and ordinal, I used **chi-square tests in SPSS** to check whether a pattern was real or just coincidence.
+
+<CaseImage
+  label="Survey respondents"
+  src={survey}
+  alt="Solar-system visualisation of the survey: 81 respondents, 91% mothers, under 40, 42% with two kids, over 4000 euro family income, 82% nuclear families, children of 4 on average"
+  size="wide"
+  ratio="16 / 9"
+  caption="81 parents in 3 weeks. Each planet is one fact about who answered."
+/>
+
+### When screens are on
+
+Screen time peaks at **transitional moments**: in the morning, when parents get ready or get housework done, and before bedtime, when screens become a way to relax. Desk research and the interviews pointed to the same moments.
+
+<CaseImage
+  label="Screen time across the day"
+  src={peaks}
+  alt="Curve of screen time across the day, with peaks in the morning and evening, on weekdays and weekends"
+  size="wide"
+  ratio="16 / 9"
+  caption="Screen time through the day, during the week and the weekend."
+/>
+
+### Why parents say yes
+
+When asked what screens give them, **63% see a moment of rest for the kids**, 48% see fun and relaxation for the kids, and 44% say it gives them time for themselves or covers time needed for chores. Most parents do set rules: **70% have rules and 65% stick to them regularly or always**, but only 45% set them together with a partner.
+
+<ImagePair
+  items={[
+    { label: 'Perceived advantages', src: moons, ratio: [16, 9], alt: 'Moons showing 44% time for chores, 44% time for myself and 63% moment of rest for the kids', caption: 'What parents say screens give them.' },
+    { label: 'Screen time rules', src: rules, ratio: [16, 9], alt: 'Planets showing 45% set rules with their partner, 70% have rules, 65% stick to them', caption: 'How many families have rules.' },
+  ]}
+/>
+
+The three most common rules: **75% allow no screens during mealtime**, 52% only after something else is done, and 50% only under supervision. Conflict is mostly rare (69% have one less than once a week), and **71% of conflicts are about stopping.**
+
+### What is statistically linked
+
+<RuledTable
+  heads={['Factor', 'What the data showed']}
+  rows={[
+    ['Family type', 'Nuclear families are slightly more structured about screen time.'],
+    ['Siblings', 'Kids with two or more siblings have higher screen time.'],
+    ['Education', 'Parents with higher education co-view more and use more creative apps.'],
+    ['Income', 'Kids from higher-income families (above €4,000 a month) have less screen time at the weekend.'],
+    ['Parenting style', 'Parents who are flexible but strict have fewer conflicts about screen time.'],
+    ['Reflection', 'Parents who reflect on screen time generally have lower screen time.'],
+    ['Confidence', 'Dads feel more confident than moms. Moms worry more in general.'],
+    ['Pressure', 'Young parents feel more pressure from their environment.'],
+  ]}
+/>
+
+### What parents say about themselves
+
+<CaseImage
+  label="Statements"
+  src={statements}
+  alt="Four slides of statement results: 65% see screens as normal, 74% reflect on screen time, 70% feel confident, 60% still worry, 55% say their own behaviour matters, 69% adapt content, 61% evaluate regularly, 23% say screen time affects family life"
+  size="wide"
+  ratio="16 / 9"
+  caption="The “I feel like…” statements, as progress bars."
+/>
+
+Parents are **confident and reflective on paper**: 65% see screens as a normal part of modern childhood, 70% feel confident about their child's screen time, 74% say they reflect on it regularly. Yet **60% are still concerned about the effects.**
+
+### The black holes
+
+The most useful part of the analysis was what wasn't there. Six of our assumptions were proven wrong by the data. Four of them:
+
+- **Working full time does not mean longer screen time.** There is no link between the two.
+- **A parent's age says nothing about worry or screen time.** No link with how much they worry, nor with their child's screen time.
+- **Younger parents don't feel less secure** in understanding their child's needs and adapting the content.
+- **Worrying doesn't lower screen time.** Parents with concerns about the effects do not have kids with lower screen time. On the contrary.
+
+## What the interviews added
+
+The survey told us what happens. The interviews told us why. We held **11 interviews**, 8 online and 3 at home, with married parents, parents in relationships and divorced parents. Each was run by two of us: one leading the conversation, one taking notes, so the talk could flow and the notes stayed accurate. They followed nine steps, from planning and consent to deeper, reflective questions and an end on a positive note.
+
+<CaseImage
+  label="Interviews"
+  src={interviews}
+  alt="Solar-system visualisation of the interviews: 11 interviews, 8 online and 3 at home, with married couples, married people, people in relationships and divorced single people"
+  size="wide"
+  ratio="16 / 9"
+  caption="11 interviews, 8 online and 3 at home."
+/>
+
+Every interview was transcribed. I marked the valuable quotes in a matrix, coded them, and grouped the codes into four themes on sticky notes. **Colours showed the different families, and washi tape showed marital status and gender**, so we could see who said what before drawing any conclusions.
+
+<RuledTable
+  heads={['Theme', 'What we found']}
+  rows={[
+    [
+      'Rules and routines',
+      'A divorced mother took a more passive approach, while a married mother of several children was active and education-oriented. Being married with several children went with stricter media rules and more structure.',
+    ],
+    [
+      'Alternatives for screen time',
+      'Women were stricter and stressed outdoor play, creativity and educational content. Fathers with several children let their kids choose and manage apps themselves, and saw games and digital platforms as educational.',
+    ],
+    [
+      'Content and media use',
+      'Everyone was conscious of their approach, and YouTube was a learning tool for many. With one child: more flexibility and content filtering. With several: stricter, structured, fixed days. More children meant more structure.',
+    ],
+    [
+      'Emotional reactions and challenges',
+      'Married mothers with one child were very strict, with more time to control. Divorced mothers with several children were relaxed and reactive, and found rules harder to follow.',
+    ],
+  ]}
+/>
+
+<PullQuote size="md">
+  Family situation and number of children affect <mark class="hl">screen-use style</mark> more than{' '}
+  <mark class="hl">gender</mark>.
+</PullQuote>
+
+## The cultural probe
+
+Surveys and interviews capture what people say after the fact. A **cultural probe** lets families reflect while screen time is happening, and shows what is easy to overlook or hard to put into words.
+
+When we brainstormed a theme, space came out as the strongest metaphor. Modern family life is full of notifications and constant demands for attention, like a spaceship cockpit. **The parents become the captains, navigating their family through the universe of screen time.** It also made a sensitive topic playful for both parents and children.
+
+<CaseImage
+  label="Cultural probe boxes"
+  src={probe}
+  alt="The cultural probe boxes: photos of the opened boxes with logbooks, postcards and stickers"
+  size="wide"
+  ratio="16 / 9"
+  caption="The boxes as they came back from the families."
+/>
+
+Each box held a **logbook** with a daily activity, reflection questions for parents and creative tasks for kids, six hanging planets on a rope, a movable spaceship marker (a clothespin), colouring materials and postcards, glow-in-the-dark star stickers and a handwritten introduction. The journey was first planned across the whole solar system. We cut it to **six days** so taking part would never feel like a burden.
+
+Five families with children aged 0 to 6 and different structures took part. With five families, 80% means four of them, so we read these as signals rather than statistics:
+
+- **All of them** became aware that their phones get in the way of family moments.
+- **All of the kids** enjoyed time with their family, with or without screens. They need that emotional involvement.
+- **80% of parents** admitted they spend too much time on screens, because work and private life are intertwined.
+- **80% of kids** consumed media passively, which affected their mood when they had to stop.
+- **80% of parents** want to decrease their own and the family's screen time and make more shared moments.
+
+## Two personas
+
+We turned the overlap of the three methods into two personas, each tied back to the data.
+
+<CaseImage
+  label="Sarah and Lotte"
+  src={personas}
+  alt="The personas Sarah and Lotte with their family structure"
+  size="wide"
+  ratio="16 / 9"
+  caption="Sarah and Lotte, the two ends of the same problem."
+/>
+
+**Sarah** is 32, works a full-time hybrid job and has two young children. Screens are not a preference but **a survival tool** she uses to keep the household running. She feels fine about her kids' screen time, yet carries a lot of guilt, and notices when they get overwhelmed. It is hard to be consistent when life gets in the way.
+
+<PullQuote size="md" source="A parent, on Sarah's quote card">
+  I have to iron now. Cooking cannot wait, so yeah, I <mark class="hl">throw them in front of the tv</mark> sometimes.
+</PullQuote>
+
+**Lotte** is 31, freelances with flexible hours and has one child of three. She tries a **structured, Montessori-inspired approach**: curated educational videos and music, watched together and discussed afterwards. She still stays open to adapting it when needed.
+
+## What it means
+
+Putting the three methods together, the digital routine is shaped by several factors: **more children means less involvement** (larger families use screens as a practical tool for rest and structure, smaller families co-view more and enforce rules more easily), and **parents want structure but also flexibility**, which the survey backs: flexible but strict parents had fewer conflicts.
+
+<PullQuote size="md">
+  Parents don't use screens simply because they want to. Their <mark class="hl">circumstances</mark> make it{' '}
+  <mark class="hl">necessary</mark>.
+</PullQuote>
+
+The overall conclusion is more nuanced than we first assumed. **Screen-time habits are defined more by the habits and perspectives of the parents than by the family structure itself**, even though family dynamics cause some differences. The digital routine cannot simply be put into boxes based on family structure. That points to where design or communication could help: supporting parents in finding a healthier balance, instead of adding to their guilt.
+
+## What I'd do differently
+
+The data is only as good as the people behind it, and ours came from a narrow slice.
+
+- **Scout more people, and more different people.** Our survey had 81 respondents, 91% of them mothers and 82% from nuclear families, and the probe had five families, all Dutch-speaking. That is enough to see patterns, but not enough to trust them. More respondents, and a wider mix of family types, fathers and backgrounds, would make the data far more reliable.
+- **Go from insight to a concept.** This project stopped at understanding the problem. I'd like to build on research like this with **recommendations or an actual concept** that tries to solve what we found: the guilt, the lack of structure, and parents who want to cut screen time but can't.
+
+## Final results
+
+The full case study is on **Behance**. The research microsite, a space-themed journey through all three methods, and the full process board in FigJam hold the rest: the assumption matrix, the questionnaire, the interview coding and the probe material.

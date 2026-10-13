@@ -1,4 +1,4 @@
-// Grainy page transition for project links. Clicking a project dissolves the current page into paper from the
+// Grainy page transition for project links and the About page. Clicking one dissolves the current page into paper from the
 // centre outwards, through the same grain as the card hover, then the next page dissolves back out the same way.
 // Plain multi-page navigation underneath: if anything here fails, the link simply works. A flag in sessionStorage
 // tells the next page to arrive covered (see the inline script in BaseLayout, which sets html.pt-arriving).
@@ -55,8 +55,9 @@ if (!reduceMotion) {
     const a = (e.target as Element | null)?.closest<HTMLAnchorElement>('a[href]');
     if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
     const url = new URL(a.href, location.href);
-    // Project links only: same site, under /works/
-    if (url.origin !== location.origin || !url.pathname.includes('/works/')) return;
+    // Project pages and About only: same site, under /works/ or the /about page itself
+    const grainy = url.pathname.includes('/works/') || /\/about\/?$/.test(url.pathname);
+    if (url.origin !== location.origin || !grainy) return;
     if (url.pathname === location.pathname) return;
 
     e.preventDefault();

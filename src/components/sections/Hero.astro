@@ -905,7 +905,7 @@ import portrait from '../../assets/images/hero_portrait.png';
   const N = 110;
   const GRAB_RADIUS = 30;
   const HOVER_RADIUS = 14;
-  const ITERATIONS = 20;
+  const ITERATIONS = 24;
   // The line is drawn through a smoothed copy of the points, so slack in the rope never shows as wrinkles
   const SMOOTH_PASSES = 6;
   // Grain on the line while it moves: 0 turns it off, 1 is the prototype default, higher is rougher
@@ -917,10 +917,13 @@ import portrait from '../../assets/images/hero_portrait.png';
   // Trail: painted at a fraction of the size (it's blurred anyway), fading a little every frame
   const TRAIL_SCALE = 0.5;
   const TRAIL_FADE = 0.05;
-  // Tuned to be critically damped: the rope eases back into place without overshooting or wobbling
-  const DAMPING = 0.8;
-  const K_IDLE = 0.01;
-  const K_DRAG = 0.0025;
+  // Pull it apart and it stays loose; let go and it drifts home slowly, without overshooting (critically damped:
+  // damping = 1 - 2 * sqrt(stiffness)). Stiffness is weakest while held, so loops can be opened right out, and
+  // after release it ramps up over RELEASE_RAMP ms, so the rope hangs untangled for a moment before it drifts back.
+  const DAMPING = 0.945;
+  const K_IDLE = 0.0007;
+  const K_DRAG = 0.0005;
+  const RELEASE_RAMP = 1400;
   // The grab offset (pointer vs. the point you caught) eases out, so the point ends up exactly under the cursor
   const OFFSET_DECAY = 0.8;
   const SIG_W = 490; // path box: x 40–530
@@ -943,6 +946,7 @@ import portrait from '../../assets/images/hero_portrait.png';
   const pointer = { x: 0, y: 0 };
   const grabOffset = { x: 0, y: 0 };
   let touched = false;
+  let releasedAt = -Infinity;
   let raf = 0;
   let width = 0;
   let height = 0;
@@ -1185,16 +1189,22 @@ import portrait from '../../assets/images/hero_portrait.png';
   /* ---------- Physics ---------- */
 
   function step() {
-    const k = grabbed >= 0 ? K_DRAG : K_IDLE;
+    let k = K_DRAG;
+    if (grabbed < 0) {
+      const t = Math.min(1, (performance.now() - releasedAt) / RELEASE_RAMP);
+      k = K_IDLE * (0.1 + 0.9 * t * t * (3 - 2 * t));
+    }
     for (let i = 0; i < N; i++) {
       const p = pts[i];
       if (i === grabbed) continue;
+      // The tail finds its way home a little sooner than the head, so the rope unravels instead of snapping back
+      const ki = k * (0.6 + 0.7 * (i / (N - 1)));
       const vx = (p.x - p.px) * DAMPING;
       const vy = (p.y - p.py) * DAMPING;
       p.px = p.x;
       p.py = p.y;
-      p.x += vx + (rest[i].x - p.x) * k;
-      p.y += vy + (rest[i].y - p.y) * k;
+      p.x += vx + (rest[i].x - p.x) * ki;
+      p.y += vy + (rest[i].y - p.y) * ki;
     }
     if (grabbed >= 0) {
       const g = pts[grabbed];
@@ -1299,6 +1309,7 @@ import portrait from '../../assets/images/hero_portrait.png';
   function onUp() {
     if (grabbed < 0) return;
     grabbed = -1;
+    releasedAt = performance.now();
   }
 
   /* ---------- Loop ---------- */
@@ -1365,10 +1376,23 @@ import portrait from '../../assets/images/hero_portrait.png';
     c.globalAlpha = 1;
   }
 
+  // The slow drift home has a long exponential tail; once it is imperceptible, land exactly on the rest shape
+  // so the rope (and its grain filter) stops being redrawn
+  function settle() {
+    if (grabbed >= 0) return;
+    for (let i = 0; i < N; i++) {
+      const p = pts[i];
+      if (Math.hypot(p.x - rest[i].x, p.y - rest[i].y) > 0.15 || Math.hypot(p.x - p.px, p.y - p.py) > 0.03)
+        return;
+    }
+    for (let i = 0; i < N; i++) pts[i] = { x: rest[i].x, y: rest[i].y, px: rest[i].x, py: rest[i].y };
+  }
+
   let frameNo = 0;
 
   function tick() {
     step();
+    settle();
     updateGrain();
     render();
     paintTrail(++frameNo);

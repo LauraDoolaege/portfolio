@@ -1,12 +1,21 @@
 ---
-// Section 01: two questions, two educations. On desktop the headline is pinned in the left columns while the two
-// question blocks scroll past on the right; the block in the middle of the screen is the active one (the rest dim,
-// and the matching segment in the pinned column darkens). A third step closes it ("...and I want to answer both!"),
-// where every segment goes dark. Below 1000px it is a plain stack.
+// Section 01, straight under the hero: two questions, two educations, as a timeline. Its spine is the hero's signature:
+// scrolling opens the tangle and the line drops out of the hero (desktop), straight down to here, where it carries on as
+// a hand-drawn line that draws itself with the scroll, with a node where each degree sits and a bow at "and I want to
+// answer both!". The tangle is the briefing; the straight line is it, detangled.
+// Order is the order she lived it: marketing first, then the UX degree (the line reads as time: "Marketer to UX
+// designer"), then the two together. Desktop: the title left of the line, the degrees and questions right of it. Phones:
+// the line runs down the left edge, with its own sprout head, and everything sits right of it.
 
 type Part = string | { word: string; tail?: string };
 
 const columns: { parts: Part[]; approach: string; value: string }[] = [
+  {
+    parts: ['How do we make sure ', { word: 'people' }, ' ', { word: 'discover', tail: ' it?' }],
+    approach: 'Bachelor in Marketing Communication (Cum Laude)',
+    value:
+      'Content strategy, persuasion, nudging, and understanding human behavior to bridge user needs with business goals.',
+  },
   {
     parts: [
       'How do we ',
@@ -23,36 +32,26 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     value:
       'Human-centered research, mapping user journeys, and prototyping interactions across physical and digital touchpoints.',
   },
-  {
-    parts: ['How do we make sure ', { word: 'people' }, ' ', { word: 'discover', tail: ' it?' }],
-    approach: 'Bachelor in Marketing Communication (Cum Laude)',
-    value:
-      'Content strategy, persuasion, nudging, and understanding human behavior to bridge user needs with business goals.',
-  },
 ];
 ---
 
 <section class="sec why" aria-labelledby="why-how-title" data-why>
+  <!-- The spine: decorative, drawn by the script (positions are measured from the page, so it holds at every width) -->
+  <svg class="why__spine" aria-hidden="true" focusable="false" data-spine>
+    <path class="why__line" data-spine-line fill="none"></path>
+    <circle class="why__node" data-spine-node r="10"></circle>
+    <circle class="why__node" data-spine-node r="10"></circle>
+  </svg>
+
   <div class="container why__grid">
-    <div class="why__pin">
-      <h2 id="why-how-title" class="sec-title" data-reveal>
-        Every company has 2 questions...
-      </h2>
-      <div class="why__bars" aria-hidden="true">
-        {[...columns, null].map(() => (
-          <span class="why__bar"></span>
-        ))}
-      </div>
-      <!-- The closing line, set in the headline's own type and lined up with its last line by the script, so on the
-           last step the two read as one quote. The list item below keeps the real text for assistive tech. -->
-      <p class="why__merge" aria-hidden="true" data-why-merge>
-        and I want to <mark class="hl">answer both</mark>!
-      </p>
-    </div>
+    <h2 id="why-how-title" class="sec-title why__title" data-reveal>
+      Every company has 2 questions...
+    </h2>
 
     <ol class="why__list">
       {columns.map((c) => (
-        <li class="why__item" data-why-item>
+        <li class="why__item">
+          <p class="tag why__label" data-spine-label>{c.approach}</p>
           <h3 class="why__question" data-reveal>
             {c.parts.map((part) =>
               typeof part === 'string' ? (
@@ -65,84 +64,134 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
               ),
             )}
           </h3>
-          <div class="why__answer" data-reveal>
-            <p class="tag">{c.approach}</p>
-            <p class="text">{c.value}</p>
-          </div>
+          <p class="text why__answer" data-reveal>{c.value}</p>
         </li>
       ))}
-      <li class="why__item why__item--close" data-why-item>
-        <p class="why__close" data-reveal>
+      <li class="why__item why__item--close">
+        <p class="why__close" data-reveal data-spine-end>
           and I want to <mark class="hl">answer both</mark>!
         </p>
       </li>
     </ol>
-    <!-- Phones: the answers swipe sideways. Counter, progress and previous/next sit under the track, so the row can
-         also be driven with a thumb tap or the keyboard. -->
-    <div class="why__controls" role="group" aria-label="Browse the answers">
-      <button class="why__nav" type="button" data-why-prev aria-label="Previous">
-        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <path
-            d="M9 6H2.5M5.5 3L2.5 6l3 3"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linecap="square"
-          />
-        </svg>
-      </button>
-      <p class="why__count" aria-live="polite" data-why-count>
-        1 / {columns.length + 1}
-      </p>
-      <div class="why__bars why__bars--below" aria-hidden="true">
-        {[...columns, null].map(() => (
-          <span class="why__bar"></span>
-        ))}
-      </div>
-      <button class="why__nav" type="button" data-why-next aria-label="Next">
-        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <path
-            d="M3 6h6.5M6.5 3l3 3-3 3"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linecap="square"
-          />
-        </svg>
-      </button>
-    </div>
   </div>
 </section>
 
 <style>
-  .why__pin .sec-title {
-    margin-bottom: 0;
+  .why {
+    position: relative;
+  }
+
+  .why__spine {
+    position: absolute;
+    top: 0;
+    z-index: 0;
+    overflow: visible;
+    pointer-events: none;
+    max-width: none;
+  }
+
+  .why__line {
+    stroke: var(--accent);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* The dots are the case pages' dots: a hollow ring with a fine border; when the line reaches one it fills with the accent
+     and swells a little before settling back (the same snap as the timeline on the project pages) */
+  .why__node {
+    fill: var(--bg-primary);
+    stroke: var(--border-color);
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition:
+      fill 0.5s var(--ease-out),
+      stroke 0.5s var(--ease-out);
+  }
+
+  .why__node.is-reached {
+    fill: var(--accent);
+    stroke: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .why__node.is-reached {
+      animation: why-snap 0.7s linear;
+    }
+  }
+
+  @keyframes why-snap {
+    0% {
+      transform: scale(1);
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+    }
+    38% {
+      transform: scale(1.55);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Same weight as the hero's line once it is settled */
+  @media (min-width: 700px) {
+    .why__line {
+      stroke-width: 6;
+    }
+
+  }
+
+  @media (min-width: 1000px) {
+    .why__line {
+      stroke-width: 8;
+    }
+  }
+
+  /* The ragged, grainy edge the hero's line has (not on touch) */
+  @media (hover: hover) {
+    .why__spine {
+      filter: url(#sand-edge);
+    }
+  }
+
+  .why__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    /* Phones and tablets: the line hugs the left edge, and the text keeps clear of it */
+    padding-left: calc(var(--page-margin) + 3rem);
+  }
+
+  .why__title {
+    max-width: 14ch;
   }
 
   .why__list {
     display: grid;
-    gap: clamp(3rem, 2rem + 4vw, 5rem);
-    margin-top: clamp(2.5rem, 1.5rem + 4vw, 4rem);
+    margin-top: clamp(2.5rem, 2rem + 3vw, 5rem);
   }
 
   .why__item {
-    padding-top: 1.75rem;
+    padding-block: clamp(1.75rem, 1rem + 2.5vw, 3.5rem);
+  }
+
+  .why__label {
+    margin-bottom: 0.9rem;
+    padding-block: 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
   }
 
   .why__question {
-    position: relative;
-    isolation: isolate;
     max-width: 16ch;
-    font-size: clamp(2rem, 1rem + 2.8vw, 3.75rem);
+    font-size: clamp(1.75rem, 1.1rem + 2.6vw, 3.75rem);
     font-weight: var(--weight-bold);
     line-height: 1.05;
     letter-spacing: -0.025em;
     text-wrap: balance;
-  }
-
-  .why__answer {
-    display: grid;
-    gap: 0.5rem;
-    margin-top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
-    max-width: 46ch;
   }
 
   /* Nowrap keeps the question mark with its word */
@@ -150,397 +199,194 @@ const columns: { parts: Part[]; approach: string; value: string }[] = [
     white-space: nowrap;
   }
 
+  .why__answer {
+    max-width: 46ch;
+    margin-top: clamp(1rem, 0.75rem + 1vw, 1.75rem);
+  }
+
+  .why__item--close {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    padding-bottom: 0;
+  }
+
   .why__close {
     max-width: 12ch;
-    font-size: clamp(2.5rem, 1rem + 4.2vw, 5.5rem);
+    font-size: clamp(2.25rem, 1rem + 4.4vw, 5.25rem);
     font-weight: var(--weight-heavy);
     line-height: 0.98;
     letter-spacing: -0.03em;
     text-wrap: balance;
   }
 
-  .why__bars {
-    display: none;
-  }
-
-  .why__merge {
-    display: none;
-  }
-
+  /* Desktop: the line is a rail. The title sits left of it; the degrees, questions and the closing line start right of it.
+     --rail (the line's distance from the content edge) is measured by the script from the hero's settled line; half the
+     container is the no-script fallback. */
   @media (min-width: 1000px) {
     .why__grid {
-      position: relative;
-      isolation: isolate;
+      grid-template-columns: var(--rail, 50%) minmax(0, 1fr);
+      padding-left: var(--page-margin);
     }
 
-    .why__grid {
-      display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: var(--grid-gutter);
-    }
-
-    .why__pin {
-      grid-column: 1 / 6;
-      position: sticky;
-      /* Centred on the screen like the answer beside it, so headline and answer line up while they are read */
-      top: var(--pin-top, clamp(5rem, 14vh, 9rem));
-      align-self: start;
+    .why__title {
+      grid-column: 1;
+      padding-right: 3rem;
+      max-width: 9ch;
+      font-size: clamp(3rem, 1rem + 5.4vw, 7rem);
+      line-height: 0.93;
+      letter-spacing: -0.04em;
+      box-sizing: content-box;
     }
 
     .why__list {
-      grid-column: 7 / 13;
-      gap: 0;
+      grid-column: 2;
       margin-top: 0;
+      padding-left: 3rem;
     }
 
-    /* Each block is most of a screen tall, so it takes real scrolling to move from one answer to the next */
-    .why__item {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 66vh;
-      padding-block: 3rem;
-      transition: opacity 0.6s var(--ease-out);
+    .why__item:first-child {
+      padding-top: 0;
     }
 
     .why__item--close {
-      min-height: 52vh;
-    }
-
-    /* The list's own copy only holds the scroll distance (and the text for screen readers) */
-    .why__grid.is-armed .why__item--close .why__close {
-      /* !important: the scroll reveal writes an inline opacity onto it */
-      opacity: 0 !important;
-    }
-
-    /* Same type as the headline, so the two are one voice. The script places it beside the headline's last line:
-             --merge-left is the list's left edge, --merge-top the top of that line (both measured, never guessed). */
-    .why__grid.is-armed .why__merge {
-      position: absolute;
-      left: var(--merge-left, 100%);
-      top: var(--merge-top, 0);
-      width: var(--merge-width, 30rem);
-      display: block;
-      margin: 0;
-      font-size: clamp(2.5rem, 1.4rem + 4.2vw, 5.25rem);
-      font-weight: var(--weight-heavy);
-      letter-spacing: var(--tracking-display);
-      line-height: 0.98;
-      text-wrap: balance;
-      pointer-events: none;
-      opacity: 0;
-      transform: translateX(2rem);
-      filter: blur(6px);
-      transition:
-        opacity 0.9s var(--ease-out),
-        transform 1.1s var(--ease-out),
-        filter 0.9s var(--ease-out);
-    }
-
-    .why__grid.is-closing .why__merge {
-      opacity: 1;
-      transform: none;
-      filter: none;
-    }
-
-    .why__grid.is-armed .why__item {
-      opacity: 0.3;
-    }
-
-    .why__grid.is-armed .why__item.is-active {
-      opacity: 1;
-    }
-
-    /* The closing line stands alone: the answers above it are gone, not dimmed behind it */
-    .why__grid.is-closing .why__item:not(.why__item--close) {
-      opacity: 0;
-    }
-
-    /* Progress in the pinned column: one segment per answer, the active one in ink */
-    .why__bars {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: clamp(2rem, 1.5rem + 3vw, 4rem);
-    }
-
-    .why__bar {
-      width: 3.5rem;
-      height: 2px;
-      background: var(--border-color);
-      transition: background-color 0.5s var(--ease-out);
-    }
-
-    .why__bar.is-active {
-      background: var(--text-main);
-    }
-  }
-
-  .why__controls,
-  .why__bars--below {
-    display: none;
-  }
-
-  /* Phones: the two questions (and the closing line) become swipeable cards in a native scroll-snap track:
-     no scroll hijack, so the page itself always scrolls. The next card peeks in as the hint to swipe. */
-  @media (max-width: 699px) {
-    .why__list {
-      display: flex;
-      gap: 0.9rem;
-      margin-top: clamp(1.5rem, 1rem + 3vw, 2.5rem);
-      margin-inline: calc(var(--page-margin) * -1);
-      padding: 1.5rem var(--page-margin);
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scroll-snap-type: x mandatory;
-      scroll-padding-inline: var(--page-margin);
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .why__list::-webkit-scrollbar {
-      display: none;
-    }
-
-    .why__item {
-      flex: 0 0 min(88%, 22rem);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 1.25rem;
-      padding: 1.25rem;
-      border: var(--hairline);
-      border-radius: var(--radius);
-      scroll-snap-align: start;
-    }
-
-    .why__item--close {
-      justify-content: center;
-    }
-
-    .why__question {
-      max-width: none;
-      font-size: clamp(1.625rem, 1.2rem + 1.8vw, 2rem);
+      padding-top: clamp(3rem, 2rem + 5vw, 7rem);
     }
 
     .why__close {
-      font-size: clamp(2rem, 1.5rem + 2vw, 2.5rem);
-    }
-
-    .why__answer {
-      margin-top: 0;
-    }
-
-    .why__controls {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .why__bars--below {
-      display: flex;
-      flex: 1;
-      gap: 0.5rem;
-    }
-
-    .why__count {
-      min-width: 3ch;
-      font-size: var(--text-small);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-    }
-
-    .why__nav {
-      display: grid;
-      place-items: center;
-      flex: none;
-      width: 2.75rem;
-      height: 2.75rem;
-      padding: 0;
-      border: var(--hairline);
-      border-radius: var(--radius);
-      background: transparent;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: background-color 0.3s var(--ease-out);
-    }
-
-    .why__nav:active {
-      background: var(--tag-fill);
-    }
-
-    .why__nav:disabled {
-      opacity: 0.35;
-    }
-
-    .why__nav svg {
-      width: 1rem;
-      height: 1rem;
-    }
-
-    .why__bar {
-      width: 2.25rem;
-      height: 2px;
-      background: var(--border-color);
-      transition: background-color 0.5s var(--ease-out);
-    }
-
-    .why__bar.is-active {
-      background: var(--text-main);
+      max-width: 13ch;
+      font-size: clamp(2.75rem, 1rem + 4.8vw, 6rem);
+      line-height: 0.95;
     }
   }
 </style>
 
 <script>
-  const grid = document.querySelector<HTMLElement>('[data-why] .why__grid');
-  const items = Array.from(document.querySelectorAll<HTMLElement>('[data-why-item]'));
-  const bars = Array.from(document.querySelectorAll<HTMLElement>('.why__bar'));
-  const desktop = matchMedia('(min-width: 1000px)');
-  const phone = matchMedia('(max-width: 699px)');
+  // The spine. On desktop it continues the hero's settled line (--spine-vx) from the top of this section down to a bow
+  // tied by the closing line, with a node on each degree; it draws itself as the section scrolls into view. On phones it
+  // runs down the left edge and begins with its own small sprout head. Reduced motion: fully drawn. No script: absent
+  // (it is decoration; the section reads without it).
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
 
-  if (grid && items.length) {
-    // Armed by script, so no-JS visitors and narrow screens just see everything at full strength
-    const activate = (index: number) => {
-      items.forEach((el, i) => el.classList.toggle('is-active', i === index));
-      // The closing line also comes in beside the headline; each step darkens only its own stripe
-      grid.classList.toggle('is-closing', index === items.length - 1);
-      bars.forEach((el, i) => el.classList.toggle('is-active', i % items.length === index));
+  const section = document.querySelector<HTMLElement>('[data-why]');
+  const svg = section?.querySelector<SVGSVGElement>('[data-spine]');
+  const line = svg?.querySelector<SVGPathElement>('[data-spine-line]');
+  const nodes = svg ? Array.from(svg.querySelectorAll<SVGCircleElement>('[data-spine-node]')) : [];
+  const labels = section ? Array.from(section.querySelectorAll<HTMLElement>('[data-spine-label]')) : [];
+  const end = section?.querySelector<HTMLElement>('[data-spine-end]');
+  const grid = section?.querySelector<HTMLElement>('.why__grid');
+
+  const W = 260; // width of the drawing, centred on the line
+  let tl: gsap.core.Timeline | null = null;
+
+  function build() {
+    if (!section || !svg || !line || !grid || !end || labels.length < nodes.length) return;
+    tl?.scrollTrigger?.kill();
+    tl?.kill();
+    tl = null;
+
+    const wide = window.matchMedia('(min-width: 1000px)').matches;
+    const published = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--spine-vx'),
+    );
+    const sr0 = section.getBoundingClientRect();
+    const gr0 = grid.getBoundingClientRect();
+    const contentLeft = gr0.left - sr0.left + parseFloat(getComputedStyle(grid).paddingLeft);
+    const hasHero = wide && Number.isFinite(published);
+    // Where the line runs, from the section's left edge
+    const x = hasHero ? published - sr0.left : gr0.left - sr0.left + 16;
+    section.style.setProperty('--rail', hasHero ? `${x - contentLeft}px` : '');
+
+    // Layout has moved with --rail: measure the nodes and the bow now
+    const sr = section.getBoundingClientRect();
+    const centreOf = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2;
+      return r.top - sr.top + (parseFloat(cs.paddingTop) || 0) + lh / 2;
     };
+    const ys = labels.slice(0, nodes.length).map((l) => centreOf(l));
+    const bowY = centreOf(end) - 4;
+    const height = sr.height;
 
-    // Phones: counter, progress and buttons follow the card the swipe has settled on
-    const track = grid.querySelector<HTMLElement>('.why__list');
-    const count = document.querySelector<HTMLElement>('[data-why-count]');
-    const prev = document.querySelector<HTMLButtonElement>('[data-why-prev]');
-    const next = document.querySelector<HTMLButtonElement>('[data-why-next]');
-    if (track) {
-      const stepOf = () =>
-        items.length > 1
-          ? items[1].getBoundingClientRect().left - items[0].getBoundingClientRect().left
-          : items[0].offsetWidth;
-      const current = () =>
-        Math.min(items.length - 1, Math.max(0, Math.round(track.scrollLeft / stepOf())));
-      const sync = () => {
-        const i = current();
-        activate(i);
-        if (count) count.textContent = `${i + 1} / ${items.length}`;
-        if (prev) prev.disabled = i === 0;
-        if (next) next.disabled = i === items.length - 1;
-      };
-      const go = (i: number) =>
-        track.scrollTo({
-          left: Math.max(0, Math.min(items.length - 1, i)) * stepOf(),
-          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        });
+    // The drawing reaches up through the section's top padding, so it meets the hero's line without a gap
+    const lift = hasHero ? parseFloat(getComputedStyle(section).paddingTop) || 0 : 0;
+    svg.setAttribute('width', String(W));
+    svg.setAttribute('height', String(height + lift));
+    svg.setAttribute('viewBox', `0 ${-lift} ${W} ${height + lift}`);
+    svg.style.left = `${x - W / 2}px`;
+    svg.style.top = `${-lift}px`;
+    const cx = W / 2;
+    const b = bowY - 36;
 
-      let queued = false;
-      track.addEventListener(
-        'scroll',
-        () => {
-          if (queued || !phone.matches) return;
-          queued = true;
-          requestAnimationFrame(() => {
-            queued = false;
-            sync();
-          });
-        },
-        { passive: true },
-      );
-      prev?.addEventListener('click', () => go(current() - 1));
-      next?.addEventListener('click', () => go(current() + 1));
+    // [phones: the sprout's head, so the line begins with the same hand] + stem + bow
+    let d = '';
+    let headLen = 0;
+    if (!hasHero) {
+      // Phones: the line comes in from the left edge of the screen (it left the hero the same way), curls down and runs
+      // along the left margin
+      const edge = cx - (gr0.left - sr0.left + 16) - 30;
+      d = `M ${edge} 6 C ${edge + 50} 4, ${cx - 6} 22, ${cx} 70 L ${cx} ${b}`;
+      headLen = 80;
+    } else {
+      d = `M ${cx} ${-lift} L ${cx} ${b}`;
+    }
+    // The bow swings right on phones (the line hugs the left edge), left on desktop
+    const m = hasHero ? -1 : 1;
+    d += ` C ${cx} ${b + 30}, ${cx + m * 30} ${b + 44}, ${cx + m * 42} ${b + 28} C ${cx + m * 54} ${b + 10}, ${cx + m * 22} ${b - 6}, ${cx + m * 8} ${b + 22} C ${cx} ${b + 40}, ${cx - m * 4} ${b + 66}, ${cx - m * 36} ${b + 74}`;
+    line.setAttribute('d', d);
 
-      // Keyboard: the row is a focusable region while it is a swipe row
-      const arm = () => {
-        if (phone.matches) {
-          track.tabIndex = 0;
-          track.setAttribute('aria-label', 'The two questions, swipe or use the arrow keys');
-          sync();
-        } else {
-          track.removeAttribute('tabindex');
-          track.removeAttribute('aria-label');
-        }
-      };
-      track.addEventListener('keydown', (e) => {
-        if (!phone.matches) return;
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          go(current() + 1);
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          go(current() - 1);
-        }
-      });
-      phone.addEventListener('change', arm);
-      arm();
+    const len = line.getTotalLength();
+    nodes.forEach((n, i) => {
+      n.setAttribute('cx', String(cx));
+      n.setAttribute('cy', String(ys[i]));
+    });
 
-      // One nudge the first time the row is on screen: it slides a little and returns, so the swipe is no secret
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        const nudgeIo = new IntersectionObserver(
-          ([entry]) => {
-            if (!entry.isIntersecting || !phone.matches) return;
-            nudgeIo.disconnect();
-            let stop = false;
-            const halt = () => (stop = true);
-            track.addEventListener('touchstart', halt, { once: true, passive: true });
-            track.style.scrollSnapType = 'none';
-            const start = performance.now();
-            const tick = (now: number) => {
-              const t = Math.min(1, (now - start) / 1100);
-              if (stop || t >= 1) {
-                track.style.scrollSnapType = '';
-                return;
-              }
-              track.scrollLeft = 44 * Math.sin(Math.PI * t) ** 2;
-              requestAnimationFrame(tick);
-            };
-            requestAnimationFrame(tick);
-          },
-          { threshold: 0.7 },
-        );
-        nudgeIo.observe(track);
-      }
+    nodes.forEach((n) => n.classList.remove('is-reached'));
+    if (prefersReducedMotion()) {
+      line.style.strokeDasharray = 'none';
+      line.style.strokeDashoffset = '0';
+      nodes.forEach((n) => n.classList.add('is-reached'));
+      return;
     }
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          // On phones the active card follows the sideways swipe (below), not the vertical position
-          if (!phone.matches) activate(items.indexOf(entry.target as HTMLElement));
-        }
+    line.style.strokeDasharray = String(len);
+    line.style.strokeDashoffset = String(len);
+
+    tl = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: section,
+        // With the hero's line arriving from above, draw from the moment the section is in view; on phones the line is
+        // all here, so wait for the section to open
+        start: hasHero ? 'top 95%' : 'top 85%',
+        end: () => `+=${bowY + window.innerHeight * 0.3}`,
+        scrub: 0.6,
+        invalidateOnRefresh: true,
+        // A dot lights up as the line's tip passes it, and goes back to a ring if the visitor scrolls up past it
+        onUpdate: (self) => {
+          const tip = self.progress * len;
+          nodes.forEach((n, i) => n.classList.toggle('is-reached', tip >= headLen + ys[i]));
+        },
       },
-      // A thin band across the middle of the screen: whichever block crosses it is the active one
-      { rootMargin: '-45% 0px -45% 0px' },
+    });
+    tl.to(line, { strokeDashoffset: 0, duration: 1 }, 0);
+  }
+
+  if (section) {
+    build();
+    // The hero publishes the line's position after layout and on every resize
+    document.addEventListener('spine:update', build);
+    let raf = 0;
+    window.addEventListener(
+      'resize',
+      () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(build);
+      },
+      { passive: true },
     );
-
-    // The closing line sits where the headline's last line ends: same top, and at the list's left edge. Measured from
-    // layout (offsets ignore the reveal transforms), re-measured on resize and once the fonts have loaded.
-    const merge = grid.querySelector<HTMLElement>('[data-why-merge]');
-    const title = grid.querySelector<HTMLElement>('.why__pin .sec-title');
-    const list = grid.querySelector<HTMLElement>('.why__list');
-    const pin = grid.querySelector<HTMLElement>('.why__pin');
-    const place = () => {
-      if (!merge || !title || !list || !pin || !desktop.matches) return;
-      const lh = parseFloat(getComputedStyle(title).lineHeight);
-      const lines = Math.max(1, Math.round(title.offsetHeight / lh));
-      merge.style.setProperty('--merge-top', `${title.offsetTop + (lines - 1) * lh}px`);
-      merge.style.setProperty('--merge-left', `${list.offsetLeft - pin.offsetLeft}px`);
-      merge.style.setProperty('--merge-width', `${list.offsetWidth}px`);
-      pin.style.setProperty(
-        '--pin-top',
-        `${Math.max(72, (window.innerHeight - pin.offsetHeight) / 2)}px`,
-      );
-    };
-
-    const arm = () => {
-      grid.classList.toggle('is-armed', desktop.matches);
-      place();
-    };
-    new ResizeObserver(place).observe(grid);
-    window.addEventListener('resize', place, { passive: true });
-    document.fonts?.ready.then(place);
-    arm();
-    desktop.addEventListener('change', arm);
-    activate(0);
-    items.forEach((el) => io.observe(el));
+    document.fonts?.ready.then(() => {
+      build();
+      ScrollTrigger.refresh();
+    });
   }
 </script>

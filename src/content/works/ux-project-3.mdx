@@ -1,12 +1,12 @@
 ---
-title: 'Screen time'
+title: 'Screen time in young children'
 description: 'A space-themed research project on how families with young children handle screens: a survey of 81 parents, 11 interviews and a cultural probe.'
 type: 'ux'
 coverImage: '../../assets/images/frame_screentime.jpg'
 behanceUrl: 'https://www.behance.net/gallery/240385549/A-Space-Journey-Through-Kids-Screen-Time'
 role: 'UX Researcher, Data Analyst, Data Visualisation'
 timeline: 'Devine XD3, 2025'
-tools: ['Survey research', 'SPSS', 'Interviews', 'Data visualisation']
+tools: ['Research', 'Survey', 'Interview']
 team: ['Laura Doolaege', 'Anna Van Ongeval', 'Bryan Deketelaere']
 facts:
   context: 'DEVINE XD3 Experience Design 3 (case 2: growing up with screens, for Craftzing), Howest, 2025'
@@ -28,6 +28,9 @@ import moons from '../../assets/images/screentime_moons.png';
 import rules from '../../assets/images/screentime_rules.png';
 import statements from '../../assets/images/screentime_statements.png';
 import interviews from '../../assets/images/screentime_interviews.png';
+import themes from '../../assets/images/screentime_themes.png';
+import blackholes1 from '../../assets/images/screentime_blackholes_1.png';
+import blackholes2 from '../../assets/images/screentime_blackholes_2.png';
 import probe from '../../assets/images/screentime_probe.png';
 import personas from '../../assets/images/screentime_personas.png';
 
@@ -183,6 +186,13 @@ Parents are **confident and reflective on paper**: 65% see screens as a normal p
 
 The most useful part of the analysis was what wasn't there. Six of our assumptions were proven wrong by the data. Four of them:
 
+<ImagePair
+  items={[
+    { label: 'Black holes, 1', src: blackholes1, ratio: [16, 9], alt: 'Slide: no link between working full time and longer screen time, and none between parent age and worry', caption: 'Work and age told us nothing.' },
+    { label: 'Black holes, 2', src: blackholes2, ratio: [16, 9], alt: 'Slide: younger parents do not feel less secure, and parents with concerns do not have kids with lower screen time', caption: 'Worry does not lower screen time.' },
+  ]}
+/>
+
 - **Working full time does not mean longer screen time.** There is no link between the two.
 - **A parent's age says nothing about worry or screen time.** No link with how much they worry, nor with their child's screen time.
 - **Younger parents don't feel less secure** in understanding their child's needs and adapting the content.
@@ -202,6 +212,15 @@ The survey told us what happens. The interviews told us why. We held **11 interv
 />
 
 Every interview was transcribed. I marked the valuable quotes in a matrix, coded them, and grouped the codes into four themes on sticky notes. **Colours showed the different families, and washi tape showed marital status and gender**, so we could see who said what before drawing any conclusions.
+
+<CaseImage
+  label="Interview themes"
+  src={themes}
+  alt="Four slides, one per interview theme: rules and routines, alternatives for screen time, content and media use, emotional reactions and challenges"
+  size="wide"
+  ratio="16 / 9"
+  caption="The four themes, with the findings per family type."
+/>
 
 <RuledTable
   heads={['Theme', 'What we found']}

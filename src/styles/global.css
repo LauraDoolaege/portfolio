@@ -43,6 +43,8 @@
   --grid-gutter: clamp(1rem, 0.5rem + 1.5vw, 2rem);
   --page-max: 1600px;
   --page-margin: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
+  /* The hero's right-hand column (photo, sentence, buttons); the header's links and Resume span the same measure */
+  --hero-col: clamp(18rem, 26vw, 26rem);
   --space-section: clamp(5rem, 3rem + 8vw, 10rem);
   --hairline: 1px solid var(--border-color);
   /* One corner scale for the whole site: square on tablet and desktop, slightly rounded on phones (see below).
@@ -87,6 +89,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* The sticky bar must never cover an anchor target or a focused control */
+  scroll-padding-top: 5rem;
 }
 
 body {

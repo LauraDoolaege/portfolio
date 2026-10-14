@@ -87,9 +87,24 @@ import { email, linkedin, cvHref } from '../../utils/contact';
 </footer>
 
 <style>
+  /* The one dark part of the site. The palette tokens are swapped locally, so every link, hairline and the signature follow
+     without extra rules: ink in light mode, a deeper black in dark mode (set apart from the page by a hairline). */
   .footer {
-    /* Bottom padding leaves room for the fixed theme toggle (bottom-right) so it never sits on the legal line */
-    padding-block: clamp(2.5rem, 1.5rem + 3vw, 5rem) 5rem;
+    --bg-primary: #161513;
+    --text-main: #ece9e1;
+    --text-muted: #9b9890;
+    --border-color: #34322e;
+    --accent-text: #c3cf4a;
+    --tag-fill: rgba(236, 233, 225, 0.08);
+    margin-top: clamp(2rem, 1rem + 4vw, 6rem);
+    background: var(--bg-primary);
+    color: var(--text-main);
+    padding-block: clamp(3.5rem, 2rem + 5vw, 7rem) clamp(3rem, 2rem + 3vw, 5rem);
+  }
+
+  :global(:root[data-theme='dark']) .footer {
+    --bg-primary: #0d0c0b;
+    border-top: 1px solid #2a2825;
   }
 
   /* The line is ~7.5em wide, so size it from its own container (cqw) to fill exactly the container width at any viewport. */
@@ -143,8 +158,11 @@ import { email, linkedin, cvHref } from '../../utils/contact';
     align-items: center;
     gap: 1rem clamp(1.5rem, 1rem + 2vw, 3rem);
     margin-top: clamp(3rem, 2rem + 5vw, 7rem);
+    padding-top: clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
+    border-top: var(--hairline);
     font-size: var(--text-body);
   }
+
 
   .footer__legal {
     margin-left: auto;

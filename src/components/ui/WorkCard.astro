@@ -13,7 +13,6 @@ interface Props {
 }
 
 const { project: p, sizes } = Astro.props;
-const TYPE_LABEL = { ux: 'Case study', visual: 'Visual Exploration' } as const;
 const cover = p.data.coverImage;
 const href = withBase(`/works/${p.id}`);
 const tools = p.data.tools.slice(0, 3);
@@ -39,7 +38,6 @@ const tools = p.data.tools.slice(0, 3);
     <div class="card__body">
       <header class="card__top">
         <h4 class="card__title">{p.data.title}</h4>
-        <p class="card__type">{TYPE_LABEL[p.data.type]}</p>
       </header>
       <p class="card__desc">{p.data.description}</p>
     </div>
@@ -71,12 +69,6 @@ const tools = p.data.tools.slice(0, 3);
     font-weight: var(--weight-bold);
     line-height: 1.15;
     letter-spacing: var(--tracking-title);
-  }
-
-  .card__type {
-    flex: none;
-    font-size: var(--text-small);
-    color: var(--text-muted);
   }
 
   /* Every cover in a group is cropped to the same ratio (--ratio, set by the grid), so edges and baselines line up.
@@ -122,10 +114,6 @@ const tools = p.data.tools.slice(0, 3);
   }
 
   .card__desc {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
     max-width: 52ch;
     font-size: var(--text-body);
     font-weight: var(--weight-light);
@@ -136,6 +124,8 @@ const tools = p.data.tools.slice(0, 3);
   .card__tags {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
     gap: 0.6rem;
     margin-top: 1.75rem;
   }
@@ -174,30 +164,8 @@ const tools = p.data.tools.slice(0, 3);
 </style>
 
 <style is:global>
-  /* While one case study is hovered or focused, the other steps back: dimmer, a touch darker, the faintest bit soft,
-     and its outer edge breaks into a little grain. The media is feathered with a mask (--feather) and its frame, one
-     element up, runs that soft alpha through the grain filter (a filter runs before a mask on the same element, so the
-     two sit on different elements). */
-  @property --feather {
-    syntax: '<length>';
-    inherits: false;
-    initial-value: 0px;
-  }
-
-  .work__grid .card .card__media {
-    --feather: 0px;
-    mask-image:
-      linear-gradient(to right, transparent, #000 var(--feather)),
-      linear-gradient(to left, transparent, #000 var(--feather)),
-      linear-gradient(to bottom, transparent, #000 var(--feather)),
-      linear-gradient(to top, transparent, #000 var(--feather));
-    mask-composite: intersect;
-    -webkit-mask-composite: source-in;
-    transition:
-      transform 0.9s var(--ease-out),
-      --feather 0.6s var(--ease-out);
-  }
-
+  /* While one case study is hovered or focused, the others step back: dimmer and a touch darker. No grain, no blur: the
+     greyscale and the narrower plate (see SelectedWork.astro) are the whole effect. */
   .card {
     transition: opacity 0.6s var(--ease-out);
   }
@@ -208,25 +176,7 @@ const tools = p.data.tools.slice(0, 3);
 
   @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
     .work__grid:has(.card__link:hover, .card__link:focus-visible) .card:not(:hover):not(:focus-within) {
-      opacity: 0.55;
-    }
-
-    .work__grid:has(.card__link:hover, .card__link:focus-visible)
-      .card:not(:hover):not(:focus-within)
-      .card__frame {
-      filter: url(#sand-edge);
-    }
-
-    .work__grid:has(.card__link:hover, .card__link:focus-visible)
-      .card:not(:hover):not(:focus-within)
-      .card__media {
-      --feather: 14px;
-    }
-
-    .work__grid:has(.card__link:hover, .card__link:focus-visible)
-      .card:not(:hover):not(:focus-within)
-      .card__img {
-      filter: brightness(0.85) blur(0.8px);
+      opacity: 0.7;
     }
   }
 </style>

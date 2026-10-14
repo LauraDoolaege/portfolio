@@ -1,6 +1,6 @@
 ---
 // Section 02: selected work, two kinds. Each group opens with a row (name left, what it is in the rail),
-// then its projects: UX as large cards (an offset pair), visual work as a lighter list of rows. Projects come from the `works` collection and link to /works/[slug].
+// then its projects: UX as a bento (one wide cover and two tall ones, covers' bottoms on one line, captions underneath), visual work as a lighter list of rows. Projects come from the `works` collection and link to /works/[slug].
 import { getCollection } from 'astro:content';
 import WorkCard from '../ui/WorkCard.astro';
 import WorkRow from '../ui/WorkRow.astro';
@@ -15,10 +15,11 @@ const groups = [
   {
     title: 'Case studies',
     intro:
-      'Two group projects, told in full. The UX behind them: diving deep into human needs through user interviews, insight gathering, wireframing, and validating solutions as a team.',
+      'Three group projects, told in full. The UX behind them: diving deep into human needs through user interviews, insight gathering, wireframing, and validating solutions as a team.',
     projects: works.filter((w) => w.data.type === 'ux').sort(byCover),
     layout: 'cards',
-    sizes: '(min-width: 700px) 45vw, 100vw',
+    sizes: '(min-width: 900px) 55vw, (min-width: 700px) 100vw, 100vw',
+    sizesSmall: '(min-width: 900px) 23vw, (min-width: 700px) 45vw, 100vw',
   },
   {
     title: 'Visual & Concept Explorations',
@@ -27,6 +28,7 @@ const groups = [
     projects: works.filter((w) => w.data.type === 'visual').sort(byCover),
     layout: 'list',
     sizes: '',
+    sizesSmall: '',
   },
 ];
 ---
@@ -47,8 +49,8 @@ const groups = [
         </div>
         {g.layout === 'cards' ? (
           <ul class="work__grid">
-            {g.projects.map((p) => (
-              <WorkCard project={p} sizes={g.sizes} />
+            {g.projects.map((p, i) => (
+              <WorkCard project={p} sizes={i === 0 ? g.sizes : g.sizesSmall} />
             ))}
           </ul>
         ) : (
@@ -82,12 +84,13 @@ const groups = [
     line-height: 1.6;
   }
 
-  /* UX: two large cards, the second sitting lower so the pair reads as composed, not as a short row */
+  /* UX: the covers are cards under their captions. Phones stack; tablets give the first one the full row and put the
+     other two side by side; from 900px it is a bento (below). */
   .work__grid {
     --ratio: 5 / 4;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: clamp(4rem, 3rem + 5vw, 8rem) clamp(2rem, 1rem + 4vw, 6rem);
+    gap: clamp(3rem, 2rem + 4vw, 6rem) clamp(1.25rem, 0.5rem + 3vw, 3rem);
     align-items: stretch;
   }
 
@@ -96,8 +99,9 @@ const groups = [
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .work__grid > :global(:nth-child(even)) {
-      margin-top: clamp(4rem, 2rem + 8vw, 10rem);
+    .work__grid > :global(:nth-child(1)) {
+      grid-column: 1 / -1;
+      --ratio: 16 / 10;
     }
   }
 
@@ -121,6 +125,122 @@ const groups = [
     }
   }
 
+  /* Bento (wide): three tall plates in a row, one open at a time. The open one is wide and shows its cover in colour with
+     the title, the description and the tools; the others are narrow, greyscale strips with only a clipped title. Hover or
+     keyboard focus opens another (the others close), and the first starts open, so nothing is hidden at rest and the row
+     never changes height. Title and arrow turn olive on the open one. */
+  @media (min-width: 900px) and (hover: hover) {
+    .work__grid {
+      --h: clamp(22rem, 33vw, 32rem);
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(1rem, 0.25rem + 2vw, 2rem);
+    }
+
+    .work__grid > :global(.card) {
+      flex: 1 1 0;
+      min-width: 0;
+      margin-top: 0;
+      transition: flex-grow 0.8s var(--ease-out);
+    }
+
+    .work__grid > :global(.card.is-open) {
+      flex-grow: 3.4;
+    }
+
+    .work__grid :global(.card__link) {
+      display: block;
+      height: auto;
+    }
+
+    .work__grid :global(.card__frame) {
+      position: relative;
+      height: var(--h);
+    }
+
+    .work__grid :global(.card__media) {
+      aspect-ratio: auto;
+      height: 100%;
+    }
+
+    .work__grid :global(.card__img) {
+      position: absolute;
+      inset: 0;
+      filter: grayscale(1) contrast(1.05);
+      transition: filter 0.7s var(--ease-out);
+    }
+
+    .work__grid > :global(.card.is-open) :global(.card__img) {
+      filter: none;
+    }
+
+    /* Title: one line, clipped by its narrow column (the open one has room), olive when open */
+    .work__grid :global(.card__body) {
+      margin-top: 1.25rem;
+      padding-top: 1.1rem;
+      overflow: hidden;
+    }
+
+    .work__grid :global(.card__top) {
+      margin-bottom: 0;
+      justify-content: flex-start;
+      gap: 0.75rem;
+    }
+
+    /* Closed strips: a smaller title that wraps at word boundaries, so no name is ever cut mid-letter. The open plate gets
+       the big size. */
+    .work__grid :global(.card__title) {
+      font-size: clamp(1.15rem, 0.8rem + 0.9vw, 1.6rem);
+      line-height: 1.1;
+      text-wrap: balance;
+      overflow-wrap: anywhere;
+      transition:
+        color 0.5s var(--ease-out),
+        font-size 0.6s var(--ease-out);
+    }
+
+    .work__grid > :global(.card.is-open) :global(.card__title) {
+      font-size: clamp(1.75rem, 1rem + 2.2vw, 3.25rem);
+    }
+
+    .work__grid > :global(.card.is-open) :global(.card__title) {
+      color: var(--accent-text);
+    }
+
+    /* The info appears only on the open plate; it keeps its space, so the plates never jump */
+    /* !important: the scroll reveal leaves an inline opacity on the body and the tools */
+    .work__grid :global(.card__desc),
+    .work__grid :global(.card__tags) {
+      opacity: 0 !important;
+      transform: translateY(0.5rem);
+      transition:
+        opacity 0.5s var(--ease-out),
+        transform 0.6s var(--ease-out);
+    }
+
+    .work__grid :global(.card__desc) {
+      margin-top: 1rem;
+    }
+
+    .work__grid :global(.card__tags) {
+      margin-top: 1.25rem;
+    }
+
+    .work__grid > :global(.card.is-open) :global(.card__desc),
+    .work__grid > :global(.card.is-open) :global(.card__tags) {
+      opacity: 1 !important;
+      transform: none;
+      transition-delay: 0.25s;
+    }
+  }
+
+  @media (min-width: 900px) and (hover: hover) and (prefers-reduced-motion: reduce) {
+    .work__grid > :global(.card),
+    .work__grid :global(.card__img) {
+      transition: none;
+    }
+  }
+
   /* Phones: UX projects stack with air between them */
   @media (max-width: 699px) {
     .work__grid {
@@ -128,3 +248,23 @@ const groups = [
     }
   }
 </style>
+
+<script>
+  // The plates open one at a time: the pointer or keyboard focus decides which; leaving the row returns to the first.
+  // Below 900px the cards are an ordinary stack and this does nothing (is-open only styles the wide layout).
+  const grid = document.querySelector<HTMLElement>('.work__grid');
+  if (grid && window.matchMedia('(hover: hover)').matches) {
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>(':scope > .card'));
+    const open = (el: HTMLElement | undefined) =>
+      cards.forEach((c) => c.classList.toggle('is-open', c === el));
+    open(cards[0]);
+    cards.forEach((c) => {
+      c.addEventListener('pointerenter', () => open(c));
+      c.addEventListener('focusin', () => open(c));
+      c.querySelector('a')?.addEventListener('focus', () => open(c));
+    });
+    grid.addEventListener('pointerleave', () => {
+      if (!grid.contains(document.activeElement)) open(cards[0]);
+    });
+  }
+</script>

@@ -1,6 +1,9 @@
 ---
-// Navigation bar: wordmark left, links right.
+// Navigation bar: wordmark left, links centred, Resume right (the one thing a recruiter wants, always in reach).
+// The light/dark switch is a fixed control in the bottom-right corner, outside the bar.
 import { withBase } from '../../utils/url';
+import { cvHref } from '../../utils/contact';
+import Button from '../ui/Button.astro';
 
 const links = [
   { href: `${withBase('/')}#work`, label: 'Work' },
@@ -12,9 +15,17 @@ const currentPath = Astro.url.pathname;
 
 <header class="site-header">
   <div class="container site-header__inner">
-    <a href={withBase('/')} class="site-header__name">
-      Laura Doolaege
-    </a>
+    <div class="site-header__brand">
+      <a href={withBase('/')} class="site-header__name">
+        Laura Doolaege
+      </a>
+      <!-- Light/dark: just the half-moon; the mode it will switch to is named on hover or focus -->
+      <button class="theme-toggle theme-icon" type="button" aria-label="Switch to dark mode">
+        <span class="theme-toggle__icon" aria-hidden="true"></span>
+        <span class="theme-toggle__label">Dark</span>
+      </button>
+    </div>
+    <div class="site-header__right">
     <nav aria-label="Primary">
       <ul class="site-header__links">
         {links.map((l) => (
@@ -29,14 +40,12 @@ const currentPath = Astro.url.pathname;
             </a>
           </li>
         ))}
-        <li class="site-header__theme">
-          <button class="theme-toggle" type="button" aria-label="Switch to dark mode">
-            <span class="theme-toggle__icon" aria-hidden="true"></span>
-            <span class="theme-toggle__label">Dark</span>
-          </button>
-        </li>
       </ul>
     </nav>
+    <div class="site-header__end">
+      <Button class="site-header__resume" href={cvHref} icon="down" download>Resume</Button>
+    </div>
+    </div>
     <button
       class="menu-toggle"
       type="button"
@@ -60,17 +69,42 @@ const currentPath = Astro.url.pathname;
         </li>
       ))}
     </ul>
-    <button class="theme-toggle menu__theme" type="button" aria-label="Switch to dark mode">
-      <span class="theme-toggle__icon" aria-hidden="true"></span>
-      <span class="theme-toggle__label">Dark</span>
-    </button>
+    <p class="menu__tag">
+      <span class="menu__dot" aria-hidden="true"></span>
+      Open to internships · Feb 2027
+    </p>
+    <!-- The way to the CV lives here on phones, under the links -->
+    <Button class="menu__resume" href={cvHref} icon="down" download>Resume</Button>
   </div>
+
+  <!-- Phones: the light/dark switch is a toggle fixed in the bottom-right corner -->
+  <button class="theme-toggle theme-switch" type="button" aria-label="Switch to dark mode">
+    <span class="theme-toggle__track" aria-hidden="true">
+      <span class="theme-toggle__icon"></span>
+    </span>
+    <span class="theme-toggle__label sr-only">Dark</span>
+  </button>
 </header>
 
 <style>
+  /* Sticky, and it steps out of the way while reading down and returns on the first scroll up (class set by the script) */
   .site-header {
-    position: relative;
+    position: sticky;
+    top: 0;
     z-index: 60;
+    background: var(--bg-primary);
+    /* Hidden by moving its sticky offset, not by a transform: a transform would carry the fixed corner switch away with it */
+    transition: top 0.45s var(--ease-out);
+  }
+
+  .site-header.is-hidden {
+    top: -6rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header {
+      transition: none;
+    }
   }
 
   /* Above the open menu */
@@ -86,6 +120,7 @@ const currentPath = Astro.url.pathname;
     width: 2.75rem;
     height: 2.75rem;
     margin-right: -0.75rem;
+    margin-left: -0.5rem;
     padding: 0;
     border: 0;
     background: transparent;
@@ -142,19 +177,43 @@ const currentPath = Astro.url.pathname;
     display: none;
   }
 
-  /* Same toggle as the bar's, set at the foot of the menu in the menu's own ink */
-  .menu .menu__theme {
-    position: absolute;
-    right: auto;
-    bottom: 2rem;
-    left: var(--page-margin);
-    z-index: auto;
-    min-height: 2.75rem;
-    padding: 0.9rem 0;
-    color: var(--bg-primary);
-    font-size: 0.75rem;
+  .menu {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: clamp(2rem, 6vh, 3.5rem);
+  }
+
+  .menu__tag {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    font-size: var(--text-small);
+    font-weight: var(--weight-medium);
     letter-spacing: 0.08em;
-    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .menu__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Resume in the menu: outlined in the menu's own ink (the page's ground) */
+  :global(.menu .menu__resume) {
+    border-color: var(--bg-primary);
+    color: var(--bg-primary);
+  }
+
+  :global(.menu .menu__resume:hover),
+  :global(.menu .menu__resume:focus-visible) {
+    color: var(--text-main);
+  }
+
+  :global(.menu .menu__resume::before) {
+    background: linear-gradient(to right, var(--bg-primary) var(--fill), transparent calc(var(--fill) + 45%));
   }
 
   .menu__links {
@@ -188,18 +247,86 @@ const currentPath = Astro.url.pathname;
     color: var(--bg-primary);
   }
 
-  :global(html.menu-open) .site-header__links .theme-toggle {
-    color: var(--bg-primary);
-  }
-
   @media (max-width: 719px) {
     .menu-toggle {
       display: block;
     }
 
-    /* The links and the theme toggle both live in the menu now */
+    /* The links and Resume live in the menu; the theme icon is replaced by the corner switch */
+    .site-header .site-header__inner {
+      display: flex;
+      justify-content: space-between;
+    }
+
     .site-header__inner .site-header__links {
       display: none;
+    }
+
+    .site-header .site-header__end,
+    .site-header__brand .theme-icon {
+      display: none;
+    }
+  }
+
+  /* Wide screens have the icon beside the name; the corner switch is for phones only */
+  .theme-switch {
+    display: none;
+  }
+
+  @media (max-width: 719px) {
+    .theme-switch {
+      position: fixed;
+      right: max(var(--page-margin), env(safe-area-inset-right));
+      bottom: max(1.25rem, env(safe-area-inset-bottom));
+      z-index: 70;
+      display: inline-flex;
+      justify-content: center;
+      width: 3.5rem;
+      height: 2.75rem;
+      padding: 0;
+      color: var(--text-muted);
+      /* A chip, so it stays readable over text and over the dark footer */
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+    }
+
+    .theme-switch::after {
+      display: none;
+    }
+
+    .theme-toggle__track {
+      position: relative;
+      display: block;
+      width: 3.25rem;
+      height: 1.75rem;
+      border: 1.5px solid currentColor;
+      border-radius: 999px;
+    }
+
+    .theme-switch .theme-toggle__icon {
+      position: absolute;
+      top: 50%;
+      left: 0.2rem;
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-top: -0.55rem;
+      transition: transform 0.5s var(--ease-out);
+    }
+
+    :global(:root[data-theme='dark']) .theme-switch .theme-toggle__icon {
+      transform: translateX(1.5rem);
+    }
+
+    /* Over the open menu the switch takes the menu's colours */
+    :global(html.menu-open) .theme-switch {
+      color: var(--bg-primary);
+      background: var(--text-main);
+      border-color: transparent;
+    }
+
+    .menu__resume {
+      align-self: flex-start;
     }
   }
 
@@ -210,9 +337,9 @@ const currentPath = Astro.url.pathname;
   }
 
   .site-header__inner {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto;
     align-items: center;
-    justify-content: space-between;
     gap: var(--grid-gutter);
     padding-block: 1.25rem;
     font-size: var(--text-small);
@@ -228,14 +355,97 @@ const currentPath = Astro.url.pathname;
   .site-header__links {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     color: var(--text-muted);
   }
 
-  /* Slashes sit between items only: never before the first one */
-  .site-header__links li + li::before {
-    content: '/';
-    margin-inline: clamp(0.6rem, 0.3rem + 1vw, 1.1rem);
+  /* Right end of the bar: availability, then Resume (outlined, with the site's sand-fill hover) */
+  .site-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  /* The theme icon: it takes the toggle's look from global.css but sits in the bar (not fixed). The label is hidden at
+     rest and fades in beside the icon on hover or keyboard focus. */
+  .site-header__brand .theme-icon {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    gap: 0.6em;
+    padding: 0.35em 0;
+    font-size: 0.75rem;
     color: var(--text-muted);
+  }
+
+  .site-header__brand .theme-icon::after {
+    display: none;
+  }
+
+  .site-header__brand .theme-icon .theme-toggle__label {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition:
+      opacity 0.35s var(--ease-out),
+      transform 0.45s var(--ease-out);
+    white-space: nowrap;
+  }
+
+  .site-header__brand .theme-icon .theme-toggle__label::before {
+    content: '( ';
+  }
+
+  .site-header__brand .theme-icon .theme-toggle__label::after {
+    content: ' )';
+  }
+
+  .site-header__brand .theme-icon:hover .theme-toggle__label,
+  .site-header__brand .theme-icon:focus-visible .theme-toggle__label {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* On touch there is no hover: icon only */
+  @media (hover: none) {
+    .site-header__brand .theme-icon .theme-toggle__label {
+      display: none;
+    }
+  }
+
+  .site-header__right {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+  }
+
+  .site-header__links li {
+    white-space: nowrap;
+  }
+
+  .site-header__end {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+  }
+
+  :global(.site-header__resume) {
+    padding: 0.7em 1.1em;
+    font-size: var(--text-small);
+    letter-spacing: 0.04em;
+  }
+
+  /* Thin vertical rules sit between items only: never before the first one */
+  .site-header__links li + li::before {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 0.95em;
+    margin-inline: clamp(0.6rem, 0.3rem + 1vw, 1.1rem);
+    vertical-align: -0.12em;
+    background: var(--border-color);
   }
 
   .site-header__links a {
@@ -244,35 +454,6 @@ const currentPath = Astro.url.pathname;
     transition:
       color var(--duration) var(--ease-out),
       opacity var(--duration) var(--ease-out);
-  }
-
-  /* The theme toggle is the last item in the row: no slash before it, and it stops being fixed. Its base look
-     stays in global.css (.theme-toggle); the parent class here is what outranks that fixed positioning. */
-  .site-header__links li + li.site-header__theme::before {
-    content: none;
-  }
-
-  .site-header__theme {
-    margin-left: clamp(1rem, 0.5rem + 2vw, 2rem);
-  }
-
-  .site-header__links .theme-toggle {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    z-index: auto;
-    padding: 0.35em 0;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-  }
-
-  .site-header__links .theme-toggle__label::before {
-    content: '( ';
-  }
-
-  .site-header__links .theme-toggle__label::after {
-    content: ' )';
   }
 
   /* Hover: the hovered link stays full strength, its siblings dim */
@@ -298,28 +479,27 @@ const currentPath = Astro.url.pathname;
   /* Touch and phone widths: the marks stay small, their hit areas grow to ~44px without moving anything */
   @media (hover: none), (max-width: 719px) {
     .site-header__name,
-    .site-header__links a,
-    .site-header__links .theme-toggle {
+    .site-header__links a {
       position: relative;
     }
 
     .site-header__name::before,
-    .site-header__links a::before,
-    .site-header__links .theme-toggle::before {
+    .site-header__links a::before {
       content: '';
       position: absolute;
       inset: -0.75rem -0.5rem;
     }
   }
 
-  /* Narrow phones: no room for the word, so the toggle is its half-moon icon alone (still named by aria-label) */
-  @media (max-width: 479px) {
-    .site-header__links .theme-toggle__label {
+
+  /* Phones: the bar is just the name and the menu button; Resume and the theme live in the menu and the corner */
+  @media (max-width: 719px) {
+    .site-header .site-header__end {
       display: none;
     }
 
-    .site-header__theme {
-      margin-left: 0.9rem;
+    .site-header__brand .theme-icon {
+      display: none;
     }
   }
 </style>
@@ -381,4 +561,25 @@ const currentPath = Astro.url.pathname;
   wide.addEventListener('change', () => {
     if (wide.matches) toggle(false, false);
   });
+</script>
+
+<script>
+  // Hide on the way down, show on the way up (ScrollTrigger reports the direction; no scroll listeners). Always shown near
+  // the top of the page and while the phone menu is open.
+  import { ScrollTrigger } from '../../utils/motion';
+
+  const bar = document.querySelector<HTMLElement>('.site-header');
+  if (bar) {
+    ScrollTrigger.create({
+      start: 0,
+      end: 'max',
+      onUpdate: (self) => {
+        const open = document.documentElement.classList.contains('menu-open');
+        const hide = self.direction === 1 && self.scroll() > 240 && !open;
+        bar.classList.toggle('is-hidden', hide);
+      },
+    });
+    // Keyboard focus inside the bar brings it back
+    bar.addEventListener('focusin', () => bar.classList.remove('is-hidden'));
+  }
 </script>

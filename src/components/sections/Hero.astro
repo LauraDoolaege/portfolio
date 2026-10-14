@@ -1,14 +1,12 @@
 ---
 import Button from '../ui/Button.astro';
 import { withBase } from '../../utils/url';
-import { cvHref } from '../../utils/contact';
 import { Image } from 'astro:assets';
 import portrait from '../../assets/images/hero_portrait.png';
 // Hero: an editorial composition ("Marketer ... Turned / UX Designer") with one playful element, the
 // signature: a Verlet rope the visitor can grab and stretch; it eases back into place (see the script).
 // Small screens are centred and stacked. From 1000px the title block sits on the left, a gap
 // divides the page, and the intro + CTAs fill a right column whose bottom lines up with "UX Designer".
-// The meta strip underneath is the header's footer and is unchanged.
 ---
 
 <section class="hero" aria-label="Introduction">
@@ -64,17 +62,18 @@ import portrait from '../../assets/images/hero_portrait.png';
           loading="eager"
         />
       </figure>
+      <!-- Where she studies, set as the portrait's caption -->
+      <p class="hero__caption" data-line>
+        <span>Digital design and development at Devine</span>
+        <span>Marketing alumni at HOGENT</span>
+      </p>
       <p class="hero__intro" data-line>
         I detangle briefings into intuitive concepts, creative and grounded in marketing.
       </p>
-      <!-- Resume is the button, the case studies a link. Below the desktop split the button is filled. -->
+      <!-- Resume lives in the top bar. Here: the work first, the About page as the smaller second step. -->
       <div class="hero__ctas" data-line>
-        <Button href={cvHref} icon="down" download>
-          Resume
-        </Button>
-        <Button variant="link" size="sm" href="#work">
-          View my work
-        </Button>
+        <Button href="#work">View my work</Button>
+        <Button variant="link" size="sm" href={withBase('/about')}>Get to know me better</Button>
       </div>
     </div>
 
@@ -131,40 +130,6 @@ import portrait from '../../assets/images/hero_portrait.png';
     </svg>
   </div>
 
-  <!-- Full-width line, then the same split as the hero above: the links under the title column,
-       the status under the portrait column, so the divider runs straight through -->
-  <div class="hero__strip reveal--strip">
-    <ul class="hero__cells">
-      <li class="hero__cell hero__cell--links">
-        <span class="hero__item">
-          <Button
-            variant="link"
-            size="sm"
-            href="https://www.howest.be/en/programmes/bachelor/digital-design-and-development"
-            target="_blank"
-            rel="noopener"
-          >
-            Digital design and development at Devine
-          </Button>
-        </span>
-        <span class="hero__item">
-          <Button
-            variant="link"
-            size="sm"
-            href="https://www.hogent.be"
-            target="_blank"
-            rel="noopener"
-          >
-            Marketing Alumni at HOGENT
-          </Button>
-        </span>
-      </li>
-      <li class="hero__cell hero__cell--status">
-        <span class="hero__dot" aria-hidden="true"></span>
-        Seeking Internship (Feb 2027)
-      </li>
-    </ul>
-  </div>
 </section>
 
 <style>
@@ -206,18 +171,21 @@ import portrait from '../../assets/images/hero_portrait.png';
   }
 
   .hero__label-text {
+    padding: 0;
     font-weight: var(--weight-regular);
+  }
+
+  /* Phones: the availability moves into the menu, so the first screen is the title, the sentence and the work */
+  @media (max-width: 699px) {
+    .hero__label {
+      display: none;
+    }
   }
 
   .hero__label-small {
     display: flex;
     align-items: center;
     gap: 0.7em;
-  }
-
-  /* The availability sits in the strip on desktop, and in the eyebrow everywhere else */
-  .hero__cell.hero__cell--status {
-    display: none;
   }
 
   /* ---------- Composition ---------- */
@@ -304,6 +272,7 @@ import portrait from '../../assets/images/hero_portrait.png';
   }
 
   .hero__intro {
+    order: 0;
     font-size: 13px;
     font-weight: var(--weight-medium);
     letter-spacing: 0;
@@ -328,9 +297,6 @@ import portrait from '../../assets/images/hero_portrait.png';
       width: min(100%, 18rem);
     }
 
-    .hero__cell {
-      letter-spacing: 0.05em;
-    }
   }
 
   /* Short landscape screens (phones on their side): less air, so the hero isn't a scroll of its own */
@@ -369,9 +335,15 @@ import portrait from '../../assets/images/hero_portrait.png';
     width: 100%;
     height: 100%;
     max-width: none;
-    z-index: 4;
+    /* Behind the words: the title always reads whole, and the line is seen through the gaps and the counters */
+    z-index: 0;
     overflow: visible;
     pointer-events: none;
+  }
+
+  /* Once unfolded, the line runs behind the title, so no letter is cut by it */
+  .hero__rope.is-behind {
+    z-index: 0;
   }
 
   .hero__trail {
@@ -435,6 +407,32 @@ import portrait from '../../assets/images/hero_portrait.png';
     /* once live, the dash must never clip the moving path */
     stroke-dasharray: none;
     transition: none;
+  }
+
+  .hero__dot {
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* The portrait's caption: where she studies, two quiet lines under the photo */
+  .hero__caption {
+    order: 3;
+    margin-top: calc(-1 * clamp(0.5rem, 0.25rem + 1vw, 1.25rem));
+    font-size: 0.6875rem;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    line-height: 1.6;
+    color: var(--text-muted);
+    text-align: left;
+  }
+
+  .hero__caption span {
+    display: block;
+    text-wrap: balance;
   }
 
   /* ---------- Portrait ---------- */
@@ -572,23 +570,19 @@ import portrait from '../../assets/images/hero_portrait.png';
   /* ---------- Desktop: title left, hairline, intro + CTAs right ---------- */
 
   @media (min-width: 1000px) {
-    /* The eyebrow is the availability line, which lives in the strip on desktop */
-    .hero__label {
-      display: none;
-    }
-
-    .hero__cell.hero__cell--status {
-      display: flex;
-    }
 
     .hero {
       /* One inset runs all the way round: page edge, divider, nav rule, strip rule. The right column
                                                                                                      (--col) is shared with the strip below, so the divider is one unbroken line. */
       --inset: var(--page-margin);
-      --col: clamp(18rem, 26vw, 26rem);
+      --col: var(--hero-col);
     }
 
+    /* On very wide screens the hero stays on the page container, like the header, so their edges line up */
     .hero__field {
+      width: 100%;
+      max-width: var(--page-max);
+      margin-inline: auto;
       display: grid;
       grid-template-columns: minmax(0, 1fr) var(--col);
       grid-template-rows: 1fr;
@@ -598,8 +592,9 @@ import portrait from '../../assets/images/hero_portrait.png';
       padding: 0 0 0 var(--inset);
     }
 
+    /* The tag's cap line sits on the photo's top edge */
     .hero__label {
-      top: var(--inset);
+      top: calc(var(--inset) - 6px);
     }
 
     .hero__stage {
@@ -619,7 +614,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     /* "Designer" is the widest line: the font is sized so it runs almost to the divider.
                                                      It measures 4.51em wide at this tracking; the divisor leaves a little air before the divider. */
     .hero__big {
-      font-size: clamp(52px, calc((100vw - var(--col) - 2 * var(--inset)) / 4.62), 340px);
+      font-size: clamp(52px, calc((min(100vw, var(--page-max)) - var(--col) - 2 * var(--inset)) / 4.62), 340px);
       /* Pulls the box up to the baseline so the glyph bottoms, not the line box, meet the button */
       margin-bottom: -0.067em;
     }
@@ -651,6 +646,12 @@ import portrait from '../../assets/images/hero_portrait.png';
       width: 100%;
       gap: 1.5rem;
       padding: var(--inset);
+    }
+
+    /* The caption sits directly under the photo, ahead of the sentence */
+    .hero__caption {
+      order: 0;
+      margin-top: -0.75rem;
     }
 
     /* The portrait takes whatever height is left, so the column runs evenly from top to bottom */
@@ -688,16 +689,6 @@ import portrait from '../../assets/images/hero_portrait.png';
       text-wrap: pretty;
     }
 
-    /* Short rule above the paragraph */
-    .hero__intro::before {
-      content: '';
-      display: block;
-      width: 2.5rem;
-      height: 1px;
-      margin-bottom: 1.5rem;
-      background: var(--text-main);
-    }
-
     .hero__ctas {
       flex-direction: column;
       align-items: stretch;
@@ -727,7 +718,20 @@ import portrait from '../../assets/images/hero_portrait.png';
   @media (max-width: 760px) {
     .hero__field {
       justify-content: flex-start;
-      padding-top: 3.5rem;
+      padding-top: 2.5rem;
+      gap: clamp(2.75rem, 2rem + 4vw, 3.5rem);
+    }
+
+    .hero__lede {
+      gap: 1.75rem;
+    }
+
+    .hero__ctas {
+      gap: 1.75rem;
+    }
+
+    .hero__aside {
+      margin-top: 0.5rem;
     }
 
     .hero__block {
@@ -740,140 +744,10 @@ import portrait from '../../assets/images/hero_portrait.png';
     }
   }
 
-  /* ---------- Meta strip ---------- */
-
-  .hero__strip {
-  }
-
-  .hero__cells {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    padding-inline: var(--page-margin);
-  }
-
-  /* One label voice, the same as the site's tags: uppercase, tracked, small */
-  .hero__cell {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 0.7em;
-    padding-block: 1.1rem;
-    font-size: var(--text-small);
-    font-weight: var(--weight-medium);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    line-height: 1.3;
-  }
-
-  /* The two links share the cell, split by their own vertical rule (as in the original strip) */
-  .hero__cell--links {
-    align-items: stretch;
-    gap: 0;
-    padding-block: 0;
-  }
-
-  .hero__item {
-    display: flex;
-    align-items: center;
-    padding-block: 1.1rem;
-    padding-right: clamp(1rem, 0.5rem + 1.5vw, 2rem);
-  }
-
-  .hero__item + .hero__item {
-    padding-left: clamp(1rem, 0.5rem + 1.5vw, 2rem);
-  }
-
-  /* Phones: stacked, the rule becomes a line above the second link */
-  @media (max-width: 719px) {
-    /* The whole row is the link (44px+), not just its text */
-    .hero__item {
-      padding-block: 0;
-      padding-right: 0;
-    }
-
-    .hero__item :global(.btn-link) {
-      width: 100%;
-      min-height: 3.25rem;
-      justify-content: space-between;
-    }
-
-    .hero__cell--links {
-      flex-direction: column;
-    }
-
-    .hero__item + .hero__item {
-      padding-left: 0;
-      border-left: 0;
-    }
-
-    /* The longest label is wider than a 375px phone on one line: let it wrap instead of pushing the page sideways */
-    .hero__item :global(.btn-link) {
-      white-space: normal;
-    }
-  }
-
-  /* The links inherit that voice instead of the link button's own size */
-  .hero__cell :global(.btn-link) {
-    font-size: inherit;
-    font-weight: inherit;
-    letter-spacing: inherit;
-  }
-
-  .hero__cell + .hero__cell {
-  }
-
-  .hero__dot {
-    flex-shrink: 0;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-
-  /* Wide: the status gets its own column behind the same vertical rule as the hero's right column */
-  @media (min-width: 720px) {
-    .hero__cells {
-      grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .hero__cell + .hero__cell {
-      border-top: 0;
-      padding-left: clamp(1rem, 0.5rem + 1.5vw, 2rem);
-    }
-  }
-
-  /* Desktop: exactly the hero's split. The strip runs to the page edge, like the field above it,
-     and the status starts where the portrait starts. */
-  @media (min-width: 1000px) {
-    /* Three items, two equal gaps: the first link at the left edge, the status where the portrait starts, and the
-           second link centred between them by two matching flexible columns. The links' cell dissolves into the grid. */
-    .hero__cells {
-      grid-template-columns: auto minmax(1.5rem, 1fr) auto minmax(1.5rem, 1fr) var(--col);
-      padding-right: 0;
-    }
-
-    .hero__cell--links {
-      display: contents;
-    }
-
-    .hero__cell--links .hero__item:nth-child(1) {
-      grid-column: 1;
-    }
-
-    /* The padding-left it keeps (the same as the status cell's) is what makes the two visible gaps equal */
-    .hero__cell--links .hero__item:nth-child(2) {
-      grid-column: 3;
-    }
-
-    .hero__cell.hero__cell--status {
-      grid-column: 5;
-      padding-left: var(--inset);
-    }
-  }
 </style>
 
 <script>
-  import { gsap, prefersReducedMotion } from '../../utils/motion';
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../utils/motion';
   import { REVEAL, grainIn, hideForFadeUp, hideForGrain } from '../../utils/reveal';
 
   const hero = document.querySelector<HTMLElement>('.hero')!;
@@ -898,7 +772,6 @@ import portrait from '../../assets/images/hero_portrait.png';
   const aside = hero.querySelector<HTMLElement>('.hero__aside')!;
   const bigLines = hero.querySelectorAll<HTMLElement>('.hero__big-line');
   const baselineMark = hero.querySelector<HTMLElement>('.hero__baseline')!;
-  const strip = hero.querySelector<HTMLElement>('.reveal--strip');
   const lines = gsap.utils.toArray<HTMLElement>('[data-line]', hero);
   const portraitFrame = hero.querySelector<HTMLElement>('.hero__portrait');
 
@@ -940,6 +813,9 @@ import portrait from '../../assets/images/hero_portrait.png';
   let pts: Pt[] = [];
   let rest: { x: number; y: number }[] = [];
   let restSig: { x: number; y: number }[] = [];
+  let settledSig: { x: number; y: number }[] = [];
+  let morph = 0;
+  let spineX = 0;
   let lens: number[] = [];
   let lensSig: number[] = [];
   let grabbed = -1;
@@ -963,6 +839,7 @@ import portrait from '../../assets/images/hero_portrait.png';
     centerX: 0,
     dividerX: 0,
     titleBottom: 0,
+    titleTop: 0,
   };
 
   const rel = (r: DOMRect) => {
@@ -1020,64 +897,15 @@ import portrait from '../../assets/images/hero_portrait.png';
       centerX: (m.left + t.right) / 2,
       // Desktop: the vertical divider, and where the last line of the title sits on its baseline
       dividerX: rel(aside.getBoundingClientRect()).left,
+      titleTop: m.top,
       titleBottom:
         rel(bigLines[bigLines.length - 1].getBoundingClientRect()).bottom -
         (parseFloat(getComputedStyle(bigLines[0]).fontSize) || 100) * 0.12,
     };
   }
 
-  /**
-   * Tablet and phone: the signature tells the tagline. It starts as a tangle that loops out of the end of
-   * "Marketer to", runs down the free space beside the title, and straightens into an underline beneath
-   * the last word. Built as a polyline, then resampled to N points evenly spaced along its length.
-   */
-  function tangleToUnderline() {
-    const fs = parseFloat(getComputedStyle(marketer).fontSize) || 20;
-    // Three loops of a prolate cycloid, leaving the row at its mid-height; sized to the free room beside the row
-    const x0 = layout.rowRight + fs * 0.6;
-    const y0 = layout.midY;
-    const loops = 3;
-    const avail = Math.max(60, width - x0 - fs * 3.2 - 24);
-    const R = Math.min(fs * 0.95, avail / (0.45 * Math.PI * 2 * loops));
-    const c = R * 0.45;
-    const raw: { x: number; y: number }[] = [];
-    for (let k = 0; k <= 96; k++) {
-      const th = (k / 96) * Math.PI * 2 * loops;
-      raw.push({ x: x0 + c * th - R * Math.sin(th), y: y0 + R * (1 - Math.cos(th)) });
-    }
-    const xe = raw[raw.length - 1].x;
-    const ye = raw[raw.length - 1].y;
-    // Down the right of the title, round the corner, and along the underline from its right end to its left
-    const xr = Math.max(layout.titleRight + fs * 0.9, xe + fs * 2);
-    const yu = layout.underlineY + fs * 0.5;
-    const bez = (p0: number[], p1: number[], p2: number[], p3: number[], n: number) => {
-      for (let k = 1; k <= n; k++) {
-        const t = k / n;
-        const u = 1 - t;
-        raw.push({
-          x: u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0],
-          y: u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1],
-        });
-      }
-    };
-    bez(
-      [xe, ye],
-      [xe + (xr - xe) * 0.7, ye - fs * 0.4],
-      [xr + fs * 0.3, yu - (yu - ye) * 0.55],
-      [xr, yu - fs * 0.2],
-      40,
-    );
-    bez(
-      [xr, yu - fs * 0.2],
-      [xr - fs * 0.2, yu + fs * 0.25],
-      [xr - fs * 0.8, yu + fs * 0.05],
-      [xr - fs * 1.4, yu],
-      14,
-    );
-    const left = layout.titleLeft;
-    raw.push({ x: left, y: yu + fs * 0.12 });
-
-    // Resample to N points evenly spaced along the length
+  /** Resample a polyline to N points evenly spaced along its length */
+  function resample(raw: { x: number; y: number }[]) {
     const cum = [0];
     for (let i = 1; i < raw.length; i++)
       cum.push(cum[i - 1] + Math.hypot(raw[i].x - raw[i - 1].x, raw[i].y - raw[i - 1].y));
@@ -1097,11 +925,86 @@ import portrait from '../../assets/images/hero_portrait.png';
     return out;
   }
 
+  /** Where the small signature sits on phones and tablets: right of "UX" (above the title when it is one row) */
+  function smallBox() {
+    const uxRow = rel(bigLines[0].getBoundingClientRect());
+    const lastRow = rel(bigLines[bigLines.length - 1].getBoundingClientRect());
+    const sameRow = Math.abs(uxRow.top - lastRow.top) < 6;
+    const top = sameRow ? Math.max(8, layout.titleTop - 150) : Math.max(8, layout.titleTop - 64);
+    const bottom = sameRow ? layout.titleTop - 12 : uxRow.bottom;
+    return { top, h: Math.max(70, bottom - top) };
+  }
+
+  /** Phones and tablets, at rest: the original signature, small, in the free corner beside "UX" */
+  function mobileTangle() {
+    const total = source.getTotalLength();
+    const box = source.getBBox();
+    const { top, h } = smallBox();
+    const sc = Math.min(h / box.height, 0.4);
+    const right = width - 14;
+    const out: { x: number; y: number }[] = [];
+    for (let i = 0; i < N; i++) {
+      const p = source.getPointAtLength((total * i) / (N - 1));
+      out.push({ x: right + (p.x - (box.x + box.width)) * sc, y: top + (p.y - box.y) * sc });
+    }
+    return out;
+  }
+
+  /**
+   * Phones and tablets, once scrolled: the same hand, its tail dropping down the right edge, passing behind the title,
+   * curling left under the last word and leaving the screen. The timeline below picks the line up again from the left
+   * edge, so it appears to enter the screen a second time.
+   */
+  function mobileSettled() {
+    const head =
+      'M 292 6 C 248 12, 206 34, 186 66 C 166 98, 196 140, 238 134 C 276 128, 280 84, 246 74 C 212 64, 172 84, 150 112 C 128 140, 116 188, 76 188 C 38 188, 24 148, 48 128 C 72 108, 118 124, 140 160 C 148 174, 150 194, 150 214';
+    const ns = head.match(/-?\d+\.?\d*/g)!.map(Number);
+    const { top, h } = smallBox();
+    const sc = Math.min(h / 214, 0.7);
+    const stemX = width - 14 - 142 * sc;
+    const px = (i: number) => stemX + (ns[i] - 150) * sc;
+    const py = (i: number) => top + ns[i + 1] * sc;
+    const raw: { x: number; y: number }[] = [];
+    let cx = px(0);
+    let cy = py(0);
+    raw.push({ x: cx, y: cy });
+    for (let i = 2; i < ns.length; i += 6) {
+      const p1 = [px(i), py(i)];
+      const p2 = [px(i + 2), py(i + 2)];
+      const p3 = [px(i + 4), py(i + 4)];
+      for (let k = 1; k <= 20; k++) {
+        const t = k / 20;
+        const u = 1 - t;
+        raw.push({
+          x: u * u * u * cx + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0],
+          y: u * u * u * cy + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1],
+        });
+      }
+      cx = p3[0];
+      cy = p3[1];
+    }
+    const yu = layout.underlineY + 14;
+    // down the stem, then a soft turn to the left under the title
+    for (let y = cy + 10; y < yu - 34; y += 10) raw.push({ x: stemX, y });
+    const y0 = Math.max(cy, yu - 34);
+    for (let k = 1; k <= 16; k++) {
+      const t = k / 16;
+      const u = 1 - t;
+      raw.push({
+        x: u * u * u * stemX + 3 * u * u * t * stemX + 3 * u * t * t * (stemX - 30) + t * t * t * (stemX - 56),
+        y: u * u * u * y0 + 3 * u * u * t * (y0 + 22) + 3 * u * t * t * yu + t * t * t * yu,
+      });
+    }
+    for (let x = stemX - 66; x > -70; x -= 10) raw.push({ x, y: yu + 2 });
+    return resample(raw);
+  }
+
   function buildRestSignature() {
     const total = source.getTotalLength();
     restSig = [];
     if (stacked.matches) {
-      restSig = tangleToUnderline();
+      restSig = mobileTangle();
+      settledSig = mobileSettled();
       return;
     }
     // Desktop: a big signature that ties the two columns together. Its right loop reaches across the
@@ -1122,6 +1025,79 @@ import portrait from '../../assets/images/hero_portrait.png';
         y: bottom + (p.y - (box.y + box.height)) * s,
       });
     }
+    buildSettled();
+  }
+
+  /**
+   * The settled signature (desktop): what the tangle becomes once the page is scrolled. The hand keeps its two loops, now
+   * small and open, and the line leaves them straight down through the title to the foot of the hero, where the
+   * "2 questions" timeline takes it up as its spine. Same number of points as the tangle, so the two blend point by point.
+   */
+  function buildSettled() {
+    const head =
+      'M 292 6 C 248 12, 206 34, 186 66 C 166 98, 196 140, 238 134 C 276 128, 280 84, 246 74 C 212 64, 172 84, 150 112 C 128 140, 116 188, 76 188 C 38 188, 24 148, 48 128 C 72 108, 118 124, 140 160 C 148 174, 150 194, 150 214';
+    const ns = head.match(/-?\d+\.?\d*/g)!.map(Number);
+    spineX = width * 0.5;
+    const headTop = Math.max(110, layout.titleTop - 260);
+    const sc = Math.min(0.85, Math.max(0.4, (layout.titleTop - 40 - headTop) / 214));
+    // sample the head as a polyline of cubic segments
+    const raw: { x: number; y: number }[] = [];
+    const px = (i: number) => spineX + (ns[i] - 150) * sc;
+    const py = (i: number) => headTop + ns[i + 1] * sc;
+    let cx = px(0);
+    let cy = py(0);
+    raw.push({ x: cx, y: cy });
+    for (let i = 2; i < ns.length; i += 6) {
+      const p1 = [px(i), py(i)];
+      const p2 = [px(i + 2), py(i + 2)];
+      const p3 = [px(i + 4), py(i + 4)];
+      for (let k = 1; k <= 24; k++) {
+        const t = k / 24;
+        const u = 1 - t;
+        raw.push({
+          x: u * u * u * cx + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0],
+          y: u * u * u * cy + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1],
+        });
+      }
+      cx = p3[0];
+      cy = p3[1];
+    }
+    for (let y = cy + 14; y < height; y += 14) raw.push({ x: spineX, y });
+    raw.push({ x: spineX, y: height });
+    const cum = [0];
+    for (let i = 1; i < raw.length; i++)
+      cum.push(cum[i - 1] + Math.hypot(raw[i].x - raw[i - 1].x, raw[i].y - raw[i - 1].y));
+    const len = cum[cum.length - 1];
+    settledSig = [];
+    let j = 1;
+    for (let i = 0; i < N; i++) {
+      const target = (len * i) / (N - 1);
+      while (j < cum.length - 1 && cum[j] < target) j++;
+      const seg = cum[j] - cum[j - 1] || 1;
+      const f = (target - cum[j - 1]) / seg;
+      settledSig.push({
+        x: raw[j - 1].x + (raw[j].x - raw[j - 1].x) * f,
+        y: raw[j - 1].y + (raw[j].y - raw[j - 1].y) * f,
+      });
+    }
+  }
+
+  /** Blend the rest shape between the tangle (0) and the settled line (1); the rope's springs follow it */
+  function applyMorph(m: number) {
+    morph = m;
+    if (!settledSig.length) {
+      rest = restSig;
+      lens = lensSig;
+      return;
+    }
+    const e = m * m * (3 - 2 * m);
+    rest = restSig.map((p, i) => ({
+      x: p.x + (settledSig[i].x - p.x) * e,
+      y: p.y + (settledSig[i].y - p.y) * e,
+    }));
+    lens = segLengths(rest);
+    // the line passes behind the title once it has settled
+    svg.classList.toggle('is-behind', m > 0.5);
   }
 
   function segLengths(a: { x: number; y: number }[]) {
@@ -1131,6 +1107,18 @@ import portrait from '../../assets/images/hero_portrait.png';
     return out;
   }
 
+  /** The timeline below reads the settled line's x to run its spine on the same line */
+  function publishSpine() {
+    const root = document.documentElement;
+    if (stacked.matches) {
+      root.style.removeProperty('--spine-vx');
+    } else {
+      const f = field.getBoundingClientRect();
+      root.style.setProperty('--spine-vx', `${(f.left + spineX).toFixed(1)}px`);
+    }
+    document.dispatchEvent(new CustomEvent('spine:update'));
+  }
+
   /** Full (re)layout. Keeps the current rope where it is, so a resize never teleports it. */
   function layoutAll(resetPoints: boolean) {
     measure();
@@ -1138,6 +1126,8 @@ import portrait from '../../assets/images/hero_portrait.png';
     lensSig = segLengths(restSig);
     rest = restSig;
     lens = lensSig;
+    applyMorph(morph);
+    publishSpine();
     if (resetPoints || pts.length === 0) {
       pts = rest.map((p) => ({ x: p.x, y: p.y, px: p.x, py: p.y }));
     }
@@ -1428,14 +1418,28 @@ import portrait from '../../assets/images/hero_portrait.png';
   {
     // Start states are set in JS, not CSS, so no-JS visitors still see everything
     hideForFadeUp(lines);
-    if (strip) hideForFadeUp([strip]);
     if (portraitFrame) hideForGrain([portraitFrame]);
     gsap
       .timeline({ onComplete: relayout })
       .to(lines, { y: 0, opacity: 1, duration: REVEAL.duration, ease: REVEAL.ease, stagger: REVEAL.stagger })
-      .to(strip, { y: 0, opacity: 1, duration: REVEAL.duration, ease: REVEAL.ease }, '-=0.8')
       .add(() => portraitFrame && grainIn(portraitFrame), 0.3);
   }
+  // Scroll: the signature unfolds. At rest it is the tangle; as the page starts to scroll the loops open and the line
+  // drops straight down through the title to the foot of the hero, where the timeline picks it up (desktop, full motion).
+  if (!reduce) {
+    ScrollTrigger.create({
+      trigger: hero,
+      start: 'top top',
+      end: () => (stacked.matches ? '+=120' : 'bottom 55%'),
+      scrub: 0.8,
+      onUpdate: (self) => {
+        applyMorph(self.progress);
+        // The line follows the scroll directly (the springs' slow drift home is for the drag, not for the unfold)
+        if (grabbed < 0 && pts.length) pts = rest.map((p) => ({ x: p.x, y: p.y, px: p.x, py: p.y }));
+      },
+    });
+  }
+
   // Layout settles once the entrance has finished
   window.setTimeout(relayout, 1300);
 

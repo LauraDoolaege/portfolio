@@ -285,10 +285,8 @@ const currentPath = Astro.url.pathname;
       height: 2.75rem;
       padding: 0;
       color: var(--text-muted);
-      /* A chip, so it stays readable over text and over the dark footer */
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 999px;
+      background: none;
+      border: 0;
     }
 
     .theme-switch::after {
@@ -321,8 +319,6 @@ const currentPath = Astro.url.pathname;
     /* Over the open menu the switch takes the menu's colours */
     :global(html.menu-open) .theme-switch {
       color: var(--bg-primary);
-      background: var(--text-main);
-      border-color: transparent;
     }
 
     .menu__resume {
